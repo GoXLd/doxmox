@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260408T221717Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: linear-gradient(180deg, #0a1227 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.88);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #ffffff;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: #93c5fd;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h1>20260408T221717Z.diff</h1>
+      <p>Generated (UTC): 2026-04-08T23:06:34Z</p>
+      <p><a href="20260408T221717Z.diff" target="_blank" rel="noopener noreferrer">Open raw .diff</a></p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -785,7 +785,6 @@</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line del">-       &lt;!--test--&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line ctx">       Additionally, the</span>
+<span class="line ctx">       &lt;a href=&quot;#storage_pbs&quot;&gt;</span></pre>
+  </div>
+</body>
+</html>

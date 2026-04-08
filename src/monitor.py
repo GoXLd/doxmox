@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import hashlib
+import html
 import json
 import sys
 from dataclasses import dataclass
@@ -164,8 +165,13 @@ def format_event_row(event: dict[str, Any]) -> str:
     diff_file = event.get("diff_file")
 
     if diff_file:
-        href = diff_file[5:] if diff_file.startswith("docs/") else diff_file
-        link = f'<a href="{href}" target="_blank" rel="noopener noreferrer">diff</a>'
+        html_file = diff_html_path(diff_file)
+        html_href = docs_href_from_path(html_file)
+        raw_href = docs_href_from_path(diff_file)
+        link = (
+            f'<a href="{html_href}" target="_blank" rel="noopener noreferrer">view</a> | '
+            f'<a href="{raw_href}" target="_blank" rel="noopener noreferrer">raw</a>'
+        )
     else:
         link = "-"
 
@@ -178,6 +184,150 @@ def format_event_row(event: dict[str, Any]) -> str:
         f"<td>{link}</td>"
         "</tr>"
     )
+
+
+def docs_href_from_path(path: str) -> str:
+    return path[5:] if path.startswith("docs/") else path
+
+
+def diff_html_path(diff_file: str) -> str:
+    return str(Path(diff_file).with_suffix(".html").as_posix())
+
+
+def render_diff_html(diff_path: Path, diff_text: str) -> None:
+    generated_at = now_utc_iso()
+    title = f"{diff_path.name} - Diff Viewer"
+    raw_href = diff_path.name
+    lines = []
+    for line in diff_text.splitlines():
+        css_class = "ctx"
+        if line.startswith("--- ") or line.startswith("+++ "):
+            css_class = "meta"
+        elif line.startswith("@@ "):
+            css_class = "hunk"
+        elif line.startswith("+"):
+            css_class = "add"
+        elif line.startswith("-"):
+            css_class = "del"
+
+        safe_line = html.escape(line)
+        if not safe_line:
+            safe_line = " "
+        lines.append(f'<span class="line {css_class}">{safe_line}</span>')
+
+    if not lines:
+        lines.append('<span class="line ctx">(empty diff)</span>')
+
+    body = "\n".join(lines)
+    page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{html.escape(title)}</title>
+  <style>
+    :root {{
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: linear-gradient(180deg, #0a1227 0%, var(--bg) 100%);
+      color: var(--text);
+    }}
+    .wrap {{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }}
+    .head {{
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.88);
+    }}
+    h1 {{
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #ffffff;
+    }}
+    p {{
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+    a {{
+      color: #93c5fd;
+    }}
+    .diff {{
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }}
+    .line {{
+      display: block;
+      white-space: pre;
+    }}
+    .line.meta {{ color: var(--meta); }}
+    .line.hunk {{ color: var(--hunk); }}
+    .line.add {{
+      color: var(--add);
+      background: var(--add-bg);
+    }}
+    .line.del {{
+      color: var(--del);
+      background: var(--del-bg);
+    }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <h1>{html.escape(diff_path.name)}</h1>
+      <p>Generated (UTC): {generated_at}</p>
+      <p><a href="{html.escape(raw_href)}" target="_blank" rel="noopener noreferrer">Open raw .diff</a></p>
+    </div>
+    <pre class="diff">{body}</pre>
+  </div>
+</body>
+</html>
+"""
+    save_text(diff_path.with_suffix(".html"), page)
+
+
+def ensure_diff_html_pages(history: list[dict[str, Any]]) -> bool:
+    created_any = False
+    for event in history:
+        diff_file = event.get("diff_file")
+        if not diff_file:
+            continue
+        diff_path = Path(diff_file)
+        if not diff_path.exists():
+            continue
+        html_path = diff_path.with_suffix(".html")
+        if html_path.exists():
+            continue
+        diff_text = diff_path.read_text(encoding="utf-8")
+        render_diff_html(diff_path, diff_text)
+        created_any = True
+    return created_any
 
 
 def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None:
@@ -356,6 +506,7 @@ def process(
             ts_for_file = timestamp.replace(":", "").replace("-", "").replace("Z", "").replace("T", "T")
             diff_path = changes_dir / f"{ts_for_file}Z.diff"
             save_text(diff_path, diff_text)
+            render_diff_html(diff_path, diff_text)
             diff_file = str(diff_path.as_posix())
 
             event = {
@@ -371,8 +522,9 @@ def process(
         elif bootstrap:
             save_json(history_path, history)
 
+    created_diff_pages = ensure_diff_html_pages(history)
     index_path = docs_dir / "index.html"
-    if changed or not index_path.exists():
+    if changed or created_diff_pages or not index_path.exists():
         render_docs(history, url, docs_dir)
 
     result = Result(
