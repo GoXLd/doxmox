@@ -1,0 +1,99 @@
+name: Monitor Proxmox Admin Guide
+
+on:
+  schedule:
+    - cron: "0 */8 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: doxmox-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        run: python src/monitor.py
+
+      - name: Read monitor result
+        id: result
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          result = json.loads(Path("data/last_result.json").read_text(encoding="utf-8"))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write(f"changed={str(result.get('changed', False)).lower()}\n")
+              out.write(f"bootstrap={str(result.get('bootstrap', False)).lower()}\n")
+              out.write(f"diff_file={result.get('diff_file') or ''}\n")
+              out.write(f"added_lines={result.get('added_lines', 0)}\n")
+              out.write(f"removed_lines={result.get('removed_lines', 0)}\n")
+          PY
+
+      - name: Commit and push artifacts
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json data/latest.html data/state.json docs
+
+          if git diff --cached --quiet; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "chore: update monitor artifacts ($(date -u +'%Y-%m-%dT%H:%M:%SZ'))"
+          git push
+
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Send Telegram notification
+        if: steps.result.outputs.changed == 'true' && steps.result.outputs.bootstrap != 'true' && steps.commit.outputs.committed == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
+          DIFF_FILE: ${{ steps.result.outputs.diff_file }}
+          ADDED: ${{ steps.result.outputs.added_lines }}
+          REMOVED: ${{ steps.result.outputs.removed_lines }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "Telegram secrets are not configured; skipping notification."
+            exit 0
+          fi
+
+          COMMIT_URL="https://github.com/${REPO}/commit/${COMMIT_SHA}"
+          DIFF_URL="https://github.com/${REPO}/blob/${REF_NAME}/${DIFF_FILE}"
+          TEXT=$(cat <<EOF
+          Proxmox Admin Guide changed.
+          +${ADDED} / -${REMOVED}
+          Diff: ${DIFF_URL}
+          Commit: ${COMMIT_URL}
+          EOF
+          )
+
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${TEXT}" >/dev/null

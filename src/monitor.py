@@ -1,0 +1,417 @@
+#!/usr/bin/env python3
+"""Monitor a target web page for content changes and update changelog artifacts."""
+
+from __future__ import annotations
+
+import argparse
+import difflib
+import hashlib
+import json
+import sys
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import requests
+from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+
+DEFAULT_URL = "https://pve.proxmox.com/pve-docs/pve-admin-guide.html"
+SNAPSHOT_FILE = "latest.html"
+STATE_FILE = "state.json"
+HISTORY_FILE = "history.json"
+DEFAULT_RESULT_FILE = "last_result.json"
+
+
+@dataclass
+class Result:
+    timestamp: str
+    url: str
+    changed: bool
+    bootstrap: bool
+    old_hash: str | None
+    new_hash: str
+    diff_file: str | None
+    added_lines: int
+    removed_lines: int
+    history_count: int
+    error: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "timestamp": self.timestamp,
+            "url": self.url,
+            "changed": self.changed,
+            "bootstrap": self.bootstrap,
+            "old_hash": self.old_hash,
+            "new_hash": self.new_hash,
+            "diff_file": self.diff_file,
+            "added_lines": self.added_lines,
+            "removed_lines": self.removed_lines,
+            "history_count": self.history_count,
+            "error": self.error,
+        }
+
+
+def now_utc_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def load_json(path: Path, default: Any) -> Any:
+    if not path.exists():
+        return default
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def save_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+
+
+def save_text(path: Path, payload: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        handle.write(payload)
+
+
+def build_session() -> requests.Session:
+    retries = Retry(
+        total=5,
+        connect=5,
+        read=5,
+        backoff_factor=1.2,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET"]),
+    )
+    adapter = HTTPAdapter(max_retries=retries)
+    session = requests.Session()
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    session.headers.update({"User-Agent": "doxmox-monitor/1.0 (+github-actions)"})
+    return session
+
+
+def normalize_html(raw_html: str) -> str:
+    normalized_input = raw_html.replace("\r\n", "\n").replace("\r", "\n")
+    soup = BeautifulSoup(normalized_input, "html.parser")
+
+    # Limit comparison to meaningful document zones to reduce layout/JS noise.
+    selected = []
+    for section_id in ("header", "toc", "content", "footer"):
+        node = soup.find(id=section_id)
+        if node:
+            selected.append(str(node))
+
+    if selected:
+        fragment = "\n".join(selected)
+    elif soup.body:
+        fragment = str(soup.body)
+    else:
+        fragment = raw_html
+
+    fragment_soup = BeautifulSoup(fragment, "html.parser")
+    for tag in fragment_soup.find_all(["script", "noscript"]):
+        tag.decompose()
+
+    text = fragment_soup.prettify()
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = "\n".join(line.rstrip() for line in text.split("\n")).strip()
+    return text + "\n"
+
+
+def build_diff(previous: str, current: str) -> tuple[str, int, int]:
+    previous_lines = previous.splitlines()
+    current_lines = current.splitlines()
+    diff_lines = list(
+        difflib.unified_diff(
+            previous_lines,
+            current_lines,
+            fromfile="previous",
+            tofile="current",
+            lineterm="",
+        )
+    )
+
+    added = 0
+    removed = 0
+    for line in diff_lines:
+        if line.startswith("+++") or line.startswith("---"):
+            continue
+        if line.startswith("+"):
+            added += 1
+        elif line.startswith("-"):
+            removed += 1
+
+    return "\n".join(diff_lines) + ("\n" if diff_lines else ""), added, removed
+
+
+def format_event_row(event: dict[str, Any]) -> str:
+    timestamp = event.get("timestamp", "-")
+    old_hash = (event.get("old_hash") or "-")[:12]
+    new_hash = (event.get("new_hash") or "-")[:12]
+    added = event.get("added_lines", 0)
+    removed = event.get("removed_lines", 0)
+    diff_file = event.get("diff_file")
+
+    if diff_file:
+        href = diff_file[5:] if diff_file.startswith("docs/") else diff_file
+        link = f'<a href="{href}" target="_blank" rel="noopener noreferrer">diff</a>'
+    else:
+        link = "-"
+
+    return (
+        "<tr>"
+        f"<td>{timestamp}</td>"
+        f"<td><code>{old_hash}</code></td>"
+        f"<td><code>{new_hash}</code></td>"
+        f"<td>+{added} / -{removed}</td>"
+        f"<td>{link}</td>"
+        "</tr>"
+    )
+
+
+def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None:
+    docs_dir.mkdir(parents=True, exist_ok=True)
+    rows = "\n".join(format_event_row(event) for event in history)
+    if not rows:
+        rows = '<tr><td colspan="5">No changes detected yet.</td></tr>'
+
+    generated_at = now_utc_iso()
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Doxmox Changelog</title>
+  <style>
+    :root {{
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #dbe3ef;
+      --accent: #0b5cab;
+      --accent-soft: #e7f1fd;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eaf1fb 0%, var(--bg) 100%);
+    }}
+    .wrap {{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }}
+    .card {{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+      overflow: hidden;
+    }}
+    .head {{
+      padding: 20px;
+      background: var(--accent-soft);
+      border-bottom: 1px solid var(--line);
+    }}
+    h1 {{ margin: 0 0 8px; font-size: 24px; }}
+    p {{ margin: 4px 0; color: var(--muted); }}
+    a {{ color: var(--accent); }}
+    table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }}
+    th, td {{
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }}
+    th {{
+      background: #f8fbff;
+      color: #1e293b;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }}
+    code {{ font-size: 12px; }}
+    @media (max-width: 860px) {{
+      table, thead, tbody, th, td, tr {{ display: block; }}
+      thead {{ display: none; }}
+      tr {{ border-bottom: 1px solid var(--line); }}
+      td {{
+        border: 0;
+        padding: 8px 14px;
+      }}
+    }}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="head">
+        <h1>Proxmox VE Admin Guide Changelog</h1>
+        <p>Source: <a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a></p>
+        <p>Generated (UTC): {generated_at}</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp (UTC)</th>
+            <th>Old Hash</th>
+            <th>New Hash</th>
+            <th>Line Delta</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
+"""
+    save_text(docs_dir / "index.html", html)
+
+
+def process(
+    url: str,
+    state_dir: Path,
+    changes_dir: Path,
+    docs_dir: Path,
+    result_file: Path,
+) -> int:
+    timestamp = now_utc_iso()
+    state_dir.mkdir(parents=True, exist_ok=True)
+    changes_dir.mkdir(parents=True, exist_ok=True)
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    snapshot_path = state_dir / SNAPSHOT_FILE
+    state_path = state_dir / STATE_FILE
+    history_path = state_dir / HISTORY_FILE
+
+    try:
+        session = build_session()
+        response = session.get(url, timeout=(10, 90))
+        response.raise_for_status()
+        raw_html = response.content.decode("utf-8", errors="replace")
+        normalized = normalize_html(raw_html)
+    except Exception as exc:
+        result = Result(
+            timestamp=timestamp,
+            url=url,
+            changed=False,
+            bootstrap=False,
+            old_hash=None,
+            new_hash="",
+            diff_file=None,
+            added_lines=0,
+            removed_lines=0,
+            history_count=0,
+            error=str(exc),
+        )
+        save_json(result_file, result.to_dict())
+        return 1
+
+    new_hash = sha256_text(normalized)
+    old_snapshot = snapshot_path.read_text(encoding="utf-8") if snapshot_path.exists() else None
+    old_hash = sha256_text(old_snapshot) if old_snapshot is not None else None
+    bootstrap = old_snapshot is None
+    changed = old_snapshot is None or old_hash != new_hash
+    history: list[dict[str, Any]] = load_json(history_path, [])
+
+    diff_file: str | None = None
+    added_lines = 0
+    removed_lines = 0
+
+    if changed:
+        save_text(snapshot_path, normalized)
+        save_json(
+            state_path,
+            {
+                "url": url,
+                "hash": new_hash,
+                "updated_at": timestamp,
+            },
+        )
+
+        if not bootstrap and old_snapshot is not None:
+            diff_text, added_lines, removed_lines = build_diff(old_snapshot, normalized)
+            ts_for_file = timestamp.replace(":", "").replace("-", "").replace("Z", "").replace("T", "T")
+            diff_path = changes_dir / f"{ts_for_file}Z.diff"
+            save_text(diff_path, diff_text)
+            diff_file = str(diff_path.as_posix())
+
+            event = {
+                "timestamp": timestamp,
+                "old_hash": old_hash,
+                "new_hash": new_hash,
+                "diff_file": diff_file,
+                "added_lines": added_lines,
+                "removed_lines": removed_lines,
+            }
+            history.insert(0, event)
+            save_json(history_path, history)
+        elif bootstrap:
+            save_json(history_path, history)
+
+    index_path = docs_dir / "index.html"
+    if changed or not index_path.exists():
+        render_docs(history, url, docs_dir)
+
+    result = Result(
+        timestamp=timestamp,
+        url=url,
+        changed=changed,
+        bootstrap=bootstrap,
+        old_hash=old_hash,
+        new_hash=new_hash,
+        diff_file=diff_file,
+        added_lines=added_lines,
+        removed_lines=removed_lines,
+        history_count=len(history),
+        error=None,
+    )
+    save_json(result_file, result.to_dict())
+    return 0
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--url", default=DEFAULT_URL)
+    parser.add_argument("--state-dir", default="data")
+    parser.add_argument("--changes-dir", default="docs/changes")
+    parser.add_argument("--docs-dir", default="docs")
+    parser.add_argument("--result-file", default=f"data/{DEFAULT_RESULT_FILE}")
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str]) -> int:
+    args = parse_args(argv)
+    return process(
+        url=args.url,
+        state_dir=Path(args.state_dir),
+        changes_dir=Path(args.changes_dir),
+        docs_dir=Path(args.docs_dir),
+        result_file=Path(args.result_file),
+    )
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
