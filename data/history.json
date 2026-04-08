@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "timestamp": "2026-04-08T22:17:17Z",
+    "old_hash": "cba2b410d5f2890692491977d25c6aca4ccb7bbfcf8c879eaede88773d54e63e",
+    "new_hash": "981af66920dea526fd84f72e0305fcdb7f38f4cd1af24c2a5010cbc8aff90248",
+    "diff_file": "docs/changes/20260408T221717Z.diff",
+    "added_lines": 0,
+    "removed_lines": 1
+  }
+]
