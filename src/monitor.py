@@ -26,6 +26,7 @@ STATE_FILE = "state.json"
 HISTORY_FILE = "history.json"
 DEFAULT_RESULT_FILE = "last_result.json"
 DEFAULT_AUTHOR_NAME = "Alexandre VANDEMOORTELE"
+DEFAULT_AUTHOR_URL = "https://vande.fr/"
 
 
 @dataclass
@@ -207,7 +208,7 @@ def resolve_author_url(docs_dir: Path, override: str | None) -> str:
                 return domain
             return f"https://{domain}"
 
-    return "https://doxmox.nlo.ovh"
+    return DEFAULT_AUTHOR_URL
 
 
 def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_url: str) -> None:
@@ -1030,7 +1031,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--docs-dir", default="docs")
     parser.add_argument("--result-file", default=f"data/{DEFAULT_RESULT_FILE}")
     parser.add_argument("--author-name", default=DEFAULT_AUTHOR_NAME)
-    parser.add_argument("--author-url", default=None)
+    parser.add_argument("--author-url", default=DEFAULT_AUTHOR_URL)
     return parser.parse_args(argv)
 
 
