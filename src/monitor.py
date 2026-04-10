@@ -644,10 +644,22 @@ def render_docs(
     }}
     .toolbar {{
       display: flex;
-      justify-content: flex-end;
-      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 12px;
       flex-wrap: wrap;
+    }}
+    .toolbar-left {{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+    }}
+    .toolbar-right {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
     }}
     .control {{
       display: inline-flex;
@@ -676,9 +688,6 @@ def render_docs(
       background: var(--accent-soft);
       border-bottom: 1px solid var(--line);
     }}
-    .telegram-subscribe {{
-      margin-top: 12px;
-    }}
     .telegram-link {{
       display: inline-flex;
       align-items: center;
@@ -703,10 +712,21 @@ def render_docs(
       outline-offset: 2px;
     }}
     .telegram-link svg {{
-      width: 54px;
-      height: 54px;
+      width: 18px;
+      height: 18px;
       display: block;
       flex: 0 0 auto;
+      transform: scale(3);
+      transform-origin: left center;
+    }}
+    .telegram-link .tg-icon {{
+      width: 54px;
+      height: 18px;
+      flex: 0 0 54px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: visible;
     }}
     .telegram-link .tg-circle {{
       fill: #229ed9;
@@ -757,36 +777,40 @@ def render_docs(
 <body>
   <div class="wrap">
     <div class="toolbar">
-      <label class="control">
-        <span data-i18n="language">Language</span>
-        <select id="lang-select">
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="ru">Русский</option>
-        </select>
-      </label>
-      <label class="control">
-        <span data-i18n="theme">Theme</span>
-        <select id="theme-select">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </label>
+      <div class="toolbar-left">
+        <label class="control">
+          <span data-i18n="language">Language</span>
+          <select id="lang-select">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="ru">Русский</option>
+          </select>
+        </label>
+        <label class="control">
+          <span data-i18n="theme">Theme</span>
+          <select id="theme-select">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+      </div>
+      <div class="toolbar-right">
+        <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
+          <span class="tg-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="tg-circle" cx="12" cy="12" r="11"></circle>
+              <path class="tg-plane" d="M17.8 7.2 5.8 11.8c-.8.3-.8.7-.1.9l3 .9 1.2 3.5c.1.4.3.6.6.6.2 0 .4-.1.7-.3l1.7-1.7 2.8 2.1c.5.3 1 .2 1.2-.6l2.1-9c.2-.9-.3-1.3-1.2-1zM10 13.2l5.8-4c.3-.2.6.1.3.3l-4.8 4.5-.2 2 .9-2.8z"></path>
+            </svg>
+          </span>
+          <span data-i18n="subscribe_telegram">Subscribe on Telegram</span>
+        </a>
+      </div>
     </div>
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
         <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
-        <p class="telegram-subscribe">
-          <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="tg-circle" cx="12" cy="12" r="11"></circle>
-              <path class="tg-plane" d="M17.8 7.2 5.8 11.8c-.8.3-.8.7-.1.9l3 .9 1.2 3.5c.1.4.3.6.6.6.2 0 .4-.1.7-.3l1.7-1.7 2.8 2.1c.5.3 1 .2 1.2-.6l2.1-9c.2-.9-.3-1.3-1.2-1zM10 13.2l5.8-4c.3-.2.6.1.3.3l-4.8 4.5-.2 2 .9-2.8z"></path>
-            </svg>
-            <span data-i18n="subscribe_telegram">Subscribe on Telegram</span>
-          </a>
-        </p>
       </div>
       <table>
         <thead>
