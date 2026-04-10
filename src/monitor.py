@@ -673,6 +673,22 @@ def render_docs(
       background: var(--accent-soft);
       border-bottom: 1px solid var(--line);
     }}
+    .telegram-subscribe {{
+      margin-top: 8px;
+    }}
+    .telegram-subscribe a {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      text-decoration: none;
+    }}
+    .telegram-subscribe svg {{
+      width: 16px;
+      height: 16px;
+      display: block;
+      fill: currentColor;
+    }}
     h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
     a {{ color: var(--accent); }}
@@ -737,6 +753,14 @@ def render_docs(
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
         <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
+        <p class="telegram-subscribe">
+          <a href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M21.94 4.79a1.5 1.5 0 0 0-1.66-.24L3.54 11.28a1.5 1.5 0 0 0 .12 2.8l3.96 1.33 1.33 3.96a1.5 1.5 0 0 0 2.8.12l6.73-16.74a1.5 1.5 0 0 0-.24-1.66 1.5 1.5 0 0 0-1.66-.24L9.74 12.26l2 2a1 1 0 1 1-1.42 1.42l-2-2L18.8 6.2l-8.42 8.42a1 1 0 0 0-.24.39l-.88 2.61-.76-2.25a1 1 0 0 0-.63-.63l-2.25-.76 2.61-.88a1 1 0 0 0 .39-.24L19.04 4.2l-7.48 10.48 2 2a1 1 0 0 1-1.42 1.42l-2-2-7.41 7.41a1.5 1.5 0 0 0 2.34 1.83l16.74-6.73a1.5 1.5 0 0 0 .24-1.66 1.5 1.5 0 0 0-.24-1.66Z"></path>
+            </svg>
+            <span data-i18n="subscribe_telegram">Subscribe on Telegram</span>
+          </a>
+        </p>
       </div>
       <table>
         <thead>
@@ -781,6 +805,7 @@ def render_docs(
           theme_light: "Light",
           theme_dark: "Dark",
           footer_by: "Designed and implemented by",
+          subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
           language_ru: "Russian"
@@ -802,6 +827,7 @@ def render_docs(
           theme_light: "Clair",
           theme_dark: "Sombre",
           footer_by: "Conçu et réalisé par",
+          subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
           language_ru: "Russe"
@@ -823,6 +849,7 @@ def render_docs(
           theme_light: "Светлая",
           theme_dark: "Тёмная",
           footer_by: "Разработано и реализовано",
+          subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
           language_ru: "Русский"
