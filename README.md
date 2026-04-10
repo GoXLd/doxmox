@@ -28,12 +28,18 @@ Every 8 hours, GitHub Actions:
 
 Push repository and make sure Actions are enabled.
 
-### 2) Configure Telegram secrets
+### 2) Configure notification secrets
 
 In `Settings -> Secrets and variables -> Actions`, add:
 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
+- `DOMAIN` (for example `doxmox.com`)
+
+`DOMAIN` is used to build public links in Telegram notifications:
+
+- diff page: `https://<DOMAIN>/changes/<timestamp>.html`
+- changelog page: `https://<DOMAIN>/index.html`
 
 If these secrets are missing, workflow still runs and stores changes, but skips Telegram notifications.
 

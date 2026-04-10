@@ -72,25 +72,31 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          REPO: ${{ github.repository }}
-          REF_NAME: ${{ github.ref_name }}
+          DOMAIN: ${{ secrets.DOMAIN }}
           COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
           DIFF_FILE: ${{ steps.result.outputs.diff_file }}
           ADDED: ${{ steps.result.outputs.added_lines }}
           REMOVED: ${{ steps.result.outputs.removed_lines }}
         run: |
-          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo "Telegram secrets are not configured; skipping notification."
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ] || [ -z "$DOMAIN" ]; then
+            echo "Required secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DOMAIN) are not configured; skipping notification."
             exit 0
           fi
 
-          COMMIT_URL="https://github.com/${REPO}/commit/${COMMIT_SHA}"
-          DIFF_URL="https://github.com/${REPO}/blob/${REF_NAME}/${DIFF_FILE}"
+          DOMAIN="${DOMAIN#https://}"
+          DOMAIN="${DOMAIN#http://}"
+          DOMAIN="${DOMAIN%/}"
+          BASE_URL="https://${DOMAIN}"
+          PUBLIC_DIFF_PATH="${DIFF_FILE#docs/}"
+          DIFF_PAGE_PATH="${PUBLIC_DIFF_PATH%.diff}.html"
+          DIFF_URL="${BASE_URL}/${DIFF_PAGE_PATH}"
+          CHANGELOG_URL="${BASE_URL}/index.html"
           TEXT=$(cat <<EOF
           Proxmox Admin Guide changed.
           +${ADDED} / -${REMOVED}
           Diff: ${DIFF_URL}
-          Commit: ${COMMIT_URL}
+          Changelog: ${CHANGELOG_URL}
+          Commit: ${COMMIT_SHA}
           EOF
           )
 
