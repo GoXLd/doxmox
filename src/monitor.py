@@ -259,6 +259,9 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
       --control-bg: #ffffff;
       --control-line: #c7d2e0;
       --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     }}
     :root[data-theme="dark"] {{
@@ -674,20 +677,42 @@ def render_docs(
       border-bottom: 1px solid var(--line);
     }}
     .telegram-subscribe {{
-      margin-top: 8px;
+      margin-top: 12px;
     }}
-    .telegram-subscribe a {{
+    .telegram-link {{
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(13, 90, 127, 0.5);
+      background: var(--telegram);
+      color: var(--telegram-text) !important;
       font-weight: 600;
       text-decoration: none;
+      box-shadow: 0 6px 16px rgba(34, 158, 217, 0.35);
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
     }}
-    .telegram-subscribe svg {{
-      width: 16px;
-      height: 16px;
+    .telegram-link:hover {{
+      background: var(--telegram-hover);
+      box-shadow: 0 8px 20px rgba(34, 158, 217, 0.45);
+      transform: translateY(-1px);
+    }}
+    .telegram-link:focus-visible {{
+      outline: 2px solid rgba(133, 213, 245, 0.9);
+      outline-offset: 2px;
+    }}
+    .telegram-link svg {{
+      width: 18px;
+      height: 18px;
       display: block;
-      fill: currentColor;
+      flex: 0 0 auto;
+    }}
+    .telegram-link .tg-circle {{
+      fill: #229ed9;
+    }}
+    .telegram-link .tg-plane {{
+      fill: #ffffff;
     }}
     h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
@@ -754,9 +779,10 @@ def render_docs(
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
         <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
         <p class="telegram-subscribe">
-          <a href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
+          <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M21.94 4.79a1.5 1.5 0 0 0-1.66-.24L3.54 11.28a1.5 1.5 0 0 0 .12 2.8l3.96 1.33 1.33 3.96a1.5 1.5 0 0 0 2.8.12l6.73-16.74a1.5 1.5 0 0 0-.24-1.66 1.5 1.5 0 0 0-1.66-.24L9.74 12.26l2 2a1 1 0 1 1-1.42 1.42l-2-2L18.8 6.2l-8.42 8.42a1 1 0 0 0-.24.39l-.88 2.61-.76-2.25a1 1 0 0 0-.63-.63l-2.25-.76 2.61-.88a1 1 0 0 0 .39-.24L19.04 4.2l-7.48 10.48 2 2a1 1 0 0 1-1.42 1.42l-2-2-7.41 7.41a1.5 1.5 0 0 0 2.34 1.83l16.74-6.73a1.5 1.5 0 0 0 .24-1.66 1.5 1.5 0 0 0-.24-1.66Z"></path>
+              <circle class="tg-circle" cx="12" cy="12" r="11"></circle>
+              <path class="tg-plane" d="M17.8 7.2 5.8 11.8c-.8.3-.8.7-.1.9l3 .9 1.2 3.5c.1.4.3.6.6.6.2 0 .4-.1.7-.3l1.7-1.7 2.8 2.1c.5.3 1 .2 1.2-.6l2.1-9c.2-.9-.3-1.3-1.2-1zM10 13.2l5.8-4c.3-.2.6.1.3.3l-4.8 4.5-.2 2 .9-2.8z"></path>
             </svg>
             <span data-i18n="subscribe_telegram">Subscribe on Telegram</span>
           </a>
