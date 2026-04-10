@@ -7,7 +7,6 @@
   <style>
     :root {
       --bg: #f3f6fb;
-      --bg-top: #eaf1fb;
       --card: #ffffff;
       --line: #dbe3ef;
       --text: #0f172a;
@@ -26,7 +25,6 @@
     }
     :root[data-theme="dark"] {
       --bg: #0b1020;
-      --bg-top: #0a1227;
       --card: #0f172a;
       --line: #1e293b;
       --text: #dbe7ff;
@@ -46,7 +44,6 @@
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme]) {
         --bg: #0b1020;
-        --bg-top: #0a1227;
         --card: #0f172a;
         --line: #1e293b;
         --text: #dbe7ff;
@@ -68,7 +65,7 @@
     body {
       margin: 0;
       font-family: Menlo, Consolas, "Liberation Mono", monospace;
-      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
+      background: var(--bg);
       color: var(--text);
     }
     .wrap {

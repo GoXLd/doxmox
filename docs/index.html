@@ -7,7 +7,6 @@
   <style>
     :root {
       --bg: #f3f6fb;
-      --bg-top: #eaf1fb;
       --card: #ffffff;
       --text: #0f172a;
       --muted: #475569;
@@ -23,7 +22,6 @@
     }
     :root[data-theme="dark"] {
       --bg: #0b1020;
-      --bg-top: #0a1227;
       --card: #0f172a;
       --text: #dbe7ff;
       --muted: #9fb3d1;
@@ -40,7 +38,6 @@
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme]) {
         --bg: #0b1020;
-        --bg-top: #0a1227;
         --card: #0f172a;
         --text: #dbe7ff;
         --muted: #9fb3d1;
@@ -60,7 +57,7 @@
       margin: 0;
       font-family: "Segoe UI", Tahoma, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
+      background: var(--bg);
     }
     .wrap {
       max-width: 1100px;

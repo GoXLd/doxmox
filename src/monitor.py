@@ -245,7 +245,6 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
   <style>
     :root {{
       --bg: #f3f6fb;
-      --bg-top: #eaf1fb;
       --card: #ffffff;
       --line: #dbe3ef;
       --text: #0f172a;
@@ -264,7 +263,6 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     }}
     :root[data-theme="dark"] {{
       --bg: #0b1020;
-      --bg-top: #0a1227;
       --card: #0f172a;
       --line: #1e293b;
       --text: #dbe7ff;
@@ -284,7 +282,6 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     @media (prefers-color-scheme: dark) {{
       :root:not([data-theme]) {{
         --bg: #0b1020;
-        --bg-top: #0a1227;
         --card: #0f172a;
         --line: #1e293b;
         --text: #dbe7ff;
@@ -306,7 +303,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     body {{
       margin: 0;
       font-family: Menlo, Consolas, "Liberation Mono", monospace;
-      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
+      background: var(--bg);
       color: var(--text);
     }}
     .wrap {{
@@ -585,7 +582,6 @@ def render_docs(
   <style>
     :root {{
       --bg: #f3f6fb;
-      --bg-top: #eaf1fb;
       --card: #ffffff;
       --text: #0f172a;
       --muted: #475569;
@@ -601,7 +597,6 @@ def render_docs(
     }}
     :root[data-theme="dark"] {{
       --bg: #0b1020;
-      --bg-top: #0a1227;
       --card: #0f172a;
       --text: #dbe7ff;
       --muted: #9fb3d1;
@@ -618,7 +613,6 @@ def render_docs(
     @media (prefers-color-scheme: dark) {{
       :root:not([data-theme]) {{
         --bg: #0b1020;
-        --bg-top: #0a1227;
         --card: #0f172a;
         --text: #dbe7ff;
         --muted: #9fb3d1;
@@ -638,7 +632,7 @@ def render_docs(
       margin: 0;
       font-family: "Segoe UI", Tahoma, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
+      background: var(--bg);
     }}
     .wrap {{
       max-width: 1100px;
