@@ -25,6 +25,7 @@ SNAPSHOT_FILE = "latest.html"
 STATE_FILE = "state.json"
 HISTORY_FILE = "history.json"
 DEFAULT_RESULT_FILE = "last_result.json"
+DEFAULT_AUTHOR_NAME = "Alexandre VANDEMOORTELE"
 
 
 @dataclass
@@ -169,8 +170,8 @@ def format_event_row(event: dict[str, Any]) -> str:
         html_href = docs_href_from_path(html_file)
         raw_href = docs_href_from_path(diff_file)
         link = (
-            f'<a href="{html_href}" target="_blank" rel="noopener noreferrer">view</a> | '
-            f'<a href="{raw_href}" target="_blank" rel="noopener noreferrer">raw</a>'
+            f'<a href="{html.escape(html_href)}" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | '
+            f'<a href="{html.escape(raw_href)}" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a>'
         )
     else:
         link = "-"
@@ -194,7 +195,22 @@ def diff_html_path(diff_file: str) -> str:
     return str(Path(diff_file).with_suffix(".html").as_posix())
 
 
-def render_diff_html(diff_path: Path, diff_text: str) -> None:
+def resolve_author_url(docs_dir: Path, override: str | None) -> str:
+    if override:
+        return override
+
+    cname_path = docs_dir / "CNAME"
+    if cname_path.exists():
+        domain = cname_path.read_text(encoding="utf-8").strip()
+        if domain:
+            if domain.startswith(("http://", "https://")):
+                return domain
+            return f"https://{domain}"
+
+    return "https://doxmox.nlo.ovh"
+
+
+def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_url: str) -> None:
     generated_at = now_utc_iso()
     title = f"{diff_path.name} - Diff Viewer"
     raw_href = diff_path.name
@@ -216,7 +232,7 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
         lines.append(f'<span class="line {css_class}">{safe_line}</span>')
 
     if not lines:
-        lines.append('<span class="line ctx">(empty diff)</span>')
+        lines.append('<span class="line ctx" data-i18n="empty_diff">(empty diff)</span>')
 
     body = "\n".join(lines)
     page = f"""<!DOCTYPE html>
@@ -227,7 +243,27 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
   <title>{html.escape(title)}</title>
   <style>
     :root {{
+      --bg: #f3f6fb;
+      --bg-top: #eaf1fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }}
+    :root[data-theme="dark"] {{
       --bg: #0b1020;
+      --bg-top: #0a1227;
       --card: #0f172a;
       --line: #1e293b;
       --text: #dbe7ff;
@@ -238,12 +274,38 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
       --add: #6ee7b7;
       --del-bg: rgba(248, 113, 113, 0.2);
       --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }}
+    @media (prefers-color-scheme: dark) {{
+      :root:not([data-theme]) {{
+        --bg: #0b1020;
+        --bg-top: #0a1227;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }}
     }}
     * {{ box-sizing: border-box; }}
     body {{
       margin: 0;
       font-family: Menlo, Consolas, "Liberation Mono", monospace;
-      background: linear-gradient(180deg, #0a1227 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
       color: var(--text);
     }}
     .wrap {{
@@ -251,17 +313,39 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
       margin: 0 auto;
       padding: 20px 16px 36px;
     }}
+    .toolbar {{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }}
+    .control {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+    .control select {{
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }}
     .head {{
       margin-bottom: 12px;
       padding: 14px;
       border: 1px solid var(--line);
       border-radius: 10px;
-      background: rgba(15, 23, 42, 0.88);
+      background: var(--card);
+      box-shadow: var(--shadow);
     }}
     h1 {{
       margin: 0 0 8px;
       font-size: 18px;
-      color: #ffffff;
     }}
     p {{
       margin: 4px 0;
@@ -269,7 +353,13 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
       font-size: 13px;
     }}
     a {{
-      color: #93c5fd;
+      color: var(--accent);
+    }}
+    .nav {{
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
     }}
     .diff {{
       margin: 0;
@@ -277,6 +367,7 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
       border: 1px solid var(--line);
       border-radius: 10px;
       background: var(--card);
+      box-shadow: var(--shadow);
       overflow: auto;
       line-height: 1.45;
       font-size: 13px;
@@ -295,24 +386,165 @@ def render_diff_html(diff_path: Path, diff_text: str) -> None:
       color: var(--del);
       background: var(--del-bg);
     }}
+    .footer {{
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }}
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
     <div class="head">
       <h1>{html.escape(diff_path.name)}</h1>
-      <p>Generated (UTC): {generated_at}</p>
-      <p><a href="{html.escape(raw_href)}" target="_blank" rel="noopener noreferrer">Open raw .diff</a></p>
+      <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="{html.escape(raw_href)}" target="_blank" rel="noopener noreferrer" data-i18n="open_raw_diff">Open raw .diff</a>
+      </p>
     </div>
     <pre class="diff">{body}</pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Designed and implemented by</span>
+      <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
+    </footer>
   </div>
+  <script>
+    (() => {{
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {{
+        en: {{
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated (UTC):",
+          back_to_menu: "Back to main menu",
+          open_raw_diff: "Open raw .diff",
+          footer_by: "Designed and implemented by",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        }},
+        fr: {{
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré (UTC) :",
+          back_to_menu: "Retour au menu principal",
+          open_raw_diff: "Ouvrir le .diff brut",
+          footer_by: "Conçu et réalisé par",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        }},
+        ru: {{
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано (UTC):",
+          back_to_menu: "Назад в главное меню",
+          open_raw_diff: "Открыть raw .diff",
+          footer_by: "Разработано и реализовано",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }}
+      }};
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {{
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }}
+
+      function readTheme() {{
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {{
+          return saved;
+        }}
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }}
+
+      function t(lang, key) {{
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }}
+
+      function applyTheme(theme) {{
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }}
+
+      function applyLanguage(lang) {{
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {{
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        }});
+        const langOptions = {{
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        }};
+        for (const option of langSelect.options) {{
+          option.textContent = t(lang, langOptions[option.value]);
+        }}
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }}
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+
+      langSelect.addEventListener("change", () => {{
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      }});
+
+      themeSelect.addEventListener("change", () => {{
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      }});
+    }})();
+  </script>
 </body>
 </html>
 """
     save_text(diff_path.with_suffix(".html"), page)
 
 
-def ensure_diff_html_pages(history: list[dict[str, Any]]) -> bool:
+def ensure_diff_html_pages(history: list[dict[str, Any]], author_name: str, author_url: str) -> bool:
     created_any = False
     for event in history:
         diff_file = event.get("diff_file")
@@ -325,19 +557,25 @@ def ensure_diff_html_pages(history: list[dict[str, Any]]) -> bool:
         if html_path.exists():
             continue
         diff_text = diff_path.read_text(encoding="utf-8")
-        render_diff_html(diff_path, diff_text)
+        render_diff_html(diff_path, diff_text, author_name=author_name, author_url=author_url)
         created_any = True
     return created_any
 
 
-def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None:
+def render_docs(
+    history: list[dict[str, Any]],
+    url: str,
+    docs_dir: Path,
+    author_name: str,
+    author_url: str,
+) -> None:
     docs_dir.mkdir(parents=True, exist_ok=True)
     rows = "\n".join(format_event_row(event) for event in history)
     if not rows:
-        rows = '<tr><td colspan="5">No changes detected yet.</td></tr>'
+        rows = '<tr><td colspan="5" data-i18n="no_changes">No changes detected yet.</td></tr>'
 
     generated_at = now_utc_iso()
-    html = f"""<!DOCTYPE html>
+    page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -346,30 +584,93 @@ def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None
   <style>
     :root {{
       --bg: #f3f6fb;
+      --bg-top: #eaf1fb;
       --card: #ffffff;
       --text: #0f172a;
       --muted: #475569;
       --line: #dbe3ef;
       --accent: #0b5cab;
       --accent-soft: #e7f1fd;
+      --th-bg: #f8fbff;
+      --th-text: #1e293b;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }}
+    :root[data-theme="dark"] {{
+      --bg: #0b1020;
+      --bg-top: #0a1227;
+      --card: #0f172a;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --line: #1e293b;
+      --accent: #93c5fd;
+      --accent-soft: #111827;
+      --th-bg: #111827;
+      --th-text: #dbe7ff;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }}
+    @media (prefers-color-scheme: dark) {{
+      :root:not([data-theme]) {{
+        --bg: #0b1020;
+        --bg-top: #0a1227;
+        --card: #0f172a;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --line: #1e293b;
+        --accent: #93c5fd;
+        --accent-soft: #111827;
+        --th-bg: #111827;
+        --th-text: #dbe7ff;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }}
     }}
     * {{ box-sizing: border-box; }}
     body {{
       margin: 0;
       font-family: "Segoe UI", Tahoma, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, #eaf1fb 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
     }}
     .wrap {{
       max-width: 1100px;
       margin: 0 auto;
       padding: 24px 16px 48px;
     }}
+    .toolbar {{
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }}
+    .control {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+    .control select {{
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }}
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+      box-shadow: var(--shadow);
       overflow: hidden;
     }}
     .head {{
@@ -392,8 +693,8 @@ def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None
       vertical-align: top;
     }}
     th {{
-      background: #f8fbff;
-      color: #1e293b;
+      background: var(--th-bg);
+      color: var(--th-text);
       font-weight: 600;
       position: sticky;
       top: 0;
@@ -408,24 +709,48 @@ def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None
         padding: 8px 14px;
       }}
     }}
+    .footer {{
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }}
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
     <div class="card">
       <div class="head">
-        <h1>Proxmox VE Admin Guide Changelog</h1>
-        <p>Source: <a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a></p>
-        <p>Generated (UTC): {generated_at}</p>
+        <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
+        <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
+        <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
       </div>
       <table>
         <thead>
           <tr>
-            <th>Timestamp (UTC)</th>
-            <th>Old Hash</th>
-            <th>New Hash</th>
-            <th>Line Delta</th>
-            <th>Details</th>
+            <th data-i18n="timestamp">Timestamp (UTC)</th>
+            <th data-i18n="old_hash">Old Hash</th>
+            <th data-i18n="new_hash">New Hash</th>
+            <th data-i18n="line_delta">Line Delta</th>
+            <th data-i18n="details">Details</th>
           </tr>
         </thead>
         <tbody>
@@ -433,11 +758,146 @@ def render_docs(history: list[dict[str, Any]], url: str, docs_dir: Path) -> None
         </tbody>
       </table>
     </div>
+    <footer class="footer">
+      <span data-i18n="footer_by">Designed and implemented by</span>
+      <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
+    </footer>
   </div>
+  <script>
+    (() => {{
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {{
+        en: {{
+          title: "Proxmox VE Admin Guide Changelog",
+          source: "Source:",
+          generated: "Generated (UTC):",
+          timestamp: "Timestamp (UTC)",
+          old_hash: "Old Hash",
+          new_hash: "New Hash",
+          line_delta: "Line Delta",
+          details: "Details",
+          view: "View",
+          raw: "Raw",
+          no_changes: "No changes detected yet.",
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          footer_by: "Designed and implemented by",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        }},
+        fr: {{
+          title: "Journal des changements du guide Proxmox VE Admin",
+          source: "Source :",
+          generated: "Généré (UTC) :",
+          timestamp: "Horodatage (UTC)",
+          old_hash: "Ancien hash",
+          new_hash: "Nouveau hash",
+          line_delta: "Delta de lignes",
+          details: "Details",
+          view: "Voir",
+          raw: "Brut",
+          no_changes: "Aucun changement detecte pour le moment.",
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          footer_by: "Conçu et réalisé par",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        }},
+        ru: {{
+          title: "Журнал изменений руководства Proxmox VE Admin",
+          source: "Источник:",
+          generated: "Сгенерировано (UTC):",
+          timestamp: "Временная метка (UTC)",
+          old_hash: "Старый хэш",
+          new_hash: "Новый хэш",
+          line_delta: "Изменение строк",
+          details: "Детали",
+          view: "Открыть",
+          raw: "Raw",
+          no_changes: "Изменения пока не обнаружены.",
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          footer_by: "Разработано и реализовано",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }}
+      }};
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {{
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }}
+
+      function readTheme() {{
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {{
+          return saved;
+        }}
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }}
+
+      function t(lang, key) {{
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }}
+
+      function applyTheme(theme) {{
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }}
+
+      function applyLanguage(lang) {{
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {{
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        }});
+        const langOptions = {{
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        }};
+        for (const option of langSelect.options) {{
+          option.textContent = t(lang, langOptions[option.value]);
+        }}
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }}
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+
+      langSelect.addEventListener("change", () => {{
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      }});
+
+      themeSelect.addEventListener("change", () => {{
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      }});
+    }})();
+  </script>
 </body>
 </html>
 """
-    save_text(docs_dir / "index.html", html)
+    save_text(docs_dir / "index.html", page)
 
 
 def process(
@@ -446,6 +906,8 @@ def process(
     changes_dir: Path,
     docs_dir: Path,
     result_file: Path,
+    author_name: str,
+    author_url: str | None,
 ) -> int:
     timestamp = now_utc_iso()
     state_dir.mkdir(parents=True, exist_ok=True)
@@ -455,6 +917,7 @@ def process(
     snapshot_path = state_dir / SNAPSHOT_FILE
     state_path = state_dir / STATE_FILE
     history_path = state_dir / HISTORY_FILE
+    resolved_author_url = resolve_author_url(docs_dir, author_url)
 
     try:
         session = build_session()
@@ -506,7 +969,12 @@ def process(
             ts_for_file = timestamp.replace(":", "").replace("-", "").replace("Z", "").replace("T", "T")
             diff_path = changes_dir / f"{ts_for_file}Z.diff"
             save_text(diff_path, diff_text)
-            render_diff_html(diff_path, diff_text)
+            render_diff_html(
+                diff_path,
+                diff_text,
+                author_name=author_name,
+                author_url=resolved_author_url,
+            )
             diff_file = str(diff_path.as_posix())
 
             event = {
@@ -522,10 +990,20 @@ def process(
         elif bootstrap:
             save_json(history_path, history)
 
-    created_diff_pages = ensure_diff_html_pages(history)
+    created_diff_pages = ensure_diff_html_pages(
+        history,
+        author_name=author_name,
+        author_url=resolved_author_url,
+    )
     index_path = docs_dir / "index.html"
     if changed or created_diff_pages or not index_path.exists():
-        render_docs(history, url, docs_dir)
+        render_docs(
+            history,
+            url,
+            docs_dir,
+            author_name=author_name,
+            author_url=resolved_author_url,
+        )
 
     result = Result(
         timestamp=timestamp,
@@ -551,6 +1029,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--changes-dir", default="docs/changes")
     parser.add_argument("--docs-dir", default="docs")
     parser.add_argument("--result-file", default=f"data/{DEFAULT_RESULT_FILE}")
+    parser.add_argument("--author-name", default=DEFAULT_AUTHOR_NAME)
+    parser.add_argument("--author-url", default=None)
     return parser.parse_args(argv)
 
 
@@ -562,6 +1042,8 @@ def main(argv: list[str]) -> int:
         changes_dir=Path(args.changes_dir),
         docs_dir=Path(args.docs_dir),
         result_file=Path(args.result_file),
+        author_name=args.author_name,
+        author_url=args.author_url,
     )
 
 

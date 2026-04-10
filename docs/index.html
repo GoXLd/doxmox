@@ -7,30 +7,93 @@
   <style>
     :root {
       --bg: #f3f6fb;
+      --bg-top: #eaf1fb;
       --card: #ffffff;
       --text: #0f172a;
       --muted: #475569;
       --line: #dbe3ef;
       --accent: #0b5cab;
       --accent-soft: #e7f1fd;
+      --th-bg: #f8fbff;
+      --th-text: #1e293b;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --bg-top: #0a1227;
+      --card: #0f172a;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --line: #1e293b;
+      --accent: #93c5fd;
+      --accent-soft: #111827;
+      --th-bg: #111827;
+      --th-text: #dbe7ff;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --bg-top: #0a1227;
+        --card: #0f172a;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --line: #1e293b;
+        --accent: #93c5fd;
+        --accent-soft: #111827;
+        --th-bg: #111827;
+        --th-text: #dbe7ff;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, #eaf1fb 0%, var(--bg) 100%);
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg) 100%);
     }
     .wrap {
       max-width: 1100px;
       margin: 0 auto;
       padding: 24px 16px 48px;
     }
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
     .card {
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+      box-shadow: var(--shadow);
       overflow: hidden;
     }
     .head {
@@ -53,8 +116,8 @@
       vertical-align: top;
     }
     th {
-      background: #f8fbff;
-      color: #1e293b;
+      background: var(--th-bg);
+      color: var(--th-text);
       font-weight: 600;
       position: sticky;
       top: 0;
@@ -69,31 +132,190 @@
         padding: 8px 14px;
       }
     }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
     <div class="card">
       <div class="head">
-        <h1>Proxmox VE Admin Guide Changelog</h1>
-        <p>Source: <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p>Generated (UTC): 2026-04-08T23:06:34Z</p>
+        <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
+        <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
+        <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-10T07:07:29Z</p>
       </div>
       <table>
         <thead>
           <tr>
-            <th>Timestamp (UTC)</th>
-            <th>Old Hash</th>
-            <th>New Hash</th>
-            <th>Line Delta</th>
-            <th>Details</th>
+            <th data-i18n="timestamp">Timestamp (UTC)</th>
+            <th data-i18n="old_hash">Old Hash</th>
+            <th data-i18n="new_hash">New Hash</th>
+            <th data-i18n="line_delta">Line Delta</th>
+            <th data-i18n="details">Details</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>2026-04-08T22:17:17Z</td><td><code>cba2b410d5f2</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260408T221717Z.html" target="_blank" rel="noopener noreferrer">view</a> | <a href="changes/20260408T221717Z.diff" target="_blank" rel="noopener noreferrer">raw</a></td></tr>
+          <tr><td>2026-04-08T22:17:17Z</td><td><code>cba2b410d5f2</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260408T221717Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260408T221717Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a></td></tr>
         </tbody>
       </table>
     </div>
+    <footer class="footer">
+      <span data-i18n="footer_by">Designed and implemented by</span>
+      <a href="https://doxmox.nlo.ovh" target="_blank" rel="noopener noreferrer">Alexandre VANDEMOORTELE</a>
+    </footer>
   </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          title: "Proxmox VE Admin Guide Changelog",
+          source: "Source:",
+          generated: "Generated (UTC):",
+          timestamp: "Timestamp (UTC)",
+          old_hash: "Old Hash",
+          new_hash: "New Hash",
+          line_delta: "Line Delta",
+          details: "Details",
+          view: "View",
+          raw: "Raw",
+          no_changes: "No changes detected yet.",
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          footer_by: "Designed and implemented by",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          title: "Journal des changements du guide Proxmox VE Admin",
+          source: "Source :",
+          generated: "Généré (UTC) :",
+          timestamp: "Horodatage (UTC)",
+          old_hash: "Ancien hash",
+          new_hash: "Nouveau hash",
+          line_delta: "Delta de lignes",
+          details: "Details",
+          view: "Voir",
+          raw: "Brut",
+          no_changes: "Aucun changement detecte pour le moment.",
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          footer_by: "Conçu et réalisé par",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          title: "Журнал изменений руководства Proxmox VE Admin",
+          source: "Источник:",
+          generated: "Сгенерировано (UTC):",
+          timestamp: "Временная метка (UTC)",
+          old_hash: "Старый хэш",
+          new_hash: "Новый хэш",
+          line_delta: "Изменение строк",
+          details: "Детали",
+          view: "Открыть",
+          raw: "Raw",
+          no_changes: "Изменения пока не обнаружены.",
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          footer_by: "Разработано и реализовано",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
 </body>
 </html>
