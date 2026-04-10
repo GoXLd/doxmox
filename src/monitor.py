@@ -703,8 +703,8 @@ def render_docs(
       outline-offset: 2px;
     }}
     .telegram-link svg {{
-      width: 18px;
-      height: 18px;
+      width: 54px;
+      height: 54px;
       display: block;
       flex: 0 0 auto;
     }}
