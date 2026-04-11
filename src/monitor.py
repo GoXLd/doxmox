@@ -158,6 +158,20 @@ def build_diff(previous: str, current: str) -> tuple[str, int, int]:
     return "\n".join(diff_lines) + ("\n" if diff_lines else ""), added, removed
 
 
+def event_row_id(event: dict[str, Any]) -> str:
+    payload = "|".join(
+        [
+            str(event.get("timestamp", "")),
+            str(event.get("old_hash", "")),
+            str(event.get("new_hash", "")),
+            str(event.get("added_lines", 0)),
+            str(event.get("removed_lines", 0)),
+            str(event.get("diff_file", "")),
+        ]
+    )
+    return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
+
+
 def format_event_row(event: dict[str, Any]) -> str:
     timestamp = event.get("timestamp", "-")
     old_hash = (event.get("old_hash") or "-")[:12]
@@ -176,14 +190,15 @@ def format_event_row(event: dict[str, Any]) -> str:
         )
     else:
         link = "-"
+    row_id = event_row_id(event)
 
     return (
-        "<tr>"
+        f'<tr data-event-id="{row_id}">'
         f"<td>{timestamp}</td>"
         f"<td><code>{old_hash}</code></td>"
         f"<td><code>{new_hash}</code></td>"
         f"<td>+{added} / -{removed}</td>"
-        f"<td>{link}</td>"
+        f'<td>{link} | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button></td>'
         "</tr>"
     )
 
@@ -335,6 +350,18 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
       color: var(--control-text);
       padding: 6px 8px;
       font-size: 13px;
+    }}
+    .control-btn {{
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }}
+    .control-btn:hover {{
+      border-color: var(--accent);
     }}
     .head {{
       margin-bottom: 12px;
@@ -572,8 +599,6 @@ def render_docs(
 ) -> None:
     docs_dir.mkdir(parents=True, exist_ok=True)
     rows = "\n".join(format_event_row(event) for event in history)
-    if not rows:
-        rows = '<tr><td colspan="5" data-i18n="no_changes">No changes detected yet.</td></tr>'
 
     generated_at = now_utc_iso()
     page = f"""<!DOCTYPE html>
@@ -736,6 +761,19 @@ def render_docs(
     h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
     a {{ color: var(--accent); }}
+    .row-remove {{
+      border: 1px solid var(--control-line);
+      border-radius: 6px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }}
+    .row-remove:hover {{
+      border-color: #dc2626;
+      color: #dc2626;
+    }}
     table {{
       width: 100%;
       border-collapse: collapse;
@@ -792,6 +830,7 @@ def render_docs(
             <option value="dark">Dark</option>
           </select>
         </label>
+        <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
         <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
@@ -823,6 +862,7 @@ def render_docs(
         </thead>
         <tbody>
           {rows}
+          <tr data-empty-row="true" style="display:none;"><td colspan="5" data-i18n="no_changes">No changes detected yet.</td></tr>
         </tbody>
       </table>
     </div>
@@ -835,6 +875,7 @@ def render_docs(
     (() => {{
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
+      const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
       const fallbackLang = "en";
       const i18n = {{
         en: {{
@@ -853,6 +894,8 @@ def render_docs(
           theme: "Theme",
           theme_light: "Light",
           theme_dark: "Dark",
+          reset_hidden: "Reset hidden",
+          hide_entry: "Hide",
           footer_by: "Designed and implemented by",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
@@ -875,6 +918,8 @@ def render_docs(
           theme: "Theme",
           theme_light: "Clair",
           theme_dark: "Sombre",
+          reset_hidden: "Reinitialiser les caches",
+          hide_entry: "Masquer",
           footer_by: "Conçu et réalisé par",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
@@ -897,6 +942,8 @@ def render_docs(
           theme: "Тема",
           theme_light: "Светлая",
           theme_dark: "Тёмная",
+          reset_hidden: "Сбросить скрытые",
+          hide_entry: "Скрыть",
           footer_by: "Разработано и реализовано",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
@@ -907,6 +954,54 @@ def render_docs(
 
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
+      const resetHiddenButton = document.getElementById("reset-hidden");
+      const tableBody = document.querySelector("tbody");
+      const hiddenRows = new Set();
+
+      function loadHiddenRows() {{
+        try {{
+          const raw = localStorage.getItem(HIDDEN_ROWS_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return;
+          parsed.forEach((id) => {{
+            if (typeof id === "string" && id) hiddenRows.add(id);
+          }});
+        }} catch {{
+          // ignore invalid localStorage payload
+        }}
+      }}
+
+      function saveHiddenRows() {{
+        localStorage.setItem(HIDDEN_ROWS_KEY, JSON.stringify([...hiddenRows]));
+      }}
+
+      function ensureEmptyRow() {{
+        let row = tableBody.querySelector('tr[data-empty-row="true"]');
+        if (row) return row;
+        row = document.createElement("tr");
+        row.setAttribute("data-empty-row", "true");
+        const cell = document.createElement("td");
+        cell.colSpan = 5;
+        cell.setAttribute("data-i18n", "no_changes");
+        cell.textContent = i18n[fallbackLang].no_changes;
+        row.appendChild(cell);
+        tableBody.appendChild(row);
+        return row;
+      }}
+
+      function applyHiddenRows() {{
+        const rows = [...tableBody.querySelectorAll("tr[data-event-id]")];
+        let visible = 0;
+        rows.forEach((row) => {{
+          const id = row.getAttribute("data-event-id");
+          const isHidden = id && hiddenRows.has(id);
+          row.style.display = isHidden ? "none" : "";
+          if (!isHidden) visible += 1;
+        }});
+        const emptyRow = ensureEmptyRow();
+        emptyRow.style.display = visible === 0 ? "" : "none";
+      }}
 
       function readLang() {{
         const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
@@ -951,8 +1046,30 @@ def render_docs(
 
       const currentLang = readLang();
       const currentTheme = readTheme();
+      loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyHiddenRows();
+
+      tableBody.addEventListener("click", (event) => {{
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest('button[data-action="hide-row"]');
+        if (!button) return;
+        const row = button.closest("tr[data-event-id]");
+        if (!row) return;
+        const id = row.getAttribute("data-event-id");
+        if (!id) return;
+        hiddenRows.add(id);
+        saveHiddenRows();
+        applyHiddenRows();
+      }});
+
+      resetHiddenButton.addEventListener("click", () => {{
+        hiddenRows.clear();
+        localStorage.removeItem(HIDDEN_ROWS_KEY);
+        applyHiddenRows();
+      }});
 
       langSelect.addEventListener("change", () => {{
         localStorage.setItem(LANG_KEY, langSelect.value);

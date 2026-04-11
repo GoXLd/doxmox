@@ -158,6 +158,19 @@
     h1 { margin: 0 0 8px; font-size: 24px; }
     p { margin: 4px 0; color: var(--muted); }
     a { color: var(--accent); }
+    .row-remove {
+      border: 1px solid var(--control-line);
+      border-radius: 6px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .row-remove:hover {
+      border-color: #dc2626;
+      color: #dc2626;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -214,6 +227,7 @@
             <option value="dark">Dark</option>
           </select>
         </label>
+        <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
         <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
@@ -231,7 +245,7 @@
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-10T08:28:54Z</p>
+        <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-11T12:49:47Z</p>
       </div>
       <table>
         <thead>
@@ -244,20 +258,22 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>2026-04-10T08:28:42Z</td><td><code>1ad28dc68b6e</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260410T082842Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260410T082842Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a></td></tr>
-<tr><td>2026-04-08T22:17:17Z</td><td><code>cba2b410d5f2</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260408T221717Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260408T221717Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a></td></tr>
+          <tr data-event-id="be988b3fd5dc7374"><td>2026-04-10T08:28:42Z</td><td><code>1ad28dc68b6e</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260410T082842Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260410T082842Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a> | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button></td></tr>
+<tr data-event-id="c8ecc3917dc9ad40"><td>2026-04-08T22:17:17Z</td><td><code>cba2b410d5f2</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260408T221717Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260408T221717Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a> | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button></td></tr>
+          <tr data-empty-row="true" style="display:none;"><td colspan="5" data-i18n="no_changes">No changes detected yet.</td></tr>
         </tbody>
       </table>
     </div>
     <footer class="footer">
       <span data-i18n="footer_by">Designed and implemented by</span>
-      <a href="https://vande.fr/" target="_blank" rel="noopener noreferrer">Alexandre VANDEMOORTELE</a>
+      <a href="https://doxmox.com" target="_blank" rel="noopener noreferrer">Alexandre VANDEMOORTELE</a>
     </footer>
   </div>
   <script>
     (() => {
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
+      const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
       const fallbackLang = "en";
       const i18n = {
         en: {
@@ -276,6 +292,8 @@
           theme: "Theme",
           theme_light: "Light",
           theme_dark: "Dark",
+          reset_hidden: "Reset hidden",
+          hide_entry: "Hide",
           footer_by: "Designed and implemented by",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
@@ -298,6 +316,8 @@
           theme: "Theme",
           theme_light: "Clair",
           theme_dark: "Sombre",
+          reset_hidden: "Reinitialiser les caches",
+          hide_entry: "Masquer",
           footer_by: "Conçu et réalisé par",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
@@ -320,6 +340,8 @@
           theme: "Тема",
           theme_light: "Светлая",
           theme_dark: "Тёмная",
+          reset_hidden: "Сбросить скрытые",
+          hide_entry: "Скрыть",
           footer_by: "Разработано и реализовано",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
@@ -330,6 +352,54 @@
 
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
+      const resetHiddenButton = document.getElementById("reset-hidden");
+      const tableBody = document.querySelector("tbody");
+      const hiddenRows = new Set();
+
+      function loadHiddenRows() {
+        try {
+          const raw = localStorage.getItem(HIDDEN_ROWS_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return;
+          parsed.forEach((id) => {
+            if (typeof id === "string" && id) hiddenRows.add(id);
+          });
+        } catch {
+          // ignore invalid localStorage payload
+        }
+      }
+
+      function saveHiddenRows() {
+        localStorage.setItem(HIDDEN_ROWS_KEY, JSON.stringify([...hiddenRows]));
+      }
+
+      function ensureEmptyRow() {
+        let row = tableBody.querySelector('tr[data-empty-row="true"]');
+        if (row) return row;
+        row = document.createElement("tr");
+        row.setAttribute("data-empty-row", "true");
+        const cell = document.createElement("td");
+        cell.colSpan = 5;
+        cell.setAttribute("data-i18n", "no_changes");
+        cell.textContent = i18n[fallbackLang].no_changes;
+        row.appendChild(cell);
+        tableBody.appendChild(row);
+        return row;
+      }
+
+      function applyHiddenRows() {
+        const rows = [...tableBody.querySelectorAll("tr[data-event-id]")];
+        let visible = 0;
+        rows.forEach((row) => {
+          const id = row.getAttribute("data-event-id");
+          const isHidden = id && hiddenRows.has(id);
+          row.style.display = isHidden ? "none" : "";
+          if (!isHidden) visible += 1;
+        });
+        const emptyRow = ensureEmptyRow();
+        emptyRow.style.display = visible === 0 ? "" : "none";
+      }
 
       function readLang() {
         const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
@@ -374,8 +444,30 @@
 
       const currentLang = readLang();
       const currentTheme = readTheme();
+      loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyHiddenRows();
+
+      tableBody.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        const button = target.closest('button[data-action="hide-row"]');
+        if (!button) return;
+        const row = button.closest("tr[data-event-id]");
+        if (!row) return;
+        const id = row.getAttribute("data-event-id");
+        if (!id) return;
+        hiddenRows.add(id);
+        saveHiddenRows();
+        applyHiddenRows();
+      });
+
+      resetHiddenButton.addEventListener("click", () => {
+        hiddenRows.clear();
+        localStorage.removeItem(HIDDEN_ROWS_KEY);
+        applyHiddenRows();
+      });
 
       langSelect.addEventListener("change", () => {
         localStorage.setItem(LANG_KEY, langSelect.value);
