@@ -65,7 +65,6 @@ jobs:
           git push
 
           echo "committed=true" >> "$GITHUB_OUTPUT"
-          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Send Telegram notification
         if: steps.result.outputs.changed == 'true' && steps.result.outputs.bootstrap != 'true' && steps.commit.outputs.committed == 'true'
@@ -73,7 +72,6 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DOMAIN: ${{ secrets.DOMAIN }}
-          COMMIT_SHA: ${{ steps.commit.outputs.commit_sha }}
           DIFF_FILE: ${{ steps.result.outputs.diff_file }}
           ADDED: ${{ steps.result.outputs.added_lines }}
           REMOVED: ${{ steps.result.outputs.removed_lines }}
@@ -91,15 +89,23 @@ jobs:
           DIFF_PAGE_PATH="${PUBLIC_DIFF_PATH%.diff}.html"
           DIFF_URL="${BASE_URL}/${DIFF_PAGE_PATH}"
           CHANGELOG_URL="${BASE_URL}/index.html"
+          DIFF_BASENAME="$(basename "${DIFF_FILE}" .diff)"
+          if [[ "${DIFF_BASENAME}" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})T([0-9]{2})([0-9]{2})[0-9]{2}Z$ ]]; then
+            HOUR="${BASH_REMATCH[4]#0}"
+            if [ -z "${HOUR}" ]; then HOUR="0"; fi
+            DIFF_LABEL="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]}-${HOUR}:${BASH_REMATCH[5]}"
+          else
+            DIFF_LABEL="Open diff"
+          fi
           TEXT=$(cat <<EOF
           Proxmox Admin Guide changed.
           +${ADDED} / -${REMOVED}
-          Diff: ${DIFF_URL}
-          Changelog: ${CHANGELOG_URL}
-          Commit: ${COMMIT_SHA}
+          Diff: <a href="${DIFF_URL}">${DIFF_LABEL}</a>
+          <a href="${CHANGELOG_URL}">Full changelog</a>
           EOF
           )
 
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${TEXT}" >/dev/null
+            --data-urlencode "text=${TEXT}" \
+            --data-urlencode "parse_mode=HTML" >/dev/null
