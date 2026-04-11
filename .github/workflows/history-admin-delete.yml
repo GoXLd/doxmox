@@ -3,8 +3,8 @@ name: Admin Delete History Entry
 on:
   workflow_dispatch:
     inputs:
-      selector:
-        description: "History selector (timestamp or diff filename)"
+      selectors:
+        description: "History selectors (newline-separated timestamps or diff filenames)"
         required: true
         type: string
       delete_artifacts:
@@ -39,7 +39,22 @@ jobs:
 
       - name: Delete history entry
         run: |
-          ARGS=("--history-delete" "${{ inputs.selector }}")
+          ARGS=()
+          while IFS= read -r line; do
+            selector="$(echo "$line" | xargs)"
+            if [ -z "$selector" ]; then
+              continue
+            fi
+            ARGS+=("--history-delete" "$selector")
+          done <<'EOF'
+          ${{ inputs.selectors }}
+          EOF
+
+          if [ ${#ARGS[@]} -eq 0 ]; then
+            echo "No selectors provided."
+            exit 1
+          fi
+
           if [ "${{ inputs.delete_artifacts }}" = "true" ]; then
             ARGS+=("--history-delete-artifacts")
           fi
@@ -56,5 +71,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "chore: delete history entry (${{ inputs.selector }})"
+          git commit -m "chore: delete history entries via admin workflow"
           git push

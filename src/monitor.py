@@ -198,7 +198,11 @@ def format_event_row(event: dict[str, Any]) -> str:
     details_cell = (
         f'{link} | '
         '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> | '
-        '<button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button>'
+        '<button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button> | '
+        '<label class="row-select-wrap" hidden>'
+        '<input type="checkbox" class="row-select" data-role="row-select"> '
+        '<span data-i18n="select_entry">Select</span>'
+        "</label>"
     )
 
     return (
@@ -821,6 +825,14 @@ def render_docs(
       border-color: #b91c1c;
       color: #b91c1c;
     }}
+    .row-select-wrap {{
+      color: var(--muted);
+      font-size: 12px;
+      user-select: none;
+    }}
+    .row-select {{
+      vertical-align: middle;
+    }}
     table {{
       width: 100%;
       border-collapse: collapse;
@@ -879,6 +891,7 @@ def render_docs(
         </label>
         <button type="button" id="admin-login" class="control-btn" data-i18n="admin_login">Admin login</button>
         <button type="button" id="admin-logout" class="control-btn" data-i18n="admin_logout" hidden>Admin logout</button>
+        <button type="button" id="delete-selected" class="control-btn" data-i18n="delete_selected" hidden disabled>Delete selected</button>
         <span id="admin-status" class="admin-status" data-i18n="admin_status_off">Admin: off</span>
         <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
@@ -950,7 +963,9 @@ def render_docs(
           theme_dark: "Dark",
           reset_hidden: "Reset hidden",
           hide_entry: "Hide",
+          select_entry: "Select",
           delete_entry: "Delete",
+          delete_selected: "Delete selected",
           admin_login: "Admin login",
           admin_logout: "Admin logout",
           admin_status_off: "Admin: off",
@@ -961,6 +976,7 @@ def render_docs(
           admin_delete_failed: "Delete request failed",
           admin_prompt: "Paste GitHub token (repo + workflow scopes):",
           delete_confirm: "Delete this entry from history.json?",
+          delete_selected_confirm: "Delete selected entries from history.json?",
           footer_by: "Designed and implemented by",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
@@ -985,7 +1001,9 @@ def render_docs(
           theme_dark: "Sombre",
           reset_hidden: "Reinitialiser les caches",
           hide_entry: "Masquer",
+          select_entry: "Selectionner",
           delete_entry: "Supprimer",
+          delete_selected: "Supprimer la selection",
           admin_login: "Connexion admin",
           admin_logout: "Deconnexion admin",
           admin_status_off: "Admin : off",
@@ -996,6 +1014,7 @@ def render_docs(
           admin_delete_failed: "Echec de la demande de suppression",
           admin_prompt: "Collez le token GitHub (scopes repo + workflow) :",
           delete_confirm: "Supprimer cette entree de history.json ?",
+          delete_selected_confirm: "Supprimer les entrees selectionnees de history.json ?",
           footer_by: "Conçu et réalisé par",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
@@ -1020,7 +1039,9 @@ def render_docs(
           theme_dark: "Тёмная",
           reset_hidden: "Сбросить скрытые",
           hide_entry: "Скрыть",
+          select_entry: "Выбрать",
           delete_entry: "Удалить",
+          delete_selected: "Удалить выбранное",
           admin_login: "Вход админ",
           admin_logout: "Выход админ",
           admin_status_off: "Админ: нет",
@@ -1031,6 +1052,7 @@ def render_docs(
           admin_delete_failed: "Ошибка запроса удаления",
           admin_prompt: "Вставьте GitHub token (scopes repo + workflow):",
           delete_confirm: "Удалить эту запись из history.json?",
+          delete_selected_confirm: "Удалить выбранные записи из history.json?",
           footer_by: "Разработано и реализовано",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
@@ -1044,17 +1066,46 @@ def render_docs(
       const resetHiddenButton = document.getElementById("reset-hidden");
       const adminLoginButton = document.getElementById("admin-login");
       const adminLogoutButton = document.getElementById("admin-logout");
+      const deleteSelectedButton = document.getElementById("delete-selected");
       const adminStatus = document.getElementById("admin-status");
       const tableBody = document.querySelector("tbody");
       const hiddenRows = new Set();
       let adminToken = null;
 
+      function selectedSelectors() {{
+        const selected = new Set();
+        tableBody.querySelectorAll('tr[data-event-id] .row-select:checked').forEach((checkbox) => {{
+          const row = checkbox.closest("tr[data-event-id]");
+          if (!row) return;
+          const selector = row.getAttribute("data-history-selector");
+          if (selector) selected.add(selector);
+        }});
+        return [...selected];
+      }}
+
+      function updateBatchDeleteState() {{
+        if (!adminToken) {{
+          deleteSelectedButton.disabled = true;
+          return;
+        }}
+        deleteSelectedButton.disabled = selectedSelectors().length === 0;
+      }}
+
       function setAdminMode(enabled, login = "") {{
         adminLoginButton.hidden = enabled;
         adminLogoutButton.hidden = !enabled;
+        deleteSelectedButton.hidden = !enabled;
         document.querySelectorAll('button[data-action="admin-delete"]').forEach((btn) => {{
           btn.hidden = !enabled;
         }});
+        document.querySelectorAll(".row-select-wrap").forEach((node) => {{
+          node.hidden = !enabled;
+        }});
+        if (!enabled) {{
+          tableBody.querySelectorAll(".row-select").forEach((checkbox) => {{
+            checkbox.checked = false;
+          }});
+        }}
         const lang = readLang();
         if (enabled) {{
           adminStatus.textContent = t(lang, "admin_status_on").replace("{{login}}", login || "admin");
@@ -1063,6 +1114,7 @@ def render_docs(
           adminStatus.textContent = t(lang, "admin_status_off");
           adminStatus.dataset.login = "";
         }}
+        updateBatchDeleteState();
       }}
 
       async function githubApiRequest(path, token, method = "GET", payload = null) {{
@@ -1117,6 +1169,7 @@ def render_docs(
       }}
 
       async function queueHistoryDelete(selector) {{
+        const normalized = Array.isArray(selector) ? selector : [selector];
         await githubApiRequest(
           `/repos/${{GITHUB_REPO}}/actions/workflows/${{encodeURIComponent(GITHUB_ADMIN_WORKFLOW)}}/dispatches`,
           adminToken,
@@ -1124,7 +1177,7 @@ def render_docs(
           {{
             ref: GITHUB_REF,
             inputs: {{
-              selector,
+              selectors: normalized.join("\\n"),
               delete_artifacts: "false"
             }}
           }}
@@ -1170,10 +1223,15 @@ def render_docs(
           const id = row.getAttribute("data-event-id");
           const isHidden = id && hiddenRows.has(id);
           row.style.display = isHidden ? "none" : "";
+          if (isHidden) {{
+            const checkbox = row.querySelector(".row-select");
+            if (checkbox) checkbox.checked = false;
+          }}
           if (!isHidden) visible += 1;
         }});
         const emptyRow = ensureEmptyRow();
         emptyRow.style.display = visible === 0 ? "" : "none";
+        updateBatchDeleteState();
       }}
 
       function readLang() {{
@@ -1253,7 +1311,7 @@ def render_docs(
 
           button.disabled = true;
           try {{
-            await queueHistoryDelete(selector);
+            await queueHistoryDelete([selector]);
             row.style.display = "none";
             applyHiddenRows();
             window.alert(t(lang, "admin_delete_queued"));
@@ -1265,10 +1323,40 @@ def render_docs(
         }}
       }});
 
+      tableBody.addEventListener("change", (event) => {{
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (!target.matches(".row-select")) return;
+        updateBatchDeleteState();
+      }});
+
       resetHiddenButton.addEventListener("click", () => {{
         hiddenRows.clear();
         localStorage.removeItem(HIDDEN_ROWS_KEY);
         applyHiddenRows();
+      }});
+
+      deleteSelectedButton.addEventListener("click", async () => {{
+        if (!adminToken) return;
+        const selectors = selectedSelectors();
+        if (!selectors.length) return;
+        const lang = readLang();
+        if (!window.confirm(t(lang, "delete_selected_confirm"))) return;
+
+        deleteSelectedButton.disabled = true;
+        try {{
+          await queueHistoryDelete(selectors);
+          tableBody.querySelectorAll('tr[data-event-id] .row-select:checked').forEach((checkbox) => {{
+            const row = checkbox.closest("tr[data-event-id]");
+            if (row) row.style.display = "none";
+          }});
+          applyHiddenRows();
+          window.alert(t(lang, "admin_delete_queued"));
+        }} catch {{
+          window.alert(t(lang, "admin_delete_failed"));
+        }} finally {{
+          updateBatchDeleteState();
+        }}
       }});
 
       adminLoginButton.addEventListener("click", async () => {{
