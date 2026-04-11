@@ -745,6 +745,9 @@ def render_docs(
       gap: 8px;
       flex-wrap: wrap;
     }}
+    .admin-panel[hidden] {{
+      display: none !important;
+    }}
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
