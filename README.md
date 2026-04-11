@@ -95,3 +95,22 @@ python src/monitor.py --history-delete "20260410T082842Z.diff" --history-delete-
 ```
 
 After deletion, `docs/index.html` is regenerated automatically.
+
+### Delete from website (admin-only)
+
+`docs/index.html` now supports admin deletion from the UI:
+
+1. click `Admin login`;
+2. paste GitHub token;
+3. click `Delete` on a row.
+
+The page checks GitHub permissions and enables deletion only for users with `admin` access to the repository.
+
+The delete request triggers GitHub workflow:
+
+- `.github/workflows/history-admin-delete.yml`
+
+Token requirements:
+
+- access to this repository;
+- API scopes/permissions for repository and Actions (`repo` + `workflow` for classic PAT, or equivalent fine-grained permissions).

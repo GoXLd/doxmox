@@ -18,6 +18,9 @@
       --control-bg: #ffffff;
       --control-line: #c7d2e0;
       --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     }
     :root[data-theme="dark"] {
@@ -98,6 +101,22 @@
       padding: 6px 8px;
       font-size: 13px;
     }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .admin-status {
+      color: var(--muted);
+      font-size: 12px;
+    }
     .card {
       background: var(--card);
       border: 1px solid var(--line);
@@ -171,6 +190,19 @@
       border-color: #dc2626;
       color: #dc2626;
     }
+    .row-delete {
+      border: 1px solid var(--control-line);
+      border-radius: 6px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .row-delete:hover {
+      border-color: #b91c1c;
+      color: #b91c1c;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -227,6 +259,9 @@
             <option value="dark">Dark</option>
           </select>
         </label>
+        <button type="button" id="admin-login" class="control-btn" data-i18n="admin_login">Admin login</button>
+        <button type="button" id="admin-logout" class="control-btn" data-i18n="admin_logout" hidden>Admin logout</button>
+        <span id="admin-status" class="admin-status" data-i18n="admin_status_off">Admin: off</span>
         <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
@@ -245,7 +280,7 @@
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-11T12:49:47Z</p>
+        <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-11T13:04:53Z</p>
       </div>
       <table>
         <thead>
@@ -258,8 +293,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-event-id="be988b3fd5dc7374"><td>2026-04-10T08:28:42Z</td><td><code>1ad28dc68b6e</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260410T082842Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260410T082842Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a> | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button></td></tr>
-<tr data-event-id="c8ecc3917dc9ad40"><td>2026-04-08T22:17:17Z</td><td><code>cba2b410d5f2</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260408T221717Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260408T221717Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a> | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button></td></tr>
+          <tr data-event-id="be988b3fd5dc7374" data-history-selector="2026-04-10T08:28:42Z"><td>2026-04-10T08:28:42Z</td><td><code>1ad28dc68b6e</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260410T082842Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260410T082842Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a> | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> | <button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button></td></tr>
+<tr data-event-id="c8ecc3917dc9ad40" data-history-selector="2026-04-08T22:17:17Z"><td>2026-04-08T22:17:17Z</td><td><code>cba2b410d5f2</code></td><td><code>981af66920de</code></td><td>+0 / -1</td><td><a href="changes/20260408T221717Z.html" target="_blank" rel="noopener noreferrer" data-i18n="view">View</a> | <a href="changes/20260408T221717Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="raw">Raw</a> | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> | <button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button></td></tr>
           <tr data-empty-row="true" style="display:none;"><td colspan="5" data-i18n="no_changes">No changes detected yet.</td></tr>
         </tbody>
       </table>
@@ -274,7 +309,11 @@
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
       const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
+      const ADMIN_TOKEN_KEY = "doxmox-admin-token";
       const fallbackLang = "en";
+      const GITHUB_REPO = "GoXLd/doxmox";
+      const GITHUB_REF = "main";
+      const GITHUB_ADMIN_WORKFLOW = "history-admin-delete.yml";
       const i18n = {
         en: {
           title: "Proxmox VE Admin Guide Changelog",
@@ -294,6 +333,17 @@
           theme_dark: "Dark",
           reset_hidden: "Reset hidden",
           hide_entry: "Hide",
+          delete_entry: "Delete",
+          admin_login: "Admin login",
+          admin_logout: "Admin logout",
+          admin_status_off: "Admin: off",
+          admin_status_on: "Admin: {login}",
+          admin_bad_token: "Invalid token",
+          admin_no_rights: "User is not admin in this repo",
+          admin_delete_queued: "Delete queued in GitHub Actions",
+          admin_delete_failed: "Delete request failed",
+          admin_prompt: "Paste GitHub token (repo + workflow scopes):",
+          delete_confirm: "Delete this entry from history.json?",
           footer_by: "Designed and implemented by",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
@@ -318,6 +368,17 @@
           theme_dark: "Sombre",
           reset_hidden: "Reinitialiser les caches",
           hide_entry: "Masquer",
+          delete_entry: "Supprimer",
+          admin_login: "Connexion admin",
+          admin_logout: "Deconnexion admin",
+          admin_status_off: "Admin : off",
+          admin_status_on: "Admin : {login}",
+          admin_bad_token: "Token invalide",
+          admin_no_rights: "Cet utilisateur n'est pas admin du repo",
+          admin_delete_queued: "Suppression envoyee a GitHub Actions",
+          admin_delete_failed: "Echec de la demande de suppression",
+          admin_prompt: "Collez le token GitHub (scopes repo + workflow) :",
+          delete_confirm: "Supprimer cette entree de history.json ?",
           footer_by: "Conçu et réalisé par",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
@@ -342,6 +403,17 @@
           theme_dark: "Тёмная",
           reset_hidden: "Сбросить скрытые",
           hide_entry: "Скрыть",
+          delete_entry: "Удалить",
+          admin_login: "Вход админ",
+          admin_logout: "Выход админ",
+          admin_status_off: "Админ: нет",
+          admin_status_on: "Админ: {login}",
+          admin_bad_token: "Неверный токен",
+          admin_no_rights: "Пользователь не админ этого репозитория",
+          admin_delete_queued: "Удаление отправлено в GitHub Actions",
+          admin_delete_failed: "Ошибка запроса удаления",
+          admin_prompt: "Вставьте GitHub token (scopes repo + workflow):",
+          delete_confirm: "Удалить эту запись из history.json?",
           footer_by: "Разработано и реализовано",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
@@ -353,8 +425,94 @@
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
       const resetHiddenButton = document.getElementById("reset-hidden");
+      const adminLoginButton = document.getElementById("admin-login");
+      const adminLogoutButton = document.getElementById("admin-logout");
+      const adminStatus = document.getElementById("admin-status");
       const tableBody = document.querySelector("tbody");
       const hiddenRows = new Set();
+      let adminToken = null;
+
+      function setAdminMode(enabled, login = "") {
+        adminLoginButton.hidden = enabled;
+        adminLogoutButton.hidden = !enabled;
+        document.querySelectorAll('button[data-action="admin-delete"]').forEach((btn) => {
+          btn.hidden = !enabled;
+        });
+        const lang = readLang();
+        if (enabled) {
+          adminStatus.textContent = t(lang, "admin_status_on").replace("{login}", login || "admin");
+          adminStatus.dataset.login = login || "admin";
+        } else {
+          adminStatus.textContent = t(lang, "admin_status_off");
+          adminStatus.dataset.login = "";
+        }
+      }
+
+      async function githubApiRequest(path, token, method = "GET", payload = null) {
+        const response = await fetch(`https://api.github.com${path}`, {
+          method,
+          headers: {
+            Accept: "application/vnd.github+json",
+            Authorization: `Bearer ${token}`,
+            "X-GitHub-Api-Version": "2022-11-28",
+            ...(payload ? { "Content-Type": "application/json" } : {})
+          },
+          body: payload ? JSON.stringify(payload) : undefined
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`GitHub API ${response.status}: ${text || response.statusText}`);
+        }
+
+        if (response.status === 204) return null;
+        return response.json();
+      }
+
+      async function verifyAdminToken(token) {
+        const user = await githubApiRequest("/user", token);
+        const repo = await githubApiRequest(`/repos/${GITHUB_REPO}`, token);
+        if (!repo.permissions || !repo.permissions.admin) {
+          return null;
+        }
+        return user.login;
+      }
+
+      async function loadStoredAdminSession() {
+        const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+        if (!token) {
+          setAdminMode(false);
+          return;
+        }
+        try {
+          const login = await verifyAdminToken(token);
+          if (!login) {
+            sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+            setAdminMode(false);
+            return;
+          }
+          adminToken = token;
+          setAdminMode(true, login);
+        } catch {
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminMode(false);
+        }
+      }
+
+      async function queueHistoryDelete(selector) {
+        await githubApiRequest(
+          `/repos/${GITHUB_REPO}/actions/workflows/${encodeURIComponent(GITHUB_ADMIN_WORKFLOW)}/dispatches`,
+          adminToken,
+          "POST",
+          {
+            ref: GITHUB_REF,
+            inputs: {
+              selector,
+              delete_artifacts: "false"
+            }
+          }
+        );
+      }
 
       function loadHiddenRows() {
         try {
@@ -447,26 +605,81 @@
       loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      setAdminMode(false);
       applyHiddenRows();
+      loadStoredAdminSession();
 
-      tableBody.addEventListener("click", (event) => {
+      tableBody.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        const button = target.closest('button[data-action="hide-row"]');
+        const button = target.closest('button[data-action]');
         if (!button) return;
+        const action = button.getAttribute("data-action");
         const row = button.closest("tr[data-event-id]");
         if (!row) return;
-        const id = row.getAttribute("data-event-id");
-        if (!id) return;
-        hiddenRows.add(id);
-        saveHiddenRows();
-        applyHiddenRows();
+
+        if (action === "hide-row") {
+          const id = row.getAttribute("data-event-id");
+          if (!id) return;
+          hiddenRows.add(id);
+          saveHiddenRows();
+          applyHiddenRows();
+          return;
+        }
+
+        if (action === "admin-delete") {
+          if (!adminToken) return;
+          const selector = row.getAttribute("data-history-selector");
+          if (!selector) return;
+          const lang = readLang();
+          if (!window.confirm(t(lang, "delete_confirm"))) return;
+
+          button.disabled = true;
+          try {
+            await queueHistoryDelete(selector);
+            row.style.display = "none";
+            applyHiddenRows();
+            window.alert(t(lang, "admin_delete_queued"));
+          } catch {
+            window.alert(t(lang, "admin_delete_failed"));
+          } finally {
+            button.disabled = false;
+          }
+        }
       });
 
       resetHiddenButton.addEventListener("click", () => {
         hiddenRows.clear();
         localStorage.removeItem(HIDDEN_ROWS_KEY);
         applyHiddenRows();
+      });
+
+      adminLoginButton.addEventListener("click", async () => {
+        const lang = readLang();
+        const token = window.prompt(t(lang, "admin_prompt")) || "";
+        const trimmed = token.trim();
+        if (!trimmed) return;
+
+        try {
+          const login = await verifyAdminToken(trimmed);
+          if (!login) {
+            window.alert(t(lang, "admin_no_rights"));
+            setAdminMode(false);
+            return;
+          }
+          adminToken = trimmed;
+          sessionStorage.setItem(ADMIN_TOKEN_KEY, trimmed);
+          setAdminMode(true, login);
+        } catch {
+          window.alert(t(lang, "admin_bad_token"));
+          setAdminMode(false);
+        }
+      });
+
+      adminLogoutButton.addEventListener("click", () => {
+        adminToken = null;
+        sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+        setAdminMode(false);
       });
 
       langSelect.addEventListener("change", () => {

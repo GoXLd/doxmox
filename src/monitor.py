@@ -27,6 +27,9 @@ HISTORY_FILE = "history.json"
 DEFAULT_RESULT_FILE = "last_result.json"
 DEFAULT_AUTHOR_NAME = "Alexandre VANDEMOORTELE"
 DEFAULT_AUTHOR_URL = "https://vande.fr/"
+DEFAULT_GITHUB_REPO = "GoXLd/doxmox"
+DEFAULT_GITHUB_REF = "main"
+DEFAULT_GITHUB_ADMIN_WORKFLOW = "history-admin-delete.yml"
 
 
 @dataclass
@@ -191,14 +194,20 @@ def format_event_row(event: dict[str, Any]) -> str:
     else:
         link = "-"
     row_id = event_row_id(event)
+    selector = html.escape(str(timestamp))
+    details_cell = (
+        f'{link} | '
+        '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> | '
+        '<button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button>'
+    )
 
     return (
-        f'<tr data-event-id="{row_id}">'
+        f'<tr data-event-id="{row_id}" data-history-selector="{selector}">'
         f"<td>{timestamp}</td>"
         f"<td><code>{old_hash}</code></td>"
         f"<td><code>{new_hash}</code></td>"
         f"<td>+{added} / -{removed}</td>"
-        f'<td>{link} | <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button></td>'
+        f"<td>{details_cell}</td>"
         "</tr>"
     )
 
@@ -548,6 +557,9 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
         }}
         themeSelect.options[0].textContent = t(lang, "theme_light");
         themeSelect.options[1].textContent = t(lang, "theme_dark");
+        if (adminToken) {{
+          setAdminMode(true, adminStatus.dataset.login || "admin");
+        }}
       }}
 
       const currentLang = readLang();
@@ -596,6 +608,9 @@ def render_docs(
     docs_dir: Path,
     author_name: str,
     author_url: str,
+    github_repo: str,
+    github_ref: str,
+    github_admin_workflow: str,
 ) -> None:
     docs_dir.mkdir(parents=True, exist_ok=True)
     rows = "\n".join(format_event_row(event) for event in history)
@@ -621,6 +636,9 @@ def render_docs(
       --control-bg: #ffffff;
       --control-line: #c7d2e0;
       --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     }}
     :root[data-theme="dark"] {{
@@ -701,6 +719,22 @@ def render_docs(
       padding: 6px 8px;
       font-size: 13px;
     }}
+    .control-btn {{
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }}
+    .control-btn:hover {{
+      border-color: var(--accent);
+    }}
+    .admin-status {{
+      color: var(--muted);
+      font-size: 12px;
+    }}
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
@@ -774,6 +808,19 @@ def render_docs(
       border-color: #dc2626;
       color: #dc2626;
     }}
+    .row-delete {{
+      border: 1px solid var(--control-line);
+      border-radius: 6px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }}
+    .row-delete:hover {{
+      border-color: #b91c1c;
+      color: #b91c1c;
+    }}
     table {{
       width: 100%;
       border-collapse: collapse;
@@ -830,6 +877,9 @@ def render_docs(
             <option value="dark">Dark</option>
           </select>
         </label>
+        <button type="button" id="admin-login" class="control-btn" data-i18n="admin_login">Admin login</button>
+        <button type="button" id="admin-logout" class="control-btn" data-i18n="admin_logout" hidden>Admin logout</button>
+        <span id="admin-status" class="admin-status" data-i18n="admin_status_off">Admin: off</span>
         <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
@@ -876,7 +926,11 @@ def render_docs(
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
       const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
+      const ADMIN_TOKEN_KEY = "doxmox-admin-token";
       const fallbackLang = "en";
+      const GITHUB_REPO = "{html.escape(github_repo)}";
+      const GITHUB_REF = "{html.escape(github_ref)}";
+      const GITHUB_ADMIN_WORKFLOW = "{html.escape(github_admin_workflow)}";
       const i18n = {{
         en: {{
           title: "Proxmox VE Admin Guide Changelog",
@@ -896,6 +950,17 @@ def render_docs(
           theme_dark: "Dark",
           reset_hidden: "Reset hidden",
           hide_entry: "Hide",
+          delete_entry: "Delete",
+          admin_login: "Admin login",
+          admin_logout: "Admin logout",
+          admin_status_off: "Admin: off",
+          admin_status_on: "Admin: {{login}}",
+          admin_bad_token: "Invalid token",
+          admin_no_rights: "User is not admin in this repo",
+          admin_delete_queued: "Delete queued in GitHub Actions",
+          admin_delete_failed: "Delete request failed",
+          admin_prompt: "Paste GitHub token (repo + workflow scopes):",
+          delete_confirm: "Delete this entry from history.json?",
           footer_by: "Designed and implemented by",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
@@ -920,6 +985,17 @@ def render_docs(
           theme_dark: "Sombre",
           reset_hidden: "Reinitialiser les caches",
           hide_entry: "Masquer",
+          delete_entry: "Supprimer",
+          admin_login: "Connexion admin",
+          admin_logout: "Deconnexion admin",
+          admin_status_off: "Admin : off",
+          admin_status_on: "Admin : {{login}}",
+          admin_bad_token: "Token invalide",
+          admin_no_rights: "Cet utilisateur n'est pas admin du repo",
+          admin_delete_queued: "Suppression envoyee a GitHub Actions",
+          admin_delete_failed: "Echec de la demande de suppression",
+          admin_prompt: "Collez le token GitHub (scopes repo + workflow) :",
+          delete_confirm: "Supprimer cette entree de history.json ?",
           footer_by: "Conçu et réalisé par",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
@@ -944,6 +1020,17 @@ def render_docs(
           theme_dark: "Тёмная",
           reset_hidden: "Сбросить скрытые",
           hide_entry: "Скрыть",
+          delete_entry: "Удалить",
+          admin_login: "Вход админ",
+          admin_logout: "Выход админ",
+          admin_status_off: "Админ: нет",
+          admin_status_on: "Админ: {{login}}",
+          admin_bad_token: "Неверный токен",
+          admin_no_rights: "Пользователь не админ этого репозитория",
+          admin_delete_queued: "Удаление отправлено в GitHub Actions",
+          admin_delete_failed: "Ошибка запроса удаления",
+          admin_prompt: "Вставьте GitHub token (scopes repo + workflow):",
+          delete_confirm: "Удалить эту запись из history.json?",
           footer_by: "Разработано и реализовано",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
@@ -955,8 +1042,94 @@ def render_docs(
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
       const resetHiddenButton = document.getElementById("reset-hidden");
+      const adminLoginButton = document.getElementById("admin-login");
+      const adminLogoutButton = document.getElementById("admin-logout");
+      const adminStatus = document.getElementById("admin-status");
       const tableBody = document.querySelector("tbody");
       const hiddenRows = new Set();
+      let adminToken = null;
+
+      function setAdminMode(enabled, login = "") {{
+        adminLoginButton.hidden = enabled;
+        adminLogoutButton.hidden = !enabled;
+        document.querySelectorAll('button[data-action="admin-delete"]').forEach((btn) => {{
+          btn.hidden = !enabled;
+        }});
+        const lang = readLang();
+        if (enabled) {{
+          adminStatus.textContent = t(lang, "admin_status_on").replace("{{login}}", login || "admin");
+          adminStatus.dataset.login = login || "admin";
+        }} else {{
+          adminStatus.textContent = t(lang, "admin_status_off");
+          adminStatus.dataset.login = "";
+        }}
+      }}
+
+      async function githubApiRequest(path, token, method = "GET", payload = null) {{
+        const response = await fetch(`https://api.github.com${{path}}`, {{
+          method,
+          headers: {{
+            Accept: "application/vnd.github+json",
+            Authorization: `Bearer ${{token}}`,
+            "X-GitHub-Api-Version": "2022-11-28",
+            ...(payload ? {{ "Content-Type": "application/json" }} : {{}})
+          }},
+          body: payload ? JSON.stringify(payload) : undefined
+        }});
+
+        if (!response.ok) {{
+          const text = await response.text();
+          throw new Error(`GitHub API ${{response.status}}: ${{text || response.statusText}}`);
+        }}
+
+        if (response.status === 204) return null;
+        return response.json();
+      }}
+
+      async function verifyAdminToken(token) {{
+        const user = await githubApiRequest("/user", token);
+        const repo = await githubApiRequest(`/repos/${{GITHUB_REPO}}`, token);
+        if (!repo.permissions || !repo.permissions.admin) {{
+          return null;
+        }}
+        return user.login;
+      }}
+
+      async function loadStoredAdminSession() {{
+        const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+        if (!token) {{
+          setAdminMode(false);
+          return;
+        }}
+        try {{
+          const login = await verifyAdminToken(token);
+          if (!login) {{
+            sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+            setAdminMode(false);
+            return;
+          }}
+          adminToken = token;
+          setAdminMode(true, login);
+        }} catch {{
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          setAdminMode(false);
+        }}
+      }}
+
+      async function queueHistoryDelete(selector) {{
+        await githubApiRequest(
+          `/repos/${{GITHUB_REPO}}/actions/workflows/${{encodeURIComponent(GITHUB_ADMIN_WORKFLOW)}}/dispatches`,
+          adminToken,
+          "POST",
+          {{
+            ref: GITHUB_REF,
+            inputs: {{
+              selector,
+              delete_artifacts: "false"
+            }}
+          }}
+        );
+      }}
 
       function loadHiddenRows() {{
         try {{
@@ -1049,26 +1222,81 @@ def render_docs(
       loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      setAdminMode(false);
       applyHiddenRows();
+      loadStoredAdminSession();
 
-      tableBody.addEventListener("click", (event) => {{
+      tableBody.addEventListener("click", async (event) => {{
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        const button = target.closest('button[data-action="hide-row"]');
+        const button = target.closest('button[data-action]');
         if (!button) return;
+        const action = button.getAttribute("data-action");
         const row = button.closest("tr[data-event-id]");
         if (!row) return;
-        const id = row.getAttribute("data-event-id");
-        if (!id) return;
-        hiddenRows.add(id);
-        saveHiddenRows();
-        applyHiddenRows();
+
+        if (action === "hide-row") {{
+          const id = row.getAttribute("data-event-id");
+          if (!id) return;
+          hiddenRows.add(id);
+          saveHiddenRows();
+          applyHiddenRows();
+          return;
+        }}
+
+        if (action === "admin-delete") {{
+          if (!adminToken) return;
+          const selector = row.getAttribute("data-history-selector");
+          if (!selector) return;
+          const lang = readLang();
+          if (!window.confirm(t(lang, "delete_confirm"))) return;
+
+          button.disabled = true;
+          try {{
+            await queueHistoryDelete(selector);
+            row.style.display = "none";
+            applyHiddenRows();
+            window.alert(t(lang, "admin_delete_queued"));
+          }} catch {{
+            window.alert(t(lang, "admin_delete_failed"));
+          }} finally {{
+            button.disabled = false;
+          }}
+        }}
       }});
 
       resetHiddenButton.addEventListener("click", () => {{
         hiddenRows.clear();
         localStorage.removeItem(HIDDEN_ROWS_KEY);
         applyHiddenRows();
+      }});
+
+      adminLoginButton.addEventListener("click", async () => {{
+        const lang = readLang();
+        const token = window.prompt(t(lang, "admin_prompt")) || "";
+        const trimmed = token.trim();
+        if (!trimmed) return;
+
+        try {{
+          const login = await verifyAdminToken(trimmed);
+          if (!login) {{
+            window.alert(t(lang, "admin_no_rights"));
+            setAdminMode(false);
+            return;
+          }}
+          adminToken = trimmed;
+          sessionStorage.setItem(ADMIN_TOKEN_KEY, trimmed);
+          setAdminMode(true, login);
+        }} catch {{
+          window.alert(t(lang, "admin_bad_token"));
+          setAdminMode(false);
+        }}
+      }});
+
+      adminLogoutButton.addEventListener("click", () => {{
+        adminToken = null;
+        sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+        setAdminMode(false);
       }});
 
       langSelect.addEventListener("change", () => {{
@@ -1115,6 +1343,9 @@ def prune_history(
     delete_artifacts: bool,
     author_name: str,
     author_url: str | None,
+    github_repo: str,
+    github_ref: str,
+    github_admin_workflow: str,
 ) -> int:
     state_dir.mkdir(parents=True, exist_ok=True)
     docs_dir.mkdir(parents=True, exist_ok=True)
@@ -1171,6 +1402,9 @@ def prune_history(
         docs_dir,
         author_name=author_name,
         author_url=resolved_author_url,
+        github_repo=github_repo,
+        github_ref=github_ref,
+        github_admin_workflow=github_admin_workflow,
     )
 
     print(f"Removed {len(removed)} entr{'y' if len(removed) == 1 else 'ies'} from {history_path}.")
@@ -1187,6 +1421,9 @@ def process(
     result_file: Path,
     author_name: str,
     author_url: str | None,
+    github_repo: str,
+    github_ref: str,
+    github_admin_workflow: str,
 ) -> int:
     timestamp = now_utc_iso()
     state_dir.mkdir(parents=True, exist_ok=True)
@@ -1282,6 +1519,9 @@ def process(
             docs_dir,
             author_name=author_name,
             author_url=resolved_author_url,
+            github_repo=github_repo,
+            github_ref=github_ref,
+            github_admin_workflow=github_admin_workflow,
         )
 
     result = Result(
@@ -1310,6 +1550,9 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--result-file", default=f"data/{DEFAULT_RESULT_FILE}")
     parser.add_argument("--author-name", default=DEFAULT_AUTHOR_NAME)
     parser.add_argument("--author-url", default=DEFAULT_AUTHOR_URL)
+    parser.add_argument("--github-repo", default=DEFAULT_GITHUB_REPO)
+    parser.add_argument("--github-ref", default=DEFAULT_GITHUB_REF)
+    parser.add_argument("--github-admin-workflow", default=DEFAULT_GITHUB_ADMIN_WORKFLOW)
     parser.add_argument(
         "--history-delete",
         action="append",
@@ -1344,6 +1587,9 @@ def main(argv: list[str]) -> int:
             delete_artifacts=args.history_delete_artifacts,
             author_name=args.author_name,
             author_url=args.author_url,
+            github_repo=args.github_repo,
+            github_ref=args.github_ref,
+            github_admin_workflow=args.github_admin_workflow,
         )
 
     return process(
@@ -1354,6 +1600,9 @@ def main(argv: list[str]) -> int:
         result_file=Path(args.result_file),
         author_name=args.author_name,
         author_url=args.author_url,
+        github_repo=args.github_repo,
+        github_ref=args.github_ref,
+        github_admin_workflow=args.github_admin_workflow,
     )
 
 

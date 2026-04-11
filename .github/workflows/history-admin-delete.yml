@@ -1,0 +1,60 @@
+name: Admin Delete History Entry
+
+on:
+  workflow_dispatch:
+    inputs:
+      selector:
+        description: "History selector (timestamp or diff filename)"
+        required: true
+        type: string
+      delete_artifacts:
+        description: "Also delete related docs/changes artifacts"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: doxmox-history-admin-delete
+  cancel-in-progress: false
+
+jobs:
+  delete-history-entry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Delete history entry
+        run: |
+          ARGS=("--history-delete" "${{ inputs.selector }}")
+          if [ "${{ inputs.delete_artifacts }}" = "true" ]; then
+            ARGS+=("--history-delete-artifacts")
+          fi
+          python src/monitor.py "${ARGS[@]}"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/history.json docs
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: delete history entry (${{ inputs.selector }})"
+          git push
