@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260411T144832Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260411T144832Z.diff</h1>
+      <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-11T14:48:43Z</p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260411T144832Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="open_raw_diff">Open raw .diff</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -785,7 +785,6 @@</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line del">-       &lt;/div&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line ctx">       Additionally, the</span>
+<span class="line ctx">       &lt;a href=&quot;#storage_pbs&quot;&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Designed and implemented by</span>
+      <a href="https://vande.fr/" target="_blank" rel="noopener noreferrer">Alexandre VANDEMOORTELE</a>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated (UTC):",
+          back_to_menu: "Back to main menu",
+          open_raw_diff: "Open raw .diff",
+          footer_by: "Designed and implemented by",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré (UTC) :",
+          back_to_menu: "Retour au menu principal",
+          open_raw_diff: "Ouvrir le .diff brut",
+          footer_by: "Conçu et réalisé par",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано (UTC):",
+          back_to_menu: "Назад в главное меню",
+          open_raw_diff: "Открыть raw .diff",
+          footer_by: "Разработано и реализовано",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+        if (adminToken) {
+          setAdminMode(true, adminStatus.dataset.login || "admin");
+        }
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

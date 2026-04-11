@@ -1,0 +1,10 @@
+--- previous
++++ current
+@@ -785,7 +785,6 @@
+      </p>
+     </div>
+     <div class="paragraph">
+-       </div>
+      <p>
+       Additionally, the
+       <a href="#storage_pbs">
