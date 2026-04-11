@@ -100,9 +100,10 @@ After deletion, `docs/index.html` is regenerated automatically.
 
 `docs/index.html` now supports admin deletion from the UI:
 
-1. click `Admin login`;
-2. paste GitHub token;
-3. either click `Delete` on one row, or tick multiple `Select` checkboxes and click `Delete selected`.
+1. press `Esc` three times to reveal admin controls;
+2. click `Admin login`;
+3. paste GitHub token;
+4. either click `Delete` on one row, or tick multiple `Select` checkboxes and click `Delete selected`.
 
 The page checks GitHub permissions and enables deletion only for users with `admin` access to the repository.
 

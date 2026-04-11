@@ -739,6 +739,12 @@ def render_docs(
       color: var(--muted);
       font-size: 12px;
     }}
+    .admin-panel {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }}
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
@@ -889,10 +895,12 @@ def render_docs(
             <option value="dark">Dark</option>
           </select>
         </label>
-        <button type="button" id="admin-login" class="control-btn" data-i18n="admin_login">Admin login</button>
-        <button type="button" id="admin-logout" class="control-btn" data-i18n="admin_logout" hidden>Admin logout</button>
-        <button type="button" id="delete-selected" class="control-btn" data-i18n="delete_selected" hidden disabled>Delete selected</button>
-        <span id="admin-status" class="admin-status" data-i18n="admin_status_off">Admin: off</span>
+        <span id="admin-panel" class="admin-panel" hidden>
+          <button type="button" id="admin-login" class="control-btn" data-i18n="admin_login">Admin login</button>
+          <button type="button" id="admin-logout" class="control-btn" data-i18n="admin_logout" hidden>Admin logout</button>
+          <button type="button" id="delete-selected" class="control-btn" data-i18n="delete_selected" hidden disabled>Delete selected</button>
+          <span id="admin-status" class="admin-status" data-i18n="admin_status_off">Admin: off</span>
+        </span>
         <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
@@ -1064,6 +1072,7 @@ def render_docs(
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
       const resetHiddenButton = document.getElementById("reset-hidden");
+      const adminPanel = document.getElementById("admin-panel");
       const adminLoginButton = document.getElementById("admin-login");
       const adminLogoutButton = document.getElementById("admin-logout");
       const deleteSelectedButton = document.getElementById("delete-selected");
@@ -1071,6 +1080,14 @@ def render_docs(
       const tableBody = document.querySelector("tbody");
       const hiddenRows = new Set();
       let adminToken = null;
+      let adminPanelUnlocked = false;
+      let escHitCounter = 0;
+      let escTimer = null;
+
+      function unlockAdminPanel() {{
+        adminPanelUnlocked = true;
+        adminPanel.hidden = false;
+      }}
 
       function selectedSelectors() {{
         const selected = new Set();
@@ -1092,6 +1109,8 @@ def render_docs(
       }}
 
       function setAdminMode(enabled, login = "") {{
+        if (enabled) unlockAdminPanel();
+        adminPanel.hidden = !adminPanelUnlocked;
         adminLoginButton.hidden = enabled;
         adminLogoutButton.hidden = !enabled;
         deleteSelectedButton.hidden = !enabled;
@@ -1283,6 +1302,25 @@ def render_docs(
       setAdminMode(false);
       applyHiddenRows();
       loadStoredAdminSession();
+
+      document.addEventListener("keydown", (event) => {{
+        if (event.key !== "Escape") return;
+        escHitCounter += 1;
+        if (escTimer) clearTimeout(escTimer);
+        escTimer = setTimeout(() => {{
+          escHitCounter = 0;
+          escTimer = null;
+        }}, 1300);
+        if (escHitCounter >= 3) {{
+          unlockAdminPanel();
+          escHitCounter = 0;
+          if (escTimer) {{
+            clearTimeout(escTimer);
+            escTimer = null;
+          }}
+          setAdminMode(!!adminToken, adminStatus.dataset.login || "");
+        }}
+      }});
 
       tableBody.addEventListener("click", async (event) => {{
         const target = event.target;
