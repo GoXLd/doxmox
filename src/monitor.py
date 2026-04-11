@@ -196,9 +196,9 @@ def format_event_row(event: dict[str, Any]) -> str:
     row_id = event_row_id(event)
     selector = html.escape(str(timestamp))
     details_cell = (
-        f'{link} | '
-        '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> | '
-        '<button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button> | '
+        f"{link} "
+        '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> '
+        '<button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button> '
         '<label class="row-select-wrap" hidden>'
         '<input type="checkbox" class="row-select" data-role="row-select"> '
         '<span data-i18n="select_entry">Select</span>'
