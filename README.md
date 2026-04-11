@@ -72,3 +72,26 @@ python src/monitor.py
 ```
 
 Trigger workflow manually from Actions tab using `workflow_dispatch`.
+
+## Manage history entries
+
+You can remove records from `data/history.json` with built-in CLI options:
+
+```bash
+# delete one entry by timestamp
+python src/monitor.py --history-delete "2026-04-10T08:28:42Z"
+
+# delete by diff filename (basename is supported)
+python src/monitor.py --history-delete "20260410T082842Z.diff"
+
+# delete several entries in one command
+python src/monitor.py --history-delete "20260410T082842Z.diff" --history-delete "2026-04-08T22:17:17Z"
+
+# delete all history entries
+python src/monitor.py --history-delete-all
+
+# optional: also remove linked docs/changes artifacts for removed entries
+python src/monitor.py --history-delete "20260410T082842Z.diff" --history-delete-artifacts
+```
+
+After deletion, `docs/index.html` is regenerated automatically.

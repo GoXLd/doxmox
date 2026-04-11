@@ -1088,6 +1088,97 @@ def render_docs(
     save_text(docs_dir / "index.html", page)
 
 
+def history_entry_matches(event: dict[str, Any], selector: str) -> bool:
+    value = selector.strip()
+    if not value:
+        return False
+
+    timestamp = str(event.get("timestamp") or "")
+    diff_file = str(event.get("diff_file") or "")
+    diff_name = Path(diff_file).name if diff_file else ""
+    diff_stem = Path(diff_file).stem if diff_file else ""
+
+    if value.startswith("ts:"):
+        return timestamp == value[3:]
+    if value.startswith("diff:"):
+        needle = value[5:]
+        return needle in {diff_file, diff_name, diff_stem}
+
+    return value in {timestamp, diff_file, diff_name, diff_stem}
+
+
+def prune_history(
+    state_dir: Path,
+    docs_dir: Path,
+    selectors: list[str],
+    delete_all: bool,
+    delete_artifacts: bool,
+    author_name: str,
+    author_url: str | None,
+) -> int:
+    state_dir.mkdir(parents=True, exist_ok=True)
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    history_path = state_dir / HISTORY_FILE
+    state_path = state_dir / STATE_FILE
+    history: list[dict[str, Any]] = load_json(history_path, [])
+
+    if not history:
+        print("History is empty; nothing to delete.")
+        return 0
+
+    selector_values = [value.strip() for value in selectors if value.strip()]
+    if not delete_all and not selector_values:
+        print("No selectors provided. Use --history-delete or --history-delete-all.")
+        return 1
+
+    if delete_all:
+        removed = history
+        kept: list[dict[str, Any]] = []
+    else:
+        removed = []
+        kept = []
+        for event in history:
+            if any(history_entry_matches(event, selector) for selector in selector_values):
+                removed.append(event)
+            else:
+                kept.append(event)
+
+        if not removed:
+            print("No matching history entries found.")
+            return 1
+
+    save_json(history_path, kept)
+
+    if delete_artifacts:
+        for event in removed:
+            diff_file = event.get("diff_file")
+            if not diff_file:
+                continue
+            diff_path = Path(str(diff_file))
+            html_path = diff_path.with_suffix(".html")
+            if diff_path.exists():
+                diff_path.unlink()
+            if html_path.exists():
+                html_path.unlink()
+
+    state_payload = load_json(state_path, {})
+    url = state_payload.get("url") or DEFAULT_URL
+    resolved_author_url = resolve_author_url(docs_dir, author_url)
+    render_docs(
+        kept,
+        url,
+        docs_dir,
+        author_name=author_name,
+        author_url=resolved_author_url,
+    )
+
+    print(f"Removed {len(removed)} entr{'y' if len(removed) == 1 else 'ies'} from {history_path}.")
+    if delete_artifacts:
+        print("Deleted linked diff/html artifacts for removed entries (if present).")
+    return 0
+
+
 def process(
     url: str,
     state_dir: Path,
@@ -1219,11 +1310,42 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--result-file", default=f"data/{DEFAULT_RESULT_FILE}")
     parser.add_argument("--author-name", default=DEFAULT_AUTHOR_NAME)
     parser.add_argument("--author-url", default=DEFAULT_AUTHOR_URL)
+    parser.add_argument(
+        "--history-delete",
+        action="append",
+        default=[],
+        metavar="SELECTOR",
+        help=(
+            "Delete history entry by selector. Supports exact timestamp, diff path/name, "
+            "or prefixes ts:<timestamp> and diff:<file>. Repeatable."
+        ),
+    )
+    parser.add_argument(
+        "--history-delete-all",
+        action="store_true",
+        help="Delete all entries from data/history.json.",
+    )
+    parser.add_argument(
+        "--history-delete-artifacts",
+        action="store_true",
+        help="Also delete linked docs/changes/*.diff and *.html files for removed entries.",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str]) -> int:
     args = parse_args(argv)
+    if args.history_delete_all or args.history_delete:
+        return prune_history(
+            state_dir=Path(args.state_dir),
+            docs_dir=Path(args.docs_dir),
+            selectors=args.history_delete,
+            delete_all=args.history_delete_all,
+            delete_artifacts=args.history_delete_artifacts,
+            author_name=args.author_name,
+            author_url=args.author_url,
+        )
+
     return process(
         url=args.url,
         state_dir=Path(args.state_dir),
