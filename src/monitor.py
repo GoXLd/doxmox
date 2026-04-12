@@ -25,8 +25,8 @@ SNAPSHOT_FILE = "latest.html"
 STATE_FILE = "state.json"
 HISTORY_FILE = "history.json"
 DEFAULT_RESULT_FILE = "last_result.json"
-DEFAULT_AUTHOR_NAME = "Alexandre VANDEMOORTELE"
-DEFAULT_AUTHOR_URL = "https://vande.fr/"
+DEFAULT_AUTHOR_NAME = "GoXLd"
+DEFAULT_AUTHOR_URL = "https://vande.fr/posts/doxmox/"
 DEFAULT_GITHUB_REPO = "GoXLd/doxmox"
 DEFAULT_GITHUB_REF = "main"
 DEFAULT_GITHUB_ADMIN_WORKFLOW = "history-admin-delete.yml"
@@ -465,7 +465,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     </div>
     <pre class="diff">{body}</pre>
     <footer class="footer">
-      <span data-i18n="footer_by">Designed and implemented by</span>
+      <span data-i18n="footer_by">Author</span>
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
     </footer>
   </div>
@@ -483,7 +483,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           generated: "Generated (UTC):",
           back_to_menu: "Back to main menu",
           open_raw_diff: "Open raw .diff",
-          footer_by: "Designed and implemented by",
+          footer_by: "Author",
           empty_diff: "(empty diff)",
           language_en: "English",
           language_fr: "French",
@@ -497,7 +497,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           generated: "Généré (UTC) :",
           back_to_menu: "Retour au menu principal",
           open_raw_diff: "Ouvrir le .diff brut",
-          footer_by: "Conçu et réalisé par",
+          footer_by: "Auteur",
           empty_diff: "(diff vide)",
           language_en: "Anglais",
           language_fr: "Français",
@@ -511,7 +511,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           generated: "Сгенерировано (UTC):",
           back_to_menu: "Назад в главное меню",
           open_raw_diff: "Открыть raw .diff",
-          footer_by: "Разработано и реализовано",
+          footer_by: "Автор",
           empty_diff: "(пустой diff)",
           language_en: "Английский",
           language_fr: "Французский",
@@ -956,7 +956,7 @@ def render_docs(
       </table>
     </div>
     <footer class="footer">
-      <span data-i18n="footer_by">Designed and implemented by</span>
+      <span data-i18n="footer_by">Author</span>
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
     </footer>
   </div>
@@ -1003,7 +1003,7 @@ def render_docs(
           admin_prompt: "Enter admin access key:",
           delete_confirm: "Delete this entry from history.json?",
           delete_selected_confirm: "Delete selected entries from history.json?",
-          footer_by: "Designed and implemented by",
+          footer_by: "Author",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
@@ -1041,7 +1041,7 @@ def render_docs(
           admin_prompt: "Entrez la cle d'acces administrateur :",
           delete_confirm: "Supprimer cette entree de history.json ?",
           delete_selected_confirm: "Supprimer les entrees selectionnees de history.json ?",
-          footer_by: "Conçu et réalisé par",
+          footer_by: "Auteur",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
@@ -1079,7 +1079,7 @@ def render_docs(
           admin_prompt: "Введите ключ доступа администратора:",
           delete_confirm: "Удалить эту запись из history.json?",
           delete_selected_confirm: "Удалить выбранные записи из history.json?",
-          footer_by: "Разработано и реализовано",
+          footer_by: "Автор",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
