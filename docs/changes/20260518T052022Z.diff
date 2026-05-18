@@ -1,0 +1,3296 @@
+--- previous
++++ current
+@@ -346,10 +346,10 @@
+  </span>
+  <br/>
+  <span id="revnumber">
+-  version 9.1.3,
++  version 9.1.4,
+  </span>
+  <span id="revdate">
+-  Thu Apr 30 15:44:52 CEST 2026
++  Fri May 15 07:28:20 CEST 2026
+  </span>
+  <div id="toc">
+   <a href="index.html" style="font-size: 0.8em;">
+@@ -14638,6 +14638,24 @@
+        .
+       </p>
+      </div>
++     <div class="paragraph">
++      <p>
++       To distribute the cluster CA to administrator workstations and avoid
++browser warnings, copy
++       <span class="monospaced">
++        /etc/pve/pve-root-ca.pem
++       </span>
++       from any cluster node
++out of band (for example via
++       <span class="monospaced">
++        scp
++       </span>
++       or by reading it through an existing
++SSH session) and import it into the operating system or browser trust
++store. There is no API or web interface endpoint for downloading the
++file.
++      </p>
++     </div>
+     </div>
+     <div class="sect3">
+      <h4 id="sysadmin_certs_api_gui">
+@@ -20665,6 +20683,45 @@
+      </div>
+      <div class="paragraph">
+       <p>
++       By default,
++       <span class="monospaced">
++        pvecm add
++       </span>
++       authenticates against the existing cluster
++node’s API, prompting for that node’s
++       <span class="monospaced">
++        root@pam
++       </span>
++       password and verifying
++its SHA-256 certificate fingerprint. SSH password authentication is not
++required for this default flow, so administrators may keep
++       <span class="monospaced">
++        PasswordAuthentication no
++       </span>
++       set in
++       <span class="monospaced">
++        sshd_config
++       </span>
++       .
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Pass
++       <span class="monospaced">
++        --use_ssh
++       </span>
++       to fall back to the legacy SSH-based join, which uses
++       <span class="monospaced">
++        ssh-copy-id
++       </span>
++       to merge the existing cluster’s root key onto the new
++node. That flow does require root SSH login (with password or key) on
++the existing node.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
+        To check the state of the cluster use:
+       </p>
+      </div>
+@@ -20794,11 +20851,11 @@
+     </div>
+    </div>
+    <div class="sect2">
+-    <h3 id="_remove_a_cluster_node">
++    <h3 id="pvecm_remove_node">
+      <span>
+       5.5. Remove a Cluster Node
+      </span>
+-     <a class="headerlink" href="#_remove_a_cluster_node" title="Permalink to this heading">
++     <a class="headerlink" href="#pvecm_remove_node" title="Permalink to this heading">
+      </a>
+     </h3>
+     <div class="admonitionblock">
+@@ -30209,8 +30266,61 @@
+      </div>
+     </div>
+     <div class="sect3">
++     <h4 id="_encryption">
++      7.9.4. Encryption
++      <a class="headerlink" href="#_encryption" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       ZFS supports encryption of dataset hierarchies. Each encrypted dataset, is
++either an
++       <span class="monospaced">
++        encryption_root
++       </span>
++       , storing the properties for encryption itself or
++descendant of its
++       <span class="monospaced">
++        encryption_root
++       </span>
++       - see the
++       <span class="monospaced">
++        zfs-load-key(8)
++       </span>
++       manpage for
++details.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Sending and receiving encrypted datasets is subject to constraints as some
++encryption parameters (initialization vectors for the symmetric ciphers) need
++to be either transferred with the data, breaking inheriting the encryption
++properties on the receiving side, or need to be recreated on target, requiring
++the data to be sent unencrypted - see the
++       <span class="monospaced">
++        zfs-recv(8)
++       </span>
++       manpage for details.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       For migration and storage replication of encrypted datasets in Proxmox VE, the
++data is sent without the encryption properties, and the state of encryption
++is determined by the target.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       If you want to send and receive encrypted ZFS datasets, you need to ensure that
++all involved storages on all nodes are encrypted.
++      </p>
++     </div>
++    </div>
++    <div class="sect3">
+      <h4 id="_examples_5">
+-      7.9.4. Examples
++      7.9.5. Examples
+       <a class="headerlink" href="#_examples_5" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -30645,11 +30755,12 @@
+          lvm
+         </span>
+        </caption>
+-       <col style="width:20%;"/>
+-       <col style="width:20%;"/>
+-       <col style="width:20%;"/>
+-       <col style="width:20%;"/>
+-       <col style="width:20%;"/>
++       <col style="width:16%;"/>
++       <col style="width:16%;"/>
++       <col style="width:16%;"/>
++       <col style="width:16%;"/>
++       <col style="width:16%;"/>
++       <col style="width:16%;"/>
+        <thead>
+         <tr>
+          <th class="tableblock halign-left valign-top">
+@@ -30667,23 +30778,24 @@
+          <th class="tableblock halign-left valign-top">
+           Full Clones
+          </th>
++         <th class="tableblock halign-left valign-top">
++          Linked Clones
++         </th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr>
+          <td class="tableblock halign-left valign-top">
+           <p class="tableblock monospaced">
+-           Linked Clones
++           images rootdir
+           </p>
+          </td>
+          <td class="tableblock halign-left valign-top">
+           <p class="tableblock monospaced">
+-           images rootdir
+-          </p>
+-         </td>
+-         <td class="tableblock halign-left valign-top">
+-          <p class="tableblock">
+            raw, qcow2
++           <sup>
++            1
++           </sup>
+           </p>
+          </td>
+          <td class="tableblock halign-left valign-top">
+@@ -30697,6 +30809,16 @@
+            <sup>
+             1
+            </sup>
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           yes
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           no
+           </p>
+          </td>
+         </tr>
+@@ -54427,7 +54549,7 @@
+            </td>
+            <td class="hdlist2">
+             <p style="margin-top: 0;">
+-             Linux 2.6 - 6.X Kernel
++             Linux 2.6 - 7.X Kernel
+             </p>
+            </td>
+           </tr>
+@@ -56221,7 +56343,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         (/dev/.+|socket)
++         (/dev/[^,]+|socket)
+         </span>
+        </dt>
+        <dd>
+@@ -59414,7 +59536,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++         [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -59428,7 +59550,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++         [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -59463,6 +59585,62 @@
+           <dd>
+            <p>
+             Whether to include the mount point in backups (only used for volume mount points).
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            idmap
++           </span>
++           =
++           <span class="monospaced">
++            &lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;
++           </span>
++          </dt>
++          <dd>
++           <p>
++            Customize UID/GID mappings that override the container’s
++            <span class="monospaced">
++             lxc.idmap
++            </span>
++            for this mount point. Accepts a semicolon-separated list of
++            <span class="monospaced">
++             type:container:disk:range-size
++            </span>
++            entries.
++            <span class="monospaced">
++             type
++            </span>
++            is
++            <span class="monospaced">
++             u
++            </span>
++            for UID or
++            <span class="monospaced">
++             g
++            </span>
++            for GID.
++            <span class="monospaced">
++             container
++            </span>
++            is the first ID as seen inside the container.
++            <span class="monospaced">
++             disk
++            </span>
++            is the first corresponding ID on the underlying filesystem.
++            <span class="monospaced">
++             range-size
++            </span>
++            is the number of consecutive IDs to map.
++Unmapped IDs fall back to the container’s
++            <span class="monospaced">
++             lxc.idmap
++            </span>
++            .
++Example:
++            <span class="monospaced">
++             u:123:456:1
++            </span>
++            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -63510,7 +63688,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++         [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -63545,6 +63723,62 @@
+           <dd>
+            <p>
+             Whether to include the mount point in backups (only used for volume mount points).
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            idmap
++           </span>
++           =
++           <span class="monospaced">
++            &lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;
++           </span>
++          </dt>
++          <dd>
++           <p>
++            Customize UID/GID mappings that override the container’s
++            <span class="monospaced">
++             lxc.idmap
++            </span>
++            for this mount point. Accepts a semicolon-separated list of
++            <span class="monospaced">
++             type:container:disk:range-size
++            </span>
++            entries.
++            <span class="monospaced">
++             type
++            </span>
++            is
++            <span class="monospaced">
++             u
++            </span>
++            for UID or
++            <span class="monospaced">
++             g
++            </span>
++            for GID.
++            <span class="monospaced">
++             container
++            </span>
++            is the first ID as seen inside the container.
++            <span class="monospaced">
++             disk
++            </span>
++            is the first corresponding ID on the underlying filesystem.
++            <span class="monospaced">
++             range-size
++            </span>
++            is the number of consecutive IDs to map.
++Unmapped IDs fall back to the container’s
++            <span class="monospaced">
++             lxc.idmap
++            </span>
++            .
++Example:
++            <span class="monospaced">
++             u:123:456:1
++            </span>
++            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -64135,7 +64369,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++         [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -64156,6 +64390,62 @@
+           <dd>
+            <p>
+             Explicitly enable or disable ACL support.
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            idmap
++           </span>
++           =
++           <span class="monospaced">
++            &lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;
++           </span>
++          </dt>
++          <dd>
++           <p>
++            Customize UID/GID mappings that override the container’s
++            <span class="monospaced">
++             lxc.idmap
++            </span>
++            for this mount point. Accepts a semicolon-separated list of
++            <span class="monospaced">
++             type:container:disk:range-size
++            </span>
++            entries.
++            <span class="monospaced">
++             type
++            </span>
++            is
++            <span class="monospaced">
++             u
++            </span>
++            for UID or
++            <span class="monospaced">
++             g
++            </span>
++            for GID.
++            <span class="monospaced">
++             container
++            </span>
++            is the first ID as seen inside the container.
++            <span class="monospaced">
++             disk
++            </span>
++            is the first corresponding ID on the underlying filesystem.
++            <span class="monospaced">
++             range-size
++            </span>
++            is the number of consecutive IDs to map.
++Unmapped IDs fall back to the container’s
++            <span class="monospaced">
++             lxc.idmap
++            </span>
++            .
++Example:
++            <span class="monospaced">
++             u:123:456:1
++            </span>
++            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -65607,12 +65897,26 @@
+         </p>
+        </dd>
+        <dt class="hdlist1">
+-        Controller
++        Primay Controller
+        </dt>
+        <dd>
+         <p>
+-         The EVPN-controller to use for this zone. (See controller plugins
+-  section).
++         The primary EVPN-controller to use for this zone.
++  The primary controller is used for auto-deriving the VTEP IPs, based on the
++  peer definition. For more information see the
++         <a href="#pvesdn_controller_plugin_evpn">
++          controller section
++         </a>
++         .
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Addtional Controllers
++       </dt>
++       <dd>
++        <p>
++         Additional EVPN controllers to use for this zone.
++  Controllers listed here will announce the L2VPN EVPN routes for this zone.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+@@ -66077,7 +66381,8 @@
+         <p>
+          A unique BGP ASN number. It’s highly recommended to use a private ASN
+   number (64512 – 65534, 4200000000 – 4294967294), as otherwise you could end up
+-  breaking global routing by mistake.
++  breaking global routing by mistake. Every EVPN controller configured on a node
++  must have the same ASN configured.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+@@ -66102,7 +66407,148 @@
+   external nodes or route reflector servers)
+         </p>
+        </dd>
++       <dt class="hdlist1">
++        Nodes
++       </dt>
++       <dd>
++        <p>
++         A list of nodes where this controller should be active. This can be used
++  to configure EVPN peering sessions on specific nodes only.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Peer Group Name
++       </dt>
++       <dd>
++        <p>
++         EVPN controllers use the peer group name
++         <em>
++          VTEP
++         </em>
++         by default.
++  When defining multiple EVPN controllers, each additional controller needs to
++  specify a custom peer group name to be used in the FRR configuration.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        BGP Mode
++       </dt>
++       <dd>
++        <p>
++         Allows configuring the type of BGP session manually.  The
++         <em>
++          auto
++         </em>
++         mode preserves the old behavior of the SDN stack: EVPN controllers were iBGP,
++  unless there was a BGP controller configured. In that case the EVPN controller
++  re-used the BGP session from the BGP controller. With this option, the type of
++  BGP session can be overridden manually - allowing for explicitly configuring
++  the type of BGP session that should be established with the EVPN controller.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        ebgp-multihop
++       </dt>
++       <dd>
++        <p>
++         Increase the number of hops to reach peers, in case they are
++  not directly connected or they use loopback. (only for BGP Mode
++         <em>
++          external
++         </em>
++         ).
++        </p>
++       </dd>
+       </dl>
++     </div>
++     <div class="sect4">
++      <h5 id="_asn">
++       ASN
++       <a class="headerlink" href="#_asn" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        Every router can be member of exactly one Autonomous System, so any iBGP
++sessions on a given node (irregardless of address family) need to have the same
++ASN configured. Any configuration that has two iBGP sessions with different ASNs
++is rejected and an error thrown, since it is by definition not possible to have
++two iBGP sessions with different ASNs on the same BGP instance, as one instance
++can only have one local ASN.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        The local ASN of the FRR instance is auto-derived based on the
++settings in the SDN controllers:
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        If only a BGP or EVPN controller exists (but not both), then the respective ASN
++from the controller is used.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        For backwards-compatibility reasons, the SDN stack checks if there are any EVPN
++controllers in auto mode. If a BGP controller exists, then the ASN from the
++BGP controller will be used in any case.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        Otherwise, if an EVPN controller is configured, then the ASN from the EVPN
++controller is used - otherwise the ASN from the BGP controller.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        The SDN stack utilizes the local-as directive together with the
++        <span class="monospaced">
++         no-prepend
++replace-as
++        </span>
++        option in the FRR configuration for handling multiple ASN numbers in
++the configuration. This is the case when the BGP and EVPN controller have
++different ASNs configured and auto mode is disabled.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_vtep_ip_auto_generation">
++       VTEP IP auto-generation
++       <a class="headerlink" href="#_vtep_ip_auto_generation" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        The VTEP IPs for the VXLAN devices of a zone will be auto-derived based on the
++(primary) controller defined in the EVPN zone:
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        If a BGP or IS-IS controller with a loopback interface is used, then the IP from
++the loopback interface will be used as VTEP IP.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        If the peer list of the controller contains an IP that is locally configured on
++the node, then this IP will be used as VTEP IP.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        Otherwise, the EVPN controller will check the route in the default routing table
++for the first peer IP and use the source IP address specified in the routing
++table as VTEP IP. This can cause issues if the route gets announced dynamically
++e.g. via a fabric. In that case it is necessary for the kernel routing table to
++contain the required entry when applying the configuration for the EVPN
++controller.
++       </p>
++      </div>
+      </div>
+     </div>
+     <div class="sect3">
+@@ -66232,7 +66678,7 @@
+         </p>
+        </dd>
+        <dt class="hdlist1">
+-        ebgp-mutltihop
++        ebgp-multihop
+        </dt>
+        <dd>
+         <p>
+@@ -67182,11 +67628,1195 @@
+       </div>
+      </div>
+     </div>
++    <div class="sect3">
++     <h4 id="pvesdn_wireguard">
++      12.10.6. WireGuard
++      <a class="headerlink" href="#pvesdn_wireguard" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       WireGuard can be used for establishing a VPN between Proxmox VE nodes and / or
++external nodes. It does not provide dynamic routing by itself, but can be used
++in conjunction with dynamic routing protocols operating on layer 3 and above
++(OSPF, BGP) to provide a dynamically routed, encrypted transport, for example
++to carry EVPN or VXLAN traffic.
++      </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         In order to use WireGuard, the package
++         <span class="monospaced">
++          wireguard-tools
++         </span>
++         needs to be
++installed.
++        </td>
++       </tr>
++      </table>
++     </div>
++     <div class="paragraph">
++      <p>
++       Configuration options:
++      </p>
++     </div>
++     <div class="sect4">
++      <h5 id="pvesdn_wireguard_fabric">
++       On the Fabric
++       <a class="headerlink" href="#pvesdn_wireguard_fabric" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="dlist">
++       <dl>
++        <dt class="hdlist1">
++         Name
++        </dt>
++        <dd>
++         <p>
++          This is the name of the WireGuard fabric and can be at most 8 characters
++long.
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Persistent Keepalive
++        </dt>
++        <dd>
++         <p>
++          If this is set, then WireGuard will send an empty
++authenticated packet every N seconds to each configured peer. This can help
++keeping connections alive when using stateful firewalls or NAT.
++         </p>
++        </dd>
++       </dl>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="pvesdn_wireguard_node">
++       On the Node
++       <a class="headerlink" href="#pvesdn_wireguard_node" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        There are two types of nodes: internal and external. Internal nodes are Proxmox
++VE nodes, external nodes everything else. They are essentially reusable peer
++definitions that can be used across the whole cluster.
++       </p>
++      </div>
++      <div class="dlist">
++       <div class="title">
++        Internal
++       </div>
++       <dl>
++        <dt class="hdlist1">
++         Endpoint
++        </dt>
++        <dd>
++         <p>
++          This is the IP or hostname that other Proxmox VE nodes should use for
++connecting to this Proxmox VE node. This is used as the endpoint when
++configuring this Proxmox VE node as a peer.
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Allowed IPs
++        </dt>
++        <dd>
++         <p>
++          A comma-separated list of CIDRs (for example
++          <span class="monospaced">
++           198.51.100.0/24
++          </span>
++          ,
++or
++          <span class="monospaced">
++           0.0.0.0/0
++          </span>
++          to tunnel all IPv4 traffic). When selecting this node as a peer
++on other nodes, the list is used as the
++          <span class="monospaced">
++           AllowedIPs
++          </span>
++          setting in the WireGuard
++peer configuration, that is, both the source filter for incoming traffic and
++the routing destination for outgoing traffic to this node.
++         </p>
++        </dd>
++       </dl>
++      </div>
++      <div class="dlist">
++       <div class="title">
++        External
++       </div>
++       <dl>
++        <dt class="hdlist1">
++         Name
++        </dt>
++        <dd>
++         <p>
++          The name of the external node.
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Public Key
++        </dt>
++        <dd>
++         <p>
++          The public key used by the external node.
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Endpoint
++        </dt>
++        <dd>
++         <p>
++          The endpoint other nodes use to connect to this external peer, such
++as
++          <span class="monospaced">
++           192.0.2.1:51820
++          </span>
++          .
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Allowed IPs
++        </dt>
++        <dd>
++         <p>
++          A comma-separated list of CIDRs (for example
++          <span class="monospaced">
++           198.51.100.0/24
++          </span>
++          ,
++or
++          <span class="monospaced">
++           0.0.0.0/0
++          </span>
++          to tunnel all IPv4 traffic). When selecting this node as a peer
++on other nodes, the list is used as the
++          <span class="monospaced">
++           AllowedIPs
++          </span>
++          setting in the WireGuard
++peer configuration, that is, both the source filter for incoming traffic and
++the routing destination for outgoing traffic to this node.
++         </p>
++        </dd>
++       </dl>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="pvesdn_wireguard_interface">
++       On The Interface
++       <a class="headerlink" href="#pvesdn_wireguard_interface" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="dlist">
++       <dl>
++        <dt class="hdlist1">
++         Name
++        </dt>
++        <dd>
++         <p>
++          The name of the network interface on the Linux host. One to eight
++characters that must start with an alphanumeric character; the remaining
++characters may be alphanumeric or hyphens.
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         IP
++        </dt>
++        <dd>
++         <p>
++          The IPv4 address in CIDR notation that should be configured on this
++interface (for example
++          <span class="monospaced">
++           198.51.100.1/24
++          </span>
++          ).
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         IPv6
++        </dt>
++        <dd>
++         <p>
++          The IPv6 address in CIDR notation that should be configured on this
++interface (for example
++          <span class="monospaced">
++           2001:db8::1/64
++          </span>
++          ).
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Listen Port
++        </dt>
++        <dd>
++         <p>
++          The listening port for this interface.
++         </p>
++        </dd>
++        <dt class="hdlist1">
++         Peers
++        </dt>
++        <dd>
++         <p>
++          A list of peers that should be configured for that interface. All nodes
++that are part of the fabric can be selected as peers - the peer definition will
++be auto-generated from the configuration in the node.
++         </p>
++        </dd>
++       </dl>
++      </div>
++      <div class="paragraph">
++       <p>
++        When defining an interface, Proxmox VE automatically generates a private key
++for it in
++        <span class="monospaced">
++         /etc/pve/priv/wg-keys.cfg
++        </span>
++        upon saving the interface, and stores the
++matching public key alongside the interface in the fabric configuration so it
++can be shown in the Web UI when editing the node. Removing an interface from a
++node removes the corresponding private key from
++        <span class="monospaced">
++         wg-keys.cfg
++        </span>
++        as part of the
++same API call.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        The fabric automatically generates routes through the WireGuard interface for
++every peer’s allowed IPs. For example, if interface wg0 has two peers with
++        <span class="monospaced">
++         198.51.100.0/24
++        </span>
++        and
++        <span class="monospaced">
++         203.0.113.0/24
++        </span>
++        as allowed IPs, then routes for both
++subnets are created. If the peer references the interface of a Proxmox VE node,
++that interface’s configured IP address is additionally added as a host route to
++the allowed IPs (for example, a peer node configured with
++        <span class="monospaced">
++         192.0.2.10/24
++        </span>
++        gets
++        <span class="monospaced">
++         192.0.2.10/32
++        </span>
++        added).
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="pvesdn_wireguard_peer">
++       On The Peer
++       <a class="headerlink" href="#pvesdn_wireguard_peer" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="dlist">
++       <dl>
++        <dt class="hdlist1">
++         Skip Route Generation
++        </dt>
++        <dd>
++         <p>
++          The fabric will autogenerate routes in the kernel
++routing table for all allowed IPs of a peer. By setting this option, no routes
++will be inserted into the kernel routing table.
++         </p>
++        </dd>
++       </dl>
++      </div>
++     </div>
++    </div>
++   </div>
++   <div class="sect2">
++    <h3 id="pvesdn_config_route_filtering">
++     <span>
++      12.11. Prefix Lists and Route Maps
++     </span>
++     <a class="headerlink" href="#pvesdn_config_route_filtering" title="Permalink to this heading">
++     </a>
++    </h3>
++    <div class="paragraph">
++     <p>
++      Prefix lists and route maps let you control which routes are exchanged between
++the Proxmox VE nodes and their BGP, EVPN, OSPF, or OpenFabric peers, and modify
++attributes of those routes on the way in or out. The two work together: a
++prefix list classifies routes by their destination CIDR, while a route map
++chains match conditions and actions into an ordered policy.
++     </p>
++    </div>
++    <div class="paragraph">
++     <p>
++      If you have used
++      <span class="monospaced">
++       ip prefix-list
++      </span>
++      and
++      <span class="monospaced">
++       route-map
++      </span>
++      on FRR, Cisco IOS, or Juniper
++before, the Proxmox VE entities behave the same way. The Proxmox VE layer manages the
++configuration as cluster-wide entities under
++      <span class="monospaced">
++       /etc/pve/sdn/
++      </span>
++      and translates them
++to FRR
++      <span class="monospaced">
++       prefix-list
++      </span>
++      and
++      <span class="monospaced">
++       route-map
++      </span>
++      stanzas when applying the SDN
++configuration. The merged FRR configuration ends up in
++      <span class="monospaced">
++       /etc/frr/frr.conf
++      </span>
++      on
++each node; any node-local additions in
++      <span class="monospaced">
++       /etc/frr/frr.conf.local
++      </span>
++      are appended
++on top.
++     </p>
++    </div>
++    <div class="paragraph">
++     <p>
++      Like the rest of the SDN configuration, edits go to a pending state first and
++become active only after you apply changes in the main
++      <span class="monospaced">
++       SDN
++      </span>
++      panel.
++     </p>
++    </div>
++    <div class="sect3">
++     <h4 id="pvesdn_config_prefix_lists">
++      12.11.1. Prefix Lists
++      <a class="headerlink" href="#pvesdn_config_prefix_lists" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       A prefix list is an ordered, named list of entries that each match a single
++destination CIDR (or a range of prefix lengths within that CIDR) and either
++       <span class="monospaced">
++        permit
++       </span>
++       or
++       <span class="monospaced">
++        deny
++       </span>
++       it. FRR evaluates entries in order of their sequence number
++and stops at the first match; if no entry matches, the prefix list denies
++implicitly, same as plain FRR.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Prefix lists are managed under
++       <span class="monospaced">
++        Datacenter -&gt; SDN -&gt; Prefix Lists
++       </span>
++       . Each list
++has a name and contains one or more entries with the following properties:
++      </p>
++     </div>
++     <div class="dlist">
++      <dl>
++       <dt class="hdlist1">
++        Sequence Nr.
++       </dt>
++       <dd>
++        <p>
++         Order in which the entry is evaluated within the list. Must be
++unique per list and at least
++         <span class="monospaced">
++          1
++         </span>
++         . If left empty on creation, Proxmox VE auto-assigns
++the next free sequence number using the convention
++         <span class="monospaced">
++          max + 5
++         </span>
++         , leaving room for
++later insertions.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Action
++       </dt>
++       <dd>
++        <p>
++         Either
++         <span class="monospaced">
++          permit
++         </span>
++         or
++         <span class="monospaced">
++          deny
++         </span>
++         . There is an implicit
++         <span class="monospaced">
++          deny
++         </span>
++         at the end of
++each list.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Prefix
++       </dt>
++       <dd>
++        <p>
++         Destination network in CIDR notation, for example
++         <span class="monospaced">
++          192.0.2.0/24
++         </span>
++         or
++         <span class="monospaced">
++          2001:db8::/32
++         </span>
++         . The prefix
++         <span class="monospaced">
++          0.0.0.0/0
++         </span>
++         (and
++         <span class="monospaced">
++          ::/0
++         </span>
++         ) is allowed and matches the
++default route.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Prefix &gt;= (
++        <span class="monospaced">
++         ge
++        </span>
++        )
++       </dt>
++       <dd>
++        <p>
++         Optional minimum prefix length. If set, the entry matches
++any subnet of
++         <span class="monospaced">
++          prefix
++         </span>
++         whose length is at least
++         <span class="monospaced">
++          ge
++         </span>
++         .
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Prefix ⇐ (
++        <span class="monospaced">
++         le
++        </span>
++        )
++       </dt>
++       <dd>
++        <p>
++         Optional maximum prefix length. If set, the entry matches
++any subnet of
++         <span class="monospaced">
++          prefix
++         </span>
++         whose length is at most
++         <span class="monospaced">
++          le
++         </span>
++         .
++        </p>
++       </dd>
++      </dl>
++     </div>
++     <div class="paragraph">
++      <p>
++       Without
++       <span class="monospaced">
++        le
++       </span>
++       or
++       <span class="monospaced">
++        ge
++       </span>
++       an entry matches the prefix exactly. With both set, it
++matches any subnet within the given length range. For example
++       <span class="monospaced">
++        10.0.0.0/8 ge 16 le 24
++       </span>
++       matches every /16 to /24 subnet inside
++       <span class="monospaced">
++        10.0.0.0/8
++       </span>
++       .
++This is the standard FRR/Cisco semantics. Additional validation enforced by
++Proxmox VE:
++       <span class="monospaced">
++        ge
++       </span>
++       must not exceed
++       <span class="monospaced">
++        le
++       </span>
++       , neither may be smaller than the prefix’s own
++length, and both must stay within the address family bound (/32 for IPv4,
++/128 for IPv6).
++      </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         The names
++         <span class="monospaced">
++          only_default
++         </span>
++         ,
++         <span class="monospaced">
++          only_default_v6
++         </span>
++         , and
++         <span class="monospaced">
++          loopbacks_ips
++         </span>
++         are
++reserved. The BGP and EVPN controllers generate these automatically and they
++cannot be used as user-defined prefix list names.
++        </td>
++       </tr>
++      </table>
++     </div>
++    </div>
++    <div class="sect3">
++     <h4 id="pvesdn_config_route_maps">
++      12.11.2. Route Maps
++      <a class="headerlink" href="#pvesdn_config_route_maps" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       A route map is an ordered list of entries that match incoming or outgoing
++routes against criteria, optionally modify attributes such as the metric or
++local preference, and either
++       <span class="monospaced">
++        permit
++       </span>
++       (forward the route, possibly modified) or
++       <span class="monospaced">
++        deny
++       </span>
++       (drop the route). FRR evaluates entries in order; the first match
++controls the action. Every route map implicitly has an otherwise empty
++       <span class="monospaced">
++        deny
++       </span>
++       as
++its last entry, denying all routes that did not match an entry explicitly.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Route maps are managed under
++       <span class="monospaced">
++        Datacenter -&gt; SDN -&gt; Route Maps
++       </span>
++       . Each entry has
++the following properties:
++      </p>
++     </div>
++     <div class="dlist">
++      <dl>
++       <dt class="hdlist1">
++        Order
++       </dt>
++       <dd>
++        <p>
++         Order in which the entry is evaluated, between
++         <span class="monospaced">
++          0
++         </span>
++         and
++         <span class="monospaced">
++          65535
++         </span>
++         .
++Mandatory and must be unique within a route map. Leaving gaps between orders,
++for example assigning entries
++         <span class="monospaced">
++          10
++         </span>
++         ,
++         <span class="monospaced">
++          20
++         </span>
++         ,
++         <span class="monospaced">
++          30
++         </span>
++         , leaves room for later
++insertions without renumbering.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Action
++       </dt>
++       <dd>
++        <p>
++         Either
++         <span class="monospaced">
++          permit
++         </span>
++         or
++         <span class="monospaced">
++          deny
++         </span>
++         .
++         <span class="monospaced">
++          permit
++         </span>
++         lets the route pass (after any
++         <span class="monospaced">
++          set
++         </span>
++         actions);
++         <span class="monospaced">
++          deny
++         </span>
++         drops it.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Match
++       </dt>
++       <dd>
++        <p>
++         One or more match conditions. Available keys are:
++         <span class="monospaced">
++          route-type
++         </span>
++         ,
++         <span class="monospaced">
++          vni
++         </span>
++         ,
++         <span class="monospaced">
++          ip-address-prefix-list
++         </span>
++         ,
++         <span class="monospaced">
++          ip6-address-prefix-list
++         </span>
++         ,
++         <span class="monospaced">
++          ip-next-hop-prefix-list
++         </span>
++         ,
++         <span class="monospaced">
++          ip6-next-hop-prefix-list
++         </span>
++         ,
++         <span class="monospaced">
++          ip-next-hop-address
++         </span>
++         ,
++         <span class="monospaced">
++          ip6-next-hop-address
++         </span>
++         ,
++         <span class="monospaced">
++          metric
++         </span>
++         ,
++         <span class="monospaced">
++          local-preference
++         </span>
++         , and
++         <span class="monospaced">
++          peer
++         </span>
++         . The four
++         <span class="monospaced">
++          *-prefix-list
++         </span>
++         keys
++reference a prefix list by name. All match conditions of an entry must be true
++for it to apply.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Set
++       </dt>
++       <dd>
++        <p>
++         One or more attributes to set when the entry matches. Available keys are
++         <span class="monospaced">
++          ip-next-hop
++         </span>
++         ,
++         <span class="monospaced">
++          ip-next-hop-peer-address
++         </span>
++         ,
++         <span class="monospaced">
++          ip-next-hop-unchanged
++         </span>
++         ,
++         <span class="monospaced">
++          ip6-next-hop
++         </span>
++         ,
++         <span class="monospaced">
++          ip6-next-hop-peer-address
++         </span>
++         ,
++         <span class="monospaced">
++          ip6-next-hop-prefer-global
++         </span>
++         ,
++         <span class="monospaced">
++          local-preference
++         </span>
++         ,
++         <span class="monospaced">
++          tag
++         </span>
++         ,
++         <span class="monospaced">
++          weight
++         </span>
++         ,
++         <span class="monospaced">
++          metric
++         </span>
++         , and
++         <span class="monospaced">
++          src
++         </span>
++         . The
++         <span class="monospaced">
++          metric
++         </span>
++         value
++supports
++         <span class="monospaced">
++          N
++         </span>
++         ,
++         <span class="monospaced">
++          +N
++         </span>
++         ,
++         <span class="monospaced">
++          -N
++         </span>
++         (adjust),
++         <span class="monospaced">
++          rtt
++         </span>
++         ,
++         <span class="monospaced">
++          +rtt
++         </span>
++         ,
++         <span class="monospaced">
++          -rtt
++         </span>
++         ,
++         <span class="monospaced">
++          igp
++         </span>
++         , and
++         <span class="monospaced">
++          aigp
++         </span>
++         .
++The
++         <span class="monospaced">
++          tag
++         </span>
++         value accepts an integer or the literal
++         <span class="monospaced">
++          untagged
++         </span>
++         .
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Exit Action
++       </dt>
++       <dd>
++        <p>
++         Controls how evaluation continues after a match. Leave empty for
++the default behavior (terminate on match).
++         <span class="monospaced">
++          on-match-next
++         </span>
++         proceeds with the
++immediately following entry.
++         <span class="monospaced">
++          on-match-goto &lt;order&gt;
++         </span>
++         jumps to the first entry
++whose order is greater than or equal to the given value.
++         <span class="monospaced">
++          continue &lt;order&gt;
++         </span>
++         jumps to the entry with exactly that order. All three correspond to the FRR
++         <span class="monospaced">
++          on-match
++         </span>
++         /
++         <span class="monospaced">
++          continue
++         </span>
++         directives.
++        </p>
++       </dd>
++       <dt class="hdlist1">
++        Call
++       </dt>
++       <dd>
++        <p>
++         Optionally call another route map at the end of this entry’s processing.
++This corresponds to the FRR
++         <span class="monospaced">
++          call
++         </span>
++         directive.
++        </p>
++       </dd>
++      </dl>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         A route map referenced by a controller cannot be deleted while it is
++still in use. Delete the reference from the controller first. The names
++         <span class="monospaced">
++          MAP_VTEP_IN
++         </span>
++         ,
++         <span class="monospaced">
++          MAP_VTEP_OUT
++         </span>
++         ,
++         <span class="monospaced">
++          correct_src
++         </span>
++         , and any name starting with
++         <span class="monospaced">
++          pve_
++         </span>
++         are reserved for internally generated route maps.
++        </td>
++       </tr>
++      </table>
++     </div>
++    </div>
++    <div class="sect3">
++     <h4 id="pvesdn_config_route_filtering_usage">
++      12.11.3. Where Prefix Lists and Route Maps Are Used
++      <a class="headerlink" href="#pvesdn_config_route_filtering_usage" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       The BGP and EVPN
++       <a href="#pvesdn_config_controllers">
++        controllers
++       </a>
++       each take an
++       <span class="monospaced">
++        incoming
++       </span>
++       and an
++       <span class="monospaced">
++        outgoing
++       </span>
++       route map. Incoming maps run against routes
++received from a peer before installing them; outgoing maps run against routes
++before announcing them. Both fields are optional and selected from the route
++maps configured in the SDN.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       The OSPF and OpenFabric
++       <a href="#pvesdn_config_fabrics">
++        fabrics
++       </a>
++       take a
++       <span class="monospaced">
++        Route
++Filter
++       </span>
++       option that references a prefix list. When set, only routes whose
++destinations pass the prefix list are installed in the kernel routing table.
++Without an explicit filter, the fabric generates a default filter from the
++fabric’s own
++       <span class="monospaced">
++        IPv4 Prefix
++       </span>
++       and
++       <span class="monospaced">
++        IPv6 Prefix
++       </span>
++       CIDRs (an FRR
++       <span class="monospaced">
++        access-list
++       </span>
++       permitting those networks); configure a route filter when you need a different
++policy, for example to allow a default route learned from a border node.
++      </p>
++     </div>
++    </div>
++    <div class="sect3">
++     <h4 id="pvesdn_config_route_filtering_examples">
++      12.11.4. Examples
++      <a class="headerlink" href="#pvesdn_config_route_filtering_examples" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       Allow only the IPv4 default route, for example as a route filter on a node
++that should learn just an upstream default:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content monospaced">
++       <pre># /etc/pve/sdn/prefix-lists.cfg
++
++prefix-list: default-only
++ entries action=permit,prefix=0.0.0.0/0,seq=10</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       Allow every subnet between /16 and /24 inside
++       <span class="monospaced">
++        10.0.0.0/8
++       </span>
++       , and deny anything
++else within the
++       <span class="monospaced">
++        10.0.0.0/8
++       </span>
++       block:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content monospaced">
++       <pre>prefix-list: internal-subnets
++ entries action=permit,prefix=10.0.0.0/8,ge=16,le=24,seq=10
++ entries action=deny,prefix=10.0.0.0/8,le=32,seq=20</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       Outgoing BGP policy that lowers
++       <span class="monospaced">
++        local-preference
++       </span>
++       to 50 on routes matched by
++the
++       <span class="monospaced">
++        internal-subnets
++       </span>
++       prefix list, and otherwise leaves routes untouched.
++Each route map entry is its own section, with the order encoded as a suffix on
++the section ID:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content monospaced">
++       <pre># /etc/pve/sdn/route-maps.cfg
++
++route-map-entry: bgp-out_10
++ action permit
++ match key=ip-address-prefix-list,value=internal-subnets
++ set key=local-preference,value=50
++
++route-map-entry: bgp-out_20
++ action permit</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       The trailing
++       <span class="monospaced">
++        permit
++       </span>
++       entry with no match is the FRR pattern for "allow
++everything else"; without it the implicit deny at the end of the route map
++would drop all unmatched routes.
++      </p>
++     </div>
++    </div>
+    </div>
+    <div class="sect2">
+     <h3 id="pvesdn_config_ipam">
+      <span>
+-      12.11. IPAM
++      12.12. IPAM
+      </span>
+      <a class="headerlink" href="#pvesdn_config_ipam" title="Permalink to this heading">
+      </a>
+@@ -67205,7 +68835,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_ipam_plugin_pveipam">
+-      12.11.1. PVE IPAM Plugin
++      12.12.1. PVE IPAM Plugin
+       <a class="headerlink" href="#pvesdn_ipam_plugin_pveipam" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -67238,7 +68868,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_ipam_plugin_netbox">
+-      12.11.2. NetBox IPAM Plugin
++      12.12.2. NetBox IPAM Plugin
+       <a class="headerlink" href="#pvesdn_ipam_plugin_netbox" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -67304,7 +68934,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_ipam_plugin_phpipam">
+-      12.11.3. phpIPAM Plugin
++      12.12.3. phpIPAM Plugin
+       <a class="headerlink" href="#pvesdn_ipam_plugin_phpipam" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -67364,7 +68994,7 @@
+    <div class="sect2">
+     <h3 id="pvesdn_config_dns">
+      <span>
+-      12.12. DNS
++      12.13. DNS
+      </span>
+      <a class="headerlink" href="#pvesdn_config_dns" title="Permalink to this heading">
+      </a>
+@@ -67379,7 +69009,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_dns_plugin_powerdns">
+-      12.12.1. PowerDNS Plugin
++      12.13.1. PowerDNS Plugin
+       <a class="headerlink" href="#pvesdn_dns_plugin_powerdns" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -67444,7 +69074,7 @@
+    <div class="sect2">
+     <h3 id="pvesdn_config_dhcp">
+      <span>
+-      12.13. DHCP
++      12.14. DHCP
+      </span>
+      <a class="headerlink" href="#pvesdn_config_dhcp" title="Permalink to this heading">
+      </a>
+@@ -67538,7 +69168,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="_configuration_14">
+-      12.13.1. Configuration
++      12.14.1. Configuration
+       <a class="headerlink" href="#_configuration_14" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -67644,7 +69274,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="_plugins">
+-      12.13.2. Plugins
++      12.14.2. Plugins
+       <a class="headerlink" href="#_plugins" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -67787,7 +69417,7 @@
+    <div class="sect2">
+     <h3 id="pvesdn_firewall_integration">
+      <span>
+-      12.14. Firewall Integration
++      12.15. Firewall Integration
+      </span>
+      <a class="headerlink" href="#pvesdn_firewall_integration" title="Permalink to this heading">
+      </a>
+@@ -67801,7 +69431,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="_vnets_and_subnets">
+-      12.14.1. VNets and Subnets
++      12.15.1. VNets and Subnets
+       <a class="headerlink" href="#_vnets_and_subnets" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68067,7 +69697,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="_ipam">
+-      12.14.2. IPAM
++      12.15.2. IPAM
+       <a class="headerlink" href="#_ipam" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68170,7 +69800,7 @@
+    <div class="sect2">
+     <h3 id="pvesdn_setup_examples">
+      <span>
+-      12.15. Examples
++      12.16. Examples
+      </span>
+      <a class="headerlink" href="#pvesdn_setup_examples" title="Permalink to this heading">
+      </a>
+@@ -68184,7 +69814,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_setup_example_simple">
+-      12.15.1. Simple Zone Example
++      12.16.1. Simple Zone Example
+       <a class="headerlink" href="#pvesdn_setup_example_simple" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68315,7 +69945,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_setup_example_nat">
+-      12.15.2. Source NAT Example
++      12.16.2. Source NAT Example
+       <a class="headerlink" href="#pvesdn_setup_example_nat" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68364,7 +69994,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_setup_example_vlan">
+-      12.15.3. VLAN Setup Example
++      12.16.3. VLAN Setup Example
+       <a class="headerlink" href="#pvesdn_setup_example_vlan" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68473,7 +70103,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_setup_example_qinq">
+-      12.15.4. QinQ Setup Example
++      12.16.4. QinQ Setup Example
+       <a class="headerlink" href="#pvesdn_setup_example_qinq" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68653,7 +70283,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_setup_example_vxlan">
+-      12.15.5. VXLAN Setup Example
++      12.16.5. VXLAN Setup Example
+       <a class="headerlink" href="#pvesdn_setup_example_vxlan" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -68774,7 +70404,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="pvesdn_setup_example_evpn">
+-      12.15.6. EVPN Setup Example
++      12.16.6. EVPN Setup Example
+       <a class="headerlink" href="#pvesdn_setup_example_evpn" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -69068,14 +70698,14 @@
+    <div class="sect2">
+     <h3 id="pvesdn_notes">
+      <span>
+-      12.16. Notes
++      12.17. Notes
+      </span>
+      <a class="headerlink" href="#pvesdn_notes" title="Permalink to this heading">
+      </a>
+     </h3>
+     <div class="sect3">
+      <h4 id="_multiple_evpn_exit_nodes">
+-      12.16.1. Multiple EVPN Exit Nodes
++      12.17.1. Multiple EVPN Exit Nodes
+       <a class="headerlink" href="#_multiple_evpn_exit_nodes" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -69108,7 +70738,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="_vxlan_ipsec_encryption">
+-      12.16.2. VXLAN IPSEC Encryption
++      12.17.2. VXLAN IPSEC Encryption
+       <a class="headerlink" href="#_vxlan_ipsec_encryption" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -72835,9 +74465,9 @@
+   </div>
+  </div>
+  <div class="sect1">
+-  <h2 id="user_mgmt">
++  <h2 id="chapter_user_management">
+    14. User Management
+-   <a class="headerlink" href="#user_mgmt" title="Permalink to this heading">
++   <a class="headerlink" href="#chapter_user_management" title="Permalink to this heading">
+    </a>
+   </h2>
+   <div class="sectionbody">
+@@ -73060,15 +74690,31 @@
+         Separated privileges: The token needs to be given explicit access with ACLs.
+   Its effective permissions are calculated by intersecting user and token
+   permissions.
++        <strong>
++         This is the default
++        </strong>
++        for newly created tokens.
+        </p>
+       </li>
+       <li>
+        <p>
+         Full privileges: The token’s permissions are identical to that of the
+-  associated user.
++  associated user. Disable Privilege Separation only when the integration
++  genuinely needs the user’s full permissions.
+        </p>
+       </li>
+      </ul>
++    </div>
++    <div class="paragraph">
++     <p>
++      Set an
++      <span class="monospaced">
++       expire
++      </span>
++      timestamp (Unix epoch seconds) when creating a token so
++that abandoned automation does not silently keep working. The
++authentication code refuses requests once the deadline has passed.
++     </p>
+     </div>
+     <div class="admonitionblock">
+      <table>
+@@ -78205,36 +79851,71 @@
+     </h3>
+     <div class="paragraph">
+      <p>
+-      We call the primary management unit handled by
++      The HA Manager’s primary management unit is called an HA resource (or
++“HA service”). Currently, an HA resource can be either a Virtual
++Machine (VM) or a Linux Container (CT).
++     </p>
++    </div>
++    <div class="paragraph">
++     <p>
++      Each HA resource is uniquely identified by a service ID (
+       <span class="monospaced">
+-       ha-manager
++       sid
+       </span>
+-      a
+-resource. A resource (also called “service”) is uniquely
+-identified by a service ID (SID), which consists of the resource type
+-and a type specific ID, for example
++      ), which
++consists of the resource type and a type-specific ID, which is the VMID
++for VMs and containers. For example, for the VM with VMID
++      <span class="monospaced">
++       100
++      </span>
++      , the
++service ID is
+       <span class="monospaced">
+        vm:100
+       </span>
+-      . That example would be a
+-resource of type
+-      <span class="monospaced">
+-       vm
+-      </span>
+-      (virtual machine) with the ID 100.
++      .
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+-      For now we have two important resources types - virtual machines and
+-containers. One basic idea here is that we can bundle related software
+-into such a VM or container, so there is no need to compose one big
+-service from other services, as was done with
+-      <span class="monospaced">
+-       rgmanager
+-      </span>
+-      . In
+-general, a HA managed resource should not depend on other resources.
++      An HA resource can only run on nodes where all of its dependencies are
++available. By default, the HA Manager treats every cluster node as eligible. To
++keep this default, a VM or container should:
++     </p>
++    </div>
++    <div class="ulist">
++     <ul>
++      <li>
++       <p>
++        use options that are compatible with all cluster nodes
++       </p>
++      </li>
++      <li>
++       <p>
++        use only shared storage that is accessible from all cluster nodes
++       </p>
++      </li>
++      <li>
++       <p>
++        use only network interfaces that exist on all cluster nodes
++       </p>
++      </li>
++      <li>
++       <p>
++        use only device passthroughs that are present on all cluster nodes
++       </p>
++      </li>
++     </ul>
++    </div>
++    <div class="paragraph">
++     <p>
++      If any of these dependencies is only available on a subset of nodes, restrict
++the HA resource to that subset with a strict
++      <a href="#ha_manager_node_affinity_rules">
++       node affinity rule
++      </a>
++      . The HA Manager then
++limits placement, recovery, and migration to the rule’s nodes.
+      </p>
+     </div>
+    </div>
+@@ -82270,123 +83951,308 @@
+     </h3>
+     <div class="paragraph">
+      <p>
+-      The cluster resource scheduler (CRS) mode controls how HA selects nodes for the
+-recovery of a service as well as for migrations that are triggered by a
+-shutdown policy. The default mode is
+-      <span class="monospaced">
+-       basic
+-      </span>
+-      , you can change it in the Web UI
+-(
+-      <span class="monospaced">
+-       Datacenter
+-      </span>
+-      →
+-      <span class="monospaced">
+-       Options
+-      </span>
+-      ), or directly in
+-      <span class="monospaced">
+-       datacenter.cfg
+-      </span>
+-      :
+-     </p>
+-    </div>
+-    <div class="listingblock">
+-     <div class="content monospaced">
+-      <pre>crs: ha=static</pre>
+-     </div>
+-    </div>
+-    <div class="paragraph">
+-     <a class="image" href="images/screenshot/gui-datacenter-options-crs.png">
+-      <img alt="screenshot/gui-datacenter-options-crs.png" src="images/screenshot/gui-datacenter-options-crs.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
+-     </a>
+-     <p>
+-      The change will be in effect starting with the next manager round (after a few
+-seconds).
++      The Cluster Resource Scheduler (CRS) is responsible for selecting new node
++placements for HA resources and keeping HA resources on their allowed nodes.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+-      For each service that needs to be recovered or migrated, the scheduler
+-iteratively chooses the best node among the nodes that are available to
+-the service according to their HA rules, if any.
++      In every HA Manager round, the scheduler goes through every HA resource and
++checks whether the HA resource needs any new node placement. This new node
++placement can be caused by different actions, such as recovering HA resources
++from a fenced node or a new HA affinity rule. See the section
++      <a href="#ha_manager_crs_scheduling_points">
++       CRS Scheduling Points
++      </a>
++      for a more thorough
++description of which actions the CRS takes for specific changes in the cluster.
+      </p>
+     </div>
+-    <div class="admonitionblock">
+-     <table>
+-      <tr>
+-       <td class="icon">
+-        <img alt="Note" src="data:image/png;base64,
+-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"/>
+-       </td>
+-       <td class="content">
+-        There are plans to add modes for (static and dynamic) load-balancing in
+-the future.
+-       </td>
+-      </tr>
+-     </table>
+-    </div>
+     <div class="sect3">
+-     <h4 id="_basic_scheduler">
+-      15.13.1. Basic Scheduler
+-      <a class="headerlink" href="#_basic_scheduler" title="Permalink to this heading">
++     <h4 id="_crs_scheduling_mode">
++      15.13.1. CRS Scheduling Mode
++      <a class="headerlink" href="#_crs_scheduling_mode" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <a class="image" href="images/screenshot/gui-datacenter-options-crs.png">
++       <img alt="screenshot/gui-datacenter-options-crs.png" src="images/screenshot/gui-datacenter-options-crs.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
++      </a>
++      <p>
++       The CRS scheduling mode controls how the CRS will calculate the usage
++information for the cluster. This usage information is used as a basis for the
++scheduling decisions. The CRS mode can be changed in the web interface
++(
++       <span class="monospaced">
++        Datacenter
++       </span>
++       →
++       <span class="monospaced">
++        Options
++       </span>
++       →
++       <span class="monospaced">
++        Cluster Resource Scheduling
++       </span>
++       ). The default mode
++is
++       <span class="monospaced">
++        basic
++       </span>
++       . The change will take effect starting with the next HA Manager
++round, which should take no longer than 10 seconds.
++      </p>
++     </div>
++     <div class="sect4">
++      <h5 id="ha_manager_crs_basic_scheduler">
++       Basic Scheduler
++       <a class="headerlink" href="#ha_manager_crs_basic_scheduler" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        The number of active guests on each node is used to choose the best-fitting
++node for an HA resource.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="ha_manager_crs_static_scheduler">
++       Static-Load Scheduler
++       <a class="headerlink" href="#ha_manager_crs_static_scheduler" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        Static usage information from active guests on each node is used to choose the
++best-fitting node for an HA resource. This includes the configured CPU and
++memory quotas for the active guests.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="ha_manager_crs_dynamic_scheduler">
++       Dynamic-Load Scheduler
++       <a class="headerlink" href="#ha_manager_crs_dynamic_scheduler" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        Dynamic usage information from active guests on each node is used to choose the
++best-fitting node for an HA resource. This includes the average CPU and memory
++usage as well as the configured CPU and memory quotas for the active guests.
++       </p>
++      </div>
++     </div>
++    </div>
++    <div class="sect3">
++     <h4 id="ha_manager_crs_scheduling_points">
++      15.13.2. CRS Scheduling Points
++      <a class="headerlink" href="#ha_manager_crs_scheduling_points" title="Permalink to this heading">
+       </a>
+      </h4>
+      <div class="paragraph">
+       <p>
+-       The number of active HA services on each node is used to choose a recovery node.
+-Non-HA-managed services are currently not counted.
++       In every HA Manager round, the CRS checks whether any HA resources need a new
++node placement, which can be caused by any of the following scheduling points:
+       </p>
+      </div>
++     <div class="sect4">
++      <h5 id="_ha_resource_recovery_always_active">
++       HA resource recovery (always active)
++       <a class="headerlink" href="#_ha_resource_recovery_always_active" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        When a node with active HA resources fails, all its HA resources need to be
++recovered to other nodes. The CRS algorithm will be used here to balance that
++recovery over the remaining nodes.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_ha_rule_config_changes_always_active">
++       HA rule config changes (always active)
++       <a class="headerlink" href="#_ha_rule_config_changes_always_active" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        If a rule imposes different constraints on the HA resources, the HA stack will
++use the CRS algorithm to find a new target node for the HA resources affected
++by these rules depending on the type of the new rules:
++       </p>
++      </div>
++      <div class="ulist">
++       <ul>
++        <li>
++         <p>
++          Node affinity rules: If a node affinity rule is created or HA resources/nodes
++  are added to an existing node affinity rule, the HA stack will use the CRS
++  algorithm to ensure that these HA resources are assigned according to their
++  node and priority constraints.
++         </p>
++        </li>
++        <li>
++         <p>
++          Positive resource affinity rules: If a positive resource affinity rule is
++  created or HA resources are added to an existing positive resource affinity
++  rule, the HA stack will use the CRS algorithm to ensure that these HA
++  resources are moved to a common node.
++         </p>
++        </li>
++        <li>
++         <p>
++          Negative resource affinity rules: If a negative resource affinity rule is
++  created or HA resources are added to an existing negative resource affinity
++  rule, the HA stack will use the CRS algorithm to ensure that these HA
++  resources are moved to separate nodes.
++         </p>
++        </li>
++       </ul>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_ha_resource_rebalance_on_start_opt_in">
++       HA resource rebalance on start (opt-in)
++       <a class="headerlink" href="#_ha_resource_rebalance_on_start_opt_in" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        When starting an HA resource with rebalance on start enabled, the CRS will
++select the node best suited for the HA resource. If the selected node is not
++the current node, the HA resource will be migrated to the selected node.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        For the
++        <a href="#ha_manager_crs_basic_scheduler">
++         basic scheduler mode
++        </a>
++        , the node with
++the fewest active guests is considered the best-suited node.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        For the
++        <a href="#ha_manager_crs_static_scheduler">
++         static-load
++        </a>
++        and
++        <a href="#ha_manager_crs_dynamic_scheduler">
++         dynamic-load
++        </a>
++        scheduler modes, each node in turn is
++considered as if the HA resource was already running on it, using CPU and
++memory usage from the associated guest configuration. Then for each such
++alternative, CPU and memory usage of all nodes are considered, with memory
++being weighted much more, because it’s a truly limited resource. For both, CPU
++and memory, highest usage among nodes (weighted more, as ideally no node should
++be overcommitted) and average usage of all nodes (to still be able to
++distinguish in case there already is a more highly committed node) are
++considered.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        This setting can be enabled with the CRS option
++        <span class="monospaced">
++         ha-rebalance-on-start
++        </span>
++        in the
++web interface under
++        <span class="monospaced">
++         Datacenter
++        </span>
++        →
++        <span class="monospaced">
++         Options
++        </span>
++        →
++        <span class="monospaced">
++         Cluster Resource Scheduling
++        </span>
++        .
++       </p>
++      </div>
++      <div class="admonitionblock">
++       <table>
++        <tr>
++         <td class="icon">
++          <img alt="Important" src="data:image/png;base64,
++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
++EQn3XQAAAABJRU5ErkJggg=="/>
++         </td>
++         <td class="content">
++          For the static-load and dynamic-load scheduler modes, this
++functionality is still in technology preview. The more HA resources the more
++possible combinations there are, so it’s currently not recommended to use it if
++you have thousands of HA resources.
++         </td>
++        </tr>
++       </table>
++      </div>
++     </div>
+     </div>
+     <div class="sect3">
+-     <h4 id="_static_load_scheduler">
+-      15.13.2. Static-Load Scheduler
+-      <a class="headerlink" href="#_static_load_scheduler" title="Permalink to this heading">
++     <h4 id="_crs_load_balancer">
++      15.13.3. CRS Load Balancer
++      <a class="headerlink" href="#_crs_load_balancer" title="Permalink to this heading">
+       </a>
+      </h4>
+      <div class="admonitionblock">
+@@ -82449,199 +84315,246 @@
+ EQn3XQAAAABJRU5ErkJggg=="/>
+         </td>
+         <td class="content">
+-         The static mode is still a technology preview.
++         This feature is still in technology preview.
+         </td>
+        </tr>
+       </table>
+      </div>
+      <div class="paragraph">
+       <p>
+-       Static usage information from HA services on each node is used to choose a
+-recovery node. Usage of non-HA-managed services is currently not considered.
++       The utilization of individual cluster nodes can vary greatly depending on where
++guests are currently running and how much load these exert at any moment. This
++can cause the node utilizations to become imbalanced over time, where HA
++resources on one node become bottlenecked due to resource contention, while
++another node is barely utilized.
+       </p>
+      </div>
+      <div class="paragraph">
+       <p>
+-       For this selection, each node in turn is considered as if the service was
+-already running on it, using CPU and memory usage from the associated guest
+-configuration. Then for each such alternative, CPU and memory usage of all nodes
+-are considered, with memory being weighted much more, because it’s a truly
+-limited resource. For both, CPU and memory, highest usage among nodes (weighted
+-more, as ideally no node should be overcommitted) and average usage of all nodes
+-(to still be able to distinguish in case there already is a more highly
+-committed node) are considered.
++       The HA Manager’s automatic load balancer can lower the overall cluster
++imbalance by automatically issuing rebalancing migrations. Currently, these
++migrations are issued only for HA resources and executed sequentially.
++Furthermore, these migrations always obey the current HA affinity rules.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Disabling
++       <span class="monospaced">
++        auto-rebalance
++       </span>
++       for an HA resource prevents the resource from
++being part of automatically issued rebalancing migrations.
+       </p>
+      </div>
+      <div class="admonitionblock">
+       <table>
+        <tr>
+         <td class="icon">
+-         <img alt="Important" src="data:image/png;base64,
+-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
+-EQn3XQAAAABJRU5ErkJggg=="/>
++         <img alt="Note" src="data:image/png;base64,
++iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
++m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
++CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
++BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
++Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
++vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
++oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
++/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
++Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
++bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
++0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
++rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
++X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
++NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
++cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
++KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
++S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
++UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
++XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
++4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
++nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
++iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
++/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
++qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
++uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
++bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
++NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
++PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
++0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
++1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
++i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
++UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
++4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
++Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
++NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
++ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
++AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
++IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
++W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
++o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
++GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
++lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
++zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
++PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
+         </td>
+         <td class="content">
+-         The more services the more possible combinations there are, so it’s
+-currently not recommended to use it if you have thousands of HA managed
+-services.
++         Any HA resource with a positive affinity for an HA resource with
++         <span class="monospaced">
++          auto-rebalance
++         </span>
++         disabled won’t be part of rebalancing migrations either.
+         </td>
+        </tr>
+       </table>
+      </div>
+-    </div>
+-    <div class="sect3">
+-     <h4 id="_crs_scheduling_points">
+-      15.13.3. CRS Scheduling Points
+-      <a class="headerlink" href="#_crs_scheduling_points" title="Permalink to this heading">
+-      </a>
+-     </h4>
+      <div class="paragraph">
+       <p>
+-       The CRS algorithm is not applied for every service in every round, since this
+-would mean a large number of constant migrations. Depending on the workload,
+-this could put more strain on the cluster than could be avoided by constant
+-balancing.
+-That’s why the Proxmox VE HA manager favors keeping services on their current node.
++       The automatic load balancing system can be enabled and configured in the web
++interface under
++       <span class="monospaced">
++        Datacenter
++       </span>
++       →
++       <span class="monospaced">
++        Options
++       </span>
++       →
++       <span class="monospaced">
++        Cluster Resource Scheduling
++       </span>
++       .
++This allows fine-tuning the various parameters as described in the next
++paragraph for different cluster setups and requirements. The load balancer
++requires either the
++       <a href="#ha_manager_crs_static_scheduler">
++        static-load
++       </a>
++       or
++       <a href="#ha_manager_crs_dynamic_scheduler">
++        dynamic-load
++       </a>
++       scheduler mode to be in use.
+       </p>
+      </div>
+      <div class="paragraph">
+       <p>
+-       The CRS is currently used at the following scheduling points:
++       In every HA Manager round, each of which lasts around 10 seconds, the
++automatic load balancer checks whether the cluster imbalance exceeds the
++       <em>
++        imbalance threshold
++       </em>
++       . If the cluster imbalance stays above the threshold for
++at least as many consecutive HA Manager rounds as the
++       <em>
++        hold duration
++       </em>
++       , then
++the load balancer will select the rebalancing migration for an HA resource,
++which lowers the overall cluster imbalance the most. The method used to select
++the best rebalancing migration can be set with the
++       <em>
++        rebalancing method
++       </em>
++       option. Finally, if the selected migration reduces the current cluster
++imbalance by at least the percentage given by the
++       <em>
++        imbalance improvement
++       </em>
++       option, the load balancer issues the selected migration.
+       </p>
+      </div>
+-     <div class="ulist">
+-      <ul>
+-       <li>
+-        <p>
+-         Service recovery (always active). When a node with active HA services fails,
+-  all its services need to be recovered to other nodes. The CRS algorithm will
+-  be used here to balance that recovery over the remaining nodes.
+-        </p>
+-       </li>
+-       <li>
+-        <p>
+-         HA group config changes (always active). If a node is removed from a group,
+-  or its priority is reduced, the HA stack will use the CRS algorithm to find a
+-  new target node for the HA services in that group, matching the adapted
+-  priority constraints.
+-        </p>
+-       </li>
+-       <li>
+-        <p>
+-         HA rule config changes (always active). If a rule emposes different
+-  constraints on the HA resources, the HA stack will use the CRS algorithm to
+-  find a new target node for the HA resources affected by these rules depending
+-  on the type of the new rules:
+-        </p>
+-        <div class="ulist">
+-         <ul>
+-          <li>
+-           <p>
+-            Node affinity rules: If a node affinity rule is created or HA resources/nodes
+-   are added to an existing node affinity rule, the HA stack will use the CRS
+-   algorithm to ensure that these HA resources are assigned according to their
+-   node and priority constraints.
+-           </p>
+-          </li>
+-          <li>
+-           <p>
+-            Positive resource affinity rules: If a positive resource affinity rule is
+-   created or HA resources are added to an existing positive resource affinity
+-   rule, the HA stack will use the CRS algorithm to ensure that these HA
+-   resources are moved to a common node.
+-           </p>
+-          </li>
+-          <li>
+-           <p>
+-            Negative resource affinity rules: If a negative resource affinity rule is
+-   created or HA resources are added to an existing negative resource affinity
+-   rule, the HA stack will use the CRS algorithm to ensure that these HA
+-   resources are moved to separate nodes.
+-           </p>
+-          </li>
+-         </ul>
+-        </div>
+-       </li>
+-       <li>
+-        <p>
+-         HA service stopped → start transition (opt-in). Requesting that a stopped
+-  service should be started is an good opportunity to check for the best suited
+-  node as per the CRS algorithm, as moving stopped services is  cheaper to do
+-  than moving them started, especially if their disk volumes reside on shared
+-  storage. You can enable this by setting the
+-         <strong>
+-          <span class="monospaced">
+-           ha-rebalance-on-start
+-          </span>
+-         </strong>
+-         CRS option in the datacenter config. You can change that option also in the
+-  Web UI, under
+-         <span class="monospaced">
+-          Datacenter
+-         </span>
+-         →
+-         <span class="monospaced">
+-          Options
+-         </span>
+-         →
+-         <span class="monospaced">
+-          Cluster Resource Scheduling
+-         </span>
+-         .
+-        </p>
+-       </li>
+-      </ul>
++     <div class="paragraph">
++      <p>
++       The cluster imbalance is calculated as the ratio between the standard deviation
++and mean of the individual node loads. Therefore, the
++       <em>
++        imbalance threshold
++       </em>
++       controls the sensitivity of the load balancer. If the
++       <em>
++        imbalance threshold
++       </em>
++       is
++set to a value of
++       <span class="monospaced">
++        0.0
++       </span>
++       , it will try to select a rebalancing migration every
++time the
++       <em>
++        hold duration
++       </em>
++       is exceeded. The
++       <em>
++        imbalance improvement
++       </em>
++       percentage
++filters what constitutes an acceptable rebalancing migration. If it is set to
++       <span class="monospaced">
++        0.0
++       </span>
++       , then it will always commit to a migration even if the expected
++imbalance does not change at all. However, the value can never be negative, so
++it will never commit to a migration with an expected imbalance worse than the
++current one.
++      </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         It is planned that load balancing will also include non-HA resources in
++the future.
++        </td>
++       </tr>
++      </table>
+      </div>
+     </div>
+    </div>
+@@ -89068,16 +90981,77 @@
+         pveproxy
+        </span>
+        uses gzip HTTP-level compression for compressible
+-content, if the client supports it. This can disabled in
++content, if the client supports it. This can be disabled in
+        <span class="monospaced">
+         /etc/default/pveproxy
+        </span>
++       :
+       </p>
+      </div>
+      <div class="literalblock">
+       <div class="content monospaced">
+        <pre>COMPRESSION=0</pre>
+       </div>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         Disabling compression mitigates BREACH-class side-channel attacks
++against authenticated session cookies, at the cost of slightly more
++bandwidth used by the web interface. Most deployments do not need to
++change the default; consider it on hosts where the web interface is
++exposed across networks you do not fully control.
++        </td>
++       </tr>
++      </table>
+      </div>
+     </div>
+     <div class="sect3">
+@@ -100489,7 +102463,7 @@
+         --serial[n]
+        </span>
+        <span class="monospaced">
+-        (/dev/.+|socket)
++        (/dev/[^,]+|socket)
+        </span>
+       </dt>
+       <dd>
+@@ -103161,7 +105135,7 @@
+         --serial[n]
+        </span>
+        <span class="monospaced">
+-        (/dev/.+|socket)
++        (/dev/[^,]+|socket)
+        </span>
+       </dt>
+       <dd>
+@@ -105771,7 +107745,7 @@
+         --serial[n]
+        </span>
+        <span class="monospaced">
+-        (/dev/.+|socket)
++        (/dev/[^,]+|socket)
+        </span>
+       </dt>
+       <dd>
+@@ -108241,7 +110215,7 @@
+         --mp[n]
+        </span>
+        <span class="monospaced">
+-        [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++        [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -108378,7 +110352,7 @@
+         --rootfs
+        </span>
+        <span class="monospaced">
+-        [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++        [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -110681,7 +112655,7 @@
+         --mp[n]
+        </span>
+        <span class="monospaced">
+-        [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++        [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -110805,7 +112779,7 @@
+         --rootfs
+        </span>
+        <span class="monospaced">
+-        [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++        [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -111620,7 +113594,7 @@
+         --mp[n]
+        </span>
+        <span class="monospaced">
+-        [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++        [volume=]&lt;volume&gt; ,mp=&lt;Path&gt; [,acl=&lt;1|0&gt;] [,backup=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,keepattrs=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -111731,7 +113705,7 @@
+         --rootfs
+        </span>
+        <span class="monospaced">
+-        [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
++        [volume=]&lt;volume&gt; [,acl=&lt;1|0&gt;] [,idmap=&lt;type:container:disk:range-size[;type:container:disk:range-size;...]&gt;] [,mountoptions=&lt;opt[;opt...]&gt;] [,quota=&lt;1|0&gt;] [,replicate=&lt;1|0&gt;] [,ro=&lt;1|0&gt;] [,shared=&lt;1|0&gt;] [,size=&lt;DiskSize&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -118404,7 +120378,13 @@
+     </div>
+     <div class="paragraph">
+      <p>
+-      Update API token for a specific user.
++      Update API token for a specific user. NOTE: when
++      <em>
++       regenerate
++      </em>
++      is set, the
++returned token value needs to be stored as it cannot be retrieved
++afterwards!
+      </p>
+     </div>
+     <div class="dlist">
+@@ -118511,6 +120491,27 @@
+       <dd>
+        <p>
+         Restrict API token privileges with separate ACLs (default), or give full privileges of corresponding user.
++       </p>
++      </dd>
++      <dt class="hdlist1">
++       <span class="monospaced">
++        --regenerate
++       </span>
++       <span class="monospaced">
++        &lt;boolean&gt;
++       </span>
++       (
++       <em>
++        default =
++       </em>
++       <span class="monospaced">
++        0
++       </span>
++       )
++      </dt>
++      <dd>
++       <p>
++        Regenerate the token’s secret value. All users of the previous secret will lose access after this operation.
+        </p>
+       </dd>
+      </dl>
+@@ -123565,6 +125566,66 @@
+        </dd>
+        <dt class="hdlist1">
+         <span class="monospaced">
++         location
++        </span>
++        :
++        <span class="monospaced">
++         latitude=&lt;number&gt; ,longitude=&lt;number&gt; [,name=&lt;name&gt;]
++        </span>
++       </dt>
++       <dd>
++        <p>
++         The location of the cluster.
++        </p>
++        <div class="dlist">
++         <dl>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            latitude
++           </span>
++           =
++           <span class="monospaced">
++            &lt;number&gt; (-90 - 90)
++           </span>
++          </dt>
++          <dd>
++           <p>
++            The latitude of the nodes location in degrees.
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            longitude
++           </span>
++           =
++           <span class="monospaced">
++            &lt;number&gt; (-180 - 180)
++           </span>
++          </dt>
++          <dd>
++           <p>
++            The longitude of the nodes location in degrees.
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            name
++           </span>
++           =
++           <span class="monospaced">
++            &lt;name&gt;
++           </span>
++          </dt>
++          <dd>
++           <p>
++            The name of the location of this node
++           </p>
++          </dd>
++         </dl>
++        </div>
++       </dd>
++       <dt class="hdlist1">
++        <span class="monospaced">
+          mac_prefix
+         </span>
+         :
+@@ -133192,9 +135253,9 @@
+ </div>
+ <div id="footer">
+  <div id="footer-text">
+-  Version 9.1.3
++  Version 9.1.4
+   <br/>
+   Last updated
+- Thu Apr 30 15:44:52 CEST 2026
++ Fri May 15 07:28:20 CEST 2026
+  </div>
+ </div>

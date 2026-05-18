@@ -1,5 +1,13 @@
 [
   {
+    "timestamp": "2026-05-18T05:20:22Z",
+    "old_hash": "e471464dbf5a04f512f097eebc11fd6a04a1319c93ba5ce6b46fbb98e1a89395",
+    "new_hash": "8cd0afe293469b69ce90f144cfcf2219fe6c821b25f70e828b10c5083110952b",
+    "diff_file": "docs/changes/20260518T052022Z.diff",
+    "added_lines": 2412,
+    "removed_lines": 351
+  },
+  {
     "timestamp": "2026-05-14T05:14:52Z",
     "old_hash": "981af66920dea526fd84f72e0305fcdb7f38f4cd1af24c2a5010cbc8aff90248",
     "new_hash": "e471464dbf5a04f512f097eebc11fd6a04a1319c93ba5ce6b46fbb98e1a89395",
