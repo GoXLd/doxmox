@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260520T051906Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260520T051906Z.diff</h1>
+      <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-20T05:19:19Z</p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260520T051906Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="open_raw_diff">Open raw .diff</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -346,10 +346,10 @@</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;br/&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revnumber&quot;&gt;</span>
+<span class="line del">-  version 9.1.4,</span>
+<span class="line add">+  version 9.1.5,</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revdate&quot;&gt;</span>
+<span class="line del">-  Fri May 15 07:28:20 CEST 2026</span>
+<span class="line add">+  Mon May 18 11:31:11 CEST 2026</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;toc&quot;&gt;</span>
+<span class="line ctx">   &lt;a href=&quot;index.html&quot; style=&quot;font-size: 0.8em;&quot;&gt;</span>
+<span class="line hunk">@@ -11895,9 +11895,13 @@</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line ctx">        ZFS uses</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line del">-        50 %</span>
+<span class="line add">+        10 %</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line del">-       of the host memory for the</span>
+<span class="line add">+       of the host memory, clamped to a maximum of</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        16 GiB</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       , for the</span>
+<span class="line ctx">        &lt;strong&gt;</span>
+<span class="line ctx">         A</span>
+<span class="line ctx">        &lt;/strong&gt;</span>
+<span class="line hunk">@@ -11909,21 +11913,25 @@</span>
+<span class="line ctx">        &lt;strong&gt;</span>
+<span class="line ctx">         C</span>
+<span class="line ctx">        &lt;/strong&gt;</span>
+<span class="line del">-       ache (ARC) by default. For new installations starting with Proxmox VE 8.1, the</span>
+<span class="line del">-ARC usage limit will be set to</span>
+<span class="line del">-       &lt;em&gt;</span>
+<span class="line del">-        10 %</span>
+<span class="line del">-       &lt;/em&gt;</span>
+<span class="line del">-       of the installed physical memory, clamped</span>
+<span class="line del">-to a maximum of</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        16 GiB</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       . This value is written to</span>
+<span class="line add">+       ache (ARC) by default. This value is written</span>
+<span class="line add">+to</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         /etc/modprobe.d/zfs.conf</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line del">-       .</span>
+<span class="line add">+       during installation. See the manual</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        man 4 zfs</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       for more information about ZFS kernel module parameters.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       Before Proxmox VE 8.1, the ARC usage limit was not set during installation and</span>
+<span class="line add">+matched ZFS&#x27; default value which was either 62.5% starting on ZFS 2.3.0 or 50%</span>
+<span class="line add">+for older versions. For existing installations that predate Proxmox VE 8.1, manual</span>
+<span class="line add">+steps would have to be performed in order to lower the usage limit as described</span>
+<span class="line add">+below.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -34109,6 +34117,16 @@</span>
+<span class="line ctx">       &lt;/li&gt;</span>
+<span class="line ctx">      &lt;/ul&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+     &lt;p&gt;</span>
+<span class="line add">+      If a firewall is enabled you will have to open the ports used by Ceph, the</span>
+<span class="line add">+easiest way to do this is to use a firewall</span>
+<span class="line add">+      &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+       macro</span>
+<span class="line add">+      &lt;/span&gt;</span>
+<span class="line add">+      .</span>
+<span class="line add">+     &lt;/p&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot; id=&quot;pve_ceph_recommendation_disk&quot;&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;title&quot;&gt;</span>
+<span class="line ctx">       Disks</span>
+<span class="line hunk">@@ -36487,6 +36505,481 @@</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;_fastec_span_class_monospaced_allow_ec_optimizations_span&quot;&gt;</span>
+<span class="line add">+       FastEC (</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        allow_ec_optimizations</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       )</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#_fastec_span_class_monospaced_allow_ec_optimizations_span&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Ceph Tentacle introduces a new erasure coding I/O path called FastEC,</span>
+<span class="line add">+enabled per pool via the</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         allow_ec_optimizations</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        flag. FastEC adds partial</span>
+<span class="line add">+reads and partial writes on EC pools, substantially improving small random</span>
+<span class="line add">+I/O performance — the dominant access pattern of virtual machine disk I/O.</span>
+<span class="line add">+Upstream recommends it for RBD and CephFS backed storage</span>
+<span class="line add">+        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line add">+         &lt;br/&gt;</span>
+<span class="line add">+         [Ceph Erasure Code</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/erasure-code/&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/squid/rados/operations/erasure-code/</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         ]</span>
+<span class="line add">+         &lt;br/&gt;</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        .</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        FastEC has four requirements that the Ceph monitor enforces:</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+       &lt;ul&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          the pool must be erasure coded;</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          the cluster must be at</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           require_osd_release</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          tentacle or later;</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          the erasure code profile must use a plugin and technique combination</span>
+<span class="line add">+  that supports the optimized EC path:</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+         &lt;div style=&quot;overflow-x:auto&quot;&gt;</span>
+<span class="line add">+          &lt;table class=&quot;tableblock frame-all grid-all&quot; style=&quot;</span>
+<span class="line add">+width:70%;</span>
+<span class="line add">+&quot;&gt;</span>
+<span class="line add">+           &lt;col style=&quot;width:33%;&quot;/&gt;</span>
+<span class="line add">+           &lt;col style=&quot;width:33%;&quot;/&gt;</span>
+<span class="line add">+           &lt;col style=&quot;width:33%;&quot;/&gt;</span>
+<span class="line add">+           &lt;thead&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              Plugin</span>
+<span class="line add">+             &lt;/th&gt;</span>
+<span class="line add">+             &lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              Technique</span>
+<span class="line add">+             &lt;/th&gt;</span>
+<span class="line add">+             &lt;th class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              FastEC</span>
+<span class="line add">+             &lt;/th&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+           &lt;/thead&gt;</span>
+<span class="line add">+           &lt;tbody&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                isa</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                reed_sol_van</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               yes</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                isa</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                cauchy</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               no</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                jerasure</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                reed_sol_van</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               yes</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                jerasure</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               all others</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               no</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                lrc</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               (any)</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               no</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                shec</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               (any)</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               no</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+            &lt;tr&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+                clay</span>
+<span class="line add">+               &lt;/span&gt;</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               (any)</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+             &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+              &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+               no</span>
+<span class="line add">+              &lt;/p&gt;</span>
+<span class="line add">+             &lt;/td&gt;</span>
+<span class="line add">+            &lt;/tr&gt;</span>
+<span class="line add">+           &lt;/tbody&gt;</span>
+<span class="line add">+          &lt;/table&gt;</span>
+<span class="line add">+         &lt;/div&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          the pool’s stripe unit must be a multiple of 4096 bytes. The default</span>
+<span class="line add">+  stripe unit satisfies this, so this is only relevant for pools created</span>
+<span class="line add">+  with a custom</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           stripe_unit</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          in their erasure code profile.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line add">+       &lt;/ul&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        If any precondition is not met,</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         ceph osd pool set &amp;lt;pool&amp;gt;-data allow_ec_optimizations 1</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        fails with a descriptive error — no silent degradation.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         pveceph</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        does not set the plugin or technique explicitly when creating an</span>
+<span class="line add">+EC profile — both are seeded from the monitor’s</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         osd_pool_default_erasure_code_profile</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        option (</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         reed_sol_van</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        by default</span>
+<span class="line add">+on both Squid and Tentacle). The technique requirement is therefore</span>
+<span class="line add">+satisfied out of the box unless the operator has overridden this setting.</span>
+<span class="line add">+Verify with:</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+       &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+        &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+        &lt;pre&gt;&lt;tt&gt;ceph config get mon osd_pool_default_erasure_code_profile&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        If the output shows a technique other than</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         reed_sol_van</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        , either update</span>
+<span class="line add">+the cluster-wide default or create a compatible profile explicitly and pass</span>
+<span class="line add">+it via the</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         profile</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        property when creating the pool (see above).</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Check the cluster release with:</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+       &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+        &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+        &lt;pre&gt;&lt;tt&gt;ceph osd dump &lt;span style=&quot;color: #990000&quot;&gt;|&lt;/span&gt; grep require_osd_release&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        If this reports a release older than</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         tentacle</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        , run</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         ceph osd require-osd-release tentacle</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        after all OSDs have been upgraded.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Important&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAALa0lEQVRogdWZa2wc1RXHfzM7O/te</span>
+<span class="line add">+P9e1vXHSmEdjx3YeDkkaF6REKRRCEDSEFNkRjdSWSsgC2iqoRWqLQKiqIBg1NOQDiMeHtkQIQkRR</span>
+<span class="line add">+S9S4aWwgCQoUgl232KkT28J21l6vd3d2dx79sDuTXdtre03Uqlc62tl53Pv/n3PuOffcKxiGwf9z</span>
+<span class="line add">+E//XAL5sk65WR0a6AaDrOjMtKwgCoigiCAKCIAhXa9wvTcAEHhoc5KMjR7jw3nucf+MN67k/GCS4</span>
+<span class="line add">+YQOr77yTpl27kGUZm81mXC0ywlLnQDbwEwcO0P2b3yz4jV5RwZq2Nm5/5BH8fj+SJGGz2b4UiSUR</span>
+<span class="line add">+MAzD0DSNEwcO8MdHHln8d0AcsAUCfOe551h7yy04HA7sdvuSrVEwAV3XjdDgIC/v2cOl06dznqWA</span>
+<span class="line add">+JCAAMvn9MwlEgF1PP8037rsPt9uN3W5fkjUKIqDrujF+4QLP3XQTU0NDOc8UIAa4y8sJtrQQqK/H</span>
+<span class="line add">+7XQSfv99Pn/nHQRRxNB16/0EEAUatm9n76uv4vP5cDgcBZNYNIF84I0MEK20lIZvf5sNe/dSWlqK</span>
+<span class="line add">+1+vFxBEZHubT3/+evqNHmR4dJRWP55BevW0bra+8gt/vx+l0IknSokksikA+8ElgClixYwc3799P</span>
+<span class="line add">+ZWUlTqczbz+x0VFOPvEEQ6dPE/niCwxdt0jUbd1K68svU1xcXBCJBQnMBz5eWkrL/v2s++Y3KSsr</span>
+<span class="line add">+QxQXlxc7f/5zBjo7CQ8NoadSKKQn943t7dyyf79FYjHuNC8BwzAMVVV56Z57+OzNN3PAJ8vK+FZH</span>
+<span class="line add">+B2s2b55X6/nahRMnOP7TnxLOKEXJyO2/+hVf37uXoqIinE6nmfzyksirMjNUvvGjH+WAVwG1vJxb</span>
+<span class="line add">+Dhxg1bp1uFwuMwQWJCu3bWPN3r24SkoAcGbA/OXXv2bws8+IRqOkUqlZGX1RBAzDMHRd51+nTvHe</span>
+<span class="line add">+wYNX7gPTQMO+faxav56SkpIlgTdlU3s7TXv2IGUs6AGioRDH2tuZmJggFouhqirGPCzyEUBVVX7X</span>
+<span class="line add">+1pZzPwI0fP/7bNmzh7KysrzADh8+zP3338++ffs4ePBg3vdEUWTDD3/IsuZmRLsdW4bEpd5eOp99</span>
+<span class="line add">+lnA4jKIoaJqWl8QsAqb2Txw4kDNp40BxXR0bWlspLy/PC+qZZ55hdHQUSZIYHByko6ODxx57bBZw</span>
+<span class="line add">+cy3kq6xk6y9/ib+qCgQBmbQ7nT50iIs9PUSjUZLJJIZhzEliLgKMDQzwp5/9zLqnkQ51W3/xCwKB</span>
+<span class="line add">+AE6nMy+B3t5exsfH6ezspLe3l3g8zuHDh2cBz5bKpibWtrXhLi0FwA3owNsPP8zExATxeBxVVecy</span>
+<span class="line add">+QC4Bc+L+taNjluvU33031dddN6/2BUGgpKSE/v5+JicncweaA3i2tDz8MIHrr0eU0gsQBzDW10ff</span>
+<span class="line add">+yZNEIhESicScrpRDQNd1xgYG+OC3v7XuJQBXIMDWn/yEioqKeUGMjY0hCAKKoszS1MjIyLzfAmx/</span>
+<span class="line add">+4gmKli0DQcBJOmicfOopJicnicfjJoG5LWBq/+Szz+a8oABNe/bgdrvndR1BEKiqqiIejxOLxWYR</span>
+<span class="line add">+CAaDC0alqjVrqGxowFNWhkDalUKff07f3/5mWSFTLFksLAK6rjN+4UKO9lXAUV7O2tbWeaNOthZl</span>
+<span class="line add">+WZ4FHlh0aN3y4IPIHk+6L8AGvNfRQTgctuZCthVEU/u6rnPutddyBk0A9bt3W4us+QY2fbyurg6v</span>
+<span class="line add">+15vTzw033LBoAsHmZoLNzdgcDgBcQKi/n391dTE9PU0ymcyxgkmAVCrF+4cO5WjfFgiwfoGwOTOy</span>
+<span class="line add">+lJWVUVtba1mkUAKCILClvR1veTkA9owVPnzllZy8YFnA1H5/dzfTw8PWgziwcutWfD4fsiwvCNyU</span>
+<span class="line add">+xsZG3G43lZWVVl933XVXQQSq161j+ebNlhXcwBdnzxIOh60lhmkFEUDTNP7++uvWgBrp6mrNHBk3</span>
+<span class="line add">+H/BsAtFoFEdm8GAwyMaNGwsiIAgCjbt346uosKwgAp8cPWolNj1THInmsqHn6FGLQApY1thIxcqV</span>
+<span class="line add">++Hy+WX6+0ETesWMHLpcLWZZ54IEHCgYvCAKrbrsNyem0JrQEXMzkhKzlBaKu61z+97+ZHhnJmbwr</span>
+<span class="line add">+tm2zJu5CWp8pra2tNDU1sXPnTtrb25dEQBAEvrplC57MXJCB8XPniEQixONxa6Uq6brOQHd3jvvo</span>
+<span class="line add">+QP2ttxZUpMxsL7zwwpK+AyxLXrt9Oxe6uxFEEXvGZc4fO0bVD35AMplM1wuapjGYtbugAp5AgKLq</span>
+<span class="line add">+aquu/W/JTEs37dqFqihWzSADk8PD1jzQNC3tQtmrThUINDbm+H4h0tfXx6OPPsodd9xBW1sbPT09</span>
+<span class="line add">+BQPPluu2b7fWRxIQ6usjFotZBCRN06wZbbZAfT1FRUWWKQtpzz//PMPDw/T09DA1NcXo6CjHjx+f</span>
+<span class="line add">+11Xma95AwHJjEdB0HUVRrhCYuRGrAiXBoFUqFtq6u7sZHx9nJBMUurq65uxnsX0Hm5v56A9/ANIJ</span>
+<span class="line add">+LXrpEolEwgqlUqZQyPlo6OOPlzx5ly1bxnBWQmxpackBW6hSBEC02axrpqasNZGmaek8kN0kYPDj</span>
+<span class="line add">+j1FVdUlz4Mknn6Surs4Cb5aUhYZiUy59+GGOgm3V1WiadiUPCILAV9autV5wAaM9PXQeOWJprBBp</span>
+<span class="line add">+aGjgxIkTpFIpOjs7aWxsXBJwUwZOnUKZmgLS2zl4vUjSlV1XURRFqtavv3IDKAVe/O53efPxx69a</span>
+<span class="line add">+SCxUBs+c4dV77+Vyfz+xy5eBdG3iX7ECm81m9S2JokiwuZmiujrCPT1AuqgOAqcef5zzL77Imt27</span>
+<span class="line add">+uemhhyipqVnYZ5cw8bPbR0eOcOall7g8MEB4aIhEJAJk9qOAwKZNyLJsHpQgRKNRIxQK0XPmDH/+</span>
+<span class="line add">+3vdQQ6G8na/YtIk199zDypYWVmzceFWAT1y8yMWzZzn/9tv0vfsudqeTlKIQHRvL2QSOAqU7d/K1</span>
+<span class="line add">+W2/l2muvpba2Nl3iJhIJIxKJMDw8TO/Zs3zw4x+jTUzkHVCw2fCUleHw+QiuXYu/upqqhgb8VVUY</span>
+<span class="line add">+hkFNczPFweCs7z556y3r+vyxYwiiyD+PHwdBwNB1krEYhqYRC4UwdB2D9LJmmnRtXHz77VTfeCPL</span>
+<span class="line add">+ly+ntraWmpqa9MaaqqqGoiiEQiGGhoYYHBzk00OHiHR2LkqDNlnG7nJhd7nQswqN+ZogiuipFMlY</span>
+<span class="line add">+DDWRgBl5KEF6woqAUFFByc03U756NZWVlSxfvpyamhoCgQAejwdB13VDVVVisRihUIiRkRGGh4cZ</span>
+<span class="line add">++sc/GO3qIt7VhZGJAle7mVpWuVKDCBng8jXX4N68Gc8111BUVER5eTnV1dVUV1cTCASuFFqGYaDr</span>
+<span class="line add">+upFKpYjH40xMTDA+Ps7Y2Bjj4+OEw2EmenqYPneO1OAgZCWpxTY9S9QMcLhyHGUDRI8HqbISZ309</span>
+<span class="line add">+zoYGnE4nHo8Hv99PaWkpgUCAiooK6/DE4XCkI1HW2a6hqiqKojA9Pc3k5KQl4XCY6elpotFoetuk</span>
+<span class="line add">+v59UKIR66RLToRBJTcMYHUWIRvMSMPO6rbY2/SsIOFatQpYk5NWrkSQJWZZxOBy43W68Xi9+v5+i</span>
+<span class="line add">+oiJKSkooLi7G5/PhdruRZdnads85HzD3hpLJJIqiEIvFiEajRCIRIpEI0WiUWCxGPB631iOKopBK</span>
+<span class="line add">+pazUbi4Oc7Y+snKCzWbDZrMhSRKSJGG3262w6HK5cLlceDwevF4vPp8Pr9eL2+3G5XLhcDjMkxuE</span>
+<span class="line add">+TNibdcBhnv9qmkYqlSKZTJJIJFAUhXg8jqIoKIpCIpGwSCSTSVRVtWSuk3qTiAnebrfngHc4HDid</span>
+<span class="line add">+TpxOJy6Xy7qWZdk6wZzrxCbvCY1JRNd1NE3LAWgSM69ngp+PgCiK1gF3NhFTzHvmO+Y3wCzw8xLI</span>
+<span class="line add">+JpL5tYCZpEyw2f/nWt1ag2UtM0x3Mq1iAp1j+bH0M7KFCGWDnfmbd8AMnuxfUzL/C0rp/wFnFd4n</span>
+<span class="line add">+EQn3XQAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           allow_ec_optimizations</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          is a one-way switch. Once enabled on a</span>
+<span class="line add">+pool, the Ceph monitor refuses to clear the flag again, so rolling back</span>
+<span class="line add">+requires draining and recreating the pool. Enable it only after validating</span>
+<span class="line add">+that FastEC works for your workload on a test pool.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line add">+       &lt;h6 id=&quot;_enabling_fastec_on_a_pool&quot;&gt;</span>
+<span class="line add">+        Enabling FastEC on a pool</span>
+<span class="line add">+        &lt;a class=&quot;headerlink&quot; href=&quot;#_enabling_fastec_on_a_pool&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+        &lt;/a&gt;</span>
+<span class="line add">+       &lt;/h6&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         FastEC is enabled per pool via the</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          ceph</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         CLI. It can be set on both new</span>
+<span class="line add">+and existing (populated) pools. No data migration or re-encoding takes</span>
+<span class="line add">+place; only pool metadata changes.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         To enable FastEC on a pool, run the following command against the data pool</span>
+<span class="line add">+(typically named</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          &amp;lt;pool-name&amp;gt;-data</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         ):</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+        &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+         &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+         &lt;pre&gt;&lt;tt&gt;ceph osd pool &lt;span style=&quot;font-weight: bold&quot;&gt;&lt;span style=&quot;color: #0000FF&quot;&gt;set&lt;/span&gt;&lt;/span&gt; &lt;span style=&quot;color: #990000&quot;&gt;&amp;lt;&lt;/span&gt;pool-name&lt;span style=&quot;color: #990000&quot;&gt;&amp;gt;&lt;/span&gt;-data allow_ec_optimizations &lt;span style=&quot;color: #993399&quot;&gt;1&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+        &lt;/div&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Verify the result with:</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+        &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+         &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+         &lt;pre&gt;&lt;tt&gt;ceph osd pool get &lt;span style=&quot;color: #990000&quot;&gt;&amp;lt;&lt;/span&gt;pool-name&lt;span style=&quot;color: #990000&quot;&gt;&amp;gt;&lt;/span&gt;-data allow_ec_optimizations&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+        &lt;/div&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         The same command reports the current state for any EC pool, which is useful</span>
+<span class="line add">+when auditing a cluster.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         When the flag is set on a populated pool, be aware of the following:</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+        &lt;ul&gt;</span>
+<span class="line add">+         &lt;li&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           &lt;strong&gt;</span>
+<span class="line add">+            Primary re-election.</span>
+<span class="line add">+           &lt;/strong&gt;</span>
+<span class="line add">+           FastEC marks data shards 1 through k-1 as</span>
+<span class="line add">+  non-primary, so PGs whose primary was on one of those shards will</span>
+<span class="line add">+  re-peer. This is a normal peering event and causes a brief I/O pause</span>
+<span class="line add">+  per affected PG.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/li&gt;</span>
+<span class="line add">+         &lt;li&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           &lt;strong&gt;</span>
+<span class="line add">+            Scrub interaction.</span>
+<span class="line add">+           &lt;/strong&gt;</span>
+<span class="line add">+           Re-peering cancels any in-flight scrub on</span>
+<span class="line add">+  affected PGs. Those PGs will need to be re-scrubbed after peering</span>
+<span class="line add">+  completes.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/li&gt;</span>
+<span class="line add">+        &lt;/ul&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line ctx">       &lt;h5 id=&quot;_adding_ec_pools_as_storage&quot;&gt;</span>
+<span class="line ctx">        Adding EC Pools as Storage</span>
+<span class="line ctx">        &lt;a class=&quot;headerlink&quot; href=&quot;#_adding_ec_pools_as_storage&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line hunk">@@ -37196,6 +37689,82 @@</span>
+<span class="line ctx">         If the pool already contains objects, these must be moved accordingly.</span>
+<span class="line ctx"> Depending on your setup, this may introduce a big performance impact on your</span>
+<span class="line ctx"> cluster. As an alternative, you can create a new pool and move disks separately.</span>
+<span class="line add">+       &lt;/td&gt;</span>
+<span class="line add">+      &lt;/tr&gt;</span>
+<span class="line add">+     &lt;/table&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+     &lt;table&gt;</span>
+<span class="line add">+      &lt;tr&gt;</span>
+<span class="line add">+       &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+        &lt;img alt=&quot;Warning&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAMVUlEQVRogdWZeXDVVZbHP7/f27JB</span>
+<span class="line add">+wtJIiCERRFlbx5FuHRrRBgtBsRIwCCOrFmGmiDBjYVNlQlgiQjU6IjI4xLJxGf5QGp0Cbaftsu3R</span>
+<span class="line add">+hu6aYXqgLZoWEsjyyDP7S972e7/l3vnj5cW3Ji9M/zOn6lRS997fvd/vueece+59ipSS/89iv5mP</span>
+<span class="line add">+ZEQQQsS23RQARVEAUFUVRVFQog0ZyogJSClld3c327Ztw7IsLMuKto90KgBsNhtVVVXMnj2bvLw8</span>
+<span class="line add">+7Ha7HBEJKWXGKoSQXV1dcsuWLfLSpUsyKkKIIdWyrLTqdrvlU089Jc+cOSM9Ho8Mh8NSCCEzxTRi</span>
+<span class="line add">+8JWVlbKtre0vAt6yLGmapmxtbZXr1q2TZ86ckW1tbSMikTH4GzduyKqqqkHwsSA1TZOhUChOg8Hg</span>
+<span class="line add">+oBqGIQ3DSAk+VleuXDliEspwviullD09PbzwwgscO3Yszt91XScQCNDZ2YlhGIPfuFwu7Pb48FJV</span>
+<span class="line add">+lZycnEG/z8/PRwiBqqqDYzweD88//zyrV69m7ty5jBs3DofDMWRgD0lASik9Hg979uzh2LFjcYEa</span>
+<span class="line add">+CoVob2/n2q9+hbZ585BGSCWltbVMr61NtSYbN25k7dq1zJkzZ1gSaqrGWPD79+9PAh8MBuns7OTi</span>
+<span class="line add">+e+8R2rwZCYOaqTTt3cuf6+qSwAMcP36co0eP8vXXX9Pd3Y1hGMg0lk65A1HwdXV1vPHGG0mW7+jo</span>
+<span class="line add">+4A8/+xn2BAAAI0riQOnu3cyork7Zt3btWtavX89dd92VdieSCEgppdvt5sCBAxw5ciSuLxQK0dTU</span>
+<span class="line add">+RMOHHyJ37hwh1NSiAKU7djDzxRdT9q9YsYJt27YxY8aMlCTiCEgp5eXLl6mvr+fVV1+NmygYDNLW</span>
+<span class="line add">+1sY3J09ipLEYQDPw2sBfCTwMLARKgKwhiNxWU8OsXbvi2qLYnnzySSorK1PvRGyqvH79uty6dWtS</span>
+<span class="line add">+Lg8EAvLKlSvyo1275M8hSV8H+eMBvRPkP9Vslp0tV6W3u12+c7hOTgT5NyAXgtwE8gTIUyn0D9XV</span>
+<span class="line add">+0jAMqet6klZUVMjPP/88KcWqUcs3NjZy+PBhDh06FGeFqNtcOnECY8+euICVwDWgFtj/m1/wD+8f</span>
+<span class="line add">+5xtg6uy5ZI+5BSkkU6fexgu7tvLWhd/x1tXL5P/905wAggnzSODavn388Sc/SblDL7/8Mq+99hqX</span>
+<span class="line add">+L1+OC2zb7t27uX79+u7Dhw+ndJvW1lYaP/qI0EDKS1z0XeDjC7/l9llz+d6EWxjv0imdcgeFRcVo</span>
+<span class="line add">+fR46vm1Cx8ndP5hP3qjR/GDuX/GbC5/iberl1qirxGjv73+PYRjc8tBDcVhGjRpFRUUF27dvp7i4</span>
+<span class="line add">+mPz8fFwuV2QHVq1aldLyDQ0NXDt5En91NRIQCRqNHld2HsLUCfu6GD9mNIoVQggDy9RQpYLTbkdV</span>
+<span class="line add">+7Vh6CH9vJ/fcfz/vALsAN2AlzHv1wAEu1tTExUI0Hl555RXq6upobm4mEAhECEyePDkOvK7rtLS0</span>
+<span class="line add">+cOP0aby1tUnAo2oNkFAUSTjoRfN+ix7wgjRBShACVVFQRGSkHvTypwtnmXHPQhrbb3D0k1McAdpi</span>
+<span class="line add">+DBLVhp/+lIvV1UlV7oQJE8jNzcXtduPz+ZIPMtM0aWhooPH99+mtrU1ymVRqUxUQFlJYSBFGCivG</span>
+<span class="line add">+OSyEaSCFAGlhd+Vy7w/n43BmM3POXWx69hl8AyMTDXTl4EEu7t2bCBGAQCCAruupCdjtdrp3705r</span>
+<span class="line add">++ViN22YhsUwdyzRBCpACyzIRMnpngCxXNjYlMk4L+ggoYXxp5pbAlX37cDgcSQSEEAxmoVgQg/9n</span>
+<span class="line add">+AP67bVdAUcFmQ3W6IgtIiWUKLCGwLGvQj69e+m+EsBB6iGB/N/3e9oyNlIgRYm5kiR2JH0L6MkFY</span>
+<span class="line add">+Ei0UQKAycdJUbIodT3Mjpu6n3xfCptoRlomQCqZpRkhLCykMhLBQSV1HJbalKnvSF3MpNO0OSIEw</span>
+<span class="line add">+DWyuPCaVzCRv7ER8Ph+mtJM35lZsdjvuxktYhobDkYOCgqJEDWLLaAfSVc1p78SJO2AAvUBggLUN</span>
+<span class="line add">+KIx2Kgqjv3crY2wOiqaqKKoKihKJCctCC/npbW+jq7sbS7UjkGCZCCkQQkdJsV6mRWHGBH4HLHpx</span>
+<span class="line add">+F3LcGDq6u7nw2S85++V/4gb0kB9hFoAZwuZwgc2BqjpQVRWbzYXd4cDlysHn7WJi0W2EfH24XA6E</span>
+<span class="line add">+jKySqhTPtDRPIjB4XUtoPw3sKV/O+KJipJT4V63mq3/7Obu21/LN/5xl9l/PIys7G2fOaBS7E5vN</span>
+<span class="line add">+QrU7UW0KNlUFp5P8MeO5/8HFhPo7CXr7MMIaQW8neSkMlqnEEYj1s8QJbwXaWpopmDgJh93OqHGF</span>
+<span class="line add">+LFy9jjunTeHNo2uAvUy54/uMuaUYV24BUpVYpoVEwaY4UVUbitNJ9ugxOBw2tEAPfX29QCjuVB9O</span>
+<span class="line add">+EmNBTdeRGEj3A56OdkwtgDDCCKFjz8ql6N55/G3VcRouX+SXH72Ht6udcCg4cJiJSPIn8oCloIKU</span>
+<span class="line add">+KAhURUUIiVCjx128pjtrEiVtFkrMNNOBA+s34XG3YIRDSMtAkSbOrDzuvOchHnmiklEFY3n76G7O</span>
+<span class="line add">+f/nv9Ht7EMJCSjGoljCxjOBAnaSjhYPowevDZrx04FMSGLwnJEzmAOYCn33wAUYoiGXoSMsEoeNw</span>
+<span class="line add">+ZTO2aDrzFpWxck0VJVOn4fd2E/T7oneNyOFlGkjLwNTD6FoILRQEa/hDcyhJIuB0OlFVNeVE04B3</span>
+<span class="line add">+XjnC+d9+hRYKYJlhpDBBGDidDiaUfp/xk24nJ3c0eaPzsKsgzEhtZJkGIuzDNDRCAR99fb309XYh</span>
+<span class="line add">+NAYPsnQ6IgJSSgoKCihavDilJZ4Aajf8HVf/fAnLCCNNAyktECaqIsgbV8So0WMHrn2RGLBMHREO</span>
+<span class="line add">+YBg6eiiIFgzQ7/US8vmYoEDuENa/u6oqcwJRPysoKOC+N9+kcNGiJGvkAQuADY+twn3tCuFg/4CV</span>
+<span class="line add">+DbB0VKHhzHbhdGVhs6kgDKTuR9f86KEAWtBHd0c73p52pB5Av5KewJxnnmHeoUOEw+EkjHEEYi8M</span>
+<span class="line add">+EHlFKyws5IfHjlG4cGHSxJOA1cATPy7nT388j+73YoYDCEuP1DhSRrKOlFhmmLAWQNMCBHw9tHtu</span>
+<span class="line add">+8K2nBcsI8uGxf8HoiRBINNTtjz7KQ/X1xL6iRDHGvubZAfr7+1Nuz+TJk6G+nv/atInmX/86rq8A</span>
+<span class="line add">+WAlUrahk/Fio/8XHjM4fi93pHCgRFCzLQtd1tFAQLeCjs9NNb4cHxdL44J8PozfD7XyXRqNy97p1</span>
+<span class="line add">+PPz220gp0XU9zriKogw+SaqqGtmB48ePU15enkRASklRURH31tcz6cEHk1JrAfAUcEcPLLjvMU69</span>
+<span class="line add">+/694uzsI+X3093TS5blBl8eNt72VHk8Tfd9eR+vv4MQ/HkZpiJwttgTL3/Hoo2nBNzY2smjRIhYs</span>
+<span class="line add">+WEBBQQEulyvyLuT3+2VTUxM7d+7k5MmTKXNuS0sL555+mtYvv0zqE0A7kavhqFL4oAlCCWOygGIi</span>
+<span class="line add">+qTiHyMnuTBgz/bHHKDt9GillnN8D+P1+ysrKWLJkCdOmTWPWrFmUlpZGCAghpN/vp7m5mZqaGl5/</span>
+<span class="line add">+/XUKCwtJFLfbzX+sX8+Nr75K6rtZiXr49KVLKf/4Y4QQ6LqeBP6RRx6hvLycadOmMXPmTEpKSsjN</span>
+<span class="line add">+zf3uZS6WRHV1NadOnUpaTEpJa2sr5zZupOkmSaQqk2csWcLyTz4BQNO0uL7GxkbWr1+fErzNZlMG</span>
+<span class="line add">+w1lVVSUvL4+SkhL27dvH8uXL8Xg8ceABiouLue+ttyieN2+IK2Z6TRx/5+LFacE3NDRQWVmZFjwk</span>
+<span class="line add">+nAOxJF566SW2bNnChQsXkmKipKSEB959l9vmzcvo1pZOpz/8ME98+mla8Bs2bGDZsmVpwUOa5/VE</span>
+<span class="line add">+d0oXE319fXxWXs43Z88m9Q0n03/0I1YPJIRE8OfOnWPHjh2UlZUNCT4tgUQSO3fupKqqigceeGCw</span>
+<span class="line add">+P/a7VM8emUg0VcbK+fPn2bp1KytWrBgW/JAEEknU1NTw7LPPMn/+/GFBZQI8lZw/f57nnnuO5cuX</span>
+<span class="line add">+M2XKlGHBD0sgkURdXR2PP/44FRUVNwV+qP7Tp09z8ODBjNxmRAQSSRw4cIBly5axdOnSvwh4RVH4</span>
+<span class="line add">+4osv2L9/P2VlZRlbfkQEEkls376djo4OQqHE83bk4nK5EEKwZs0aSktLRwR+RATgOxItLS1cu3aN</span>
+<span class="line add">+vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s</span>
+<span class="line add">+/F/lgJiyQFHragAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+       &lt;/td&gt;</span>
+<span class="line add">+       &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+        When using the PG autoscaler, all pools in the cluster are required to</span>
+<span class="line add">+use CRUSH rules of the same kind, either all specifying a device class,</span>
+<span class="line add">+or none. Otherwise the autoscaler will skip the affected</span>
+<span class="line add">+pools and their</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         pg_num</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        will not be adjusted.</span>
+<span class="line ctx">        &lt;/td&gt;</span>
+<span class="line ctx">       &lt;/tr&gt;</span>
+<span class="line ctx">      &lt;/table&gt;</span>
+<span class="line hunk">@@ -68812,6 +69381,458 @@</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line add">+     &lt;h4 id=&quot;pvesdn_bgp&quot;&gt;</span>
+<span class="line add">+      12.11.5. BGP</span>
+<span class="line add">+      &lt;a class=&quot;headerlink&quot; href=&quot;#pvesdn_bgp&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+      &lt;/a&gt;</span>
+<span class="line add">+     &lt;/h4&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       BGP (Border Gateway Protocol) can be used as an eBGP unnumbered fabric. Each</span>
+<span class="line add">+node has its own Autonomous System Number (ASN) and peers with its neighbors</span>
+<span class="line add">+over physical interfaces without requiring IP addresses on the fabric links.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       Configuration options:</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;pvesdn_bgp_fabric&quot;&gt;</span>
+<span class="line add">+       On the Fabric</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#pvesdn_bgp_fabric&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line add">+       &lt;dl&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         IPv4 Prefix</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          IPv4 CIDR network range (e.g., 192.0.2.0/24) used to verify that</span>
+<span class="line add">+all node IPv4 addresses (BGP router-IDs) are contained within this prefix.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         IPv6 Prefix</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          IPv6 CIDR network range (e.g., 2001:db8::/64) used to verify that</span>
+<span class="line add">+all node IPv6 addresses in the fabric are contained within this prefix.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         BFD</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          Enable Bidirectional Forwarding Detection on all peering sessions in this</span>
+<span class="line add">+fabric. BFD provides fast failure detection for links between nodes.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Route Filter</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          A prefix list applied to the fabric peer-group’s inbound</span>
+<span class="line add">+direction. When set, this prefix list replaces the implicit &quot;must be within the</span>
+<span class="line add">+fabric prefix&quot; filter. Useful to widen the accepted range (e.g. accept</span>
+<span class="line add">+additional non-fabric prefixes redistributed via the fabric) or to use a more</span>
+<span class="line add">+expressive match. References a prefix list defined under SDN.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Incoming Route Map</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          A route map chained from the fabric peer-group’s implicit</span>
+<span class="line add">+inbound filter via FRR’s</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           call</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          action. Only prefixes that have already passed</span>
+<span class="line add">+the implicit prefix check (or the Route Filter override) reach this route map.</span>
+<span class="line add">+Useful to transform or further narrow accepted routes (e.g. adjust community or</span>
+<span class="line add">+local-preference), but cannot widen the accepted set. Use Route Filter to</span>
+<span class="line add">+override the implicit filter. References a route map defined under SDN.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Outgoing Route Map</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          A route map applied to the fabric peer-group’s outbound</span>
+<span class="line add">+direction. Used to transform or filter what is announced to fabric neighbors.</span>
+<span class="line add">+References a route map defined under SDN.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Redistribute</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          Which other-protocol routes the BGP router on each node should</span>
+<span class="line add">+redistribute into the fabric. Supported sources are</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           connected</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ,</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           kernel</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ,</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           static</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          , and</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           ospf</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          . An optional per-source route map can be attached to shape</span>
+<span class="line add">+the redistributed routes before they are announced.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+       &lt;/dl&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          At least one of IPv4 Prefix or IPv6 Prefix must be configured.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;pvesdn_bgp_node&quot;&gt;</span>
+<span class="line add">+       On the Node</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#pvesdn_bgp_node&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Options that are available on every node that is part of a fabric:</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line add">+       &lt;dl&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Node</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          Select the node which will be added to the fabric. Only nodes that are</span>
+<span class="line add">+currently in the cluster will be shown.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         ASN</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          BGP Autonomous System Number for this node. It is recommended to use</span>
+<span class="line add">+private ASN numbers (64512-65534 for 16-bit, 4200000000-4294967294 for 32-bit).</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         IPv4</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          A unique IPv4 address for this node, also used as the BGP router-id.</span>
+<span class="line add">+Required when the fabric has an IPv4 prefix configured; each node in the same</span>
+<span class="line add">+fabric must have a different address.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         IPv6</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          IPv6 address for this node. If only an IPv6 address is configured</span>
+<span class="line add">+(without an IPv4 address), the BGP router-id is derived from it via a FNV-1a</span>
+<span class="line add">+hash.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Interfaces</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          Specify the interfaces used to establish peering connections with</span>
+<span class="line add">+other BGP nodes. These interfaces run BGP unnumbered (no IP address assignment</span>
+<span class="line add">+needed). When a node IP is configured, a dummy &quot;loopback&quot; interface is</span>
+<span class="line add">+automatically created with that IP.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+       &lt;/dl&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          Unlike OSPF and OpenFabric, BGP unnumbered interfaces do not need IP</span>
+<span class="line add">+addresses. Peering is established using IPv6 link-local addresses</span>
+<span class="line add">+automatically.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          In an eBGP unnumbered fabric, directly peering nodes must have different</span>
+<span class="line add">+ASNs for BGP sessions to establish.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;pvesdn_bgp_evpn&quot;&gt;</span>
+<span class="line add">+       Using BGP Fabrics with EVPN</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#pvesdn_bgp_evpn&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        When configuring an EVPN controller, a BGP fabric can be selected as the</span>
+<span class="line add">+underlay instead of manually specifying peer addresses. The default</span>
+<span class="line add">+configuration runs the EVPN overlay (VTEP) sessions as iBGP, using the EVPN</span>
+<span class="line add">+controller’s ASN for the router process. The per-node fabric ASN is</span>
+<span class="line add">+automatically applied via</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         local-as</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        on the underlay neighbor group.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        This means the EVPN controller ASN and the per-node fabric ASNs should be</span>
+<span class="line add">+different. For example, with three nodes using ASNs 65001, 65002, and 65003 for</span>
+<span class="line add">+the underlay, the EVPN controller could use ASN 65000 for the overlay.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Alternatively, setting BGP Mode to &quot;external&quot; on the EVPN controller runs the</span>
+<span class="line add">+VTEP sessions as eBGP. The per-node fabric ASN is then used as the local ASN</span>
+<span class="line add">+for the VTEP peer-group as well, so the VTEPs naturally peer with each other</span>
+<span class="line add">+under different ASNs without needing a separate overlay ASN. The EVPN</span>
+<span class="line add">+controller ASN is still used for auto-derived route-target values to keep</span>
+<span class="line add">+them consistent across the fabric.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          Using a BGP fabric for an EVPN underlay requires each node to have an</span>
+<span class="line add">+IPv4 address, since EVPN uses it as the VTEP address.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line ctx">    &lt;/div&gt;</span>
+<span class="line ctx">    &lt;div class=&quot;sect2&quot;&gt;</span>
+<span class="line ctx">     &lt;h3 id=&quot;pvesdn_config_ipam&quot;&gt;</span>
+<span class="line hunk">@@ -70722,9 +71743,9 @@</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line del">-       Add the following to</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        /etc/sysctl.conf</span>
+<span class="line add">+       Create a drop-in sysctl file</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        /etc/sysctl.d/99-rp-filter.conf</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        :</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line hunk">@@ -71526,12 +72547,25 @@</span>
+<span class="line ctx"> EQn3XQAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">          &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line del">-          If you enable the firewall, traffic to all hosts is blocked by</span>
+<span class="line del">-default. Only exceptions is WebGUI(8006) and ssh(22) from your local</span>
+<span class="line del">-network.</span>
+<span class="line add">+          If you enable the firewall, traffic to all hosts will be</span>
+<span class="line add">+blocked by default - with some exceptions for traffic coming from the</span>
+<span class="line add">+local network to the WebUI, SSH and other important services. A full</span>
+<span class="line add">+list of the default firewall rules can be found at</span>
+<span class="line add">+xref:pve_firewall_default_rules.</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">         &lt;/tr&gt;</span>
+<span class="line ctx">        &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Should you have other services running which communicate over the</span>
+<span class="line add">+network, you will have to allow them seperately. For some common</span>
+<span class="line add">+services there are</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         macros</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        available.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line hunk">@@ -73152,6 +74186,12 @@</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          TCP traffic from management hosts to port 22 to allow ssh access</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         TCP traffic from management hots to the port range 60000 to 60050 allowing</span>
+<span class="line add">+  traffic for migrations</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line hunk">@@ -84465,22 +85505,27 @@</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line del">-       The cluster imbalance is calculated as the ratio between the standard deviation</span>
+<span class="line del">-and mean of the individual node loads. Therefore, the</span>
+<span class="line add">+       The cluster imbalance is derived from the standard deviation and mean of the</span>
+<span class="line add">+individual node loads and is normalized to a 0-100% range. Both the</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        imbalance</span>
+<span class="line add">+threshold</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       and the</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        imbalance improvement</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       are configured in percent. The</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line ctx">         imbalance threshold</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line del">-       controls the sensitivity of the load balancer. If the</span>
+<span class="line del">-       &lt;em&gt;</span>
+<span class="line del">-        imbalance threshold</span>
+<span class="line del">-       &lt;/em&gt;</span>
+<span class="line del">-       is</span>
+<span class="line del">-set to a value of</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        0.0</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       , it will try to select a rebalancing migration every</span>
+<span class="line del">-time the</span>
+<span class="line add">+       defaults to 30% and controls the sensitivity of the load</span>
+<span class="line add">+balancer; with a value of</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        0</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       it will try to select a rebalancing migration</span>
+<span class="line add">+every time the</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line ctx">         hold duration</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line hunk">@@ -84488,15 +85533,15 @@</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line ctx">         imbalance improvement</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line del">-       percentage</span>
+<span class="line del">-filters what constitutes an acceptable rebalancing migration. If it is set to</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        0.0</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       , then it will always commit to a migration even if the expected</span>
+<span class="line del">-imbalance does not change at all. However, the value can never be negative, so</span>
+<span class="line del">-it will never commit to a migration with an expected imbalance worse than the</span>
+<span class="line del">-current one.</span>
+<span class="line add">+       defaults to 10% and filters what constitutes an acceptable rebalancing</span>
+<span class="line add">+migration; with a value of</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        0</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       it will always commit to a migration even if</span>
+<span class="line add">+the expected imbalance does not change at all. The value can never be</span>
+<span class="line add">+negative, so the balancer will never commit to a migration with an expected</span>
+<span class="line add">+imbalance worse than the current one.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line hunk">@@ -135253,9 +136298,9 @@</span>
+<span class="line ctx"> &lt;/div&gt;</span>
+<span class="line ctx"> &lt;div id=&quot;footer&quot;&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;footer-text&quot;&gt;</span>
+<span class="line del">-  Version 9.1.4</span>
+<span class="line add">+  Version 9.1.5</span>
+<span class="line ctx">   &lt;br/&gt;</span>
+<span class="line ctx">   Last updated</span>
+<span class="line del">- Fri May 15 07:28:20 CEST 2026</span>
+<span class="line add">+ Mon May 18 11:31:11 CEST 2026</span>
+<span class="line ctx">  &lt;/div&gt;</span>
+<span class="line ctx"> &lt;/div&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Author</span>
+      <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated (UTC):",
+          back_to_menu: "Back to main menu",
+          open_raw_diff: "Open raw .diff",
+          footer_by: "Author",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré (UTC) :",
+          back_to_menu: "Retour au menu principal",
+          open_raw_diff: "Ouvrir le .diff brut",
+          footer_by: "Auteur",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано (UTC):",
+          back_to_menu: "Назад в главное меню",
+          open_raw_diff: "Открыть raw .diff",
+          footer_by: "Автор",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+        if (adminToken) {
+          setAdminMode(true, adminStatus.dataset.login || "admin");
+        }
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>
