@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260521T130040Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260521T130040Z.diff</h1>
+      <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-21T13:00:59Z</p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260521T130040Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="open_raw_diff">Open raw .diff</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -346,10 +346,10 @@</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;br/&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revnumber&quot;&gt;</span>
+<span class="line del">-  version 9.1.5,</span>
+<span class="line add">+  version 9.2.1,</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revdate&quot;&gt;</span>
+<span class="line del">-  Mon May 18 11:31:11 CEST 2026</span>
+<span class="line add">+  Wed May 20 15:46:31 CEST 2026</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;toc&quot;&gt;</span>
+<span class="line ctx">   &lt;a href=&quot;index.html&quot; style=&quot;font-size: 0.8em;&quot;&gt;</span>
+<span class="line hunk">@@ -5366,7 +5366,7 @@</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">          &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line ctx">           &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-           &lt;a href=&quot;https://docs.ceph.com/en/squid/releases/&quot;&gt;</span>
+<span class="line add">+           &lt;a href=&quot;https://docs.ceph.com/en/tentacle/releases/&quot;&gt;</span>
+<span class="line ctx">             Estimated End-of-Life</span>
+<span class="line ctx">            &lt;/a&gt;</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line hunk">@@ -5404,14 +5404,14 @@</span>
+<span class="line ctx">           &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line ctx">            &lt;strong&gt;</span>
+<span class="line ctx">             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             ceph-squid</span>
+<span class="line add">+             ceph-tentacle</span>
+<span class="line ctx">             &lt;/span&gt;</span>
+<span class="line ctx">            &lt;/strong&gt;</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">          &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line ctx">           &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-           2026-09 (v19.2)</span>
+<span class="line add">+           2027-11 (v20.2)</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">          &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line hunk">@@ -5430,6 +5430,37 @@</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">         &lt;/tr&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           &lt;strong&gt;</span>
+<span class="line add">+            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+             ceph-squid</span>
+<span class="line add">+            &lt;/span&gt;</span>
+<span class="line add">+           &lt;/strong&gt;</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           2026-09 (v19.2)</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           available</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           available</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;tableblock halign-center valign-top&quot;&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           available</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line ctx">        &lt;/tbody&gt;</span>
+<span class="line ctx">       &lt;/table&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line hunk">@@ -5487,7 +5518,7 @@</span>
+<span class="line ctx">         &lt;/div&gt;</span>
+<span class="line ctx">         &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">          &lt;pre&gt;Types: deb</span>
+<span class="line del">-URIs: https://enterprise.proxmox.com/debian/ceph-squid</span>
+<span class="line add">+URIs: https://enterprise.proxmox.com/debian/ceph-tentacle</span>
+<span class="line ctx"> Suites: trixie</span>
+<span class="line ctx"> Components: enterprise</span>
+<span class="line ctx"> Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg&lt;/pre&gt;</span>
+<span class="line hunk">@@ -5522,7 +5553,7 @@</span>
+<span class="line ctx">         &lt;/div&gt;</span>
+<span class="line ctx">         &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">          &lt;pre&gt;Types: deb</span>
+<span class="line del">-URIs: http://download.proxmox.com/debian/ceph-squid</span>
+<span class="line add">+URIs: http://download.proxmox.com/debian/ceph-tentacle</span>
+<span class="line ctx"> Suites: trixie</span>
+<span class="line ctx"> Components: no-subscription</span>
+<span class="line ctx"> Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg&lt;/pre&gt;</span>
+<span class="line hunk">@@ -5556,7 +5587,7 @@</span>
+<span class="line ctx">         &lt;/div&gt;</span>
+<span class="line ctx">         &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">          &lt;pre&gt;Types: deb</span>
+<span class="line del">-URIs: http://download.proxmox.com/debian/ceph-squid</span>
+<span class="line add">+URIs: http://download.proxmox.com/debian/ceph-tentacle</span>
+<span class="line ctx"> Suites: trixie</span>
+<span class="line ctx"> Components: test</span>
+<span class="line ctx"> Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg&lt;/pre&gt;</span>
+<span class="line hunk">@@ -24497,9 +24528,9 @@</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line del">-     &lt;h4 id=&quot;_changing_the_token_coefficient&quot;&gt;</span>
+<span class="line add">+     &lt;h4 id=&quot;pvecm_changing_token_coefficient&quot;&gt;</span>
+<span class="line ctx">       5.12.2. Changing the Token Coefficient</span>
+<span class="line del">-      &lt;a class=&quot;headerlink&quot; href=&quot;#_changing_the_token_coefficient&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+      &lt;a class=&quot;headerlink&quot; href=&quot;#pvecm_changing_token_coefficient&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -24512,8 +24543,20 @@</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         /etc/pve/corosync.conf</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line del">-       . corosync uses the token coefficient to calculate</span>
+<span class="line del">-several timeouts in relation to the cluster size.</span>
+<span class="line add">+       . If the token coefficient is not explicitly set, it</span>
+<span class="line add">+defaults to 650 milliseconds. Since Proxmox VE 9.2, new clusters are created</span>
+<span class="line add">+with a lower token coefficient of 125 milliseconds explicitly set in</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        /etc/pve/corosync.conf</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       . This reduces the time needed for reestablishing a</span>
+<span class="line add">+new cluster membership after a node failure.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       corosync uses the token coefficient to calculate</span>
+<span class="line add">+several timeouts in relation to the cluster size</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [</span>
+<span class="line hunk">@@ -24527,27 +24570,219 @@</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line add">+       ,</span>
+<span class="line add">+most importantly the token timeout and consensus timeout.</span>
+<span class="line add">+corosync implements a token-passing protocol. The token timeout specifies how</span>
+<span class="line add">+long a node waits for the token until it declares the token to be lost</span>
+<span class="line add">+       &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line add">+        &lt;br/&gt;</span>
+<span class="line add">+        [</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         token</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        in the corosync manual page</span>
+<span class="line add">+        &lt;a href=&quot;https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#token&quot;&gt;</span>
+<span class="line add">+         https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#token</span>
+<span class="line add">+        &lt;/a&gt;</span>
+<span class="line add">+        ]</span>
+<span class="line add">+        &lt;br/&gt;</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       . The</span>
+<span class="line add">+consensus timeout</span>
+<span class="line add">+       &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line add">+        &lt;br/&gt;</span>
+<span class="line add">+        [</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         consensus</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        in the corosync manual page</span>
+<span class="line add">+        &lt;a href=&quot;https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#consensus&quot;&gt;</span>
+<span class="line add">+         https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#consensus</span>
+<span class="line add">+        &lt;/a&gt;</span>
+<span class="line add">+        ]</span>
+<span class="line add">+        &lt;br/&gt;</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       specifies the time nodes wait for a consensus on a new cluster membership. The</span>
+<span class="line add">+sum of token and consensus timeouts defines the minimum time needed to</span>
+<span class="line add">+reestablish a new cluster membership after a node goes offline.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line del">-       If the token coefficient is not explicitly set, it defaults to 650 milliseconds.</span>
+<span class="line del">-New clusters are created with a lower token coefficient of 125 milliseconds that</span>
+<span class="line del">-is explicitly set in</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        /etc/pve/corosync.conf</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       .</span>
+<span class="line add">+       Keeping the sum of token and consensus timeouts below 30 seconds reduces the</span>
+<span class="line add">+time needed for reestablishing a new cluster membership after a node failure.</span>
+<span class="line add">+When HA is enabled, it is especially important that this time stays below 45</span>
+<span class="line add">+seconds to ensure that a new cluster membership is formed before the</span>
+<span class="line add">+       &lt;a href=&quot;#ha_manager_crm&quot;&gt;</span>
+<span class="line add">+        watchdog timeout</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+       of 60 seconds expires, which would</span>
+<span class="line add">+trigger a node fence. A safety margin below this 45 second limit is advisable</span>
+<span class="line add">+so that transient timing variations do not push the cluster past the watchdog</span>
+<span class="line add">+threshold. The recommended mechanism for lowering the token and consensus</span>
+<span class="line add">+timeouts is lowering the token coefficient as explained below.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line del">-       You can change the token coefficient of an existing cluster by</span>
+<span class="line del">-       &lt;a href=&quot;#pvecm_edit_corosync_conf&quot;&gt;</span>
+<span class="line del">-        editing corosync.conf</span>
+<span class="line add">+       You can check the current token and consensus timeouts (in milliseconds) with</span>
+<span class="line add">+the following command:</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+      &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+       &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+       &lt;pre&gt;&lt;tt&gt;corosync-cmapctl &lt;span style=&quot;color: #990000&quot;&gt;|&lt;/span&gt; grep -Ew &lt;span style=&quot;color: #FF0000&quot;&gt;&#x27;runtime.config.totem.token|runtime.config.totem.consensus&#x27;&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       For example:</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+      &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+       &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+       &lt;pre&gt;&lt;tt&gt;runtime&lt;span style=&quot;color: #990000&quot;&gt;.&lt;/span&gt;config&lt;span style=&quot;color: #990000&quot;&gt;.&lt;/span&gt;totem&lt;span style=&quot;color: #990000&quot;&gt;.&lt;/span&gt;consensus &lt;span style=&quot;color: #990000&quot;&gt;(&lt;/span&gt;u32&lt;span style=&quot;color: #990000&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #990000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #993399&quot;&gt;5940&lt;/span&gt;</span>
+<span class="line add">+runtime&lt;span style=&quot;color: #990000&quot;&gt;.&lt;/span&gt;config&lt;span style=&quot;color: #990000&quot;&gt;.&lt;/span&gt;totem&lt;span style=&quot;color: #990000&quot;&gt;.&lt;/span&gt;token &lt;span style=&quot;color: #990000&quot;&gt;(&lt;/span&gt;u32&lt;span style=&quot;color: #990000&quot;&gt;)&lt;/span&gt; &lt;span style=&quot;color: #990000&quot;&gt;=&lt;/span&gt; &lt;span style=&quot;color: #993399&quot;&gt;4950&lt;/span&gt;&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       The sum of these two values (10.89 seconds in the example) defines the minimum</span>
+<span class="line add">+time needed to reestablish a new cluster membership after a node goes offline.</span>
+<span class="line add">+Lowering the token coefficient is</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+      &lt;ul&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         a suggested optimization if this value exceeds 30 seconds,</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         recommended if it exceeds 40 seconds,</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         strongly recommended if it exceeds 45 seconds.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+      &lt;/ul&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       To lower the token coefficient, first make sure your setup adheres</span>
+<span class="line add">+       &lt;a href=&quot;#pvecm_cluster_network_requirements&quot;&gt;</span>
+<span class="line add">+        to the network requirements</span>
+<span class="line ctx">        &lt;/a&gt;</span>
+<span class="line del">-       . Corosync will then</span>
+<span class="line del">-automatically adopt the new value for the cluster.</span>
+<span class="line add">+       ,</span>
+<span class="line add">+especially with regards to latency. Then:</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+      &lt;ul&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         If the</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          token_coefficient</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         is not yet set explicitly to 125 milliseconds in</span>
+<span class="line add">+  corosync.conf,</span>
+<span class="line add">+         &lt;a href=&quot;#pvecm_edit_corosync_conf&quot;&gt;</span>
+<span class="line add">+          edit corosync.conf</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         and add</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          token_coefficient: 125</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         to the</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          totem</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         section. Do not forget to</span>
+<span class="line add">+         &lt;a href=&quot;#pvecm_edit_corosync_conf&quot;&gt;</span>
+<span class="line add">+          increase the</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           config_version</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         .</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Otherwise, if 125 milliseconds is not low enough to keep the timeouts within</span>
+<span class="line add">+  the limits above, select a</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          token_coefficient</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         with which the token and</span>
+<span class="line add">+  consensus timeouts sum up to at most 45 seconds. By default, corosync computes</span>
+<span class="line add">+  the token and consensus timeouts (in milliseconds) according to the following</span>
+<span class="line add">+  formula:</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+        &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+         &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line add">+          &lt;pre&gt;token = 3000 + (number_of_nodes - 2) * token_coefficient</span>
+<span class="line add">+consensus = 1.2 * token&lt;/pre&gt;</span>
+<span class="line add">+         &lt;/div&gt;</span>
+<span class="line add">+        &lt;/div&gt;</span>
+<span class="line add">+        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          &lt;a href=&quot;#pvecm_edit_corosync_conf&quot;&gt;</span>
+<span class="line add">+           Edit corosync.conf</span>
+<span class="line add">+          &lt;/a&gt;</span>
+<span class="line add">+          and set an appropriate</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           token_coefficient</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          option in the</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           totem</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          section. Do not forget to</span>
+<span class="line add">+          &lt;a href=&quot;#pvecm_edit_corosync_conf&quot;&gt;</span>
+<span class="line add">+           increase the</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            config_version</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+          &lt;/a&gt;</span>
+<span class="line add">+          . Test your setup</span>
+<span class="line add">+thoroughly for stability!</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/div&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+      &lt;/ul&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       After adjusting the</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        token_coefficient</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       in</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        corosync.conf</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       , recent corosync</span>
+<span class="line add">+versions will automatically adopt the new value for the cluster. For corosync</span>
+<span class="line add">+versions below</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        3.1.10-pve1</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       , corosync needs to be restarted on all nodes for</span>
+<span class="line add">+the change to take effect.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line hunk">@@ -32112,7 +32347,7 @@</span>
+<span class="line ctx">          &lt;span class=&quot;footnote&quot; id=&quot;_footnote_cephusermgmt&quot;&gt;</span>
+<span class="line ctx">           &lt;br/&gt;</span>
+<span class="line ctx">           [</span>
+<span class="line del">-          &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/user-management/&quot;&gt;</span>
+<span class="line add">+          &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/user-management/&quot;&gt;</span>
+<span class="line ctx">            Ceph User Management</span>
+<span class="line ctx">           &lt;/a&gt;</span>
+<span class="line ctx">           ]</span>
+<span class="line hunk">@@ -32156,8 +32391,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [RBD configuration reference</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/rbd/rbd-config-ref/&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/rbd/rbd-config-ref/</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rbd/rbd-config-ref/&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/rbd/rbd-config-ref/</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -33687,8 +33922,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph intro</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/start/&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/start/</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/start/&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/start/</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -33698,8 +33933,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph architecture</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/architecture/&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/architecture/</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/architecture/&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/architecture/</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -33708,8 +33943,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph glossary</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/glossary&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/glossary</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/glossary&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/glossary</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -33737,7 +33972,7 @@</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line ctx">       Check also the recommendations from</span>
+<span class="line del">-      &lt;a href=&quot;https://docs.ceph.com/en/squid/start/hardware-recommendations/&quot;&gt;</span>
+<span class="line add">+      &lt;a href=&quot;https://docs.ceph.com/en/tentacle/start/hardware-recommendations/&quot;&gt;</span>
+<span class="line ctx">        Ceph’s website</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">       .</span>
+<span class="line hunk">@@ -34539,8 +34774,8 @@</span>
+<span class="line ctx">       &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">        &lt;br/&gt;</span>
+<span class="line ctx">        [Ceph Monitor</span>
+<span class="line del">-       &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/configuration/mon-config-ref/&quot;&gt;</span>
+<span class="line del">-        https://docs.ceph.com/en/squid/rados/configuration/mon-config-ref/</span>
+<span class="line add">+       &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/configuration/mon-config-ref/&quot;&gt;</span>
+<span class="line add">+        https://docs.ceph.com/en/tentacle/rados/configuration/mon-config-ref/</span>
+<span class="line ctx">        &lt;/a&gt;</span>
+<span class="line ctx">        ]</span>
+<span class="line ctx">        &lt;br/&gt;</span>
+<span class="line hunk">@@ -34686,8 +34921,8 @@</span>
+<span class="line ctx">       &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">        &lt;br/&gt;</span>
+<span class="line ctx">        [Ceph Manager</span>
+<span class="line del">-       &lt;a href=&quot;https://docs.ceph.com/en/squid/mgr/&quot;&gt;</span>
+<span class="line del">-        https://docs.ceph.com/en/squid/mgr/</span>
+<span class="line add">+       &lt;a href=&quot;https://docs.ceph.com/en/tentacle/mgr/&quot;&gt;</span>
+<span class="line add">+        https://docs.ceph.com/en/tentacle/mgr/</span>
+<span class="line ctx">        &lt;/a&gt;</span>
+<span class="line ctx">        ]</span>
+<span class="line ctx">        &lt;br/&gt;</span>
+<span class="line hunk">@@ -35803,8 +36038,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot; id=&quot;_footnote_placement_groups&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [Placement Groups</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/placement-groups/&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/rados/operations/placement-groups/</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -35818,8 +36053,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot; id=&quot;_footnote_autoscaler&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [Automated Scaling</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/placement-groups/#automated-scaling&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/rados/operations/placement-groups/#automated-scaling</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/#automated-scaling&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/#automated-scaling</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -36089,8 +36324,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph pool operation</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/pools/&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/rados/operations/pools/</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/pools/&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/rados/operations/pools/</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -36211,8 +36446,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph Erasure Coded Pool Recovery</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-coded-pool-recovery&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-coded-pool-recovery</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-coded-pool-recovery&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-coded-pool-recovery</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -36475,8 +36710,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph Erasure Code Profile</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-code-profiles&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-code-profiles</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-code-profiles&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-code-profiles</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -36528,8 +36763,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [Ceph Erasure Code</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/erasure-code/&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/rados/operations/erasure-code/</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -37471,8 +37706,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line ctx">          [CRUSH map</span>
+<span class="line del">-         &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/operations/crush-map/&quot;&gt;</span>
+<span class="line del">-          https://docs.ceph.com/en/squid/rados/operations/crush-map/</span>
+<span class="line add">+         &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/operations/crush-map/&quot;&gt;</span>
+<span class="line add">+          https://docs.ceph.com/en/tentacle/rados/operations/crush-map/</span>
+<span class="line ctx">          &lt;/a&gt;</span>
+<span class="line ctx">          ]</span>
+<span class="line ctx">          &lt;br/&gt;</span>
+<span class="line hunk">@@ -38096,8 +38331,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [Configuring multiple active MDS daemons</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/cephfs/multimds/&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/cephfs/multimds/</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/cephfs/multimds/&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/cephfs/multimds/</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -38563,8 +38798,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [Ceph scrubbing</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/configuration/osd-config-ref/#scrubbing&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/rados/configuration/osd-config-ref/#scrubbing</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/configuration/osd-config-ref/#scrubbing&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/rados/configuration/osd-config-ref/#scrubbing</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -39916,8 +40151,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [Ceph troubleshooting</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/troubleshooting/&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/rados/troubleshooting/</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/troubleshooting/&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/rados/troubleshooting/</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -40002,8 +40237,8 @@</span>
+<span class="line ctx">        &lt;span class=&quot;footnote&quot;&gt;</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line ctx">         [Ceph log and debugging</span>
+<span class="line del">-        &lt;a href=&quot;https://docs.ceph.com/en/squid/rados/troubleshooting/log-and-debug/&quot;&gt;</span>
+<span class="line del">-         https://docs.ceph.com/en/squid/rados/troubleshooting/log-and-debug/</span>
+<span class="line add">+        &lt;a href=&quot;https://docs.ceph.com/en/tentacle/rados/troubleshooting/log-and-debug/&quot;&gt;</span>
+<span class="line add">+         https://docs.ceph.com/en/tentacle/rados/troubleshooting/log-and-debug/</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         ]</span>
+<span class="line ctx">         &lt;br/&gt;</span>
+<span class="line hunk">@@ -42678,35 +42913,76 @@</span>
+<span class="line ctx">       &lt;/h5&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        You can specify custom CPU types with a configurable set of features. These are</span>
+<span class="line del">-maintained in the configuration file</span>
+<span class="line add">+        You can define custom CPU types with a configurable set of base model, vendor,</span>
+<span class="line add">+physical address bits, and per-flag toggles, then assign them to VMs like a</span>
+<span class="line add">+built-in type. Custom types are referenced from a VM configuration as</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         custom-&amp;lt;name&amp;gt;</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        .</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Manage them under</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         Datacenter -&amp;gt; Custom CPU Models</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        in the web UI. The model</span>
+<span class="line add">+dialog embeds a flag editor grid with free-text search over flag name and</span>
+<span class="line add">+description, an accelerator (kvm/tcg) selector, and a per-node multi-select</span>
+<span class="line add">+that highlights the flags each selected cluster node currently reports as</span>
+<span class="line add">+supported - useful to spot which flags would actually be available on the</span>
+<span class="line add">+target hosts before committing to a model. The same grid is reused in the</span>
+<span class="line add">+per-VM</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         Processor</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        edit dialog, restricted there to the flags settable per</span>
+<span class="line add">+VM; configured flags unknown to the API or unsupported on the selected</span>
+<span class="line add">+accelerator surface at the top with a warning.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Custom CPU types are still backed by the configuration file</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          /etc/pve/virtual-guest/cpu-models.conf</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line del">-        by</span>
+<span class="line del">-an administrator. See</span>
+<span class="line add">+        and can be maintained from the CLI</span>
+<span class="line add">+as well, see</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          man cpu-models.conf</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line del">-        for format details.</span>
+<span class="line add">+        for the format.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Specified custom types can be selected by any user with the</span>
+<span class="line add">+        Access to a custom model is controlled per model via the ACL path</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         Sys.Audit</span>
+<span class="line add">+         /mapping/cpu/&amp;lt;name&amp;gt;</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line del">-        privilege on</span>
+<span class="line add">+        .</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         /nodes</span>
+<span class="line add">+         Mapping.Audit</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line del">-        . When configuring a custom CPU type for a VM via the CLI</span>
+<span class="line del">-or API, the name needs to be prefixed with</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         custom-</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line del">-        .</span>
+<span class="line add">+        lets a user see the model in</span>
+<span class="line add">+listings,</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         Mapping.Modify</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        gates create/update/delete in the panel, and</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         Mapping.Use</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        is required to assign the model to a VM. The latter is</span>
+<span class="line add">+enforced on VM create, VM update, and VM clone, so a user who can clone a VM</span>
+<span class="line add">+that uses a custom model still needs</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         Mapping.Use</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        on that model’s ACL path.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line hunk">@@ -42963,6 +43239,72 @@</span>
+<span class="line ctx"> This is mutually exclusive with virt-ssbd and amd-ssbd.</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/div&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line add">+       &lt;/ul&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;qm_cpu_windows_tweaks&quot;&gt;</span>
+<span class="line add">+       Windows-related CPU settings</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#qm_cpu_windows_tweaks&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        A couple of CPU defaults and properties are tuned specifically for Windows</span>
+<span class="line add">+guests on recent Intel hardware:</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+       &lt;ul&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           cet-ibt</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          and</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           cet-ss</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          (Control-flow Enforcement Technology: indirect</span>
+<span class="line add">+  branch tracking and shadow stack) are disabled by default for Windows 11</span>
+<span class="line add">+  machine types, as they currently break boot for Windows guests with</span>
+<span class="line add">+  virtualization-based security enabled. Workloads that explicitly rely on</span>
+<span class="line add">+  the flags can re-enable them per VM via the</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           Processor</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          flag editor.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          The QEMU</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           level</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          CPU property is exposed so it can be set per VM (or in a</span>
+<span class="line add">+  custom CPU model) without resorting to custom</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           args</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          . Setting</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           level=30</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          is a known workaround for Hyper-V boot failures of Windows guests on</span>
+<span class="line add">+  recent Intel hosts when the CPU type is</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           host</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          or</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           max</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          . The property</span>
+<span class="line add">+  only applies for x86_64 vCPUs; it is silently ignored on other</span>
+<span class="line add">+  architectures.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/li&gt;</span>
+<span class="line ctx">        &lt;/ul&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line hunk">@@ -52342,7 +52684,7 @@</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         :</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line add">+         [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,level=&amp;lt;integer&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">        &lt;/dt&gt;</span>
+<span class="line ctx">        &lt;dd&gt;</span>
+<span class="line hunk">@@ -52467,6 +52809,24 @@</span>
+<span class="line ctx">           &lt;/dd&gt;</span>
+<span class="line ctx">           &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            level</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           =</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            &amp;lt;integer&amp;gt; (0 - 4294967295)</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+          &lt;/dt&gt;</span>
+<span class="line add">+          &lt;dd&gt;</span>
+<span class="line add">+           &lt;p&gt;</span>
+<span class="line add">+            Maximum input value for the basic CPUID leaves the guest can query - that is the vendor (leaf 0), family/model/stepping and feature bits (leaf 1), cache and topology info (leaves 4 and B), and so on. Higher-numbered leaves are hidden. Setting</span>
+<span class="line add">+            &lt;em&gt;</span>
+<span class="line add">+             30</span>
+<span class="line add">+            &lt;/em&gt;</span>
+<span class="line add">+            is a common workaround for Hyper-V boot failures on Windows guests running on recent Intel hosts. Only applies when the vCPU architecture is x86_64.</span>
+<span class="line add">+           &lt;/p&gt;</span>
+<span class="line add">+          &lt;/dd&gt;</span>
+<span class="line add">+          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">             phys-bits</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            =</span>
+<span class="line hunk">@@ -52489,7 +52849,7 @@</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            =</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-            &amp;lt;486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | ClearwaterForest | Conroe | Cooperlake | Cooperlake-v2 | EPYC | EPYC-Genoa | EPYC-Genoa-v2 | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Milan-v3 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-Rome-v5 | EPYC-Turin | EPYC-v3 | EPYC-v4 | EPYC-v5 | GraniteRapids | GraniteRapids-v2 | GraniteRapids-v3 | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | Icelake-Server-v7 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | SapphireRapids-v3 | SapphireRapids-v4 | SierraForest | SierraForest-v2 | SierraForest-v3 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Westmere | Westmere-IBRS | a64fx | athlon | core2duo | coreduo | cortex-a35 | cortex-a53 | cortex-a55 | cortex-a57 | cortex-a710 | cortex-a72 | cortex-a76 | host | kvm32 | kvm64 | max | neoverse-n1 | neoverse-n2 | neoverse-v1 | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64&amp;gt;</span>
+<span class="line add">+            &amp;lt;486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | ClearwaterForest | ClearwaterForest-v2 | ClearwaterForest-v3 | Conroe | Cooperlake | Cooperlake-v2 | DiamondRapids | EPYC | EPYC-Genoa | EPYC-Genoa-v2 | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Milan-v3 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-Rome-v5 | EPYC-Turin | EPYC-v3 | EPYC-v4 | EPYC-v5 | GraniteRapids | GraniteRapids-v2 | GraniteRapids-v3 | GraniteRapids-v4 | GraniteRapids-v5 | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | Icelake-Server-v7 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | SapphireRapids-v3 | SapphireRapids-v4 | SapphireRapids-v5 | SapphireRapids-v6 | SierraForest | SierraForest-v2 | SierraForest-v3 | SierraForest-v4 | SierraForest-v5 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Westmere | Westmere-IBRS | a64fx | athlon | core2duo | coreduo | cortex-a35 | cortex-a53 | cortex-a55 | cortex-a57 | cortex-a710 | cortex-a72 | cortex-a76 | cortex-a78ae | host | kvm32 | kvm64 | max | neoverse-n1 | neoverse-n2 | neoverse-v1 | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64&amp;gt;</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            (</span>
+<span class="line ctx">            &lt;em&gt;</span>
+<span class="line hunk">@@ -60176,41 +60536,83 @@</span>
+<span class="line ctx">              type:container:disk:range-size</span>
+<span class="line ctx">             &lt;/span&gt;</span>
+<span class="line ctx">             entries.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             type</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             u</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            for UID or</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             g</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            for GID.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             container</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the first ID as seen inside the container.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             disk</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the first corresponding ID on the underlying filesystem.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             range-size</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the number of consecutive IDs to map.</span>
+<span class="line del">-Unmapped IDs fall back to the container’s</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             lxc.idmap</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            .</span>
+<span class="line del">-Example:</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             u:123:456:1</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              type</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              u</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             for UID or</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              g</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             for GID.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              container</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the first ID as seen inside the container.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              disk</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the first corresponding ID on the underlying filesystem.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              range-size</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the number of consecutive IDs to map.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Unmapped IDs fall back to the container’s</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              lxc.idmap</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             .</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 1:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              u:123:456:1</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 2:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              g:100:50:5</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             maps 5 consecutive GIDs, such that GIDs 100-104 in the container are mapped to GIDs 50-54 on the disk.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 3:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              passthrough</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             identity-maps all UIDs and GIDs, meaning IDs inside the container will match the IDs on the disk.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line ctx">           &lt;/dd&gt;</span>
+<span class="line ctx">           &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -64003,7 +64405,7 @@</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         :</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         (?^:[^\x00-\x08\x10-\x1F\x7F]+)</span>
+<span class="line add">+         (?^:[^\x00-\x08\x0a-\x1F\x7F]+)</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         (</span>
+<span class="line ctx">         &lt;em&gt;</span>
+<span class="line hunk">@@ -64025,7 +64427,7 @@</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         :</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)</span>
+<span class="line add">+         (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">        &lt;/dt&gt;</span>
+<span class="line ctx">        &lt;dd&gt;</span>
+<span class="line hunk">@@ -64314,41 +64716,83 @@</span>
+<span class="line ctx">              type:container:disk:range-size</span>
+<span class="line ctx">             &lt;/span&gt;</span>
+<span class="line ctx">             entries.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             type</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             u</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            for UID or</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             g</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            for GID.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             container</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the first ID as seen inside the container.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             disk</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the first corresponding ID on the underlying filesystem.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             range-size</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the number of consecutive IDs to map.</span>
+<span class="line del">-Unmapped IDs fall back to the container’s</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             lxc.idmap</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            .</span>
+<span class="line del">-Example:</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             u:123:456:1</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              type</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              u</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             for UID or</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              g</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             for GID.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              container</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the first ID as seen inside the container.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              disk</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the first corresponding ID on the underlying filesystem.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              range-size</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the number of consecutive IDs to map.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Unmapped IDs fall back to the container’s</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              lxc.idmap</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             .</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 1:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              u:123:456:1</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 2:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              g:100:50:5</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             maps 5 consecutive GIDs, such that GIDs 100-104 in the container are mapped to GIDs 50-54 on the disk.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 3:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              passthrough</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             identity-maps all UIDs and GIDs, meaning IDs inside the container will match the IDs on the disk.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line ctx">           &lt;/dd&gt;</span>
+<span class="line ctx">           &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -64981,41 +65425,83 @@</span>
+<span class="line ctx">              type:container:disk:range-size</span>
+<span class="line ctx">             &lt;/span&gt;</span>
+<span class="line ctx">             entries.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             type</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             u</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            for UID or</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             g</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            for GID.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             container</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the first ID as seen inside the container.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             disk</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the first corresponding ID on the underlying filesystem.</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             range-size</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            is the number of consecutive IDs to map.</span>
+<span class="line del">-Unmapped IDs fall back to the container’s</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             lxc.idmap</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            .</span>
+<span class="line del">-Example:</span>
+<span class="line del">-            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-             u:123:456:1</span>
+<span class="line del">-            &lt;/span&gt;</span>
+<span class="line del">-            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              type</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              u</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             for UID or</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              g</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             for GID.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              container</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the first ID as seen inside the container.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              disk</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the first corresponding ID on the underlying filesystem.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              range-size</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             is the number of consecutive IDs to map.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Unmapped IDs fall back to the container’s</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              lxc.idmap</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             .</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 1:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              u:123:456:1</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 2:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              g:100:50:5</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             maps 5 consecutive GIDs, such that GIDs 100-104 in the container are mapped to GIDs 50-54 on the disk.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+           &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+            &lt;p&gt;</span>
+<span class="line add">+             Example 3:</span>
+<span class="line add">+             &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+              passthrough</span>
+<span class="line add">+             &lt;/span&gt;</span>
+<span class="line add">+             identity-maps all UIDs and GIDs, meaning IDs inside the container will match the IDs on the disk.</span>
+<span class="line add">+            &lt;/p&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line ctx">           &lt;/dd&gt;</span>
+<span class="line ctx">           &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -67977,6 +68463,38 @@</span>
+<span class="line ctx"> networks hierarchically, with Area 0 (or 0.0.0.0) serving as the backbone area.</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Redistribute</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          Optional list of source protocols whose routes are imported</span>
+<span class="line add">+into OSPF. Each entry picks a source (</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           bgp</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ,</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           connected</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ,</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           kernel</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          or</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           static</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ) and may additionally reference a</span>
+<span class="line add">+          &lt;a href=&quot;#pvesdn_config_route_maps&quot;&gt;</span>
+<span class="line add">+           route map</span>
+<span class="line add">+          &lt;/a&gt;</span>
+<span class="line add">+          to filter or transform routes</span>
+<span class="line add">+before they are advertised. Useful for example to leak BGP fabric routes</span>
+<span class="line add">+into OSPF, or to advertise locally connected networks without configuring</span>
+<span class="line add">+them per interface.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line ctx">        &lt;/dl&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line hunk">@@ -68332,8 +68850,21 @@</span>
+<span class="line ctx">         &lt;dd&gt;</span>
+<span class="line ctx">          &lt;p&gt;</span>
+<span class="line ctx">           This is the IP or hostname that other Proxmox VE nodes should use for</span>
+<span class="line del">-connecting to this Proxmox VE node. This is used as the endpoint when</span>
+<span class="line del">-configuring this Proxmox VE node as a peer.</span>
+<span class="line add">+connecting to this Proxmox VE node. This is used together with the endpoint port</span>
+<span class="line add">+when configuring this Proxmox VE node as a peer.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Endpoint Port</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          This is the UDP port that other Proxmox VE nodes should use for</span>
+<span class="line add">+connecting to this Proxmox VE node. If unset, it defaults to</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           51820</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          .</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/dd&gt;</span>
+<span class="line ctx">         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -68388,10 +68919,19 @@</span>
+<span class="line ctx">         &lt;/dt&gt;</span>
+<span class="line ctx">         &lt;dd&gt;</span>
+<span class="line ctx">          &lt;p&gt;</span>
+<span class="line del">-          The endpoint other nodes use to connect to this external peer, such</span>
+<span class="line del">-as</span>
+<span class="line add">+          The IP or hostname that other nodes use to connect to this external</span>
+<span class="line add">+peer.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/dd&gt;</span>
+<span class="line add">+        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+         Endpoint Port</span>
+<span class="line add">+        &lt;/dt&gt;</span>
+<span class="line add">+        &lt;dd&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          The UDP port that other nodes use to connect to this external</span>
+<span class="line add">+peer. If unset, it defaults to</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-           192.0.2.1:51820</span>
+<span class="line add">+           51820</span>
+<span class="line ctx">           &lt;/span&gt;</span>
+<span class="line ctx">           .</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line hunk">@@ -69011,17 +69551,31 @@</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">           local-preference</span>
+<span class="line ctx">          &lt;/span&gt;</span>
+<span class="line add">+         ,</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          peer</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line ctx">          , and</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          peer</span>
+<span class="line add">+          tag</span>
+<span class="line ctx">          &lt;/span&gt;</span>
+<span class="line ctx">          . The four</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">           *-prefix-list</span>
+<span class="line ctx">          &lt;/span&gt;</span>
+<span class="line ctx">          keys</span>
+<span class="line del">-reference a prefix list by name. All match conditions of an entry must be true</span>
+<span class="line del">-for it to apply.</span>
+<span class="line add">+reference a prefix list by name.</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          tag</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         matches a 32-bit route tag attribute,</span>
+<span class="line add">+the same value that the</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          tag</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         set action assigns; this lets one entry mark</span>
+<span class="line add">+routes with a tag and a later entry (in the same or another map) act on them.</span>
+<span class="line add">+All match conditions of an entry must be true for it to apply.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/dd&gt;</span>
+<span class="line ctx">        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -82069,6 +82623,28 @@</span>
+<span class="line ctx">       &lt;dl&gt;</span>
+<span class="line ctx">        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         auto-rebalance</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        :</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        (</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         default =</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         1</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        )</span>
+<span class="line add">+       &lt;/dt&gt;</span>
+<span class="line add">+       &lt;dd&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         HA resource may be migrated during automatic rebalancing</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/dd&gt;</span>
+<span class="line add">+       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          comment</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         :</span>
+<span class="line hunk">@@ -87908,24 +88484,6 @@</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        maxfiles</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       :</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;integer&amp;gt; (1 - N)</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        Deprecated: use</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         prune-backups</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line del">-        instead. Maximal number of backup files per guest system.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -94003,12 +94561,12 @@</span>
+<span class="line ctx">         --blocksize</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;string&amp;gt;</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        block size</span>
+<span class="line add">+        &amp;lt;a power of 2 with optional k or m suffix&amp;gt;</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        ZFS block size</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -94871,7 +95429,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Only use logical volumes tagged with</span>
+<span class="line add">+        Only list logical volumes tagged with</span>
+<span class="line ctx">         &lt;em&gt;</span>
+<span class="line ctx">          pve-vm-ID</span>
+<span class="line ctx">         &lt;/em&gt;</span>
+<span class="line hunk">@@ -96305,12 +96863,12 @@</span>
+<span class="line ctx">         --blocksize</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;string&amp;gt;</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        block size</span>
+<span class="line add">+        &amp;lt;a power of 2 with optional k or m suffix&amp;gt;</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        ZFS block size</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -97121,7 +97679,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Only use logical volumes tagged with</span>
+<span class="line add">+        Only list logical volumes tagged with</span>
+<span class="line ctx">         &lt;em&gt;</span>
+<span class="line ctx">          pve-vm-ID</span>
+<span class="line ctx">         &lt;/em&gt;</span>
+<span class="line hunk">@@ -97798,7 +98356,13 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line del">-      Destroy a Ceph filesystem</span>
+<span class="line add">+      Destroy a Ceph filesystem. Refuses if any PVE storage entry of type</span>
+<span class="line add">+      &lt;em&gt;</span>
+<span class="line add">+       cephfs</span>
+<span class="line add">+      &lt;/em&gt;</span>
+<span class="line add">+      still references the filesystem and is not disabled. Optionally</span>
+<span class="line add">+also removes the storage entries and/or the underlying metadata and data</span>
+<span class="line add">+pools.</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line hunk">@@ -97814,7 +98378,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        The ceph filesystem name.</span>
+<span class="line add">+        The Ceph filesystem name.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -97835,7 +98399,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Remove data and metadata pools configured for this fs.</span>
+<span class="line add">+        Remove the metadata and data pools used by this filesystem.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -97856,7 +98420,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Remove all pveceph-managed storages configured for this fs.</span>
+<span class="line add">+        Remove pveceph-managed storages configured for this filesystem.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line hunk">@@ -97922,7 +98486,10 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line del">-      Create initial ceph default configuration and setup symlinks.</span>
+<span class="line add">+      Create the initial Ceph default configuration and set up symlinks.</span>
+<span class="line add">+Idempotent on re-call: if a [global] section already exists in ceph.conf,</span>
+<span class="line add">+the existing fsid / auth / pool defaults are preserved and most parameters</span>
+<span class="line add">+are silently ignored.</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line hunk">@@ -97937,7 +98504,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Declare a separate cluster network, OSDs will routeheartbeat, object replication and recovery traffic over it</span>
+<span class="line add">+        Declare a separate cluster network, OSDs will route heartbeat, object replication and recovery traffic over it</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line ctx">         &lt;table&gt;</span>
+<span class="line hunk">@@ -98249,7 +98816,7 @@</span>
+<span class="line ctx">         default =</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        squid</span>
+<span class="line add">+        tentacle</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        )</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line hunk">@@ -98402,10 +98969,18 @@</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         [a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        The ID for the manager, when omitted the same as the nodename</span>
+<span class="line add">+       (</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        default =</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        nodename</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       )</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        The ID for the manager, when omitted the same as the nodename.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line hunk">@@ -98459,7 +99034,7 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line del">-      Create Ceph Monitor and Manager</span>
+<span class="line add">+      Create a Ceph Monitor. Also auto-creates a Manager for the first monitor.</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line hunk">@@ -98484,10 +99059,18 @@</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         [a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        The ID for the monitor, when omitted the same as the nodename</span>
+<span class="line add">+       (</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        default =</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        nodename</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       )</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        The ID for the monitor, when omitted the same as the nodename.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line hunk">@@ -98506,7 +99089,8 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line del">-      Destroy Ceph Monitor and Manager.</span>
+<span class="line add">+      Destroy a Ceph Monitor. Refuses to remove the last monitor of the cluster.</span>
+<span class="line add">+Does not destroy any Manager on the same node; use</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line hunk">@@ -98596,14 +99180,6 @@</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         &amp;lt;number&amp;gt; (1 - N)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line del">-       (</span>
+<span class="line del">-       &lt;em&gt;</span>
+<span class="line del">-        default =</span>
+<span class="line del">-       &lt;/em&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        bluestore_block_db_size or 10% of OSD size</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       )</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line hunk">@@ -98700,8 +99276,15 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        OSD services per physical device. Only useful for fast NVMe devices&quot;</span>
+<span class="line del">-                    .&quot; to utilize their performance better.</span>
+<span class="line add">+        OSD services per physical device. Only useful for fast NVMe devices to utilize their performance better. Mutually exclusive with</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         db_dev</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        and</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         wal_dev</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        .</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -98724,14 +99307,6 @@</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         &amp;lt;number&amp;gt; (0.5 - N)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line del">-       (</span>
+<span class="line del">-       &lt;em&gt;</span>
+<span class="line del">-        default =</span>
+<span class="line del">-       &lt;/em&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        bluestore_block_wal_size or 1% of OSD size</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       )</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line hunk">@@ -98853,7 +99428,11 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        If set, we remove partition table entries.</span>
+<span class="line add">+        If set, also destroy the underlying logical volumes via</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         ceph-volume lvm zap --destroy</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        , remove the volume group’s physical volume with pvremove, and wipe any journal/block.db/block.wal partitions left over from filestore OSDs. Without this flag the LVs and partitions are left intact for inspection.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line hunk">@@ -98968,13 +99547,13 @@</span>
+<span class="line ctx">         default =</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        0; for erasure coded pools: 1</span>
+<span class="line add">+        0</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        )</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Configure VM and CT storage using the new pool.</span>
+<span class="line add">+        Configure VM and CT storage using the new pool. Defaults to false for replicated pools and to true for erasure-coded pools (since EC pools are typically only useful when wired up to storage).</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -100554,7 +101133,7 @@</span>
+<span class="line ctx">         --property</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;acme | acmedomain0 | acmedomain1 | acmedomain2 | acmedomain3 | acmedomain4 | acmedomain5 | ballooning-target | description | startall-onboot-delay | wakeonlan&amp;gt;</span>
+<span class="line add">+        &amp;lt;acme | acmedomain0 | acmedomain1 | acmedomain2 | acmedomain3 | acmedomain4 | acmedomain5 | ballooning-target | description | location | startall-onboot-delay | wakeonlan&amp;gt;</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        (</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line hunk">@@ -100675,6 +101254,19 @@</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         Prevent changes if current configuration file has different SHA1 digest. This can be used to prevent concurrent modifications.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/dd&gt;</span>
+<span class="line add">+      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        --location</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        latitude=&amp;lt;number&amp;gt; ,longitude=&amp;lt;number&amp;gt; [,name=&amp;lt;name&amp;gt;]</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        The location of the node. Overrides the default from the datacenter config.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -102674,7 +103266,7 @@</span>
+<span class="line ctx">         --cpu</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line add">+        [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,level=&amp;lt;integer&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -105414,7 +106006,7 @@</span>
+<span class="line ctx">         --cpu</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line add">+        [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,level=&amp;lt;integer&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -107977,7 +108569,7 @@</span>
+<span class="line ctx">         --cpu</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line add">+        [[cputype=]&amp;lt;string&amp;gt;] [,flags=&amp;lt;+FLAG[;-FLAG...]&amp;gt;] [,guest-phys-bits=&amp;lt;integer&amp;gt;] [,hidden=&amp;lt;1|0&amp;gt;] [,hv-vendor-id=&amp;lt;vendor-id&amp;gt;] [,level=&amp;lt;integer&amp;gt;] [,phys-bits=&amp;lt;8-64|host&amp;gt;] [,reported-model=&amp;lt;enum&amp;gt;]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -111106,7 +111698,7 @@</span>
+<span class="line ctx">         --entrypoint</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        (?^:[^\x00-\x08\x10-\x1F\x7F]+)</span>
+<span class="line add">+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        (</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line hunk">@@ -111127,7 +111719,7 @@</span>
+<span class="line ctx">         --env</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)</span>
+<span class="line add">+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -113546,7 +114138,7 @@</span>
+<span class="line ctx">         --entrypoint</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        (?^:[^\x00-\x08\x10-\x1F\x7F]+)</span>
+<span class="line add">+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        (</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line hunk">@@ -113567,7 +114159,7 @@</span>
+<span class="line ctx">         --env</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)</span>
+<span class="line add">+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -114532,7 +115124,7 @@</span>
+<span class="line ctx">         --entrypoint</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        (?^:[^\x00-\x08\x10-\x1F\x7F]+)</span>
+<span class="line add">+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        (</span>
+<span class="line ctx">        &lt;em&gt;</span>
+<span class="line hunk">@@ -114553,7 +115145,7 @@</span>
+<span class="line ctx">         --env</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)</span>
+<span class="line add">+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -118396,6 +118988,23 @@</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        --audiences</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        ^[^\x00-\x1F\x7F &amp;lt;&amp;gt;#&quot;]*$</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        A list of audiences that the OpenID Issuer may include that are accepted in addition to</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         client-id</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        .</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/dd&gt;</span>
+<span class="line add">+      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         --autocreate</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -119139,6 +119748,23 @@</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         Specifies the Authentication Context Class Reference values that theAuthorization Server is being requested to use for the Auth Request.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/dd&gt;</span>
+<span class="line add">+      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        --audiences</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        ^[^\x00-\x1F\x7F &amp;lt;&amp;gt;#&quot;]*$</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        A list of audiences that the OpenID Issuer may include that are accepted in addition to</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         client-id</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        .</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -121984,23 +122610,6 @@</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --maxfiles</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;integer&amp;gt; (1 - N)</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        Deprecated: use</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         prune-backups</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line del">-        instead. Maximal number of backup files per guest system.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         --mode</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -122550,6 +123159,27 @@</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        --auto-rebalance</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       (</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        default =</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        1</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       )</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        HA resource may be migrated during automatic rebalancing</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/dd&gt;</span>
+<span class="line add">+      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         --comment</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -123977,6 +124607,27 @@</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/dd&gt;</span>
+<span class="line add">+      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        --auto-rebalance</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       (</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        default =</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        1</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       )</span>
+<span class="line add">+      &lt;/dt&gt;</span>
+<span class="line add">+      &lt;dd&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        HA resource may be migrated during automatic rebalancing</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -126131,20 +126782,20 @@</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            =</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-            &amp;lt;number&amp;gt; (0 - N)</span>
+<span class="line add">+            &amp;lt;number&amp;gt; (0 - 100)</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            (</span>
+<span class="line ctx">            &lt;em&gt;</span>
+<span class="line ctx">             default =</span>
+<span class="line ctx">            &lt;/em&gt;</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-            0.1</span>
+<span class="line add">+            10</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            )</span>
+<span class="line ctx">           &lt;/dt&gt;</span>
+<span class="line ctx">           &lt;dd&gt;</span>
+<span class="line ctx">            &lt;p&gt;</span>
+<span class="line del">-            The minimum relative improvement in cluster node imbalance to commit to a resource balancing migration.</span>
+<span class="line add">+            The minimum relative improvement in cluster node imbalance, in percent, to commit to a resource balancing migration.</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line ctx">            &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line ctx">             &lt;table&gt;</span>
+<span class="line hunk">@@ -126293,20 +126944,20 @@</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            =</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-            &amp;lt;number&amp;gt; (0 - N)</span>
+<span class="line add">+            &amp;lt;number&amp;gt; (0 - 100)</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            (</span>
+<span class="line ctx">            &lt;em&gt;</span>
+<span class="line ctx">             default =</span>
+<span class="line ctx">            &lt;/em&gt;</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-            0.3</span>
+<span class="line add">+            30</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            )</span>
+<span class="line ctx">           &lt;/dt&gt;</span>
+<span class="line ctx">           &lt;dd&gt;</span>
+<span class="line ctx">            &lt;p&gt;</span>
+<span class="line del">-            The threshold for the cluster node imbalance, which will trigger the automatic resource balancing system if its value is exceeded.</span>
+<span class="line add">+            The cluster node imbalance, in percent, which will trigger the automatic resource balancing system if exceeded.</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line ctx">            &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line ctx">             &lt;table&gt;</span>
+<span class="line hunk">@@ -136298,9 +136949,9 @@</span>
+<span class="line ctx"> &lt;/div&gt;</span>
+<span class="line ctx"> &lt;div id=&quot;footer&quot;&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;footer-text&quot;&gt;</span>
+<span class="line del">-  Version 9.1.5</span>
+<span class="line add">+  Version 9.2.1</span>
+<span class="line ctx">   &lt;br/&gt;</span>
+<span class="line ctx">   Last updated</span>
+<span class="line del">- Mon May 18 11:31:11 CEST 2026</span>
+<span class="line add">+ Wed May 20 15:46:31 CEST 2026</span>
+<span class="line ctx">  &lt;/div&gt;</span>
+<span class="line ctx"> &lt;/div&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Author</span>
+      <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated (UTC):",
+          back_to_menu: "Back to main menu",
+          open_raw_diff: "Open raw .diff",
+          footer_by: "Author",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré (UTC) :",
+          back_to_menu: "Retour au menu principal",
+          open_raw_diff: "Ouvrir le .diff brut",
+          footer_by: "Auteur",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано (UTC):",
+          back_to_menu: "Назад в главное меню",
+          open_raw_diff: "Открыть raw .diff",
+          footer_by: "Автор",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+        if (adminToken) {
+          setAdminMode(true, adminStatus.dataset.login || "admin");
+        }
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -346,10 +346,10 @@ ICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg==" title="Proxmox VE Administration G
  </span>
  <br/>
  <span id="revnumber">
-  version 9.1.5,
+  version 9.2.1,
  </span>
  <span id="revdate">
-  Mon May 18 11:31:11 CEST 2026
+  Wed May 20 15:46:31 CEST 2026
  </span>
  <div id="toc">
   <a href="index.html" style="font-size: 0.8em;">
@@ -5366,7 +5366,7 @@ width:100%;
          </td>
          <td class="tableblock halign-center valign-top">
           <p class="tableblock">
-           <a href="https://docs.ceph.com/en/squid/releases/">
+           <a href="https://docs.ceph.com/en/tentacle/releases/">
             Estimated End-of-Life
            </a>
           </p>
@@ -5404,6 +5404,37 @@ width:100%;
           <p class="tableblock">
            <strong>
             <span class="monospaced">
+             ceph-tentacle
+            </span>
+           </strong>
+          </p>
+         </td>
+         <td class="tableblock halign-center valign-top">
+          <p class="tableblock">
+           2027-11 (v20.2)
+          </p>
+         </td>
+         <td class="tableblock halign-center valign-top">
+          <p class="tableblock">
+           recommended
+          </p>
+         </td>
+         <td class="tableblock halign-center valign-top">
+          <p class="tableblock">
+           available
+          </p>
+         </td>
+         <td class="tableblock halign-center valign-top">
+          <p class="tableblock">
+           available
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <strong>
+            <span class="monospaced">
              ceph-squid
             </span>
            </strong>
@@ -5416,7 +5447,7 @@ width:100%;
          </td>
          <td class="tableblock halign-center valign-top">
           <p class="tableblock">
-           recommended
+           available
           </p>
          </td>
          <td class="tableblock halign-center valign-top">
@@ -5487,7 +5518,7 @@ of any level. For details and included customer support levels visit:
         </div>
         <div class="content monospaced">
          <pre>Types: deb
-URIs: https://enterprise.proxmox.com/debian/ceph-squid
+URIs: https://enterprise.proxmox.com/debian/ceph-tentacle
 Suites: trixie
 Components: enterprise
 Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg</pre>
@@ -5522,7 +5553,7 @@ its package versions are also made available in the enterprise repository.
         </div>
         <div class="content monospaced">
          <pre>Types: deb
-URIs: http://download.proxmox.com/debian/ceph-squid
+URIs: http://download.proxmox.com/debian/ceph-tentacle
 Suites: trixie
 Components: no-subscription
 Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg</pre>
@@ -5556,7 +5587,7 @@ developers to test new features and bug fixes.
         </div>
         <div class="content monospaced">
          <pre>Types: deb
-URIs: http://download.proxmox.com/debian/ceph-squid
+URIs: http://download.proxmox.com/debian/ceph-tentacle
 Suites: trixie
 Components: test
 Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg</pre>
@@ -24497,9 +24528,9 @@ http://www.gnu.org/software/src-highlite -->
      </div>
     </div>
     <div class="sect3">
-     <h4 id="_changing_the_token_coefficient">
+     <h4 id="pvecm_changing_token_coefficient">
       5.12.2. Changing the Token Coefficient
-      <a class="headerlink" href="#_changing_the_token_coefficient" title="Permalink to this heading">
+      <a class="headerlink" href="#pvecm_changing_token_coefficient" title="Permalink to this heading">
       </a>
      </h4>
      <div class="paragraph">
@@ -24512,8 +24543,20 @@ http://www.gnu.org/software/src-highlite -->
        <span class="monospaced">
         /etc/pve/corosync.conf
        </span>
-       . corosync uses the token coefficient to calculate
-several timeouts in relation to the cluster size.
+       . If the token coefficient is not explicitly set, it
+defaults to 650 milliseconds. Since Proxmox VE 9.2, new clusters are created
+with a lower token coefficient of 125 milliseconds explicitly set in
+       <span class="monospaced">
+        /etc/pve/corosync.conf
+       </span>
+       . This reduces the time needed for reestablishing a
+new cluster membership after a node failure.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       corosync uses the token coefficient to calculate
+several timeouts in relation to the cluster size
        <span class="footnote">
         <br/>
         [
@@ -24527,27 +24570,219 @@ several timeouts in relation to the cluster size.
         ]
         <br/>
        </span>
-      </p>
-     </div>
-     <div class="paragraph">
-      <p>
-       If the token coefficient is not explicitly set, it defaults to 650 milliseconds.
-New clusters are created with a lower token coefficient of 125 milliseconds that
-is explicitly set in
-       <span class="monospaced">
-        /etc/pve/corosync.conf
+       ,
+most importantly the token timeout and consensus timeout.
+corosync implements a token-passing protocol. The token timeout specifies how
+long a node waits for the token until it declares the token to be lost
+       <span class="footnote">
+        <br/>
+        [
+        <span class="monospaced">
+         token
+        </span>
+        in the corosync manual page
+        <a href="https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#token">
+         https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#token
+        </a>
+        ]
+        <br/>
        </span>
-       .
+       . The
+consensus timeout
+       <span class="footnote">
+        <br/>
+        [
+        <span class="monospaced">
+         consensus
+        </span>
+        in the corosync manual page
+        <a href="https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#consensus">
+         https://manpages.debian.org/stable/corosync/corosync.conf.5.en.html#consensus
+        </a>
+        ]
+        <br/>
+       </span>
+       specifies the time nodes wait for a consensus on a new cluster membership. The
+sum of token and consensus timeouts defines the minimum time needed to
+reestablish a new cluster membership after a node goes offline.
       </p>
      </div>
      <div class="paragraph">
       <p>
-       You can change the token coefficient of an existing cluster by
-       <a href="#pvecm_edit_corosync_conf">
-        editing corosync.conf
+       Keeping the sum of token and consensus timeouts below 30 seconds reduces the
+time needed for reestablishing a new cluster membership after a node failure.
+When HA is enabled, it is especially important that this time stays below 45
+seconds to ensure that a new cluster membership is formed before the
+       <a href="#ha_manager_crm">
+        watchdog timeout
        </a>
-       . Corosync will then
-automatically adopt the new value for the cluster.
+       of 60 seconds expires, which would
+trigger a node fence. A safety margin below this 45 second limit is advisable
+so that transient timing variations do not push the cluster past the watchdog
+threshold. The recommended mechanism for lowering the token and consensus
+timeouts is lowering the token coefficient as explained below.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       You can check the current token and consensus timeouts (in milliseconds) with
+the following command:
+      </p>
+     </div>
+     <div class="listingblock">
+      <div class="content">
+       <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+       <pre><tt>corosync-cmapctl <span style="color: #990000">|</span> grep -Ew <span style="color: #FF0000">'runtime.config.totem.token|runtime.config.totem.consensus'</span></tt></pre>
+      </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       For example:
+      </p>
+     </div>
+     <div class="listingblock">
+      <div class="content">
+       <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+       <pre><tt>runtime<span style="color: #990000">.</span>config<span style="color: #990000">.</span>totem<span style="color: #990000">.</span>consensus <span style="color: #990000">(</span>u32<span style="color: #990000">)</span> <span style="color: #990000">=</span> <span style="color: #993399">5940</span>
+runtime<span style="color: #990000">.</span>config<span style="color: #990000">.</span>totem<span style="color: #990000">.</span>token <span style="color: #990000">(</span>u32<span style="color: #990000">)</span> <span style="color: #990000">=</span> <span style="color: #993399">4950</span></tt></pre>
+      </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       The sum of these two values (10.89 seconds in the example) defines the minimum
+time needed to reestablish a new cluster membership after a node goes offline.
+Lowering the token coefficient is
+      </p>
+     </div>
+     <div class="ulist">
+      <ul>
+       <li>
+        <p>
+         a suggested optimization if this value exceeds 30 seconds,
+        </p>
+       </li>
+       <li>
+        <p>
+         recommended if it exceeds 40 seconds,
+        </p>
+       </li>
+       <li>
+        <p>
+         strongly recommended if it exceeds 45 seconds.
+        </p>
+       </li>
+      </ul>
+     </div>
+     <div class="paragraph">
+      <p>
+       To lower the token coefficient, first make sure your setup adheres
+       <a href="#pvecm_cluster_network_requirements">
+        to the network requirements
+       </a>
+       ,
+especially with regards to latency. Then:
+      </p>
+     </div>
+     <div class="ulist">
+      <ul>
+       <li>
+        <p>
+         If the
+         <span class="monospaced">
+          token_coefficient
+         </span>
+         is not yet set explicitly to 125 milliseconds in
+  corosync.conf,
+         <a href="#pvecm_edit_corosync_conf">
+          edit corosync.conf
+         </a>
+         and add
+         <span class="monospaced">
+          token_coefficient: 125
+         </span>
+         to the
+         <span class="monospaced">
+          totem
+         </span>
+         section. Do not forget to
+         <a href="#pvecm_edit_corosync_conf">
+          increase the
+          <span class="monospaced">
+           config_version
+          </span>
+         </a>
+         .
+        </p>
+       </li>
+       <li>
+        <p>
+         Otherwise, if 125 milliseconds is not low enough to keep the timeouts within
+  the limits above, select a
+         <span class="monospaced">
+          token_coefficient
+         </span>
+         with which the token and
+  consensus timeouts sum up to at most 45 seconds. By default, corosync computes
+  the token and consensus timeouts (in milliseconds) according to the following
+  formula:
+        </p>
+        <div class="listingblock">
+         <div class="content monospaced">
+          <pre>token = 3000 + (number_of_nodes - 2) * token_coefficient
+consensus = 1.2 * token</pre>
+         </div>
+        </div>
+        <div class="paragraph">
+         <p>
+          <a href="#pvecm_edit_corosync_conf">
+           Edit corosync.conf
+          </a>
+          and set an appropriate
+          <span class="monospaced">
+           token_coefficient
+          </span>
+          option in the
+          <span class="monospaced">
+           totem
+          </span>
+          section. Do not forget to
+          <a href="#pvecm_edit_corosync_conf">
+           increase the
+           <span class="monospaced">
+            config_version
+           </span>
+          </a>
+          . Test your setup
+thoroughly for stability!
+         </p>
+        </div>
+       </li>
+      </ul>
+     </div>
+     <div class="paragraph">
+      <p>
+       After adjusting the
+       <span class="monospaced">
+        token_coefficient
+       </span>
+       in
+       <span class="monospaced">
+        corosync.conf
+       </span>
+       , recent corosync
+versions will automatically adopt the new value for the cluster. For corosync
+versions below
+       <span class="monospaced">
+        3.1.10-pve1
+       </span>
+       , corosync needs to be restarted on all nodes for
+the change to take effect.
       </p>
      </div>
     </div>
@@ -32112,7 +32347,7 @@ management, see the Ceph docs.
          <span class="footnote" id="_footnote_cephusermgmt">
           <br/>
           [
-          <a href="https://docs.ceph.com/en/squid/rados/operations/user-management/">
+          <a href="https://docs.ceph.com/en/tentacle/rados/operations/user-management/">
            Ceph User Management
           </a>
           ]
@@ -32156,8 +32391,8 @@ the storage.
        <span class="footnote">
         <br/>
         [RBD configuration reference
-        <a href="https://docs.ceph.com/en/squid/rbd/rbd-config-ref/">
-         https://docs.ceph.com/en/squid/rbd/rbd-config-ref/
+        <a href="https://docs.ceph.com/en/tentacle/rbd/rbd-config-ref/">
+         https://docs.ceph.com/en/tentacle/rbd/rbd-config-ref/
         </a>
         ]
         <br/>
@@ -33687,8 +33922,8 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC"/>
         <span class="footnote">
          <br/>
          [Ceph intro
-         <a href="https://docs.ceph.com/en/squid/start/">
-          https://docs.ceph.com/en/squid/start/
+         <a href="https://docs.ceph.com/en/tentacle/start/">
+          https://docs.ceph.com/en/tentacle/start/
          </a>
          ]
          <br/>
@@ -33698,8 +33933,8 @@ its architecture
         <span class="footnote">
          <br/>
          [Ceph architecture
-         <a href="https://docs.ceph.com/en/squid/architecture/">
-          https://docs.ceph.com/en/squid/architecture/
+         <a href="https://docs.ceph.com/en/tentacle/architecture/">
+          https://docs.ceph.com/en/tentacle/architecture/
          </a>
          ]
          <br/>
@@ -33708,8 +33943,8 @@ its architecture
         <span class="footnote">
          <br/>
          [Ceph glossary
-         <a href="https://docs.ceph.com/en/squid/glossary">
-          https://docs.ceph.com/en/squid/glossary
+         <a href="https://docs.ceph.com/en/tentacle/glossary">
+          https://docs.ceph.com/en/tentacle/glossary
          </a>
          ]
          <br/>
@@ -33737,7 +33972,7 @@ its architecture
     <div class="paragraph">
      <p>
       Check also the recommendations from
-      <a href="https://docs.ceph.com/en/squid/start/hardware-recommendations/">
+      <a href="https://docs.ceph.com/en/tentacle/start/hardware-recommendations/">
        Ceph’s website
       </a>
       .
@@ -34539,8 +34774,8 @@ configuration file.
       <span class="footnote">
        <br/>
        [Ceph Monitor
-       <a href="https://docs.ceph.com/en/squid/rados/configuration/mon-config-ref/">
-        https://docs.ceph.com/en/squid/rados/configuration/mon-config-ref/
+       <a href="https://docs.ceph.com/en/tentacle/rados/configuration/mon-config-ref/">
+        https://docs.ceph.com/en/tentacle/rados/configuration/mon-config-ref/
        </a>
        ]
        <br/>
@@ -34686,8 +34921,8 @@ monitor the cluster. Since the release of Ceph luminous, at least one ceph-mgr
       <span class="footnote">
        <br/>
        [Ceph Manager
-       <a href="https://docs.ceph.com/en/squid/mgr/">
-        https://docs.ceph.com/en/squid/mgr/
+       <a href="https://docs.ceph.com/en/tentacle/mgr/">
+        https://docs.ceph.com/en/tentacle/mgr/
        </a>
        ]
        <br/>
@@ -35803,8 +36038,8 @@ onward, you can change the number of PGs
        <span class="footnote" id="_footnote_placement_groups">
         <br/>
         [Placement Groups
-        <a href="https://docs.ceph.com/en/squid/rados/operations/placement-groups/">
-         https://docs.ceph.com/en/squid/rados/operations/placement-groups/
+        <a href="https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/">
+         https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/
         </a>
         ]
         <br/>
@@ -35818,8 +36053,8 @@ onward, you can change the number of PGs
        <span class="footnote" id="_footnote_autoscaler">
         <br/>
         [Automated Scaling
-        <a href="https://docs.ceph.com/en/squid/rados/operations/placement-groups/#automated-scaling">
-         https://docs.ceph.com/en/squid/rados/operations/placement-groups/#automated-scaling
+        <a href="https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/#automated-scaling">
+         https://docs.ceph.com/en/tentacle/rados/operations/placement-groups/#automated-scaling
         </a>
         ]
         <br/>
@@ -36089,8 +36324,8 @@ operation
         <span class="footnote">
          <br/>
          [Ceph pool operation
-         <a href="https://docs.ceph.com/en/squid/rados/operations/pools/">
-          https://docs.ceph.com/en/squid/rados/operations/pools/
+         <a href="https://docs.ceph.com/en/tentacle/rados/operations/pools/">
+          https://docs.ceph.com/en/tentacle/rados/operations/pools/
          </a>
          ]
          <br/>
@@ -36211,8 +36446,8 @@ the
         <span class="footnote">
          <br/>
          [Ceph Erasure Coded Pool Recovery
-         <a href="https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-coded-pool-recovery">
-          https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-coded-pool-recovery
+         <a href="https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-coded-pool-recovery">
+          https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-coded-pool-recovery
          </a>
          ]
          <br/>
@@ -36475,8 +36710,8 @@ creating it with the Ceph tools directly
         <span class="footnote">
          <br/>
          [Ceph Erasure Code Profile
-         <a href="https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-code-profiles">
-          https://docs.ceph.com/en/squid/rados/operations/erasure-code/#erasure-code-profiles
+         <a href="https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-code-profiles">
+          https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/#erasure-code-profiles
          </a>
          ]
          <br/>
@@ -36528,8 +36763,8 @@ Upstream recommends it for RBD and CephFS backed storage
         <span class="footnote">
          <br/>
          [Ceph Erasure Code
-         <a href="https://docs.ceph.com/en/squid/rados/operations/erasure-code/">
-          https://docs.ceph.com/en/squid/rados/operations/erasure-code/
+         <a href="https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/">
+          https://docs.ceph.com/en/tentacle/rados/operations/erasure-code/
          </a>
          ]
          <br/>
@@ -37471,8 +37706,8 @@ section CRUSH map
         <span class="footnote">
          <br/>
          [CRUSH map
-         <a href="https://docs.ceph.com/en/squid/rados/operations/crush-map/">
-          https://docs.ceph.com/en/squid/rados/operations/crush-map/
+         <a href="https://docs.ceph.com/en/tentacle/rados/operations/crush-map/">
+          https://docs.ceph.com/en/tentacle/rados/operations/crush-map/
          </a>
          ]
          <br/>
@@ -38096,8 +38331,8 @@ system. If you want to set this up, please refer to the Ceph documentation.
        <span class="footnote">
         <br/>
         [Configuring multiple active MDS daemons
-        <a href="https://docs.ceph.com/en/squid/cephfs/multimds/">
-         https://docs.ceph.com/en/squid/cephfs/multimds/
+        <a href="https://docs.ceph.com/en/tentacle/cephfs/multimds/">
+         https://docs.ceph.com/en/tentacle/cephfs/multimds/
         </a>
         ]
         <br/>
@@ -38563,8 +38798,8 @@ scrubs
        <span class="footnote">
         <br/>
         [Ceph scrubbing
-        <a href="https://docs.ceph.com/en/squid/rados/configuration/osd-config-ref/#scrubbing">
-         https://docs.ceph.com/en/squid/rados/configuration/osd-config-ref/#scrubbing
+        <a href="https://docs.ceph.com/en/tentacle/rados/configuration/osd-config-ref/#scrubbing">
+         https://docs.ceph.com/en/tentacle/rados/configuration/osd-config-ref/#scrubbing
         </a>
         ]
         <br/>
@@ -39916,8 +40151,8 @@ Troubleshooting
        <span class="footnote">
         <br/>
         [Ceph troubleshooting
-        <a href="https://docs.ceph.com/en/squid/rados/troubleshooting/">
-         https://docs.ceph.com/en/squid/rados/troubleshooting/
+        <a href="https://docs.ceph.com/en/tentacle/rados/troubleshooting/">
+         https://docs.ceph.com/en/tentacle/rados/troubleshooting/
         </a>
         ]
         <br/>
@@ -40002,8 +40237,8 @@ adjusted
        <span class="footnote">
         <br/>
         [Ceph log and debugging
-        <a href="https://docs.ceph.com/en/squid/rados/troubleshooting/log-and-debug/">
-         https://docs.ceph.com/en/squid/rados/troubleshooting/log-and-debug/
+        <a href="https://docs.ceph.com/en/tentacle/rados/troubleshooting/log-and-debug/">
+         https://docs.ceph.com/en/tentacle/rados/troubleshooting/log-and-debug/
         </a>
         ]
         <br/>
@@ -42678,35 +42913,76 @@ Added CPU flags compared to
       </h5>
       <div class="paragraph">
        <p>
-        You can specify custom CPU types with a configurable set of features. These are
-maintained in the configuration file
+        You can define custom CPU types with a configurable set of base model, vendor,
+physical address bits, and per-flag toggles, then assign them to VMs like a
+built-in type. Custom types are referenced from a VM configuration as
         <span class="monospaced">
-         /etc/pve/virtual-guest/cpu-models.conf
+         custom-&lt;name&gt;
         </span>
-        by
-an administrator. See
-        <span class="monospaced">
-         man cpu-models.conf
-        </span>
-        for format details.
+        .
        </p>
       </div>
       <div class="paragraph">
        <p>
-        Specified custom types can be selected by any user with the
+        Manage them under
         <span class="monospaced">
-         Sys.Audit
+         Datacenter -&gt; Custom CPU Models
         </span>
-        privilege on
+        in the web UI. The model
+dialog embeds a flag editor grid with free-text search over flag name and
+description, an accelerator (kvm/tcg) selector, and a per-node multi-select
+that highlights the flags each selected cluster node currently reports as
+supported - useful to spot which flags would actually be available on the
+target hosts before committing to a model. The same grid is reused in the
+per-VM
         <span class="monospaced">
-         /nodes
+         Processor
         </span>
-        . When configuring a custom CPU type for a VM via the CLI
-or API, the name needs to be prefixed with
-        <em>
-         custom-
-        </em>
+        edit dialog, restricted there to the flags settable per
+VM; configured flags unknown to the API or unsupported on the selected
+accelerator surface at the top with a warning.
+       </p>
+      </div>
+      <div class="paragraph">
+       <p>
+        Custom CPU types are still backed by the configuration file
+        <span class="monospaced">
+         /etc/pve/virtual-guest/cpu-models.conf
+        </span>
+        and can be maintained from the CLI
+as well, see
+        <span class="monospaced">
+         man cpu-models.conf
+        </span>
+        for the format.
+       </p>
+      </div>
+      <div class="paragraph">
+       <p>
+        Access to a custom model is controlled per model via the ACL path
+        <span class="monospaced">
+         /mapping/cpu/&lt;name&gt;
+        </span>
         .
+        <span class="monospaced">
+         Mapping.Audit
+        </span>
+        lets a user see the model in
+listings,
+        <span class="monospaced">
+         Mapping.Modify
+        </span>
+        gates create/update/delete in the panel, and
+        <span class="monospaced">
+         Mapping.Use
+        </span>
+        is required to assign the model to a VM. The latter is
+enforced on VM create, VM update, and VM clone, so a user who can clone a VM
+that uses a custom model still needs
+        <span class="monospaced">
+         Mapping.Use
+        </span>
+        on that model’s ACL path.
        </p>
       </div>
      </div>
@@ -42963,6 +43239,72 @@ and thus the guest should be told not to enable its mitigations, by exposing amd
 This is mutually exclusive with virt-ssbd and amd-ssbd.
           </p>
          </div>
+        </li>
+       </ul>
+      </div>
+     </div>
+     <div class="sect4">
+      <h5 id="qm_cpu_windows_tweaks">
+       Windows-related CPU settings
+       <a class="headerlink" href="#qm_cpu_windows_tweaks" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="paragraph">
+       <p>
+        A couple of CPU defaults and properties are tuned specifically for Windows
+guests on recent Intel hardware:
+       </p>
+      </div>
+      <div class="ulist">
+       <ul>
+        <li>
+         <p>
+          <span class="monospaced">
+           cet-ibt
+          </span>
+          and
+          <span class="monospaced">
+           cet-ss
+          </span>
+          (Control-flow Enforcement Technology: indirect
+  branch tracking and shadow stack) are disabled by default for Windows 11
+  machine types, as they currently break boot for Windows guests with
+  virtualization-based security enabled. Workloads that explicitly rely on
+  the flags can re-enable them per VM via the
+          <span class="monospaced">
+           Processor
+          </span>
+          flag editor.
+         </p>
+        </li>
+        <li>
+         <p>
+          The QEMU
+          <span class="monospaced">
+           level
+          </span>
+          CPU property is exposed so it can be set per VM (or in a
+  custom CPU model) without resorting to custom
+          <span class="monospaced">
+           args
+          </span>
+          . Setting
+          <span class="monospaced">
+           level=30
+          </span>
+          is a known workaround for Hyper-V boot failures of Windows guests on
+  recent Intel hosts when the CPU type is
+          <span class="monospaced">
+           host
+          </span>
+          or
+          <span class="monospaced">
+           max
+          </span>
+          . The property
+  only applies for x86_64 vCPUs; it is silently ignored on other
+  architectures.
+         </p>
         </li>
        </ul>
       </div>
@@ -52342,7 +52684,7 @@ by the guest firmware (BIOS/UEFI). If you require multiple disks for booting
         </span>
         :
         <span class="monospaced">
-         [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
+         [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,level=&lt;integer&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
         </span>
        </dt>
        <dd>
@@ -52467,6 +52809,24 @@ by the guest firmware (BIOS/UEFI). If you require multiple disks for booting
           </dd>
           <dt class="hdlist1">
            <span class="monospaced">
+            level
+           </span>
+           =
+           <span class="monospaced">
+            &lt;integer&gt; (0 - 4294967295)
+           </span>
+          </dt>
+          <dd>
+           <p>
+            Maximum input value for the basic CPUID leaves the guest can query - that is the vendor (leaf 0), family/model/stepping and feature bits (leaf 1), cache and topology info (leaves 4 and B), and so on. Higher-numbered leaves are hidden. Setting
+            <em>
+             30
+            </em>
+            is a common workaround for Hyper-V boot failures on Windows guests running on recent Intel hosts. Only applies when the vCPU architecture is x86_64.
+           </p>
+          </dd>
+          <dt class="hdlist1">
+           <span class="monospaced">
             phys-bits
            </span>
            =
@@ -52489,7 +52849,7 @@ by the guest firmware (BIOS/UEFI). If you require multiple disks for booting
            </span>
            =
            <span class="monospaced">
-            &lt;486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | ClearwaterForest | Conroe | Cooperlake | Cooperlake-v2 | EPYC | EPYC-Genoa | EPYC-Genoa-v2 | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Milan-v3 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-Rome-v5 | EPYC-Turin | EPYC-v3 | EPYC-v4 | EPYC-v5 | GraniteRapids | GraniteRapids-v2 | GraniteRapids-v3 | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | Icelake-Server-v7 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | SapphireRapids-v3 | SapphireRapids-v4 | SierraForest | SierraForest-v2 | SierraForest-v3 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Westmere | Westmere-IBRS | a64fx | athlon | core2duo | coreduo | cortex-a35 | cortex-a53 | cortex-a55 | cortex-a57 | cortex-a710 | cortex-a72 | cortex-a76 | host | kvm32 | kvm64 | max | neoverse-n1 | neoverse-n2 | neoverse-v1 | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64&gt;
+            &lt;486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | ClearwaterForest | ClearwaterForest-v2 | ClearwaterForest-v3 | Conroe | Cooperlake | Cooperlake-v2 | DiamondRapids | EPYC | EPYC-Genoa | EPYC-Genoa-v2 | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Milan-v3 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-Rome-v5 | EPYC-Turin | EPYC-v3 | EPYC-v4 | EPYC-v5 | GraniteRapids | GraniteRapids-v2 | GraniteRapids-v3 | GraniteRapids-v4 | GraniteRapids-v5 | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | Icelake-Server-v7 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | SapphireRapids-v3 | SapphireRapids-v4 | SapphireRapids-v5 | SapphireRapids-v6 | SierraForest | SierraForest-v2 | SierraForest-v3 | SierraForest-v4 | SierraForest-v5 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Westmere | Westmere-IBRS | a64fx | athlon | core2duo | coreduo | cortex-a35 | cortex-a53 | cortex-a55 | cortex-a57 | cortex-a710 | cortex-a72 | cortex-a76 | cortex-a78ae | host | kvm32 | kvm64 | max | neoverse-n1 | neoverse-n2 | neoverse-v1 | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64&gt;
            </span>
            (
            <em>
@@ -60176,41 +60536,83 @@ called
              type:container:disk:range-size
             </span>
             entries.
-            <span class="monospaced">
-             type
-            </span>
-            is
-            <span class="monospaced">
-             u
-            </span>
-            for UID or
-            <span class="monospaced">
-             g
-            </span>
-            for GID.
-            <span class="monospaced">
-             container
-            </span>
-            is the first ID as seen inside the container.
-            <span class="monospaced">
-             disk
-            </span>
-            is the first corresponding ID on the underlying filesystem.
-            <span class="monospaced">
-             range-size
-            </span>
-            is the number of consecutive IDs to map.
-Unmapped IDs fall back to the container’s
-            <span class="monospaced">
-             lxc.idmap
-            </span>
-            .
-Example:
-            <span class="monospaced">
-             u:123:456:1
-            </span>
-            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
            </p>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              type
+             </span>
+             is
+             <span class="monospaced">
+              u
+             </span>
+             for UID or
+             <span class="monospaced">
+              g
+             </span>
+             for GID.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              container
+             </span>
+             is the first ID as seen inside the container.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              disk
+             </span>
+             is the first corresponding ID on the underlying filesystem.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              range-size
+             </span>
+             is the number of consecutive IDs to map.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Unmapped IDs fall back to the container’s
+             <span class="monospaced">
+              lxc.idmap
+             </span>
+             .
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 1:
+             <span class="monospaced">
+              u:123:456:1
+             </span>
+             maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 2:
+             <span class="monospaced">
+              g:100:50:5
+             </span>
+             maps 5 consecutive GIDs, such that GIDs 100-104 in the container are mapped to GIDs 50-54 on the disk.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 3:
+             <span class="monospaced">
+              passthrough
+             </span>
+             identity-maps all UIDs and GIDs, meaning IDs inside the container will match the IDs on the disk.
+            </p>
+           </div>
           </dd>
           <dt class="hdlist1">
            <span class="monospaced">
@@ -64003,7 +64405,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         </span>
         :
         <span class="monospaced">
-         (?^:[^\x00-\x08\x10-\x1F\x7F]+)
+         (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
         </span>
         (
         <em>
@@ -64025,7 +64427,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         </span>
         :
         <span class="monospaced">
-         (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)
+         (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
         </span>
        </dt>
        <dd>
@@ -64314,41 +64716,83 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
              type:container:disk:range-size
             </span>
             entries.
-            <span class="monospaced">
-             type
-            </span>
-            is
-            <span class="monospaced">
-             u
-            </span>
-            for UID or
-            <span class="monospaced">
-             g
-            </span>
-            for GID.
-            <span class="monospaced">
-             container
-            </span>
-            is the first ID as seen inside the container.
-            <span class="monospaced">
-             disk
-            </span>
-            is the first corresponding ID on the underlying filesystem.
-            <span class="monospaced">
-             range-size
-            </span>
-            is the number of consecutive IDs to map.
-Unmapped IDs fall back to the container’s
-            <span class="monospaced">
-             lxc.idmap
-            </span>
-            .
-Example:
-            <span class="monospaced">
-             u:123:456:1
-            </span>
-            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
            </p>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              type
+             </span>
+             is
+             <span class="monospaced">
+              u
+             </span>
+             for UID or
+             <span class="monospaced">
+              g
+             </span>
+             for GID.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              container
+             </span>
+             is the first ID as seen inside the container.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              disk
+             </span>
+             is the first corresponding ID on the underlying filesystem.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              range-size
+             </span>
+             is the number of consecutive IDs to map.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Unmapped IDs fall back to the container’s
+             <span class="monospaced">
+              lxc.idmap
+             </span>
+             .
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 1:
+             <span class="monospaced">
+              u:123:456:1
+             </span>
+             maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 2:
+             <span class="monospaced">
+              g:100:50:5
+             </span>
+             maps 5 consecutive GIDs, such that GIDs 100-104 in the container are mapped to GIDs 50-54 on the disk.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 3:
+             <span class="monospaced">
+              passthrough
+             </span>
+             identity-maps all UIDs and GIDs, meaning IDs inside the container will match the IDs on the disk.
+            </p>
+           </div>
           </dd>
           <dt class="hdlist1">
            <span class="monospaced">
@@ -64981,41 +65425,83 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
              type:container:disk:range-size
             </span>
             entries.
-            <span class="monospaced">
-             type
-            </span>
-            is
-            <span class="monospaced">
-             u
-            </span>
-            for UID or
-            <span class="monospaced">
-             g
-            </span>
-            for GID.
-            <span class="monospaced">
-             container
-            </span>
-            is the first ID as seen inside the container.
-            <span class="monospaced">
-             disk
-            </span>
-            is the first corresponding ID on the underlying filesystem.
-            <span class="monospaced">
-             range-size
-            </span>
-            is the number of consecutive IDs to map.
-Unmapped IDs fall back to the container’s
-            <span class="monospaced">
-             lxc.idmap
-            </span>
-            .
-Example:
-            <span class="monospaced">
-             u:123:456:1
-            </span>
-            maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
            </p>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              type
+             </span>
+             is
+             <span class="monospaced">
+              u
+             </span>
+             for UID or
+             <span class="monospaced">
+              g
+             </span>
+             for GID.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              container
+             </span>
+             is the first ID as seen inside the container.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              disk
+             </span>
+             is the first corresponding ID on the underlying filesystem.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             <span class="monospaced">
+              range-size
+             </span>
+             is the number of consecutive IDs to map.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Unmapped IDs fall back to the container’s
+             <span class="monospaced">
+              lxc.idmap
+             </span>
+             .
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 1:
+             <span class="monospaced">
+              u:123:456:1
+             </span>
+             maps UID 123 in the container to UID 456 on the disk. Files owned by UID 456 on the disk will appear as UID 123 inside the container.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 2:
+             <span class="monospaced">
+              g:100:50:5
+             </span>
+             maps 5 consecutive GIDs, such that GIDs 100-104 in the container are mapped to GIDs 50-54 on the disk.
+            </p>
+           </div>
+           <div class="paragraph">
+            <p>
+             Example 3:
+             <span class="monospaced">
+              passthrough
+             </span>
+             identity-maps all UIDs and GIDs, meaning IDs inside the container will match the IDs on the disk.
+            </p>
+           </div>
           </dd>
           <dt class="hdlist1">
            <span class="monospaced">
@@ -67977,6 +68463,38 @@ signed integer or an IP address. Areas are a way to organize and structure OSPF
 networks hierarchically, with Area 0 (or 0.0.0.0) serving as the backbone area.
          </p>
         </dd>
+        <dt class="hdlist1">
+         Redistribute
+        </dt>
+        <dd>
+         <p>
+          Optional list of source protocols whose routes are imported
+into OSPF. Each entry picks a source (
+          <span class="monospaced">
+           bgp
+          </span>
+          ,
+          <span class="monospaced">
+           connected
+          </span>
+          ,
+          <span class="monospaced">
+           kernel
+          </span>
+          or
+          <span class="monospaced">
+           static
+          </span>
+          ) and may additionally reference a
+          <a href="#pvesdn_config_route_maps">
+           route map
+          </a>
+          to filter or transform routes
+before they are advertised. Useful for example to leak BGP fabric routes
+into OSPF, or to advertise locally connected networks without configuring
+them per interface.
+         </p>
+        </dd>
        </dl>
       </div>
      </div>
@@ -68332,8 +68850,21 @@ definitions that can be used across the whole cluster.
         <dd>
          <p>
           This is the IP or hostname that other Proxmox VE nodes should use for
-connecting to this Proxmox VE node. This is used as the endpoint when
-configuring this Proxmox VE node as a peer.
+connecting to this Proxmox VE node. This is used together with the endpoint port
+when configuring this Proxmox VE node as a peer.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+         Endpoint Port
+        </dt>
+        <dd>
+         <p>
+          This is the UDP port that other Proxmox VE nodes should use for
+connecting to this Proxmox VE node. If unset, it defaults to
+          <span class="monospaced">
+           51820
+          </span>
+          .
          </p>
         </dd>
         <dt class="hdlist1">
@@ -68388,10 +68919,19 @@ the routing destination for outgoing traffic to this node.
         </dt>
         <dd>
          <p>
-          The endpoint other nodes use to connect to this external peer, such
-as
+          The IP or hostname that other nodes use to connect to this external
+peer.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+         Endpoint Port
+        </dt>
+        <dd>
+         <p>
+          The UDP port that other nodes use to connect to this external
+peer. If unset, it defaults to
           <span class="monospaced">
-           192.0.2.1:51820
+           51820
           </span>
           .
          </p>
@@ -69011,17 +69551,31 @@ insertions without renumbering.
          <span class="monospaced">
           local-preference
          </span>
-         , and
+         ,
          <span class="monospaced">
           peer
+         </span>
+         , and
+         <span class="monospaced">
+          tag
          </span>
          . The four
          <span class="monospaced">
           *-prefix-list
          </span>
          keys
-reference a prefix list by name. All match conditions of an entry must be true
-for it to apply.
+reference a prefix list by name.
+         <span class="monospaced">
+          tag
+         </span>
+         matches a 32-bit route tag attribute,
+the same value that the
+         <span class="monospaced">
+          tag
+         </span>
+         set action assigns; this lets one entry mark
+routes with a tag and a later entry (in the same or another map) act on them.
+All match conditions of an entry must be true for it to apply.
         </p>
        </dd>
        <dt class="hdlist1">
@@ -82069,6 +82623,28 @@ properties:
       <dl>
        <dt class="hdlist1">
         <span class="monospaced">
+         auto-rebalance
+        </span>
+        :
+        <span class="monospaced">
+         &lt;boolean&gt;
+        </span>
+        (
+        <em>
+         default =
+        </em>
+        <span class="monospaced">
+         1
+        </span>
+        )
+       </dt>
+       <dd>
+        <p>
+         HA resource may be migrated during automatic rebalancing
+        </p>
+       </dd>
+       <dt class="hdlist1">
+        <span class="monospaced">
          comment
         </span>
         :
@@ -87908,24 +88484,6 @@ line.
       <dd>
        <p>
         Deprecated: Use notification targets/matchers instead. Comma-separated list of email addresses or users that should receive email notifications.
-       </p>
-      </dd>
-      <dt class="hdlist1">
-       <span class="monospaced">
-        maxfiles
-       </span>
-       :
-       <span class="monospaced">
-        &lt;integer&gt; (1 - N)
-       </span>
-      </dt>
-      <dd>
-       <p>
-        Deprecated: use
-        <em>
-         prune-backups
-        </em>
-        instead. Maximal number of backup files per guest system.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -94003,12 +94561,12 @@ values into human-readable text, for example:
         --blocksize
        </span>
        <span class="monospaced">
-        &lt;string&gt;
+        &lt;a power of 2 with optional k or m suffix&gt;
        </span>
       </dt>
       <dd>
        <p>
-        block size
+        ZFS block size
        </p>
       </dd>
       <dt class="hdlist1">
@@ -94871,7 +95429,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dt>
       <dd>
        <p>
-        Only use logical volumes tagged with
+        Only list logical volumes tagged with
         <em>
          pve-vm-ID
         </em>
@@ -96305,12 +96863,12 @@ used.
         --blocksize
        </span>
        <span class="monospaced">
-        &lt;string&gt;
+        &lt;a power of 2 with optional k or m suffix&gt;
        </span>
       </dt>
       <dd>
        <p>
-        block size
+        ZFS block size
        </p>
       </dd>
       <dt class="hdlist1">
@@ -97121,7 +97679,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dt>
       <dd>
        <p>
-        Only use logical volumes tagged with
+        Only list logical volumes tagged with
         <em>
          pve-vm-ID
         </em>
@@ -97798,7 +98356,13 @@ proxmox-offline-mirror-helper instead.
     </div>
     <div class="paragraph">
      <p>
-      Destroy a Ceph filesystem
+      Destroy a Ceph filesystem. Refuses if any PVE storage entry of type
+      <em>
+       cephfs
+      </em>
+      still references the filesystem and is not disabled. Optionally
+also removes the storage entries and/or the underlying metadata and data
+pools.
      </p>
     </div>
     <div class="dlist">
@@ -97814,7 +98378,7 @@ proxmox-offline-mirror-helper instead.
       </dt>
       <dd>
        <p>
-        The ceph filesystem name.
+        The Ceph filesystem name.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -97835,7 +98399,7 @@ proxmox-offline-mirror-helper instead.
       </dt>
       <dd>
        <p>
-        Remove data and metadata pools configured for this fs.
+        Remove the metadata and data pools used by this filesystem.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -97856,7 +98420,7 @@ proxmox-offline-mirror-helper instead.
       </dt>
       <dd>
        <p>
-        Remove all pveceph-managed storages configured for this fs.
+        Remove pveceph-managed storages configured for this filesystem.
        </p>
       </dd>
      </dl>
@@ -97922,7 +98486,10 @@ proxmox-offline-mirror-helper instead.
     </div>
     <div class="paragraph">
      <p>
-      Create initial ceph default configuration and setup symlinks.
+      Create the initial Ceph default configuration and set up symlinks.
+Idempotent on re-call: if a [global] section already exists in ceph.conf,
+the existing fsid / auth / pool defaults are preserved and most parameters
+are silently ignored.
      </p>
     </div>
     <div class="dlist">
@@ -97937,7 +98504,7 @@ proxmox-offline-mirror-helper instead.
       </dt>
       <dd>
        <p>
-        Declare a separate cluster network, OSDs will routeheartbeat, object replication and recovery traffic over it
+        Declare a separate cluster network, OSDs will route heartbeat, object replication and recovery traffic over it
        </p>
        <div class="admonitionblock">
         <table>
@@ -98249,7 +98816,7 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
         default =
        </em>
        <span class="monospaced">
-        squid
+        tentacle
        </span>
        )
       </dt>
@@ -98402,10 +98969,18 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
        <span class="monospaced">
         [a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?
        </span>
+       (
+       <em>
+        default =
+       </em>
+       <span class="monospaced">
+        nodename
+       </span>
+       )
       </dt>
       <dd>
        <p>
-        The ID for the manager, when omitted the same as the nodename
+        The ID for the manager, when omitted the same as the nodename.
        </p>
       </dd>
      </dl>
@@ -98459,7 +99034,7 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
     </div>
     <div class="paragraph">
      <p>
-      Create Ceph Monitor and Manager
+      Create a Ceph Monitor. Also auto-creates a Manager for the first monitor.
      </p>
     </div>
     <div class="dlist">
@@ -98484,10 +99059,18 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
        <span class="monospaced">
         [a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?
        </span>
+       (
+       <em>
+        default =
+       </em>
+       <span class="monospaced">
+        nodename
+       </span>
+       )
       </dt>
       <dd>
        <p>
-        The ID for the monitor, when omitted the same as the nodename
+        The ID for the monitor, when omitted the same as the nodename.
        </p>
       </dd>
      </dl>
@@ -98506,7 +99089,8 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
     </div>
     <div class="paragraph">
      <p>
-      Destroy Ceph Monitor and Manager.
+      Destroy a Ceph Monitor. Refuses to remove the last monitor of the cluster.
+Does not destroy any Manager on the same node; use
      </p>
     </div>
     <div class="dlist">
@@ -98596,14 +99180,6 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
        <span class="monospaced">
         &lt;number&gt; (1 - N)
        </span>
-       (
-       <em>
-        default =
-       </em>
-       <span class="monospaced">
-        bluestore_block_db_size or 10% of OSD size
-       </span>
-       )
       </dt>
       <dd>
        <p>
@@ -98700,8 +99276,15 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dt>
       <dd>
        <p>
-        OSD services per physical device. Only useful for fast NVMe devices"
-                    ." to utilize their performance better.
+        OSD services per physical device. Only useful for fast NVMe devices to utilize their performance better. Mutually exclusive with
+        <em>
+         db_dev
+        </em>
+        and
+        <em>
+         wal_dev
+        </em>
+        .
        </p>
       </dd>
       <dt class="hdlist1">
@@ -98724,14 +99307,6 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
        <span class="monospaced">
         &lt;number&gt; (0.5 - N)
        </span>
-       (
-       <em>
-        default =
-       </em>
-       <span class="monospaced">
-        bluestore_block_wal_size or 1% of OSD size
-       </span>
-       )
       </dt>
       <dd>
        <p>
@@ -98853,7 +99428,11 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dt>
       <dd>
        <p>
-        If set, we remove partition table entries.
+        If set, also destroy the underlying logical volumes via
+        <em>
+         ceph-volume lvm zap --destroy
+        </em>
+        , remove the volume group’s physical volume with pvremove, and wipe any journal/block.db/block.wal partitions left over from filestore OSDs. Without this flag the LVs and partitions are left intact for inspection.
        </p>
       </dd>
      </dl>
@@ -98968,13 +99547,13 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         default =
        </em>
        <span class="monospaced">
-        0; for erasure coded pools: 1
+        0
        </span>
        )
       </dt>
       <dd>
        <p>
-        Configure VM and CT storage using the new pool.
+        Configure VM and CT storage using the new pool. Defaults to false for replicated pools and to true for erasure-coded pools (since EC pools are typically only useful when wired up to storage).
        </p>
       </dd>
       <dt class="hdlist1">
@@ -100554,7 +101133,7 @@ new account information triggers a refresh.
         --property
        </span>
        <span class="monospaced">
-        &lt;acme | acmedomain0 | acmedomain1 | acmedomain2 | acmedomain3 | acmedomain4 | acmedomain5 | ballooning-target | description | startall-onboot-delay | wakeonlan&gt;
+        &lt;acme | acmedomain0 | acmedomain1 | acmedomain2 | acmedomain3 | acmedomain4 | acmedomain5 | ballooning-target | description | location | startall-onboot-delay | wakeonlan&gt;
        </span>
        (
        <em>
@@ -100675,6 +101254,19 @@ new account information triggers a refresh.
       <dd>
        <p>
         Prevent changes if current configuration file has different SHA1 digest. This can be used to prevent concurrent modifications.
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
+        --location
+       </span>
+       <span class="monospaced">
+        latitude=&lt;number&gt; ,longitude=&lt;number&gt; [,name=&lt;name&gt;]
+       </span>
+      </dt>
+      <dd>
+       <p>
+        The location of the node. Overrides the default from the datacenter config.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -102674,7 +103266,7 @@ instead.
         --cpu
        </span>
        <span class="monospaced">
-        [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
+        [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,level=&lt;integer&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
        </span>
       </dt>
       <dd>
@@ -105414,7 +106006,7 @@ ESXi storage.
         --cpu
        </span>
        <span class="monospaced">
-        [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
+        [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,level=&lt;integer&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
        </span>
       </dt>
       <dd>
@@ -107977,7 +108569,7 @@ allocation.
         --cpu
        </span>
        <span class="monospaced">
-        [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
+        [[cputype=]&lt;string&gt;] [,flags=&lt;+FLAG[;-FLAG...]&gt;] [,guest-phys-bits=&lt;integer&gt;] [,hidden=&lt;1|0&gt;] [,hv-vendor-id=&lt;vendor-id&gt;] [,level=&lt;integer&gt;] [,phys-bits=&lt;8-64|host&gt;] [,reported-model=&lt;enum&gt;]
        </span>
       </dt>
       <dd>
@@ -111106,7 +111698,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --entrypoint
        </span>
        <span class="monospaced">
-        (?^:[^\x00-\x08\x10-\x1F\x7F]+)
+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
        </span>
        (
        <em>
@@ -111127,7 +111719,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --env
        </span>
        <span class="monospaced">
-        (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)
+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
        </span>
       </dt>
       <dd>
@@ -113546,7 +114138,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --entrypoint
        </span>
        <span class="monospaced">
-        (?^:[^\x00-\x08\x10-\x1F\x7F]+)
+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
        </span>
        (
        <em>
@@ -113567,7 +114159,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --env
        </span>
        <span class="monospaced">
-        (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)
+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
        </span>
       </dt>
       <dd>
@@ -114532,7 +115124,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --entrypoint
        </span>
        <span class="monospaced">
-        (?^:[^\x00-\x08\x10-\x1F\x7F]+)
+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
        </span>
        (
        <em>
@@ -114553,7 +115145,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --env
        </span>
        <span class="monospaced">
-        (?^:(?:\w+=[^\x00-\x08\x10-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x10-\x1F\x7F]*)*)
+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
        </span>
       </dt>
       <dd>
@@ -118396,6 +118988,23 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dd>
       <dt class="hdlist1">
        <span class="monospaced">
+        --audiences
+       </span>
+       <span class="monospaced">
+        ^[^\x00-\x1F\x7F &lt;&gt;#"]*$
+       </span>
+      </dt>
+      <dd>
+       <p>
+        A list of audiences that the OpenID Issuer may include that are accepted in addition to
+        <em>
+         client-id
+        </em>
+        .
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
         --autocreate
        </span>
        <span class="monospaced">
@@ -119139,6 +119748,23 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       <dd>
        <p>
         Specifies the Authentication Context Class Reference values that theAuthorization Server is being requested to use for the Auth Request.
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
+        --audiences
+       </span>
+       <span class="monospaced">
+        ^[^\x00-\x1F\x7F &lt;&gt;#"]*$
+       </span>
+      </dt>
+      <dd>
+       <p>
+        A list of audiences that the OpenID Issuer may include that are accepted in addition to
+        <em>
+         client-id
+        </em>
+        .
        </p>
       </dd>
       <dt class="hdlist1">
@@ -121984,23 +122610,6 @@ afterwards!
       </dd>
       <dt class="hdlist1">
        <span class="monospaced">
-        --maxfiles
-       </span>
-       <span class="monospaced">
-        &lt;integer&gt; (1 - N)
-       </span>
-      </dt>
-      <dd>
-       <p>
-        Deprecated: use
-        <em>
-         prune-backups
-        </em>
-        instead. Maximal number of backup files per guest system.
-       </p>
-      </dd>
-      <dt class="hdlist1">
-       <span class="monospaced">
         --mode
        </span>
        <span class="monospaced">
@@ -122546,6 +123155,27 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       <dd>
        <p>
         HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
+        --auto-rebalance
+       </span>
+       <span class="monospaced">
+        &lt;boolean&gt;
+       </span>
+       (
+       <em>
+        default =
+       </em>
+       <span class="monospaced">
+        1
+       </span>
+       )
+      </dt>
+      <dd>
+       <p>
+        HA resource may be migrated during automatic rebalancing
        </p>
       </dd>
       <dt class="hdlist1">
@@ -123977,6 +124607,27 @@ old node, and restarts it on the target node.
       <dd>
        <p>
         HA resource ID. This consists of a resource type followed by a resource specific name, separated with colon (example: vm:100 / ct:100). For virtual machines and containers, you can simply use the VM or CT id as a shortcut (example: 100).
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
+        --auto-rebalance
+       </span>
+       <span class="monospaced">
+        &lt;boolean&gt;
+       </span>
+       (
+       <em>
+        default =
+       </em>
+       <span class="monospaced">
+        1
+       </span>
+       )
+      </dt>
+      <dd>
+       <p>
+        HA resource may be migrated during automatic rebalancing
        </p>
       </dd>
       <dt class="hdlist1">
@@ -126131,20 +126782,20 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
            </span>
            =
            <span class="monospaced">
-            &lt;number&gt; (0 - N)
+            &lt;number&gt; (0 - 100)
            </span>
            (
            <em>
             default =
            </em>
            <span class="monospaced">
-            0.1
+            10
            </span>
            )
           </dt>
           <dd>
            <p>
-            The minimum relative improvement in cluster node imbalance to commit to a resource balancing migration.
+            The minimum relative improvement in cluster node imbalance, in percent, to commit to a resource balancing migration.
            </p>
            <div class="admonitionblock">
             <table>
@@ -126293,20 +126944,20 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
            </span>
            =
            <span class="monospaced">
-            &lt;number&gt; (0 - N)
+            &lt;number&gt; (0 - 100)
            </span>
            (
            <em>
             default =
            </em>
            <span class="monospaced">
-            0.3
+            30
            </span>
            )
           </dt>
           <dd>
            <p>
-            The threshold for the cluster node imbalance, which will trigger the automatic resource balancing system if its value is exceeded.
+            The cluster node imbalance, in percent, which will trigger the automatic resource balancing system if exceeded.
            </p>
            <div class="admonitionblock">
             <table>
@@ -136298,9 +136949,9 @@ provided the MMC is eligible for relicensing.
 </div>
 <div id="footer">
  <div id="footer-text">
-  Version 9.1.5
+  Version 9.2.1
   <br/>
   Last updated
- Mon May 18 11:31:11 CEST 2026
+ Wed May 20 15:46:31 CEST 2026
  </div>
 </div>
