@@ -198,7 +198,6 @@ def format_event_row(event: dict[str, Any]) -> str:
     details_cell = (
         f"{link} "
         '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> '
-        '<button type="button" class="row-delete" data-action="admin-delete" data-i18n="delete_entry" hidden>Delete</button> '
         '<label class="row-select-wrap" hidden>'
         '<input type="checkbox" class="row-select" data-role="row-select"> '
         '<span data-i18n="select_entry">Select</span>'
@@ -561,9 +560,6 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
         }}
         themeSelect.options[0].textContent = t(lang, "theme_light");
         themeSelect.options[1].textContent = t(lang, "theme_dark");
-        if (adminToken) {{
-          setAdminMode(true, adminStatus.dataset.login || "admin");
-        }}
       }}
 
       const currentLang = readLang();
@@ -821,19 +817,6 @@ def render_docs(
       border-color: #dc2626;
       color: #dc2626;
     }}
-    .row-delete {{
-      border: 1px solid var(--control-line);
-      border-radius: 6px;
-      background: var(--control-bg);
-      color: var(--control-text);
-      padding: 2px 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }}
-    .row-delete:hover {{
-      border-color: #b91c1c;
-      color: #b91c1c;
-    }}
     .row-select-wrap {{
       color: var(--muted);
       font-size: 12px;
@@ -914,10 +897,9 @@ def render_docs(
           </select>
         </label>
         <span id="admin-panel" class="admin-panel" hidden>
-          <button type="button" id="admin-login" class="control-btn" data-i18n="admin_login">Admin login</button>
-          <button type="button" id="admin-logout" class="control-btn" data-i18n="admin_logout" hidden>Admin logout</button>
-          <button type="button" id="delete-selected" class="control-btn" data-i18n="delete_selected" hidden disabled>Delete selected</button>
-          <span id="admin-status" class="admin-status" data-i18n="admin_status_off">Admin: off</span>
+          <button type="button" id="open-workflow" class="control-btn" data-i18n="open_delete_workflow">Open delete workflow</button>
+          <button type="button" id="delete-selected" class="control-btn" data-i18n="copy_selected" disabled>Copy selected</button>
+          <span id="admin-status" class="admin-status" data-i18n="tools_status_off">Tools: off</span>
         </span>
         <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
@@ -965,10 +947,8 @@ def render_docs(
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
       const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
-      const ADMIN_TOKEN_KEY = "doxmox-admin-token";
       const fallbackLang = "en";
       const GITHUB_REPO = "{html.escape(github_repo)}";
-      const GITHUB_REF = "{html.escape(github_ref)}";
       const GITHUB_ADMIN_WORKFLOW = "{html.escape(github_admin_workflow)}";
       const i18n = {{
         en: {{
@@ -990,19 +970,13 @@ def render_docs(
           reset_hidden: "Reset hidden",
           hide_entry: "Hide",
           select_entry: "Select",
-          delete_entry: "Delete",
-          delete_selected: "Delete selected",
-          admin_login: "Admin login",
-          admin_logout: "Admin logout",
-          admin_status_off: "Admin: off",
-          admin_status_on: "Admin: {{login}}",
-          admin_bad_token: "Invalid token",
-          admin_no_rights: "User is not admin in this repo",
-          admin_delete_queued: "Delete queued in GitHub Actions",
-          admin_delete_failed: "Delete request failed",
-          admin_prompt: "Enter admin access key:",
-          delete_confirm: "Delete this entry from history.json?",
-          delete_selected_confirm: "Delete selected entries from history.json?",
+          copy_selected: "Copy selected",
+          open_delete_workflow: "Open delete workflow",
+          tools_status_off: "Tools: off",
+          tools_status_on: "Tools: on",
+          copy_selected_empty: "Select at least one entry first.",
+          copy_selected_done: "Selectors copied. Paste them into the 'selectors' field in GitHub workflow.",
+          copy_selected_failed: "Clipboard copy failed. Use manual copy from prompt.",
           footer_by: "Author",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
@@ -1028,19 +1002,13 @@ def render_docs(
           reset_hidden: "Reinitialiser les caches",
           hide_entry: "Masquer",
           select_entry: "Selectionner",
-          delete_entry: "Supprimer",
-          delete_selected: "Supprimer la selection",
-          admin_login: "Connexion admin",
-          admin_logout: "Deconnexion admin",
-          admin_status_off: "Admin : off",
-          admin_status_on: "Admin : {{login}}",
-          admin_bad_token: "Token invalide",
-          admin_no_rights: "Cet utilisateur n'est pas admin du repo",
-          admin_delete_queued: "Suppression envoyee a GitHub Actions",
-          admin_delete_failed: "Echec de la demande de suppression",
-          admin_prompt: "Entrez la cle d'acces administrateur :",
-          delete_confirm: "Supprimer cette entree de history.json ?",
-          delete_selected_confirm: "Supprimer les entrees selectionnees de history.json ?",
+          copy_selected: "Copier la selection",
+          open_delete_workflow: "Ouvrir le workflow de suppression",
+          tools_status_off: "Outils : off",
+          tools_status_on: "Outils : on",
+          copy_selected_empty: "Selectionnez au moins une entree.",
+          copy_selected_done: "Selecteurs copies. Collez-les dans le champ 'selectors' du workflow GitHub.",
+          copy_selected_failed: "Echec de copie dans le presse-papiers. Utilisez la copie manuelle.",
           footer_by: "Auteur",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
@@ -1066,19 +1034,13 @@ def render_docs(
           reset_hidden: "Сбросить скрытые",
           hide_entry: "Скрыть",
           select_entry: "Выбрать",
-          delete_entry: "Удалить",
-          delete_selected: "Удалить выбранное",
-          admin_login: "Вход админ",
-          admin_logout: "Выход админ",
-          admin_status_off: "Админ: нет",
-          admin_status_on: "Админ: {{login}}",
-          admin_bad_token: "Неверный токен",
-          admin_no_rights: "Пользователь не админ этого репозитория",
-          admin_delete_queued: "Удаление отправлено в GitHub Actions",
-          admin_delete_failed: "Ошибка запроса удаления",
-          admin_prompt: "Введите ключ доступа администратора:",
-          delete_confirm: "Удалить эту запись из history.json?",
-          delete_selected_confirm: "Удалить выбранные записи из history.json?",
+          copy_selected: "Скопировать выбранное",
+          open_delete_workflow: "Открыть workflow удаления",
+          tools_status_off: "Инструменты: выкл",
+          tools_status_on: "Инструменты: вкл",
+          copy_selected_empty: "Сначала выберите хотя бы одну запись.",
+          copy_selected_done: "Селекторы скопированы. Вставьте их в поле 'selectors' в GitHub workflow.",
+          copy_selected_failed: "Не удалось скопировать в буфер. Используйте ручное копирование.",
           footer_by: "Автор",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
@@ -1091,13 +1053,11 @@ def render_docs(
       const themeSelect = document.getElementById("theme-select");
       const resetHiddenButton = document.getElementById("reset-hidden");
       const adminPanel = document.getElementById("admin-panel");
-      const adminLoginButton = document.getElementById("admin-login");
-      const adminLogoutButton = document.getElementById("admin-logout");
+      const openWorkflowButton = document.getElementById("open-workflow");
       const deleteSelectedButton = document.getElementById("delete-selected");
       const adminStatus = document.getElementById("admin-status");
       const tableBody = document.querySelector("tbody");
       const hiddenRows = new Set();
-      let adminToken = null;
       let adminPanelUnlocked = false;
       let escHitCounter = 0;
       let escTimer = null;
@@ -1105,6 +1065,10 @@ def render_docs(
       function unlockAdminPanel() {{
         adminPanelUnlocked = true;
         adminPanel.hidden = false;
+      }}
+
+      function workflowUrl() {{
+        return `https://github.com/${{GITHUB_REPO}}/actions/workflows/${{encodeURIComponent(GITHUB_ADMIN_WORKFLOW)}}`;
       }}
 
       function selectedSelectors() {{
@@ -1119,22 +1083,12 @@ def render_docs(
       }}
 
       function updateBatchDeleteState() {{
-        if (!adminToken) {{
-          deleteSelectedButton.disabled = true;
-          return;
-        }}
-        deleteSelectedButton.disabled = selectedSelectors().length === 0;
+        deleteSelectedButton.disabled = !adminPanelUnlocked || selectedSelectors().length === 0;
       }}
 
-      function setAdminMode(enabled, login = "") {{
+      function setToolsMode(enabled) {{
         if (enabled) unlockAdminPanel();
         adminPanel.hidden = !adminPanelUnlocked;
-        adminLoginButton.hidden = enabled;
-        adminLogoutButton.hidden = !enabled;
-        deleteSelectedButton.hidden = !enabled;
-        document.querySelectorAll('button[data-action="admin-delete"]').forEach((btn) => {{
-          btn.hidden = !enabled;
-        }});
         document.querySelectorAll(".row-select-wrap").forEach((node) => {{
           node.hidden = !enabled;
         }});
@@ -1144,81 +1098,28 @@ def render_docs(
           }});
         }}
         const lang = readLang();
-        if (enabled) {{
-          adminStatus.textContent = t(lang, "admin_status_on").replace("{{login}}", login || "admin");
-          adminStatus.dataset.login = login || "admin";
-        }} else {{
-          adminStatus.textContent = t(lang, "admin_status_off");
-          adminStatus.dataset.login = "";
-        }}
+        adminStatus.textContent = enabled ? t(lang, "tools_status_on") : t(lang, "tools_status_off");
         updateBatchDeleteState();
       }}
 
-      async function githubApiRequest(path, token, method = "GET", payload = null) {{
-        const response = await fetch(`https://api.github.com${{path}}`, {{
-          method,
-          headers: {{
-            Accept: "application/vnd.github+json",
-            Authorization: `Bearer ${{token}}`,
-            "X-GitHub-Api-Version": "2022-11-28",
-            ...(payload ? {{ "Content-Type": "application/json" }} : {{}})
-          }},
-          body: payload ? JSON.stringify(payload) : undefined
-        }});
-
-        if (!response.ok) {{
-          const text = await response.text();
-          throw new Error(`GitHub API ${{response.status}}: ${{text || response.statusText}}`);
-        }}
-
-        if (response.status === 204) return null;
-        return response.json();
-      }}
-
-      async function verifyAdminToken(token) {{
-        const user = await githubApiRequest("/user", token);
-        const repo = await githubApiRequest(`/repos/${{GITHUB_REPO}}`, token);
-        if (!repo.permissions || !repo.permissions.admin) {{
-          return null;
-        }}
-        return user.login;
-      }}
-
-      async function loadStoredAdminSession() {{
-        const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
-        if (!token) {{
-          setAdminMode(false);
+      async function copyToClipboard(value) {{
+        if (navigator.clipboard && window.isSecureContext) {{
+          await navigator.clipboard.writeText(value);
           return;
         }}
-        try {{
-          const login = await verifyAdminToken(token);
-          if (!login) {{
-            sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-            setAdminMode(false);
-            return;
-          }}
-          adminToken = token;
-          setAdminMode(true, login);
-        }} catch {{
-          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-          setAdminMode(false);
+        const textArea = document.createElement("textarea");
+        textArea.value = value;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const success = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        if (!success) {{
+          throw new Error("copy failed");
         }}
-      }}
-
-      async function queueHistoryDelete(selector) {{
-        const normalized = Array.isArray(selector) ? selector : [selector];
-        await githubApiRequest(
-          `/repos/${{GITHUB_REPO}}/actions/workflows/${{encodeURIComponent(GITHUB_ADMIN_WORKFLOW)}}/dispatches`,
-          adminToken,
-          "POST",
-          {{
-            ref: GITHUB_REF,
-            inputs: {{
-              selectors: normalized.join("\\n"),
-              delete_artifacts: "false"
-            }}
-          }}
-        );
       }}
 
       function loadHiddenRows() {{
@@ -1317,9 +1218,8 @@ def render_docs(
       loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
-      setAdminMode(false);
+      setToolsMode(false);
       applyHiddenRows();
-      loadStoredAdminSession();
 
       document.addEventListener("keydown", (event) => {{
         if (event.key !== "Escape") return;
@@ -1336,11 +1236,11 @@ def render_docs(
             clearTimeout(escTimer);
             escTimer = null;
           }}
-          setAdminMode(!!adminToken, adminStatus.dataset.login || "");
+          setToolsMode(true);
         }}
       }});
 
-      tableBody.addEventListener("click", async (event) => {{
+      tableBody.addEventListener("click", (event) => {{
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
         const button = target.closest('button[data-action]');
@@ -1357,26 +1257,6 @@ def render_docs(
           applyHiddenRows();
           return;
         }}
-
-        if (action === "admin-delete") {{
-          if (!adminToken) return;
-          const selector = row.getAttribute("data-history-selector");
-          if (!selector) return;
-          const lang = readLang();
-          if (!window.confirm(t(lang, "delete_confirm"))) return;
-
-          button.disabled = true;
-          try {{
-            await queueHistoryDelete([selector]);
-            row.style.display = "none";
-            applyHiddenRows();
-            window.alert(t(lang, "admin_delete_queued"));
-          }} catch {{
-            window.alert(t(lang, "admin_delete_failed"));
-          }} finally {{
-            button.disabled = false;
-          }}
-        }}
       }});
 
       tableBody.addEventListener("change", (event) => {{
@@ -1392,60 +1272,34 @@ def render_docs(
         applyHiddenRows();
       }});
 
-      deleteSelectedButton.addEventListener("click", async () => {{
-        if (!adminToken) return;
-        const selectors = selectedSelectors();
-        if (!selectors.length) return;
-        const lang = readLang();
-        if (!window.confirm(t(lang, "delete_selected_confirm"))) return;
+      openWorkflowButton.addEventListener("click", () => {{
+        window.open(workflowUrl(), "_blank", "noopener,noreferrer");
+      }});
 
+      deleteSelectedButton.addEventListener("click", async () => {{
+        const selectors = selectedSelectors();
+        if (!selectors.length) {{
+          window.alert(t(readLang(), "copy_selected_empty"));
+          return;
+        }}
+        const payload = selectors.join("\\n");
+        const lang = readLang();
         deleteSelectedButton.disabled = true;
         try {{
-          await queueHistoryDelete(selectors);
-          tableBody.querySelectorAll('tr[data-event-id] .row-select:checked').forEach((checkbox) => {{
-            const row = checkbox.closest("tr[data-event-id]");
-            if (row) row.style.display = "none";
-          }});
-          applyHiddenRows();
-          window.alert(t(lang, "admin_delete_queued"));
+          await copyToClipboard(payload);
+          window.alert(t(lang, "copy_selected_done"));
         }} catch {{
-          window.alert(t(lang, "admin_delete_failed"));
+          window.prompt("Copy selectors manually:", payload);
+          window.alert(t(lang, "copy_selected_failed"));
         }} finally {{
           updateBatchDeleteState();
         }}
       }});
 
-      adminLoginButton.addEventListener("click", async () => {{
-        const lang = readLang();
-        const token = window.prompt(t(lang, "admin_prompt")) || "";
-        const trimmed = token.trim();
-        if (!trimmed) return;
-
-        try {{
-          const login = await verifyAdminToken(trimmed);
-          if (!login) {{
-            window.alert(t(lang, "admin_no_rights"));
-            setAdminMode(false);
-            return;
-          }}
-          adminToken = trimmed;
-          sessionStorage.setItem(ADMIN_TOKEN_KEY, trimmed);
-          setAdminMode(true, login);
-        }} catch {{
-          window.alert(t(lang, "admin_bad_token"));
-          setAdminMode(false);
-        }}
-      }});
-
-      adminLogoutButton.addEventListener("click", () => {{
-        adminToken = null;
-        sessionStorage.removeItem(ADMIN_TOKEN_KEY);
-        setAdminMode(false);
-      }});
-
       langSelect.addEventListener("change", () => {{
         localStorage.setItem(LANG_KEY, langSelect.value);
         applyLanguage(langSelect.value);
+        setToolsMode(adminPanelUnlocked);
       }});
 
       themeSelect.addEventListener("change", () => {{

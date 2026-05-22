@@ -96,22 +96,16 @@ python src/monitor.py --history-delete "20260410T082842Z.diff" --history-delete-
 
 After deletion, `docs/index.html` is regenerated automatically.
 
-### Delete from website (admin-only)
+### Delete from website (safe flow, no tokens in browser)
 
-`docs/index.html` now supports admin deletion from the UI:
+`docs/index.html` no longer asks for GitHub tokens and does not call GitHub API from the browser.
 
-1. press `Esc` three times to reveal admin controls;
-2. click `Admin login`;
-3. paste GitHub token;
-4. either click `Delete` on one row, or tick multiple `Select` checkboxes and click `Delete selected`.
+To delete entries:
 
-The page checks GitHub permissions and enables deletion only for users with `admin` access to the repository.
+1. press `Esc` three times to reveal maintenance tools;
+2. tick `Select` checkboxes for entries you want to remove;
+3. click `Copy selected` (copies newline-separated selectors);
+4. click `Open delete workflow`;
+5. in GitHub Actions (`.github/workflows/history-admin-delete.yml`) paste copied selectors into the `selectors` input and run the workflow.
 
-The delete request triggers GitHub workflow:
-
-- `.github/workflows/history-admin-delete.yml`
-
-Token requirements:
-
-- access to this repository;
-- API scopes/permissions for repository and Actions (`repo` + `workflow` for classic PAT, or equivalent fine-grained permissions).
+Authentication happens only in GitHub UI/session, not in page JavaScript.
