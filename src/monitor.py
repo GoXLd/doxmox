@@ -66,6 +66,15 @@ def now_utc_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
+def format_utc_display(timestamp: str) -> str:
+    """Render ISO UTC timestamp as explicit 24-hour display string."""
+    try:
+        dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    except ValueError:
+        return timestamp
+
+
 def sha256_text(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
@@ -177,6 +186,7 @@ def event_row_id(event: dict[str, Any]) -> str:
 
 def format_event_row(event: dict[str, Any]) -> str:
     timestamp = event.get("timestamp", "-")
+    timestamp_display = format_utc_display(str(timestamp))
     old_hash = (event.get("old_hash") or "-")[:12]
     new_hash = (event.get("new_hash") or "-")[:12]
     added = event.get("added_lines", 0)
@@ -206,7 +216,7 @@ def format_event_row(event: dict[str, Any]) -> str:
 
     return (
         f'<tr data-event-id="{row_id}" data-history-selector="{selector}">'
-        f"<td>{timestamp}</td>"
+        f"<td>{timestamp_display}</td>"
         f"<td><code>{old_hash}</code></td>"
         f"<td><code>{new_hash}</code></td>"
         f"<td>+{added} / -{removed}</td>"
@@ -239,7 +249,7 @@ def resolve_author_url(docs_dir: Path, override: str | None) -> str:
 
 
 def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_url: str) -> None:
-    generated_at = now_utc_iso()
+    generated_at = format_utc_display(now_utc_iso())
     title = f"{diff_path.name} - Diff Viewer"
     raw_href = diff_path.name
     lines = []
@@ -615,7 +625,7 @@ def render_docs(
     docs_dir.mkdir(parents=True, exist_ok=True)
     rows = "\n".join(format_event_row(event) for event in history)
 
-    generated_at = now_utc_iso()
+    generated_at = format_utc_display(now_utc_iso())
     page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
