@@ -1,13 +1,5 @@
 [
   {
-    "timestamp": "2026-05-24T10:30:58Z",
-    "old_hash": "a328653e01b8528861b7c9fee2b792fef5de7f76af28d79af2e7ea88fafbe96d",
-    "new_hash": "b743073ca642a426c81f79d6cbd08d60e8895d41b9e18b87dee4ce53f4f809bc",
-    "diff_file": "docs/changes/20260524T103058Z.diff",
-    "added_lines": 0,
-    "removed_lines": 2
-  },
-  {
     "timestamp": "2026-05-21T13:00:40Z",
     "old_hash": "2c1b4d4dc5b234299953c3d414dc28253a4fa688f33767315d8563bbb09124be",
     "new_hash": "b743073ca642a426c81f79d6cbd08d60e8895d41b9e18b87dee4ce53f4f809bc",
