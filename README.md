@@ -227,3 +227,10 @@ To delete entries:
 5. in GitHub Actions (`.github/workflows/history-admin-delete.yml`) paste copied selectors into the `selectors` input and run the workflow.
 
 Authentication happens only in GitHub UI/session, not in page JavaScript.
+
+## License
+
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+
+Important: this license applies to the code and project artifacts in this repository.
+The original Proxmox documentation/content remains under its own copyright and terms.
