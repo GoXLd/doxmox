@@ -178,6 +178,9 @@ python src/monitor.py --ai-enable --history-ai-backfill-all
 
 # force regenerate even if ai.status=ok
 python src/monitor.py --ai-enable --history-ai-backfill-all --history-ai-force
+
+# recover EN first if translations are temporarily failing
+python src/monitor.py --ai-enable --history-ai-backfill-all --history-ai-force --no-ai-require-full-translations
 ```
 
 Required environment variables for local runs:

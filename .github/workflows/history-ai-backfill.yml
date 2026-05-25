@@ -17,6 +17,11 @@ on:
         required: false
         default: false
         type: boolean
+      require_full_translations:
+        description: "Require ru/fr during backfill (disable to recover EN-only first)"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -77,6 +82,10 @@ jobs:
 
           if [ "${{ inputs.force }}" = "true" ]; then
             ARGS+=(--history-ai-force)
+          fi
+
+          if [ "${{ inputs.require_full_translations }}" = "false" ]; then
+            ARGS+=(--no-ai-require-full-translations)
           fi
 
           python src/monitor.py "${ARGS[@]}"
