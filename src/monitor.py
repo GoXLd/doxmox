@@ -911,7 +911,7 @@ def render_changelog_html(
     author_url: str,
 ) -> None:
     generated_at = format_utc_display(now_utc_iso())
-    page_title = f"{diff_path.name} - AI Changelog"
+    page_title = f"{diff_path.name} - Human Changelog"
     code_diff_href = diff_path.with_suffix(".html").name
 
     if not ai_data:
@@ -1084,7 +1084,7 @@ def render_changelog_html(
     </div>
     <div class="card">
       <div class="head">
-        <h1 data-i18n="title">AI Changelog</h1>
+        <h1 data-i18n="title">Human Changelog</h1>
         <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
@@ -1108,7 +1108,7 @@ def render_changelog_html(
         en: {{
           language: "Language",
           theme: "Theme",
-          title: "AI Changelog",
+          title: "Human Changelog",
           generated: "Generated (UTC):",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
@@ -1125,7 +1125,7 @@ def render_changelog_html(
         fr: {{
           language: "Langue",
           theme: "Theme",
-          title: "Journal IA",
+          title: "Journal des changements",
           generated: "Généré (UTC) :",
           back_menu: "Retour au menu principal",
           open_diff: "Ouvrir le diff de code",
@@ -1142,7 +1142,7 @@ def render_changelog_html(
         ru: {{
           language: "Язык",
           theme: "Тема",
-          title: "AI Changelog",
+          title: "Журнал изменений",
           generated: "Сгенерировано (UTC):",
           back_menu: "Назад в главное меню",
           open_diff: "Открыть code diff",
