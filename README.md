@@ -22,6 +22,7 @@ Every 2 hours, GitHub Actions:
 - `docs/changes/*.diff` - saved diffs.
 - `docs/changes/*.changelog.html` - AI summary pages for each change.
 - `docs/index.html` - static changelog page (for GitHub Pages).
+- `docs/AI_PIPELINE.md` - AI architecture, model choices, RAG flow, and tuning notes.
 - `.github/workflows/monitor.yml` - scheduled workflow.
 - `.github/workflows/history-ai-backfill.yml` - manual AI summary backfill.
 
