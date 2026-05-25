@@ -911,6 +911,7 @@ def render_changelog_html(
     author_url: str,
 ) -> None:
     generated_at = format_utc_display(now_utc_iso())
+    license_url = f"https://github.com/{DEFAULT_GITHUB_REPO}/blob/{DEFAULT_GITHUB_REF}/LICENSE"
     page_title = f"{diff_path.name} - Human Changelog"
     code_diff_href = diff_path.with_suffix(".html").name
 
@@ -1061,6 +1062,10 @@ def render_changelog_html(
       color: var(--muted);
       font-size: 13px;
     }}
+    .license-note {{
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }}
   </style>
 </head>
 <body>
@@ -1096,6 +1101,7 @@ def render_changelog_html(
         <div><span data-i18n="model_analysis">Analysis model:</span> {html.escape(str(ai_data.get("analysis_model") or "-"))}</div>
         <div><span data-i18n="model_translation">Translation model:</span> {html.escape(str(ai_data.get("translation_model") or "-"))}</div>
         <div><span data-i18n="author">Author</span> <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a></div>
+        <div><a href="{html.escape(license_url)}" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
       </div>
     </div>
   </div>
@@ -1120,7 +1126,10 @@ def render_changelog_html(
           no_items: "No items yet.",
           model_analysis: "Analysis model:",
           model_translation: "Translation model:",
-          author: "Author"
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
         }},
         fr: {{
           language: "Langue",
@@ -1137,7 +1146,10 @@ def render_changelog_html(
           no_items: "Aucun élément.",
           model_analysis: "Modèle d'analyse :",
           model_translation: "Modèle de traduction :",
-          author: "Auteur"
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
         }},
         ru: {{
           language: "Язык",
@@ -1154,7 +1166,10 @@ def render_changelog_html(
           no_items: "Пока нет пунктов.",
           model_analysis: "Модель анализа:",
           model_translation: "Модель перевода:",
-          author: "Автор"
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
         }}
       }};
       const langSelect = document.getElementById("lang-select");
@@ -1177,6 +1192,10 @@ def render_changelog_html(
         document.querySelectorAll("[data-i18n]").forEach((node) => {{
           const key = node.getAttribute("data-i18n");
           node.textContent = t(lang, key);
+        }});
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {{
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
         }});
         document.querySelectorAll("[data-lang-block]").forEach((node) => {{
           node.hidden = node.getAttribute("data-lang-block") !== lang;
@@ -1225,6 +1244,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     generated_at = format_utc_display(now_utc_iso())
     title = f"{diff_path.name} - Diff Viewer"
     changelog_href = diff_path.with_suffix(".changelog.html").name
+    license_url = f"https://github.com/{DEFAULT_GITHUB_REPO}/blob/{DEFAULT_GITHUB_REF}/LICENSE"
     lines = []
     for line in diff_text.splitlines():
         css_class = "ctx"
@@ -1416,6 +1436,10 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
       color: var(--muted);
       font-size: 13px;
     }}
+    .license-note {{
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }}
   </style>
 </head>
 <body>
@@ -1449,6 +1473,8 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     <footer class="footer">
       <span data-i18n="footer_by">Author</span>
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
+      · <a href="{html.escape(license_url)}" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
     </footer>
   </div>
   <script>
@@ -1466,6 +1492,9 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           back_to_menu: "Back to main menu",
           open_changelog: "Open changelog",
           footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
           empty_diff: "(empty diff)",
           language_en: "English",
           language_fr: "French",
@@ -1480,6 +1509,9 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           back_to_menu: "Retour au menu principal",
           open_changelog: "Ouvrir le changelog",
           footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
           empty_diff: "(diff vide)",
           language_en: "Anglais",
           language_fr: "Français",
@@ -1494,6 +1526,9 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           back_to_menu: "Назад в главное меню",
           open_changelog: "Открыть changelog",
           footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
           empty_diff: "(пустой diff)",
           language_en: "Английский",
           language_fr: "Французский",
@@ -1532,6 +1567,10 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
         document.querySelectorAll("[data-i18n]").forEach((node) => {{
           const key = node.getAttribute("data-i18n");
           node.textContent = t(lang, key);
+        }});
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {{
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
         }});
         const langOptions = {{
           en: "language_en",
@@ -1608,6 +1647,7 @@ def render_docs(
     rows = "\n".join(format_event_row(event) for event in history)
 
     generated_at = format_utc_display(now_utc_iso())
+    license_url = f"https://github.com/{github_repo}/blob/{github_ref}/LICENSE"
     page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1932,6 +1972,8 @@ def render_docs(
     <footer class="footer">
       <span data-i18n="footer_by">Author</span>
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
+      · <a href="{html.escape(license_url)}" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
     </footer>
   </div>
   <script>
@@ -1970,6 +2012,9 @@ def render_docs(
           copy_selected_done: "Selectors copied. Paste them into the 'selectors' field in GitHub workflow.",
           copy_selected_failed: "Clipboard copy failed. Use manual copy from prompt.",
           footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
@@ -2002,6 +2047,9 @@ def render_docs(
           copy_selected_done: "Selecteurs copies. Collez-les dans le champ 'selectors' du workflow GitHub.",
           copy_selected_failed: "Echec de copie dans le presse-papiers. Utilisez la copie manuelle.",
           footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
@@ -2034,6 +2082,9 @@ def render_docs(
           copy_selected_done: "Селекторы скопированы. Вставьте их в поле 'selectors' в GitHub workflow.",
           copy_selected_failed: "Не удалось скопировать в буфер. Используйте ручное копирование.",
           footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
@@ -2192,6 +2243,10 @@ def render_docs(
         document.querySelectorAll("[data-i18n]").forEach((node) => {{
           const key = node.getAttribute("data-i18n");
           node.textContent = t(lang, key);
+        }});
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {{
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
         }});
         const langOptions = {{
           en: "language_en",

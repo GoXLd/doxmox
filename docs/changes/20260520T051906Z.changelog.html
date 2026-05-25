@@ -88,6 +88,10 @@
       color: var(--muted);
       font-size: 13px;
     }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
   </style>
 </head>
 <body>
@@ -112,7 +116,7 @@
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 15:00:09 UTC</p>
+        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 15:50:47 UTC</p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260520T051906Z.html" data-i18n="open_diff">Open code diff</a></p>
       </div>
       
@@ -176,7 +180,8 @@
       <div class="footer">
         <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
         <div><span data-i18n="model_translation">Translation model:</span> @cf/zai-org/glm-4.7-flash</div>
-        <div><span data-i18n="author">Author</span> <a href="https://doxmox.com" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
       </div>
     </div>
   </div>
@@ -201,7 +206,10 @@
           no_items: "No items yet.",
           model_analysis: "Analysis model:",
           model_translation: "Translation model:",
-          author: "Author"
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
         },
         fr: {
           language: "Langue",
@@ -218,7 +226,10 @@
           no_items: "Aucun élément.",
           model_analysis: "Modèle d'analyse :",
           model_translation: "Modèle de traduction :",
-          author: "Auteur"
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
         },
         ru: {
           language: "Язык",
@@ -235,7 +246,10 @@
           no_items: "Пока нет пунктов.",
           model_analysis: "Модель анализа:",
           model_translation: "Модель перевода:",
-          author: "Автор"
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
         }
       };
       const langSelect = document.getElementById("lang-select");
@@ -258,6 +272,10 @@
         document.querySelectorAll("[data-i18n]").forEach((node) => {
           const key = node.getAttribute("data-i18n");
           node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
         });
         document.querySelectorAll("[data-lang-block]").forEach((node) => {
           node.hidden = node.getAttribute("data-lang-block") !== lang;

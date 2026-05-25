@@ -301,7 +301,7 @@
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 14:39:25 UTC</p>
+        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 15:50:47 UTC</p>
       </div>
       <table>
         <thead>
@@ -325,6 +325,8 @@
     <footer class="footer">
       <span data-i18n="footer_by">Author</span>
       <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
     </footer>
   </div>
   <script>
@@ -363,6 +365,9 @@
           copy_selected_done: "Selectors copied. Paste them into the 'selectors' field in GitHub workflow.",
           copy_selected_failed: "Clipboard copy failed. Use manual copy from prompt.",
           footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
@@ -395,6 +400,9 @@
           copy_selected_done: "Selecteurs copies. Collez-les dans le champ 'selectors' du workflow GitHub.",
           copy_selected_failed: "Echec de copie dans le presse-papiers. Utilisez la copie manuelle.",
           footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
@@ -427,6 +435,9 @@
           copy_selected_done: "Селекторы скопированы. Вставьте их в поле 'selectors' в GitHub workflow.",
           copy_selected_failed: "Не удалось скопировать в буфер. Используйте ручное копирование.",
           footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
@@ -585,6 +596,10 @@
         document.querySelectorAll("[data-i18n]").forEach((node) => {
           const key = node.getAttribute("data-i18n");
           node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
         });
         const langOptions = {
           en: "language_en",

@@ -21,6 +21,9 @@
       --control-bg: #ffffff;
       --control-line: #c7d2e0;
       --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     }
     :root[data-theme="dark"] {
@@ -95,6 +98,18 @@
       padding: 6px 8px;
       font-size: 13px;
     }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
     .head {
       margin-bottom: 12px;
       padding: 14px;
@@ -153,6 +168,10 @@
       color: var(--muted);
       font-size: 13px;
     }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
   </style>
 </head>
 <body>
@@ -176,10 +195,10 @@
     </div>
     <div class="head">
       <h1>20260408T221717Z.diff</h1>
-      <p><span data-i18n="generated">Generated (UTC):</span> 2026-04-10T07:07:29Z</p>
+      <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 15:51:14 UTC</p>
       <p class="nav">
         <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
-        <a href="20260408T221717Z.diff" target="_blank" rel="noopener noreferrer" data-i18n="open_raw_diff">Open raw .diff</a>
+        <a href="20260408T221717Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
       </p>
     </div>
     <pre class="diff"><span class="line meta">--- previous</span>
@@ -195,6 +214,8 @@
     <footer class="footer">
       <span data-i18n="footer_by">Author</span>
       <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
     </footer>
   </div>
   <script>
@@ -210,8 +231,11 @@
           theme_dark: "Dark",
           generated: "Generated (UTC):",
           back_to_menu: "Back to main menu",
-          open_raw_diff: "Open raw .diff",
+          open_changelog: "Open changelog",
           footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
           empty_diff: "(empty diff)",
           language_en: "English",
           language_fr: "French",
@@ -224,8 +248,11 @@
           theme_dark: "Sombre",
           generated: "Généré (UTC) :",
           back_to_menu: "Retour au menu principal",
-          open_raw_diff: "Ouvrir le .diff brut",
+          open_changelog: "Ouvrir le changelog",
           footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
           empty_diff: "(diff vide)",
           language_en: "Anglais",
           language_fr: "Français",
@@ -238,8 +265,11 @@
           theme_dark: "Тёмная",
           generated: "Сгенерировано (UTC):",
           back_to_menu: "Назад в главное меню",
-          open_raw_diff: "Открыть raw .diff",
+          open_changelog: "Открыть changelog",
           footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
           empty_diff: "(пустой diff)",
           language_en: "Английский",
           language_fr: "Французский",
@@ -278,6 +308,10 @@
         document.querySelectorAll("[data-i18n]").forEach((node) => {
           const key = node.getAttribute("data-i18n");
           node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
         });
         const langOptions = {
           en: "language_en",
