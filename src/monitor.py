@@ -38,6 +38,7 @@ DEFAULT_AI_EMBEDDING_MODEL = "@cf/baai/bge-m3"
 DEFAULT_AI_FALLBACK_MODEL = "@cf/moonshotai/kimi-k2.6"
 DEFAULT_AI_MAX_DIFF_CHARS = 380_000
 DEFAULT_AI_CHUNK_CHARS = 40_000
+DEFAULT_AI_REQUIRE_FULL_TRANSLATIONS = True
 DEFAULT_VECTORIZE_MAX_CHUNKS = 96
 DEFAULT_VECTORIZE_CHUNK_CHARS = 2_200
 DEFAULT_VECTORIZE_QUERY_TOP_K = 8
@@ -91,6 +92,7 @@ class AIConfig:
     vectorize_chunk_chars: int
     vectorize_max_chunks: int
     vectorize_query_top_k: int
+    require_full_translations: bool
 
 
 def now_utc_iso() -> str:
@@ -551,6 +553,54 @@ def normalize_summary_payload(payload: Any) -> dict[str, Any]:
     }
 
 
+def extract_translation_payload(parsed: Any, language: str) -> dict[str, Any]:
+    if not isinstance(parsed, dict):
+        return {}
+    lowered = {str(k).strip().lower(): v for k, v in parsed.items()}
+    candidates = {
+        "ru": ["ru", "russian", "русский"],
+        "fr": ["fr", "french", "francais", "français"],
+    }
+    for key in candidates.get(language, [language]):
+        if key in lowered:
+            normalized = normalize_summary_payload(lowered[key])
+            if normalized.get("overview"):
+                return normalized
+    translations_node = lowered.get("translations")
+    if isinstance(translations_node, dict):
+        nested = extract_translation_payload(translations_node, language)
+        if nested:
+            return nested
+    return {}
+
+
+def translate_single_language_summary(
+    session: requests.Session,
+    config: AIConfig,
+    summary_json: dict[str, Any],
+    language: str,
+) -> dict[str, Any]:
+    language_label = {"ru": "Russian", "fr": "French"}.get(language, language)
+    system = "You are a professional technical translator. Output valid JSON only."
+    user = (
+        f"Translate this JSON summary to {language_label}.\n"
+        "Return STRICT JSON object preserving the same structure:\n"
+        "overview, professional_assessment, newcomer_explainer, changes[].\n"
+        "Keep Proxmox technical terms precise.\n\n"
+        f"{json.dumps(summary_json, ensure_ascii=False)}"
+    )
+    translated = workers_ai_chat_text(
+        session,
+        config,
+        config.translation_model,
+        ai_messages(system, user),
+        max_tokens=1800,
+    )
+    parsed = parse_json_payload(translated)
+    normalized = normalize_summary_payload(parsed)
+    return normalized if normalized.get("overview") else {}
+
+
 def summarize_diff_with_ai(
     session: requests.Session,
     config: AIConfig,
@@ -647,15 +697,36 @@ def summarize_diff_with_ai(
             max_tokens=2600,
         )
         parsed_translations = parse_json_payload(translated)
-        if isinstance(parsed_translations, dict):
-            ru = normalize_summary_payload(parsed_translations.get("ru"))
-            fr = normalize_summary_payload(parsed_translations.get("fr"))
-            if ru:
-                translations["ru"] = ru
-            if fr:
-                translations["fr"] = fr
+        ru = extract_translation_payload(parsed_translations, "ru")
+        fr = extract_translation_payload(parsed_translations, "fr")
+        if ru:
+            translations["ru"] = ru
+        if fr:
+            translations["fr"] = fr
     except Exception:
         translations = {}
+
+    for language in ("ru", "fr"):
+        if language in translations:
+            continue
+        try:
+            fallback_translation = translate_single_language_summary(session, config, summary_json, language)
+            if fallback_translation:
+                translations[language] = fallback_translation
+        except Exception:
+            continue
+
+    translation_status = {
+        "required": ["ru", "fr"],
+        "present": sorted(translations.keys()),
+        "missing": sorted(language for language in ("ru", "fr") if language not in translations),
+    }
+    if config.require_full_translations and translation_status["missing"]:
+        raise RuntimeError(
+            "Missing required translations: "
+            + ", ".join(translation_status["missing"])
+            + ". Re-run backfill or verify translation model availability."
+        )
 
     return {
         "status": "ok",
@@ -663,6 +734,7 @@ def summarize_diff_with_ai(
         "analysis_model": analysis_model_used,
         "translation_model": config.translation_model,
         "embedding_model": config.embedding_model,
+        "translation_status": translation_status,
         "summary": {"en": summary_json, **translations},
         "summary_text": {
             "en": format_changes_text(summary_json.get("changes", [])),
@@ -2297,6 +2369,7 @@ def build_ai_config_from_args(args: argparse.Namespace) -> AIConfig:
         vectorize_chunk_chars=max(500, int(args.vectorize_chunk_chars)),
         vectorize_max_chunks=max(8, int(args.vectorize_max_chunks)),
         vectorize_query_top_k=max(1, int(args.vectorize_query_top_k)),
+        require_full_translations=bool(args.ai_require_full_translations),
     )
 
 
@@ -2565,6 +2638,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--vectorize-chunk-chars", type=int, default=DEFAULT_VECTORIZE_CHUNK_CHARS)
     parser.add_argument("--vectorize-max-chunks", type=int, default=DEFAULT_VECTORIZE_MAX_CHUNKS)
     parser.add_argument("--vectorize-query-top-k", type=int, default=DEFAULT_VECTORIZE_QUERY_TOP_K)
+    parser.add_argument(
+        "--ai-require-full-translations",
+        action=argparse.BooleanOptionalAction,
+        default=DEFAULT_AI_REQUIRE_FULL_TRANSLATIONS,
+        help="Require ru/fr translations when AI is enabled and credentials are present.",
+    )
     parser.add_argument(
         "--history-delete",
         action="append",
