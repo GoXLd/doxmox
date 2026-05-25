@@ -7,81 +7,9 @@
     "added_lines": 945,
     "removed_lines": 294,
     "ai": {
-      "status": "ok",
-      "generated_at": "2026-05-25T12:40:34Z",
-      "analysis_model": "@cf/openai/gpt-oss-120b",
-      "translation_model": "@cf/zai-org/glm-4.7-flash",
-      "embedding_model": "@cf/baai/bge-m3",
-      "summary": {
-        "en": {
-          "overview": "Proxmox VE 9.2.1 introduces several important updates: default Ceph manager type switched to \"tentacle\", new HA auto‑rebalance settings, expanded OSPF and OpenID options, CPU level parameter for custom models, regex enhancements, and cleanup of deprecated backup settings. Documentation has been enriched with examples and clearer wording.",
-          "professional_assessment": "The release tightens cluster stability by preventing accidental removal of critical Ceph components and by adding auto‑rebalance for HA resources. Network routing and authentication configurations gain flexibility, while the removal of obsolete options reduces configuration drift. Operators should review the new defaults and adjust monitoring to capture the changed behavior.",
-          "newcomer_explainer": "This update makes Proxmox easier to use and safer. Some default names have changed, new options let you balance workloads automatically, and the help files now show step‑by‑step examples. If you follow the recommended actions, your servers will keep running smoothly.",
-          "changes": [
-            {
-              "title": "Ceph manager default type changed to \"tentacle\"",
-              "details": "The default manager daemon type is now \"tentacle\" instead of the legacy \"squid\". Existing clusters keep their current manager type unless explicitly changed.",
-              "impact": "New installations will deploy the newer, more efficient manager. Scripts that assume \"squid\" may need adjustment.",
-              "recommended_action": "Verify any automation that references the manager type and update it to accept \"tentacle\" as the default.",
-              "severity": "low"
-            },
-            {
-              "title": "HA auto‑rebalance option added",
-              "details": "A boolean \"auto-rebalance\" flag (default enabled) allows the HA scheduler to move resources automatically when node load changes.",
-              "impact": "Resources can migrate without manual intervention, improving uptime, but may cause brief service moves during load spikes.",
-              "recommended_action": "Monitor HA logs after the first few rebalances to ensure workloads behave as expected; disable the flag if you need strict placement control.",
-              "severity": "medium"
-            },
-            {
-              "title": "OSPF \"Redistribute\" configuration introduced",
-              "details": "A new \"Redistribute\" entry lets administrators specify which routes (static, connected, etc.) should be advertised into OSPF.",
-              "impact": "Provides finer control over routing announcements, reducing unwanted traffic leaks.",
-              "recommended_action": "Add explicit redistribute rules for each OSPF area to match your network policy.",
-              "severity": "medium"
-            },
-            {
-              "title": "CPU model UI now supports \"level\" parameter",
-              "details": "When defining a custom CPU model, a \"level\" argument can be set to expose additional CPU flags, including those required for recent Windows guests.",
-              "impact": "Improves compatibility for VMs needing newer instruction sets without exposing the full host CPU.",
-              "recommended_action": "Review existing custom CPU definitions and add the appropriate level value where needed.",
-              "severity": "low"
-            },
-            {
-              "title": "Regex patterns now allow newline (0x0A) characters",
-              "details": "Entry point and environment variable validation regexes have been updated to accept line‑feed characters, enabling multi‑line values.",
-              "impact": "Facilitates more complex scripts and configuration blocks directly in the UI.",
-              "recommended_action": "Test any multi‑line entries to confirm they are accepted; no further changes required.",
-              "severity": "low"
-            },
-            {
-              "title": "Backup \"maxfiles\" option deprecated and removed",
-              "details": "The \"maxfiles\" setting, which limited the number of retained backup files, is no longer supported. Retention is now managed via the \"prune-backups\" schedule.",
-              "impact": "Existing configurations using \"maxfiles\" will fall back to default retention behavior.",
-              "recommended_action": "Update backup jobs to use the \"prune-backups\" schedule for retention control.",
-              "severity": "medium"
-            },
-            {
-              "title": "ZFS blocksize description clarified",
-              "details": "Documentation now explicitly states that blocksize must be a power‑of‑two value with an optional suffix (K, M, G).",
-              "impact": "Reduces configuration errors when creating ZFS volumes.",
-              "recommended_action": "Verify any custom ZFS blocksize settings conform to the new description.",
-              "severity": "low"
-            },
-            {
-              "title": "OpenID \"--audiences\" option added with regex validation",
-              "details": "A new \"--audiences\" flag allows specifying accepted token audiences; input is validated against an extended regex pattern.",
-              "impact": "Enhances security by restricting which tokens are accepted for authentication.",
-              "recommended_action": "Configure the appropriate audience values for your identity provider and test login flows.",
-              "severity": "high"
-            }
-          ]
-        }
-      },
-      "summary_text": {
-        "en": "1. Ceph manager default type changed to \"tentacle\"\n   - The default manager daemon type is now \"tentacle\" instead of the legacy \"squid\". Existing clusters keep their current manager type unless explicitly changed.\n   - Impact: New installations will deploy the newer, more efficient manager. Scripts that assume \"squid\" may need adjustment.\n   - Action: Verify any automation that references the manager type and update it to accept \"tentacle\" as the default.\n   - Severity: low\n2. HA auto‑rebalance option added\n   - A boolean \"auto-rebalance\" flag (default enabled) allows the HA scheduler to move resources automatically when node load changes.\n   - Impact: Resources can migrate without manual intervention, improving uptime, but may cause brief service moves during load spikes.\n   - Action: Monitor HA logs after the first few rebalances to ensure workloads behave as expected; disable the flag if you need strict placement control.\n   - Severity: medium\n3. OSPF \"Redistribute\" configuration introduced\n   - A new \"Redistribute\" entry lets administrators specify which routes (static, connected, etc.) should be advertised into OSPF.\n   - Impact: Provides finer control over routing announcements, reducing unwanted traffic leaks.\n   - Action: Add explicit redistribute rules for each OSPF area to match your network policy.\n   - Severity: medium\n4. CPU model UI now supports \"level\" parameter\n   - When defining a custom CPU model, a \"level\" argument can be set to expose additional CPU flags, including those required for recent Windows guests.\n   - Impact: Improves compatibility for VMs needing newer instruction sets without exposing the full host CPU.\n   - Action: Review existing custom CPU definitions and add the appropriate level value where needed.\n   - Severity: low\n5. Regex patterns now allow newline (0x0A) characters\n   - Entry point and environment variable validation regexes have been updated to accept line‑feed characters, enabling multi‑line values.\n   - Impact: Facilitates more complex scripts and configuration blocks directly in the UI.\n   - Action: Test any multi‑line entries to confirm they are accepted; no further changes required.\n   - Severity: low\n6. Backup \"maxfiles\" option deprecated and removed\n   - The \"maxfiles\" setting, which limited the number of retained backup files, is no longer supported. Retention is now managed via the \"prune-backups\" schedule.\n   - Impact: Existing configurations using \"maxfiles\" will fall back to default retention behavior.\n   - Action: Update backup jobs to use the \"prune-backups\" schedule for retention control.\n   - Severity: medium\n7. ZFS blocksize description clarified\n   - Documentation now explicitly states that blocksize must be a power‑of‑two value with an optional suffix (K, M, G).\n   - Impact: Reduces configuration errors when creating ZFS volumes.\n   - Action: Verify any custom ZFS blocksize settings conform to the new description.\n   - Severity: low\n8. OpenID \"--audiences\" option added with regex validation\n   - A new \"--audiences\" flag allows specifying accepted token audiences; input is validated against an extended regex pattern.\n   - Impact: Enhances security by restricting which tokens are accepted for authentication.\n   - Action: Configure the appropriate audience values for your identity provider and test login flows.\n   - Severity: high",
-        "ru": "",
-        "fr": ""
-      }
+      "status": "error",
+      "generated_at": "2026-05-25T13:26:36Z",
+      "error": "Missing required translations: fr, ru. Re-run backfill or verify translation model availability."
     }
   },
   {
@@ -93,7 +21,7 @@
     "removed_lines": 46,
     "ai": {
       "status": "error",
-      "generated_at": "2026-05-25T12:40:35Z",
+      "generated_at": "2026-05-25T13:26:36Z",
       "error": "400 Client Error: Bad Request for url: https://api.cloudflare.com/client/v4/accounts/1a180b334afa0d013606923bd52e7b7c/ai/run/@cf/baai/bge-m3"
     }
   },
@@ -106,7 +34,7 @@
     "removed_lines": 351,
     "ai": {
       "status": "error",
-      "generated_at": "2026-05-25T12:40:35Z",
+      "generated_at": "2026-05-25T13:26:37Z",
       "error": "400 Client Error: Bad Request for url: https://api.cloudflare.com/client/v4/accounts/1a180b334afa0d013606923bd52e7b7c/ai/run/@cf/baai/bge-m3"
     }
   },
@@ -119,7 +47,7 @@
     "removed_lines": 1036,
     "ai": {
       "status": "error",
-      "generated_at": "2026-05-25T12:40:35Z",
+      "generated_at": "2026-05-25T13:26:37Z",
       "error": "400 Client Error: Bad Request for url: https://api.cloudflare.com/client/v4/accounts/1a180b334afa0d013606923bd52e7b7c/ai/run/@cf/baai/bge-m3"
     }
   }
