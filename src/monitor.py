@@ -2303,6 +2303,9 @@ def build_ai_config_from_args(args: argparse.Namespace) -> AIConfig:
 def history_ai_backfill(
     state_dir: Path,
     docs_dir: Path,
+    github_repo: str,
+    github_ref: str,
+    github_admin_workflow: str,
     selectors: list[str],
     process_all: bool,
     force: bool,
@@ -2358,11 +2361,25 @@ def history_ai_backfill(
         render_changelog_html(diff_path, event.get("ai", {}), author_name=author_name, author_url=resolved_author_url)
         updated += 1
 
+    save_json(history_path, history)
+    state_payload = load_json(state_dir / STATE_FILE, {})
+    url = state_payload.get("url") or DEFAULT_URL
+    ensure_diff_html_pages(history, author_name=author_name, author_url=resolved_author_url)
+    render_docs(
+        history,
+        url,
+        docs_dir,
+        author_name=author_name,
+        author_url=resolved_author_url,
+        github_repo=github_repo,
+        github_ref=github_ref,
+        github_admin_workflow=github_admin_workflow,
+    )
+
     if updated:
-        save_json(history_path, history)
         print(f"AI backfill completed for {updated} entries.")
     else:
-        print("No entries required AI backfill.")
+        print("No entries required AI backfill. Index/docs were still refreshed.")
     return 0
 
 
@@ -2608,6 +2625,9 @@ def main(argv: list[str]) -> int:
         return history_ai_backfill(
             state_dir=Path(args.state_dir),
             docs_dir=Path(args.docs_dir),
+            github_repo=args.github_repo,
+            github_ref=args.github_ref,
+            github_admin_workflow=args.github_admin_workflow,
             selectors=args.history_ai_backfill,
             process_all=args.history_ai_backfill_all,
             force=args.history_ai_force,
