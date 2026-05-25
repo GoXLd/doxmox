@@ -42,6 +42,14 @@ In `Settings -> Secrets and variables -> Actions`, add:
 - `CLOUDFLARE_AUTH_TOKEN` (token with Workers AI + Vectorize permissions)
 - `CLOUDFLARE_VECTORIZE_INDEX` (optional; enables snapshot context retrieval)
 
+Cloudflare token must be created for the same account as `CLOUDFLARE_ACCOUNT_ID`.
+Minimum account-level permissions for this project:
+
+- `Workers AI Edit`
+- `Vectorize Edit`
+
+Never commit tokens to git or shell history. If a token is exposed, revoke it immediately and issue a new one.
+
 `DOMAIN` is used to build public links in Telegram notifications:
 
 - diff page: `https://<DOMAIN>/changes/<timestamp>.html`
@@ -49,7 +57,24 @@ In `Settings -> Secrets and variables -> Actions`, add:
 
 If these secrets are missing, workflow still runs and stores changes, but skips Telegram notifications.
 
-### 3) Enable GitHub Pages
+### 3) Create Vectorize index (recommended)
+
+For better AI context quality, create a Vectorize index once:
+
+```bash
+wr-dox vectorize create doxmox-admin-guide-index \
+  --dimensions=1024 \
+  --metric=cosine \
+  --description "RAG context for doxmox changelog summaries"
+```
+
+Then set:
+
+- `CLOUDFLARE_VECTORIZE_INDEX=doxmox-admin-guide-index`
+
+`--dimensions=1024` and `--metric=cosine` are required for the current embedding model (`@cf/baai/bge-m3`) used by this repository.
+
+### 4) Enable GitHub Pages
 
 In `Settings -> Pages`:
 
@@ -59,7 +84,7 @@ In `Settings -> Pages`:
 
 After first successful run, changelog page is served from GitHub Pages.
 
-### 4) Optional custom domain
+### 5) Optional custom domain
 
 If you want a custom domain:
 
@@ -78,6 +103,37 @@ python src/monitor.py
 ```
 
 Trigger workflow manually from Actions tab using `workflow_dispatch`.
+
+## Cloudflare multi-account helper (optional)
+
+If you manage multiple Cloudflare accounts, keep token out of shell files and use macOS Keychain:
+
+```bash
+security add-generic-password -a "$USER" -s CLOUDFLARE_API_TOKEN_DOX -w 'YOUR_TOKEN' -U
+```
+
+Add this helper to `~/.zshrc`:
+
+```bash
+wr-dox() {
+  local token
+  token="$(security find-generic-password -a "$USER" -s CLOUDFLARE_API_TOKEN_DOX -w)" || {
+    echo "Token not found in Keychain: CLOUDFLARE_API_TOKEN_DOX" >&2
+    return 1
+  }
+
+  CLOUDFLARE_ACCOUNT_ID="1a180b334afa0d013606923bd52e7b7c" \
+  CLOUDFLARE_API_TOKEN="$token" \
+  npx wrangler "$@"
+}
+```
+
+Check account context:
+
+```bash
+wr-dox whoami
+wr-dox vectorize list
+```
 
 ## Manage history entries
 
