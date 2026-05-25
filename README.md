@@ -231,6 +231,7 @@ Authentication happens only in GitHub UI/session, not in page JavaScript.
 ## License
 
 This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+Copyright 2026 GoXLd - Alexandre VANDEMOORTELE.
 
 Important: this license applies to the code and project artifacts in this repository.
 The original Proxmox documentation/content remains under its own copyright and terms.
