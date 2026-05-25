@@ -67,6 +67,15 @@
     .lang-block[hidden] {
       display: none;
     }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
     ol {
       padding-left: 20px;
     }
@@ -103,48 +112,70 @@
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">AI Changelog</h1>
-        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 12:40:35 UTC</p>
+        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 14:34:49 UTC</p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260520T051906Z.html" data-i18n="open_diff">Open code diff</a></p>
       </div>
       
+      
         <section class="lang-block" data-lang-block="en">
           <h2 data-i18n="summary_title">Summary</h2>
-          <p><strong data-i18n="overview">Overview:</strong> -</p>
-          <p><strong data-i18n="assessment">Assessment:</strong> -</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> -</p>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.5 introduces several important updates that affect storage, networking, firewall, and system defaults. The changes aim to improve performance, security, and ease of configuration while adding new features like BGP integration and FastEC support.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The release balances new capabilities with tighter defaults. Notable are the reduced ZFS ARC footprint, which helps multi‑VM hosts, and the introduction of FastEC, which can boost erasure‑coded pool performance but requires careful planning. Network operators will benefit from expanded BGP/SDN options, yet must adjust firewall rules for Ceph and migration traffic. Overall risk is moderate; most changes are additive, but the FastEC flag is irreversible without pool recreation.</p>
+          <p><strong data-i18n="newcomer">For newcomers:</strong> If you are new to Proxmox, this version makes the system a bit more memory‑friendly out of the box and adds guides for advanced networking (BGP) and faster erasure‑coded storage. You will need to open a few extra firewall ports and be aware that some settings, like the new FastEC option, cannot be undone easily.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
-            <li data-i18n="no_items">No items yet.</li>
+            <li><strong>Version bump to 9.1.5</strong><div>Documentation and release metadata updated to version 9.1.5 with a new release date.</div><div><em>Impact:</em> Ensures users reference the correct documentation and receive the latest bug fixes.</div><div><em>Action:</em> Verify you are consulting the 9.1.5 docs for any configuration tasks.</div><div><em>Severity:</em> low</div></li>
+<li><strong>ZFS ARC default reduced</strong><div>Default ARC size changed from 50% of host memory to 10%, capped at 16 GiB. The setting is written to /etc/modprobe.d/zfs.conf during installation for Proxmox VE 8.1+.</div><div><em>Impact:</em> Reduces memory pressure on hosts running many VMs, improving overall stability.</div><div><em>Action:</em> Monitor ARC usage; adjust /etc/modprobe.d/zfs.conf if a larger cache is required for heavy ZFS workloads.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>Ceph firewall port reminder</strong><div>Documentation now explicitly states that the firewall must allow Ceph traffic ports. Use the provided firewall macro for easy configuration.</div><div><em>Impact:</em> Unopened ports can break Ceph cluster communication, leading to data unavailability.</div><div><em>Action:</em> Enable the Ceph firewall macro or manually open the required ports (e.g., 6789, 6800‑7300).</div><div><em>Severity:</em> high</div></li>
+<li><strong>FastEC (allow_ec_optimizations) documentation added</strong><div>Introduces a new flag to enable fast erasure‑coded I/O paths. Requires EC pools, recent monitor releases, and stripe units aligned to 4096 bytes. The flag is one‑way; clearing it requires pool recreation.</div><div><em>Impact:</em> Potential performance boost for EC pools, but may trigger primary re‑election and cancel ongoing scrubs.</div><div><em>Action:</em> Test FastEC on a non‑production pool first, then enable via &#x27;pveceph set allow_ec_optimizations=1&#x27; if results are satisfactory.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>PG autoscaler CRUSH rule consistency requirement</strong><div>Autoscaler now requires all pools to use the same type of CRUSH rule (either device class or none).</div><div><em>Impact:</em> Mixed rule types can cause autoscaler failures or uneven data distribution.</div><div><em>Action:</em> Standardize CRUSH rules across pools before enabling the autoscaler.</div><div><em>Severity:</em> low</div></li>
+<li><strong>BGP configuration expanded under SDN</strong><div>New sections cover fabric‑level and node‑level BGP options, including IPv4/IPv6 prefixes, BFD, route maps, redistribution sources, and support for unnumbered interfaces. EVPN underlay requires at least one IPv4 address per node.</div><div><em>Impact:</em> Enables advanced routing for multi‑site clusters but adds configuration complexity.</div><div><em>Action:</em> Follow the step‑by‑step BGP guide; start with a simple IPv4 setup before adding advanced features.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>Load balancer default thresholds updated</strong><div>Imbalance threshold now defaults to 30 % and imbalance improvement to 10 %, with values normalized to a 0‑100 scale.</div><div><em>Impact:</em> Improves automatic load distribution decisions out of the box.</div><div><em>Action:</em> Review and adjust thresholds if your workload requires tighter balancing.</div><div><em>Severity:</em> low</div></li>
+<li><strong>Sysctl configuration moved to drop‑in file</strong><div>System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.</div><div><em>Impact:</em> Simplifies sysctl management and aligns with best practices for package upgrades.</div><div><em>Action:</em> Confirm the drop‑in file exists and contains the desired settings; reload sysctl with &#x27;sysctl --system&#x27;.</div><div><em>Severity:</em> low</div></li>
           </ol>
         </section>
         
       
         <section class="lang-block" data-lang-block="fr">
           <h2 data-i18n="summary_title">Summary</h2>
-          <p><strong data-i18n="overview">Overview:</strong> -</p>
-          <p><strong data-i18n="assessment">Assessment:</strong> -</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> -</p>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.5 introduces several important updates that affect storage, networking, firewall, and system defaults. The changes aim to improve performance, security, and ease of configuration while adding new features like BGP integration and FastEC support.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The release balances new capabilities with tighter defaults. Notable are the reduced ZFS ARC footprint, which helps multi‑VM hosts, and the introduction of FastEC, which can boost erasure‑coded pool performance but requires careful planning. Network operators will benefit from expanded BGP/SDN options, yet must adjust firewall rules for Ceph and migration traffic. Overall risk is moderate; most changes are additive, but the FastEC flag is irreversible without pool recreation.</p>
+          <p><strong data-i18n="newcomer">For newcomers:</strong> If you are new to Proxmox, this version makes the system a bit more memory‑friendly out of the box and adds guides for advanced networking (BGP) and faster erasure‑coded storage. You will need to open a few extra firewall ports and be aware that some settings, like the new FastEC option, cannot be undone easily.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
-            <li data-i18n="no_items">No items yet.</li>
+            <li><strong>Version bump to 9.1.5</strong><div>Documentation and release metadata updated to version 9.1.5 with a new release date.</div><div><em>Impact:</em> Ensures users reference the correct documentation and receive the latest bug fixes.</div><div><em>Action:</em> Verify you are consulting the 9.1.5 docs for any configuration tasks.</div><div><em>Severity:</em> low</div></li>
+<li><strong>ZFS ARC default reduced</strong><div>Default ARC size changed from 50% of host memory to 10%, capped at 16 GiB. The setting is written to /etc/modprobe.d/zfs.conf during installation for Proxmox VE 8.1+.</div><div><em>Impact:</em> Reduces memory pressure on hosts running many VMs, improving overall stability.</div><div><em>Action:</em> Monitor ARC usage; adjust /etc/modprobe.d/zfs.conf if a larger cache is required for heavy ZFS workloads.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>Ceph firewall port reminder</strong><div>Documentation now explicitly states that the firewall must allow Ceph traffic ports. Use the provided firewall macro for easy configuration.</div><div><em>Impact:</em> Unopened ports can break Ceph cluster communication, leading to data unavailability.</div><div><em>Action:</em> Enable the Ceph firewall macro or manually open the required ports (e.g., 6789, 6800‑7300).</div><div><em>Severity:</em> high</div></li>
+<li><strong>FastEC (allow_ec_optimizations) documentation added</strong><div>Introduces a new flag to enable fast erasure‑coded I/O paths. Requires EC pools, recent monitor releases, and stripe units aligned to 4096 bytes. The flag is one‑way; clearing it requires pool recreation.</div><div><em>Impact:</em> Potential performance boost for EC pools, but may trigger primary re‑election and cancel ongoing scrubs.</div><div><em>Action:</em> Test FastEC on a non‑production pool first, then enable via &#x27;pveceph set allow_ec_optimizations=1&#x27; if results are satisfactory.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>PG autoscaler CRUSH rule consistency requirement</strong><div>Autoscaler now requires all pools to use the same type of CRUSH rule (either device class or none).</div><div><em>Impact:</em> Mixed rule types can cause autoscaler failures or uneven data distribution.</div><div><em>Action:</em> Standardize CRUSH rules across pools before enabling the autoscaler.</div><div><em>Severity:</em> low</div></li>
+<li><strong>BGP configuration expanded under SDN</strong><div>New sections cover fabric‑level and node‑level BGP options, including IPv4/IPv6 prefixes, BFD, route maps, redistribution sources, and support for unnumbered interfaces. EVPN underlay requires at least one IPv4 address per node.</div><div><em>Impact:</em> Enables advanced routing for multi‑site clusters but adds configuration complexity.</div><div><em>Action:</em> Follow the step‑by‑step BGP guide; start with a simple IPv4 setup before adding advanced features.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>Load balancer default thresholds updated</strong><div>Imbalance threshold now defaults to 30 % and imbalance improvement to 10 %, with values normalized to a 0‑100 scale.</div><div><em>Impact:</em> Improves automatic load distribution decisions out of the box.</div><div><em>Action:</em> Review and adjust thresholds if your workload requires tighter balancing.</div><div><em>Severity:</em> low</div></li>
+<li><strong>Sysctl configuration moved to drop‑in file</strong><div>System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.</div><div><em>Impact:</em> Simplifies sysctl management and aligns with best practices for package upgrades.</div><div><em>Action:</em> Confirm the drop‑in file exists and contains the desired settings; reload sysctl with &#x27;sysctl --system&#x27;.</div><div><em>Severity:</em> low</div></li>
           </ol>
         </section>
         
       
         <section class="lang-block" data-lang-block="ru">
           <h2 data-i18n="summary_title">Summary</h2>
-          <p><strong data-i18n="overview">Overview:</strong> -</p>
-          <p><strong data-i18n="assessment">Assessment:</strong> -</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> -</p>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.5 introduces several important updates that affect storage, networking, firewall, and system defaults. The changes aim to improve performance, security, and ease of configuration while adding new features like BGP integration and FastEC support.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The release balances new capabilities with tighter defaults. Notable are the reduced ZFS ARC footprint, which helps multi‑VM hosts, and the introduction of FastEC, which can boost erasure‑coded pool performance but requires careful planning. Network operators will benefit from expanded BGP/SDN options, yet must adjust firewall rules for Ceph and migration traffic. Overall risk is moderate; most changes are additive, but the FastEC flag is irreversible without pool recreation.</p>
+          <p><strong data-i18n="newcomer">For newcomers:</strong> If you are new to Proxmox, this version makes the system a bit more memory‑friendly out of the box and adds guides for advanced networking (BGP) and faster erasure‑coded storage. You will need to open a few extra firewall ports and be aware that some settings, like the new FastEC option, cannot be undone easily.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
-            <li data-i18n="no_items">No items yet.</li>
+            <li><strong>Version bump to 9.1.5</strong><div>Documentation and release metadata updated to version 9.1.5 with a new release date.</div><div><em>Impact:</em> Ensures users reference the correct documentation and receive the latest bug fixes.</div><div><em>Action:</em> Verify you are consulting the 9.1.5 docs for any configuration tasks.</div><div><em>Severity:</em> low</div></li>
+<li><strong>ZFS ARC default reduced</strong><div>Default ARC size changed from 50% of host memory to 10%, capped at 16 GiB. The setting is written to /etc/modprobe.d/zfs.conf during installation for Proxmox VE 8.1+.</div><div><em>Impact:</em> Reduces memory pressure on hosts running many VMs, improving overall stability.</div><div><em>Action:</em> Monitor ARC usage; adjust /etc/modprobe.d/zfs.conf if a larger cache is required for heavy ZFS workloads.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>Ceph firewall port reminder</strong><div>Documentation now explicitly states that the firewall must allow Ceph traffic ports. Use the provided firewall macro for easy configuration.</div><div><em>Impact:</em> Unopened ports can break Ceph cluster communication, leading to data unavailability.</div><div><em>Action:</em> Enable the Ceph firewall macro or manually open the required ports (e.g., 6789, 6800‑7300).</div><div><em>Severity:</em> high</div></li>
+<li><strong>FastEC (allow_ec_optimizations) documentation added</strong><div>Introduces a new flag to enable fast erasure‑coded I/O paths. Requires EC pools, recent monitor releases, and stripe units aligned to 4096 bytes. The flag is one‑way; clearing it requires pool recreation.</div><div><em>Impact:</em> Potential performance boost for EC pools, but may trigger primary re‑election and cancel ongoing scrubs.</div><div><em>Action:</em> Test FastEC on a non‑production pool first, then enable via &#x27;pveceph set allow_ec_optimizations=1&#x27; if results are satisfactory.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>PG autoscaler CRUSH rule consistency requirement</strong><div>Autoscaler now requires all pools to use the same type of CRUSH rule (either device class or none).</div><div><em>Impact:</em> Mixed rule types can cause autoscaler failures or uneven data distribution.</div><div><em>Action:</em> Standardize CRUSH rules across pools before enabling the autoscaler.</div><div><em>Severity:</em> low</div></li>
+<li><strong>BGP configuration expanded under SDN</strong><div>New sections cover fabric‑level and node‑level BGP options, including IPv4/IPv6 prefixes, BFD, route maps, redistribution sources, and support for unnumbered interfaces. EVPN underlay requires at least one IPv4 address per node.</div><div><em>Impact:</em> Enables advanced routing for multi‑site clusters but adds configuration complexity.</div><div><em>Action:</em> Follow the step‑by‑step BGP guide; start with a simple IPv4 setup before adding advanced features.</div><div><em>Severity:</em> medium</div></li>
+<li><strong>Load balancer default thresholds updated</strong><div>Imbalance threshold now defaults to 30 % and imbalance improvement to 10 %, with values normalized to a 0‑100 scale.</div><div><em>Impact:</em> Improves automatic load distribution decisions out of the box.</div><div><em>Action:</em> Review and adjust thresholds if your workload requires tighter balancing.</div><div><em>Severity:</em> low</div></li>
+<li><strong>Sysctl configuration moved to drop‑in file</strong><div>System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.</div><div><em>Impact:</em> Simplifies sysctl management and aligns with best practices for package upgrades.</div><div><em>Action:</em> Confirm the drop‑in file exists and contains the desired settings; reload sysctl with &#x27;sysctl --system&#x27;.</div><div><em>Severity:</em> low</div></li>
           </ol>
         </section>
         
       <div class="footer">
-        <div><span data-i18n="model_analysis">Analysis model:</span> -</div>
-        <div><span data-i18n="model_translation">Translation model:</span> -</div>
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/zai-org/glm-4.7-flash</div>
         <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
       </div>
     </div>

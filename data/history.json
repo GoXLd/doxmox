@@ -8,82 +8,91 @@
     "removed_lines": 294,
     "ai": {
       "status": "ok",
-      "generated_at": "2026-05-25T12:40:34Z",
+      "generated_at": "2026-05-25T14:32:55Z",
       "analysis_model": "@cf/openai/gpt-oss-120b",
       "translation_model": "@cf/zai-org/glm-4.7-flash",
       "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [],
+        "missing": [
+          "fr",
+          "ru"
+        ]
+      },
       "summary": {
         "en": {
-          "overview": "Proxmox VE 9.2.1 introduces several important updates: default Ceph manager type switched to \"tentacle\", new HA auto‑rebalance settings, expanded OSPF and OpenID options, CPU level parameter for custom models, regex enhancements, and cleanup of deprecated backup settings. Documentation has been enriched with examples and clearer wording.",
-          "professional_assessment": "The release tightens cluster stability by preventing accidental removal of critical Ceph components and by adding auto‑rebalance for HA resources. Network routing and authentication configurations gain flexibility, while the removal of obsolete options reduces configuration drift. Operators should review the new defaults and adjust monitoring to capture the changed behavior.",
-          "newcomer_explainer": "This update makes Proxmox easier to use and safer. Some default names have changed, new options let you balance workloads automatically, and the help files now show step‑by‑step examples. If you follow the recommended actions, your servers will keep running smoothly.",
+          "overview": "Proxmox VE 9.2.1 introduces several important updates: the default Ceph manager backend switches from squid to tentacle, new CPU model options and level settings are added, regex handling now accepts newline characters, and documentation for container ID mapping and UID/GID handling is expanded. Additional operational tweaks include HA auto‑rebalance, updated OSPF options, refined backup settings, and a new node location property.",
+          "professional_assessment": "The changes are largely backward‑compatible but affect cluster configuration scripts and automation. Operators should review Ceph manager defaults to avoid unexpected manager type changes, adjust any custom CPU model definitions to include the new level field, and verify that regex‑based filters still behave as intended now that LF characters are permitted. HA and networking tweaks improve resilience but may require parameter tuning. Overall, the release raises the feature set without breaking existing deployments, provided the recommended actions are followed.",
+          "newcomer_explainer": "If you are new to Proxmox, this update adds more choices for virtual CPU types, lets you tag nodes with a geographic location, and makes the Ceph storage system use a newer manager component by default. Some text‑matching rules now accept line‑breaks, and the backup tool has a cleaner set of options. These changes make the platform more flexible and easier to manage, but you may need to adjust a few settings after upgrading.",
           "changes": [
             {
-              "title": "Ceph manager default type changed to \"tentacle\"",
-              "details": "The default manager daemon type is now \"tentacle\" instead of the legacy \"squid\". Existing clusters keep their current manager type unless explicitly changed.",
-              "impact": "New installations will deploy the newer, more efficient manager. Scripts that assume \"squid\" may need adjustment.",
-              "recommended_action": "Verify any automation that references the manager type and update it to accept \"tentacle\" as the default.",
+              "title": "Ceph manager default changed to tentacle",
+              "details": "The default manager backend for new Ceph clusters is now \"tentacle\" instead of the older \"squid\" implementation.",
+              "impact": "Existing clusters remain unchanged, but newly created clusters will use tentacle, which offers better performance and future feature support.",
+              "recommended_action": "When creating a new Ceph cluster, verify the manager type if you rely on specific squid features, or explicitly set the manager type to squid if needed.",
+              "severity": "medium"
+            },
+            {
+              "title": "New CPU model \"level\" option",
+              "details": "A \"level\" parameter has been added to cpu-models.conf, allowing fine‑grained selection of CPU feature sets (e.g., level 1‑5). Several new model names such as ClearwaterForest‑v2, DiamondRapids, and SapphireRapids‑v6 have also been added.",
+              "impact": "Custom CPU model definitions that omit the level may fall back to defaults, potentially affecting VM performance or compatibility.",
+              "recommended_action": "Review any custom cpu-models.conf entries and add an appropriate level value; test VMs after changes to ensure expected behavior.",
+              "severity": "high"
+            },
+            {
+              "title": "Regex patterns now accept newline (\\x0a)",
+              "details": "Entry point and environment variable regexes have been updated to allow the line‑feed character, enabling multi‑line values.",
+              "impact": "Scripts that previously rejected newline characters will now accept them, which can simplify passing complex data.",
+              "recommended_action": "Validate existing regex‑based filters to ensure they still match intended inputs; adjust patterns if unintended matches appear.",
+              "severity": "low"
+            },
+            {
+              "title": "Expanded container ID mapping documentation",
+              "details": "The documentation now includes additional examples and clearer paragraphs for UID/GID mapping inside containers.",
+              "impact": "Operators gain better guidance, reducing misconfiguration risk when mapping host IDs to containers.",
+              "recommended_action": "Read the updated docs and apply the example mappings to any custom container setups.",
               "severity": "low"
             },
             {
               "title": "HA auto‑rebalance option added",
-              "details": "A boolean \"auto-rebalance\" flag (default enabled) allows the HA scheduler to move resources automatically when node load changes.",
-              "impact": "Resources can migrate without manual intervention, improving uptime, but may cause brief service moves during load spikes.",
-              "recommended_action": "Monitor HA logs after the first few rebalances to ensure workloads behave as expected; disable the flag if you need strict placement control.",
+              "details": "A boolean \"auto-rebalance\" flag (default true) is now available for HA resources, allowing the cluster to automatically move resources for better load distribution.",
+              "impact": "Clusters may experience automatic migrations after node failures or load spikes, improving uptime.",
+              "recommended_action": "Enable or disable auto‑rebalance per your policy; monitor HA logs after enabling to confirm expected behavior.",
               "severity": "medium"
             },
             {
-              "title": "OSPF \"Redistribute\" configuration introduced",
-              "details": "A new \"Redistribute\" entry lets administrators specify which routes (static, connected, etc.) should be advertised into OSPF.",
-              "impact": "Provides finer control over routing announcements, reducing unwanted traffic leaks.",
-              "recommended_action": "Add explicit redistribute rules for each OSPF area to match your network policy.",
-              "severity": "medium"
-            },
-            {
-              "title": "CPU model UI now supports \"level\" parameter",
-              "details": "When defining a custom CPU model, a \"level\" argument can be set to expose additional CPU flags, including those required for recent Windows guests.",
-              "impact": "Improves compatibility for VMs needing newer instruction sets without exposing the full host CPU.",
-              "recommended_action": "Review existing custom CPU definitions and add the appropriate level value where needed.",
+              "title": "Node location property (--location) introduced",
+              "details": "Nodes can now be tagged with geographic coordinates (latitude, longitude) and an optional name via the new \"--location\" property.",
+              "impact": "Facilitates location‑aware scheduling and reporting, but requires updating node configuration if you use location‑based policies.",
+              "recommended_action": "Add location data to each node using \"pve node set --location <lat>,<lon>,<name>\" where relevant.",
               "severity": "low"
             },
             {
-              "title": "Regex patterns now allow newline (0x0A) characters",
-              "details": "Entry point and environment variable validation regexes have been updated to accept line‑feed characters, enabling multi‑line values.",
-              "impact": "Facilitates more complex scripts and configuration blocks directly in the UI.",
-              "recommended_action": "Test any multi‑line entries to confirm they are accepted; no further changes required.",
-              "severity": "low"
-            },
-            {
-              "title": "Backup \"maxfiles\" option deprecated and removed",
-              "details": "The \"maxfiles\" setting, which limited the number of retained backup files, is no longer supported. Retention is now managed via the \"prune-backups\" schedule.",
-              "impact": "Existing configurations using \"maxfiles\" will fall back to default retention behavior.",
-              "recommended_action": "Update backup jobs to use the \"prune-backups\" schedule for retention control.",
+              "title": "Backup configuration cleanup",
+              "details": "The deprecated \"maxfiles\" option has been removed from backup job settings; backup jobs now rely on retention policies only.",
+              "impact": "Existing backup jobs that still reference maxfiles will fail to parse.",
+              "recommended_action": "Edit affected backup jobs to remove the maxfiles line and configure retention via \"maxfiles\"‑style policies if needed.",
               "severity": "medium"
             },
             {
               "title": "ZFS blocksize description clarified",
-              "details": "Documentation now explicitly states that blocksize must be a power‑of‑two value with an optional suffix (K, M, G).",
-              "impact": "Reduces configuration errors when creating ZFS volumes.",
-              "recommended_action": "Verify any custom ZFS blocksize settings conform to the new description.",
+              "details": "The blocksize parameter now explicitly states it must be a power of two with optional 'k' or 'm' suffix (e.g., 4k, 8m).",
+              "impact": "Improves user input validation; incorrect values will be rejected with clearer error messages.",
+              "recommended_action": "Verify any custom ZFS storage definitions use the new syntax; adjust scripts that generate blocksize values accordingly.",
               "severity": "low"
-            },
-            {
-              "title": "OpenID \"--audiences\" option added with regex validation",
-              "details": "A new \"--audiences\" flag allows specifying accepted token audiences; input is validated against an extended regex pattern.",
-              "impact": "Enhances security by restricting which tokens are accepted for authentication.",
-              "recommended_action": "Configure the appropriate audience values for your identity provider and test login flows.",
-              "severity": "high"
             }
           ]
         }
       },
       "summary_text": {
-        "en": "1. Ceph manager default type changed to \"tentacle\"\n   - The default manager daemon type is now \"tentacle\" instead of the legacy \"squid\". Existing clusters keep their current manager type unless explicitly changed.\n   - Impact: New installations will deploy the newer, more efficient manager. Scripts that assume \"squid\" may need adjustment.\n   - Action: Verify any automation that references the manager type and update it to accept \"tentacle\" as the default.\n   - Severity: low\n2. HA auto‑rebalance option added\n   - A boolean \"auto-rebalance\" flag (default enabled) allows the HA scheduler to move resources automatically when node load changes.\n   - Impact: Resources can migrate without manual intervention, improving uptime, but may cause brief service moves during load spikes.\n   - Action: Monitor HA logs after the first few rebalances to ensure workloads behave as expected; disable the flag if you need strict placement control.\n   - Severity: medium\n3. OSPF \"Redistribute\" configuration introduced\n   - A new \"Redistribute\" entry lets administrators specify which routes (static, connected, etc.) should be advertised into OSPF.\n   - Impact: Provides finer control over routing announcements, reducing unwanted traffic leaks.\n   - Action: Add explicit redistribute rules for each OSPF area to match your network policy.\n   - Severity: medium\n4. CPU model UI now supports \"level\" parameter\n   - When defining a custom CPU model, a \"level\" argument can be set to expose additional CPU flags, including those required for recent Windows guests.\n   - Impact: Improves compatibility for VMs needing newer instruction sets without exposing the full host CPU.\n   - Action: Review existing custom CPU definitions and add the appropriate level value where needed.\n   - Severity: low\n5. Regex patterns now allow newline (0x0A) characters\n   - Entry point and environment variable validation regexes have been updated to accept line‑feed characters, enabling multi‑line values.\n   - Impact: Facilitates more complex scripts and configuration blocks directly in the UI.\n   - Action: Test any multi‑line entries to confirm they are accepted; no further changes required.\n   - Severity: low\n6. Backup \"maxfiles\" option deprecated and removed\n   - The \"maxfiles\" setting, which limited the number of retained backup files, is no longer supported. Retention is now managed via the \"prune-backups\" schedule.\n   - Impact: Existing configurations using \"maxfiles\" will fall back to default retention behavior.\n   - Action: Update backup jobs to use the \"prune-backups\" schedule for retention control.\n   - Severity: medium\n7. ZFS blocksize description clarified\n   - Documentation now explicitly states that blocksize must be a power‑of‑two value with an optional suffix (K, M, G).\n   - Impact: Reduces configuration errors when creating ZFS volumes.\n   - Action: Verify any custom ZFS blocksize settings conform to the new description.\n   - Severity: low\n8. OpenID \"--audiences\" option added with regex validation\n   - A new \"--audiences\" flag allows specifying accepted token audiences; input is validated against an extended regex pattern.\n   - Impact: Enhances security by restricting which tokens are accepted for authentication.\n   - Action: Configure the appropriate audience values for your identity provider and test login flows.\n   - Severity: high",
+        "en": "1. Ceph manager default changed to tentacle\n   - The default manager backend for new Ceph clusters is now \"tentacle\" instead of the older \"squid\" implementation.\n   - Impact: Existing clusters remain unchanged, but newly created clusters will use tentacle, which offers better performance and future feature support.\n   - Action: When creating a new Ceph cluster, verify the manager type if you rely on specific squid features, or explicitly set the manager type to squid if needed.\n   - Severity: medium\n2. New CPU model \"level\" option\n   - A \"level\" parameter has been added to cpu-models.conf, allowing fine‑grained selection of CPU feature sets (e.g., level 1‑5). Several new model names such as ClearwaterForest‑v2, DiamondRapids, and SapphireRapids‑v6 have also been added.\n   - Impact: Custom CPU model definitions that omit the level may fall back to defaults, potentially affecting VM performance or compatibility.\n   - Action: Review any custom cpu-models.conf entries and add an appropriate level value; test VMs after changes to ensure expected behavior.\n   - Severity: high\n3. Regex patterns now accept newline (\\x0a)\n   - Entry point and environment variable regexes have been updated to allow the line‑feed character, enabling multi‑line values.\n   - Impact: Scripts that previously rejected newline characters will now accept them, which can simplify passing complex data.\n   - Action: Validate existing regex‑based filters to ensure they still match intended inputs; adjust patterns if unintended matches appear.\n   - Severity: low\n4. Expanded container ID mapping documentation\n   - The documentation now includes additional examples and clearer paragraphs for UID/GID mapping inside containers.\n   - Impact: Operators gain better guidance, reducing misconfiguration risk when mapping host IDs to containers.\n   - Action: Read the updated docs and apply the example mappings to any custom container setups.\n   - Severity: low\n5. HA auto‑rebalance option added\n   - A boolean \"auto-rebalance\" flag (default true) is now available for HA resources, allowing the cluster to automatically move resources for better load distribution.\n   - Impact: Clusters may experience automatic migrations after node failures or load spikes, improving uptime.\n   - Action: Enable or disable auto‑rebalance per your policy; monitor HA logs after enabling to confirm expected behavior.\n   - Severity: medium\n6. Node location property (--location) introduced\n   - Nodes can now be tagged with geographic coordinates (latitude, longitude) and an optional name via the new \"--location\" property.\n   - Impact: Facilitates location‑aware scheduling and reporting, but requires updating node configuration if you use location‑based policies.\n   - Action: Add location data to each node using \"pve node set --location <lat>,<lon>,<name>\" where relevant.\n   - Severity: low\n7. Backup configuration cleanup\n   - The deprecated \"maxfiles\" option has been removed from backup job settings; backup jobs now rely on retention policies only.\n   - Impact: Existing backup jobs that still reference maxfiles will fail to parse.\n   - Action: Edit affected backup jobs to remove the maxfiles line and configure retention via \"maxfiles\"‑style policies if needed.\n   - Severity: medium\n8. ZFS blocksize description clarified\n   - The blocksize parameter now explicitly states it must be a power of two with optional 'k' or 'm' suffix (e.g., 4k, 8m).\n   - Impact: Improves user input validation; incorrect values will be rejected with clearer error messages.\n   - Action: Verify any custom ZFS storage definitions use the new syntax; adjust scripts that generate blocksize values accordingly.\n   - Severity: low",
         "ru": "",
         "fr": ""
-      },
-      "translation_error": "Missing required translations: fr, ru. Re-run translation or verify translation model availability.",
-      "translation_attempt_at": "2026-05-25T14:17:03Z"
+      }
     }
   },
   {
@@ -94,9 +103,92 @@
     "added_lines": 1091,
     "removed_lines": 46,
     "ai": {
-      "status": "error",
-      "generated_at": "2026-05-25T12:40:35Z",
-      "error": "400 Client Error: Bad Request for url: https://api.cloudflare.com/client/v4/accounts/1a180b334afa0d013606923bd52e7b7c/ai/run/@cf/baai/bge-m3"
+      "status": "ok",
+      "generated_at": "2026-05-25T14:34:49Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [],
+        "missing": [
+          "fr",
+          "ru"
+        ]
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.1.5 introduces several important updates that affect storage, networking, firewall, and system defaults. The changes aim to improve performance, security, and ease of configuration while adding new features like BGP integration and FastEC support.",
+          "professional_assessment": "The release balances new capabilities with tighter defaults. Notable are the reduced ZFS ARC footprint, which helps multi‑VM hosts, and the introduction of FastEC, which can boost erasure‑coded pool performance but requires careful planning. Network operators will benefit from expanded BGP/SDN options, yet must adjust firewall rules for Ceph and migration traffic. Overall risk is moderate; most changes are additive, but the FastEC flag is irreversible without pool recreation.",
+          "newcomer_explainer": "If you are new to Proxmox, this version makes the system a bit more memory‑friendly out of the box and adds guides for advanced networking (BGP) and faster erasure‑coded storage. You will need to open a few extra firewall ports and be aware that some settings, like the new FastEC option, cannot be undone easily.",
+          "changes": [
+            {
+              "title": "Version bump to 9.1.5",
+              "details": "Documentation and release metadata updated to version 9.1.5 with a new release date.",
+              "impact": "Ensures users reference the correct documentation and receive the latest bug fixes.",
+              "recommended_action": "Verify you are consulting the 9.1.5 docs for any configuration tasks.",
+              "severity": "low"
+            },
+            {
+              "title": "ZFS ARC default reduced",
+              "details": "Default ARC size changed from 50% of host memory to 10%, capped at 16 GiB. The setting is written to /etc/modprobe.d/zfs.conf during installation for Proxmox VE 8.1+.",
+              "impact": "Reduces memory pressure on hosts running many VMs, improving overall stability.",
+              "recommended_action": "Monitor ARC usage; adjust /etc/modprobe.d/zfs.conf if a larger cache is required for heavy ZFS workloads.",
+              "severity": "medium"
+            },
+            {
+              "title": "Ceph firewall port reminder",
+              "details": "Documentation now explicitly states that the firewall must allow Ceph traffic ports. Use the provided firewall macro for easy configuration.",
+              "impact": "Unopened ports can break Ceph cluster communication, leading to data unavailability.",
+              "recommended_action": "Enable the Ceph firewall macro or manually open the required ports (e.g., 6789, 6800‑7300).",
+              "severity": "high"
+            },
+            {
+              "title": "FastEC (allow_ec_optimizations) documentation added",
+              "details": "Introduces a new flag to enable fast erasure‑coded I/O paths. Requires EC pools, recent monitor releases, and stripe units aligned to 4096 bytes. The flag is one‑way; clearing it requires pool recreation.",
+              "impact": "Potential performance boost for EC pools, but may trigger primary re‑election and cancel ongoing scrubs.",
+              "recommended_action": "Test FastEC on a non‑production pool first, then enable via 'pveceph set allow_ec_optimizations=1' if results are satisfactory.",
+              "severity": "medium"
+            },
+            {
+              "title": "PG autoscaler CRUSH rule consistency requirement",
+              "details": "Autoscaler now requires all pools to use the same type of CRUSH rule (either device class or none).",
+              "impact": "Mixed rule types can cause autoscaler failures or uneven data distribution.",
+              "recommended_action": "Standardize CRUSH rules across pools before enabling the autoscaler.",
+              "severity": "low"
+            },
+            {
+              "title": "BGP configuration expanded under SDN",
+              "details": "New sections cover fabric‑level and node‑level BGP options, including IPv4/IPv6 prefixes, BFD, route maps, redistribution sources, and support for unnumbered interfaces. EVPN underlay requires at least one IPv4 address per node.",
+              "impact": "Enables advanced routing for multi‑site clusters but adds configuration complexity.",
+              "recommended_action": "Follow the step‑by‑step BGP guide; start with a simple IPv4 setup before adding advanced features.",
+              "severity": "medium"
+            },
+            {
+              "title": "Load balancer default thresholds updated",
+              "details": "Imbalance threshold now defaults to 30 % and imbalance improvement to 10 %, with values normalized to a 0‑100 scale.",
+              "impact": "Improves automatic load distribution decisions out of the box.",
+              "recommended_action": "Review and adjust thresholds if your workload requires tighter balancing.",
+              "severity": "low"
+            },
+            {
+              "title": "Sysctl configuration moved to drop‑in file",
+              "details": "System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.",
+              "impact": "Simplifies sysctl management and aligns with best practices for package upgrades.",
+              "recommended_action": "Confirm the drop‑in file exists and contains the desired settings; reload sysctl with 'sysctl --system'.",
+              "severity": "low"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Version bump to 9.1.5\n   - Documentation and release metadata updated to version 9.1.5 with a new release date.\n   - Impact: Ensures users reference the correct documentation and receive the latest bug fixes.\n   - Action: Verify you are consulting the 9.1.5 docs for any configuration tasks.\n   - Severity: low\n2. ZFS ARC default reduced\n   - Default ARC size changed from 50% of host memory to 10%, capped at 16 GiB. The setting is written to /etc/modprobe.d/zfs.conf during installation for Proxmox VE 8.1+.\n   - Impact: Reduces memory pressure on hosts running many VMs, improving overall stability.\n   - Action: Monitor ARC usage; adjust /etc/modprobe.d/zfs.conf if a larger cache is required for heavy ZFS workloads.\n   - Severity: medium\n3. Ceph firewall port reminder\n   - Documentation now explicitly states that the firewall must allow Ceph traffic ports. Use the provided firewall macro for easy configuration.\n   - Impact: Unopened ports can break Ceph cluster communication, leading to data unavailability.\n   - Action: Enable the Ceph firewall macro or manually open the required ports (e.g., 6789, 6800‑7300).\n   - Severity: high\n4. FastEC (allow_ec_optimizations) documentation added\n   - Introduces a new flag to enable fast erasure‑coded I/O paths. Requires EC pools, recent monitor releases, and stripe units aligned to 4096 bytes. The flag is one‑way; clearing it requires pool recreation.\n   - Impact: Potential performance boost for EC pools, but may trigger primary re‑election and cancel ongoing scrubs.\n   - Action: Test FastEC on a non‑production pool first, then enable via 'pveceph set allow_ec_optimizations=1' if results are satisfactory.\n   - Severity: medium\n5. PG autoscaler CRUSH rule consistency requirement\n   - Autoscaler now requires all pools to use the same type of CRUSH rule (either device class or none).\n   - Impact: Mixed rule types can cause autoscaler failures or uneven data distribution.\n   - Action: Standardize CRUSH rules across pools before enabling the autoscaler.\n   - Severity: low\n6. BGP configuration expanded under SDN\n   - New sections cover fabric‑level and node‑level BGP options, including IPv4/IPv6 prefixes, BFD, route maps, redistribution sources, and support for unnumbered interfaces. EVPN underlay requires at least one IPv4 address per node.\n   - Impact: Enables advanced routing for multi‑site clusters but adds configuration complexity.\n   - Action: Follow the step‑by‑step BGP guide; start with a simple IPv4 setup before adding advanced features.\n   - Severity: medium\n7. Load balancer default thresholds updated\n   - Imbalance threshold now defaults to 30 % and imbalance improvement to 10 %, with values normalized to a 0‑100 scale.\n   - Impact: Improves automatic load distribution decisions out of the box.\n   - Action: Review and adjust thresholds if your workload requires tighter balancing.\n   - Severity: low\n8. Sysctl configuration moved to drop‑in file\n   - System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.\n   - Impact: Simplifies sysctl management and aligns with best practices for package upgrades.\n   - Action: Confirm the drop‑in file exists and contains the desired settings; reload sysctl with 'sysctl --system'.\n   - Severity: low",
+        "ru": "",
+        "fr": ""
+      }
     }
   },
   {
@@ -107,9 +199,113 @@
     "added_lines": 2412,
     "removed_lines": 351,
     "ai": {
-      "status": "error",
-      "generated_at": "2026-05-25T12:40:35Z",
-      "error": "400 Client Error: Bad Request for url: https://api.cloudflare.com/client/v4/accounts/1a180b334afa0d013606923bd52e7b7c/ai/run/@cf/baai/bge-m3"
+      "status": "ok",
+      "generated_at": "2026-05-25T14:37:03Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [],
+        "missing": [
+          "fr",
+          "ru"
+        ]
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.1.4 introduces several documentation and feature updates that improve security, storage handling, networking, and high‑availability scheduling. The changes range from new guidance on cluster CA distribution to detailed ZFS encryption rules, added WireGuard and EVPN controller information, and enhancements to the Cluster Resource Scheduler (CRS). Operators will find new flags for token regeneration and SSH‑based cluster joins, while newcomers benefit from clearer explanations of networking constructs like Prefix Lists and Route Maps.",
+          "professional_assessment": "The release adds substantive security and HA improvements that require attention during upgrade planning. ZFS encryption enforcement and CRS load‑balancer parameters can impact workload placement and must be reviewed before production rollout. New documentation on EVEVPN, WireGuard, and idmap storage options expands the feature set, offering more flexibility but also increasing configuration complexity. Overall, the update is a net positive for stability and security, provided operators validate the new settings in a test environment.",
+          "newcomer_explainer": "If you are new to Proxmox, this version gives you clearer steps to set up a secure cluster, explains how to protect ZFS disks with encryption, and introduces easy‑to‑read guides for advanced networking like WireGuard and EVPN. It also tells you how the system decides where to run your virtual machines, so you can keep your services running smoothly.",
+          "changes": [
+            {
+              "title": "Version bump to 9.1.4",
+              "details": "Documentation now reflects the new Proxmox VE version 9.1.4 and updates the last‑modified timestamp.",
+              "impact": "Ensures all references point to the correct version, avoiding confusion during support or upgrade processes.",
+              "recommended_action": "Verify that your environment matches the documented version; no functional changes required.",
+              "severity": "low"
+            },
+            {
+              "title": "Manual distribution of the cluster CA file",
+              "details": "Added a paragraph describing how to copy the cluster CA certificate to new nodes manually, since there is no API endpoint for this operation.",
+              "impact": "Operators must ensure the CA file is present on each node to maintain secure inter‑node communication.",
+              "recommended_action": "Copy the CA file to /etc/pve/cluster/ca.pem on each new node before joining the cluster.",
+              "severity": "medium"
+            },
+            {
+              "title": "pvecm add default API authentication and --use_ssh flag",
+              "details": "The pvecm add command now defaults to API‑based authentication, removing the need for SSH passwords. A new --use_ssh flag allows legacy SSH joins.",
+              "impact": "Simplifies cluster expansion while still supporting older workflows.",
+              "recommended_action": "Use the default pvecm add command for new nodes; add --use_ssh only when required for compatibility.",
+              "severity": "medium"
+            },
+            {
+              "title": "ZFS encryption documentation",
+              "details": "Introduces a dedicated ZFS Encryption subsection covering encryption_root, migration constraints, and the requirement that all storages be encrypted when using this feature.",
+              "impact": "Provides clear guidance to protect data at rest; misconfiguration could prevent VM migration or backup.",
+              "recommended_action": "Review the encryption settings before enabling ZFS encryption and test migration of encrypted volumes.",
+              "severity": "high"
+            },
+            {
+              "title": "idmap option added to storage definitions",
+              "details": "The idmap parameter is now documented for various storage types, allowing per‑mount ID mapping configuration.",
+              "impact": "Enables finer control over UID/GID translation for containers and VMs, improving compatibility with mixed‑user environments.",
+              "recommended_action": "Add idmap settings where needed in storage.cfg; verify container access after changes.",
+              "severity": "medium"
+            },
+            {
+              "title": "EVPN controller documentation enhancements",
+              "details": "Renamed sections to Primary Controller and Additional Controllers, added ASN requirements, and introduced new fields (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).",
+              "impact": "Clarifies multi‑controller setups and BGP configuration, reducing misconfiguration risk.",
+              "recommended_action": "Follow the updated guide when configuring EVPN; ensure all controllers share the same ASN.",
+              "severity": "medium"
+            },
+            {
+              "title": "WireGuard configuration guide added",
+              "details": "Comprehensive documentation for WireGuard fabric, node roles, interfaces, peers, route generation, key handling, and required packages.",
+              "impact": "Expands secure overlay networking options for operators.",
+              "recommended_action": "Read the new WireGuard section before deploying; install the wireguard package on all nodes.",
+              "severity": "low"
+            },
+            {
+              "title": "Prefix Lists and Route Maps documentation",
+              "details": "New sections explain syntax, sequence numbers, actions, ge/le qualifiers, reserved names, and provide usage examples.",
+              "impact": "Helps operators create precise routing policies within SDN.",
+              "recommended_action": "Use the examples as templates when building your own prefix lists and route maps.",
+              "severity": "low"
+            },
+            {
+              "title": "Cluster Resource Scheduler (CRS) mode and load‑balancer parameters",
+              "details": "Added CRS Scheduling Mode (basic, static‑load, dynamic‑load) and detailed load‑balancer settings such as imbalance threshold, hold duration, and rebalancing method.",
+              "impact": "Directly influences HA resource placement and migration decisions; incorrect values can cause unnecessary migrations or resource starvation.",
+              "recommended_action": "Review and adjust CRS settings in Datacenter → Options to match your workload characteristics; test in a staging cluster.",
+              "severity": "high"
+            },
+            {
+              "title": "API token regeneration flag (--regenerate)",
+              "details": "Introduces a new flag for the Update API token command that creates a new secret and invalidates the old one; the new token cannot be retrieved later.",
+              "impact": "Improves security by allowing token rotation, but requires careful handling to avoid loss of access.",
+              "recommended_action": "Save the regenerated token immediately; update any scripts or services that use the token.",
+              "severity": "medium"
+            },
+            {
+              "title": "Serial device regex update",
+              "details": "The device pattern for --serial options changed from \"/dev/.+\" to \"/dev/[^,]+\" to prevent commas in device paths from being accepted.",
+              "impact": "Reduces parsing errors when specifying serial devices.",
+              "recommended_action": "Ensure serial device paths do not contain commas; no further action needed for existing configurations.",
+              "severity": "low"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Version bump to 9.1.4\n   - Documentation now reflects the new Proxmox VE version 9.1.4 and updates the last‑modified timestamp.\n   - Impact: Ensures all references point to the correct version, avoiding confusion during support or upgrade processes.\n   - Action: Verify that your environment matches the documented version; no functional changes required.\n   - Severity: low\n2. Manual distribution of the cluster CA file\n   - Added a paragraph describing how to copy the cluster CA certificate to new nodes manually, since there is no API endpoint for this operation.\n   - Impact: Operators must ensure the CA file is present on each node to maintain secure inter‑node communication.\n   - Action: Copy the CA file to /etc/pve/cluster/ca.pem on each new node before joining the cluster.\n   - Severity: medium\n3. pvecm add default API authentication and --use_ssh flag\n   - The pvecm add command now defaults to API‑based authentication, removing the need for SSH passwords. A new --use_ssh flag allows legacy SSH joins.\n   - Impact: Simplifies cluster expansion while still supporting older workflows.\n   - Action: Use the default pvecm add command for new nodes; add --use_ssh only when required for compatibility.\n   - Severity: medium\n4. ZFS encryption documentation\n   - Introduces a dedicated ZFS Encryption subsection covering encryption_root, migration constraints, and the requirement that all storages be encrypted when using this feature.\n   - Impact: Provides clear guidance to protect data at rest; misconfiguration could prevent VM migration or backup.\n   - Action: Review the encryption settings before enabling ZFS encryption and test migration of encrypted volumes.\n   - Severity: high\n5. idmap option added to storage definitions\n   - The idmap parameter is now documented for various storage types, allowing per‑mount ID mapping configuration.\n   - Impact: Enables finer control over UID/GID translation for containers and VMs, improving compatibility with mixed‑user environments.\n   - Action: Add idmap settings where needed in storage.cfg; verify container access after changes.\n   - Severity: medium\n6. EVPN controller documentation enhancements\n   - Renamed sections to Primary Controller and Additional Controllers, added ASN requirements, and introduced new fields (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).\n   - Impact: Clarifies multi‑controller setups and BGP configuration, reducing misconfiguration risk.\n   - Action: Follow the updated guide when configuring EVPN; ensure all controllers share the same ASN.\n   - Severity: medium\n7. WireGuard configuration guide added\n   - Comprehensive documentation for WireGuard fabric, node roles, interfaces, peers, route generation, key handling, and required packages.\n   - Impact: Expands secure overlay networking options for operators.\n   - Action: Read the new WireGuard section before deploying; install the wireguard package on all nodes.\n   - Severity: low\n8. Prefix Lists and Route Maps documentation\n   - New sections explain syntax, sequence numbers, actions, ge/le qualifiers, reserved names, and provide usage examples.\n   - Impact: Helps operators create precise routing policies within SDN.\n   - Action: Use the examples as templates when building your own prefix lists and route maps.\n   - Severity: low\n9. Cluster Resource Scheduler (CRS) mode and load‑balancer parameters\n   - Added CRS Scheduling Mode (basic, static‑load, dynamic‑load) and detailed load‑balancer settings such as imbalance threshold, hold duration, and rebalancing method.\n   - Impact: Directly influences HA resource placement and migration decisions; incorrect values can cause unnecessary migrations or resource starvation.\n   - Action: Review and adjust CRS settings in Datacenter → Options to match your workload characteristics; test in a staging cluster.\n   - Severity: high\n10. API token regeneration flag (--regenerate)\n   - Introduces a new flag for the Update API token command that creates a new secret and invalidates the old one; the new token cannot be retrieved later.\n   - Impact: Improves security by allowing token rotation, but requires careful handling to avoid loss of access.\n   - Action: Save the regenerated token immediately; update any scripts or services that use the token.\n   - Severity: medium\n11. Serial device regex update\n   - The device pattern for --serial options changed from \"/dev/.+\" to \"/dev/[^,]+\" to prevent commas in device paths from being accepted.\n   - Impact: Reduces parsing errors when specifying serial devices.\n   - Action: Ensure serial device paths do not contain commas; no further action needed for existing configurations.\n   - Severity: low",
+        "ru": "",
+        "fr": ""
+      }
     }
   },
   {
@@ -120,9 +316,106 @@
     "added_lines": 3704,
     "removed_lines": 1036,
     "ai": {
-      "status": "error",
-      "generated_at": "2026-05-25T12:40:35Z",
-      "error": "400 Client Error: Bad Request for url: https://api.cloudflare.com/client/v4/accounts/1a180b334afa0d013606923bd52e7b7c/ai/run/@cf/baai/bge-m3"
+      "status": "ok",
+      "generated_at": "2026-05-25T14:39:25Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [],
+        "missing": [
+          "fr",
+          "ru"
+        ]
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.1.3 introduces a range of enhancements and clarifications aimed at simplifying cluster management, improving storage and networking flexibility, and strengthening high‑availability (HA) controls. The release also updates documentation to reflect new best‑practice procedures for node removal, QDevice handling, and secure boot certificate management.",
+          "professional_assessment": "The update delivers solid incremental value for production environments. Notable are the refined HA auto‑rebalance options, clearer Ceph network change procedures, and the addition of the import storage type, which together reduce operational risk. Documentation improvements around node removal and QDevice prerequisites help prevent common pitfalls. Overall risk is low, but operators should review the new HA and Ceph steps before applying them in critical clusters.",
+          "newcomer_explainer": "This version adds helpful new features and clearer instructions. You’ll see a newer UI element (scroll‑to‑top), more storage choices, better guidance for safely removing a node, and new safety checks when changing network settings. If you run HA or Ceph, there are extra options to keep your services running smoothly.",
+          "changes": [
+            {
+              "title": "Version bump and UI polish",
+              "details": "Proxmox VE is now version 9.1.3. A \"scroll to top\" link was added to the documentation pages, and minor wording updates improve clarity across the UI description.",
+              "impact": "Users see the new version number and benefit from easier navigation in the docs.",
+              "recommended_action": "Refresh the web UI and documentation cache to view the latest UI elements.",
+              "severity": "low"
+            },
+            {
+              "title": "Enhanced node removal workflow with QDevice warning",
+              "details": "New documentation requires removal of any QDevice before taking a node out of the cluster and adds a detailed step‑by‑step guide for safe removal, especially for Ceph‑enabled nodes.",
+              "impact": "Prevents cluster quorum loss and Ceph data inconsistency during node decommissioning.",
+              "recommended_action": "Verify QDevice status, follow the new removal checklist, and ensure all VMs and storage are migrated before proceeding.",
+              "severity": "high"
+            },
+            {
+              "title": "Ceph network change procedures clarified",
+              "details": "A comprehensive new section (8.13.5) explains how to modify public and cluster networks, including MTU testing, IPv4/IPv6 packet size limits, and required service restarts.",
+              "impact": "Reduces risk of accidental cluster downtime when adjusting network settings.",
+              "recommended_action": "Follow the step‑by‑step guide, test MTU sizes, and restart OSDs one host at a time as described.",
+              "severity": "medium"
+            },
+            {
+              "title": "HA auto‑rebalance options introduced",
+              "details": "New HA configuration flags (ha-auto-rebalance, ha-auto-rebalance-method, etc.) allow automatic redistribution of resources after failures, with customizable thresholds and hold durations.",
+              "impact": "Improves resilience and reduces manual intervention for HA clusters.",
+              "recommended_action": "Enable ha-auto-rebalance in the HA manager and tune the method and thresholds to match your workload.",
+              "severity": "medium"
+            },
+            {
+              "title": "Import storage type added",
+              "details": "Documentation now includes an \"import\" storage type, allowing direct import of external data sets into Proxmox storage pools.",
+              "impact": "Simplifies migration of existing data without needing intermediate steps.",
+              "recommended_action": "Create an import storage definition where needed and use the pvesm import commands to bring data in.",
+              "severity": "low"
+            },
+            {
+              "title": "Secure Boot certificate expiration handling",
+              "details": "New guidance on Microsoft Secure Boot certificates (2023k, 2023w) and how to enroll updated keys, including CLI commands for certificate renewal.",
+              "impact": "Prevents boot failures on systems with expired Secure Boot certificates.",
+              "recommended_action": "Check the current certificate version on each node and run the provided enrollment commands if needed.",
+              "severity": "high"
+            },
+            {
+              "title": "CPU model list expanded and defaults clarified",
+              "details": "The supported CPU model list now includes newer AMD EPYC and Intel Sapphire/Rapids generations, and the default CPU type is set to \"host\" architecture.",
+              "impact": "Ensures optimal performance on modern hardware and reduces manual CPU configuration.",
+              "recommended_action": "Verify that VMs use the default \"host\" CPU model unless a specific compatibility mode is required.",
+              "severity": "low"
+            },
+            {
+              "title": "Migration downtime parameter capped",
+              "details": "The \"migration-downtime\" option now has a maximum of 2000 seconds, matching QEMU's limit.",
+              "impact": "Prevents configuration errors that could cause migration failures.",
+              "recommended_action": "Adjust any custom migration-downtime values to stay within the new limit.",
+              "severity": "low"
+            },
+            {
+              "title": "CLI option \"--max-workers\" replaces deprecated \"--maxworkers\"",
+              "details": "A new \"--max-workers\" flag (1‑64) is introduced with clearer defaults; the old \"--maxworkers\" flag is deprecated.",
+              "impact": "Provides better control over parallel operations and aligns with newer configuration standards.",
+              "recommended_action": "Update scripts and automation to use \"--max-workers\" and remove references to the deprecated flag.",
+              "severity": "low"
+            },
+            {
+              "title": "HA manager commands for arm/disarm HA",
+              "details": "New commands \"crm-command arm-ha\" and \"crm-command disarm-ha\" allow administrators to temporarily disable HA during maintenance, with options to freeze or ignore resources.",
+              "impact": "Facilitates safe cluster maintenance without triggering HA failovers.",
+              "recommended_action": "Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.",
+              "severity": "medium"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Version bump and UI polish\n   - Proxmox VE is now version 9.1.3. A \"scroll to top\" link was added to the documentation pages, and minor wording updates improve clarity across the UI description.\n   - Impact: Users see the new version number and benefit from easier navigation in the docs.\n   - Action: Refresh the web UI and documentation cache to view the latest UI elements.\n   - Severity: low\n2. Enhanced node removal workflow with QDevice warning\n   - New documentation requires removal of any QDevice before taking a node out of the cluster and adds a detailed step‑by‑step guide for safe removal, especially for Ceph‑enabled nodes.\n   - Impact: Prevents cluster quorum loss and Ceph data inconsistency during node decommissioning.\n   - Action: Verify QDevice status, follow the new removal checklist, and ensure all VMs and storage are migrated before proceeding.\n   - Severity: high\n3. Ceph network change procedures clarified\n   - A comprehensive new section (8.13.5) explains how to modify public and cluster networks, including MTU testing, IPv4/IPv6 packet size limits, and required service restarts.\n   - Impact: Reduces risk of accidental cluster downtime when adjusting network settings.\n   - Action: Follow the step‑by‑step guide, test MTU sizes, and restart OSDs one host at a time as described.\n   - Severity: medium\n4. HA auto‑rebalance options introduced\n   - New HA configuration flags (ha-auto-rebalance, ha-auto-rebalance-method, etc.) allow automatic redistribution of resources after failures, with customizable thresholds and hold durations.\n   - Impact: Improves resilience and reduces manual intervention for HA clusters.\n   - Action: Enable ha-auto-rebalance in the HA manager and tune the method and thresholds to match your workload.\n   - Severity: medium\n5. Import storage type added\n   - Documentation now includes an \"import\" storage type, allowing direct import of external data sets into Proxmox storage pools.\n   - Impact: Simplifies migration of existing data without needing intermediate steps.\n   - Action: Create an import storage definition where needed and use the pvesm import commands to bring data in.\n   - Severity: low\n6. Secure Boot certificate expiration handling\n   - New guidance on Microsoft Secure Boot certificates (2023k, 2023w) and how to enroll updated keys, including CLI commands for certificate renewal.\n   - Impact: Prevents boot failures on systems with expired Secure Boot certificates.\n   - Action: Check the current certificate version on each node and run the provided enrollment commands if needed.\n   - Severity: high\n7. CPU model list expanded and defaults clarified\n   - The supported CPU model list now includes newer AMD EPYC and Intel Sapphire/Rapids generations, and the default CPU type is set to \"host\" architecture.\n   - Impact: Ensures optimal performance on modern hardware and reduces manual CPU configuration.\n   - Action: Verify that VMs use the default \"host\" CPU model unless a specific compatibility mode is required.\n   - Severity: low\n8. Migration downtime parameter capped\n   - The \"migration-downtime\" option now has a maximum of 2000 seconds, matching QEMU's limit.\n   - Impact: Prevents configuration errors that could cause migration failures.\n   - Action: Adjust any custom migration-downtime values to stay within the new limit.\n   - Severity: low\n9. CLI option \"--max-workers\" replaces deprecated \"--maxworkers\"\n   - A new \"--max-workers\" flag (1‑64) is introduced with clearer defaults; the old \"--maxworkers\" flag is deprecated.\n   - Impact: Provides better control over parallel operations and aligns with newer configuration standards.\n   - Action: Update scripts and automation to use \"--max-workers\" and remove references to the deprecated flag.\n   - Severity: low\n10. HA manager commands for arm/disarm HA\n   - New commands \"crm-command arm-ha\" and \"crm-command disarm-ha\" allow administrators to temporarily disable HA during maintenance, with options to freeze or ignore resources.\n   - Impact: Facilitates safe cluster maintenance without triggering HA failovers.\n   - Action: Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.\n   - Severity: medium",
+        "ru": "",
+        "fr": ""
+      }
     }
   }
 ]
