@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       delete_artifacts:
-        description: "Also delete related docs/changes artifacts"
+        description: "Also delete related docs/changes artifacts (.diff, .html, .changelog.html)"
         required: false
         default: false
         type: boolean

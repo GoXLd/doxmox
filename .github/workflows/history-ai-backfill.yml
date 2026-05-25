@@ -1,0 +1,96 @@
+name: Admin AI Backfill History
+
+on:
+  workflow_dispatch:
+    inputs:
+      selectors:
+        description: "History selectors (newline-separated timestamps or diff filenames)"
+        required: false
+        type: string
+      all_entries:
+        description: "Backfill all entries"
+        required: false
+        default: false
+        type: boolean
+      force:
+        description: "Regenerate even if AI summary already exists"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: doxmox-history-ai-backfill
+  cancel-in-progress: false
+
+jobs:
+  ai-backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Backfill AI summaries
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
+          CLOUDFLARE_VECTORIZE_INDEX: ${{ secrets.CLOUDFLARE_VECTORIZE_INDEX }}
+        run: |
+          ARGS=(--ai-enable --vectorize-namespace "doxmox-admin-guide")
+          HAS_SELECTOR=false
+          if [ -n "${CLOUDFLARE_VECTORIZE_INDEX}" ]; then
+            ARGS+=(--vectorize-index "${CLOUDFLARE_VECTORIZE_INDEX}")
+          fi
+
+          if [ "${{ inputs.all_entries }}" = "true" ]; then
+            ARGS+=(--history-ai-backfill-all)
+            HAS_SELECTOR=true
+          else
+            while IFS= read -r line; do
+              selector="$(echo "$line" | xargs)"
+              if [ -z "$selector" ]; then
+                continue
+              fi
+              ARGS+=("--history-ai-backfill" "$selector")
+              HAS_SELECTOR=true
+            done <<'EOF'
+          ${{ inputs.selectors }}
+          EOF
+          fi
+
+          if [ "${HAS_SELECTOR}" != "true" ]; then
+            echo "No selectors provided and all_entries=false."
+            exit 1
+          fi
+
+          if [ "${{ inputs.force }}" = "true" ]; then
+            ARGS+=(--history-ai-force)
+          fi
+
+          python src/monitor.py "${ARGS[@]}"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json docs
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: backfill ai changelog entries"
+          git push

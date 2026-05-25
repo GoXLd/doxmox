@@ -30,7 +30,16 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run monitor
-        run: python src/monitor.py
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
+          CLOUDFLARE_VECTORIZE_INDEX: ${{ secrets.CLOUDFLARE_VECTORIZE_INDEX }}
+        run: |
+          ARGS=(--ai-enable --vectorize-namespace "doxmox-admin-guide")
+          if [ -n "${CLOUDFLARE_VECTORIZE_INDEX}" ]; then
+            ARGS+=(--vectorize-index "${CLOUDFLARE_VECTORIZE_INDEX}")
+          fi
+          python src/monitor.py "${ARGS[@]}"
 
       - name: Read monitor result
         id: result

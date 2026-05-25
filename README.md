@@ -4,13 +4,14 @@ Monitoring repository for:
 
 - `https://pve.proxmox.com/pve-docs/pve-admin-guide.html`
 
-Every 8 hours, GitHub Actions:
+Every 2 hours, GitHub Actions:
 
 1. downloads and normalizes page content,
 2. compares it with the previous snapshot,
 3. saves a diff on changes,
-4. updates a static changelog page (`docs/index.html`),
-5. sends a Telegram notification if a real change is detected.
+4. generates an AI text changelog (`en`, `ru`, `fr`) for each diff,
+5. updates a static changelog page (`docs/index.html`),
+6. sends a Telegram notification if a real change is detected.
 
 ## Repository layout
 
@@ -19,8 +20,10 @@ Every 8 hours, GitHub Actions:
 - `data/history.json` - change history for changelog page.
 - `data/last_result.json` - ephemeral run payload (not committed).
 - `docs/changes/*.diff` - saved diffs.
+- `docs/changes/*.changelog.html` - AI summary pages for each change.
 - `docs/index.html` - static changelog page (for GitHub Pages).
 - `.github/workflows/monitor.yml` - scheduled workflow.
+- `.github/workflows/history-ai-backfill.yml` - manual AI summary backfill.
 
 ## Setup
 
@@ -35,6 +38,9 @@ In `Settings -> Secrets and variables -> Actions`, add:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 - `DOMAIN` (for example `doxmox.com`)
+- `CLOUDFLARE_ACCOUNT_ID` (for Workers AI/Vectorize API calls)
+- `CLOUDFLARE_AUTH_TOKEN` (token with Workers AI + Vectorize permissions)
+- `CLOUDFLARE_VECTORIZE_INDEX` (optional; enables snapshot context retrieval)
 
 `DOMAIN` is used to build public links in Telegram notifications:
 
@@ -95,6 +101,35 @@ python src/monitor.py --history-delete "20260410T082842Z.diff" --history-delete-
 ```
 
 After deletion, `docs/index.html` is regenerated automatically.
+
+## AI changelog backfill
+
+Rebuild AI text summaries for existing history entries:
+
+```bash
+# one entry
+python src/monitor.py --ai-enable --history-ai-backfill "20260521T130040Z.diff"
+
+# several entries
+python src/monitor.py --ai-enable \
+  --history-ai-backfill "20260521T130040Z.diff" \
+  --history-ai-backfill "2026-05-20T05:19:06Z"
+
+# all entries
+python src/monitor.py --ai-enable --history-ai-backfill-all
+
+# force regenerate even if ai.status=ok
+python src/monitor.py --ai-enable --history-ai-backfill-all --history-ai-force
+```
+
+Required environment variables for local runs:
+
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_AUTH_TOKEN`
+
+Optional for Vectorize-based context retrieval:
+
+- `CLOUDFLARE_VECTORIZE_INDEX`
 
 ### Delete from website (safe flow, no tokens in browser)
 
