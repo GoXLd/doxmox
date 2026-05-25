@@ -26,6 +26,7 @@ Every 2 hours, GitHub Actions:
 - `.github/workflows/monitor.yml` - scheduled workflow.
 - `.github/workflows/history-ai-backfill.yml` - manual AI summary backfill.
 - `.github/workflows/history-ai-translate.yml` - manual translation-only run (`en` -> `ru/fr`).
+- `.github/workflows/history-ai-brief.yml` - manual short one-line changelog summary generation from existing EN AI summary.
 
 ## Setup
 
@@ -213,6 +214,22 @@ python src/monitor.py --ai-enable --history-ai-translate-all --history-ai-transl
 ```
 
 This mode does not regenerate `summary.en`; it only updates translations and re-renders docs pages.
+
+## AI compact summary mode
+
+Use this when EN changelog already exists and you need a short one-line summary
+for the index table/Telegram message (for example: `Proxmox VE 9.2.1: Ceph, CPU model, Regex, ...`).
+
+```bash
+# one entry
+python src/monitor.py --ai-enable --history-ai-brief "20260521T130040Z.diff"
+
+# all entries with EN summary
+python src/monitor.py --ai-enable --history-ai-brief-all
+
+# force overwrite existing compact summaries
+python src/monitor.py --ai-enable --history-ai-brief-all --history-ai-brief-force
+```
 
 ### Delete from website (safe flow, no tokens in browser)
 

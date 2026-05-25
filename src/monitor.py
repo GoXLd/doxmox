@@ -34,6 +34,8 @@ DEFAULT_GITHUB_REF = "main"
 DEFAULT_GITHUB_ADMIN_WORKFLOW = "history-admin-delete.yml"
 DEFAULT_AI_ANALYSIS_MODEL = "@cf/openai/gpt-oss-120b"
 DEFAULT_AI_TRANSLATION_MODEL = "@cf/zai-org/glm-4.7-flash"
+DEFAULT_AI_BRIEF_MODEL = "@cf/openai/gpt-oss-20b"
+DEFAULT_AI_BRIEF_FALLBACK_MODEL = "@cf/zai-org/glm-4.7-flash"
 DEFAULT_AI_EMBEDDING_MODEL = "@cf/baai/bge-m3"
 DEFAULT_AI_FALLBACK_MODEL = "@cf/moonshotai/kimi-k2.6"
 DEFAULT_AI_MAX_DIFF_CHARS = 380_000
@@ -58,6 +60,7 @@ class Result:
     added_lines: int
     removed_lines: int
     history_count: int
+    short_summary: str | None = None
     error: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -72,6 +75,7 @@ class Result:
             "added_lines": self.added_lines,
             "removed_lines": self.removed_lines,
             "history_count": self.history_count,
+            "short_summary": self.short_summary,
             "error": self.error,
         }
 
@@ -84,6 +88,8 @@ class AIConfig:
     analysis_model: str
     fallback_model: str
     translation_model: str
+    brief_model: str
+    brief_fallback_model: str
     embedding_model: str
     max_diff_chars: int
     chunk_chars: int
@@ -550,6 +556,137 @@ def format_changes_text(changes: list[dict[str, Any]]) -> str:
     return "\n".join(lines).strip()
 
 
+def extract_release_version(summary_json: dict[str, Any]) -> str | None:
+    if not isinstance(summary_json, dict):
+        return None
+    for key in ("overview", "professional_assessment", "newcomer_explainer"):
+        value = str(summary_json.get(key) or "")
+        match = re.search(r"\b(Proxmox\s+VE\s+\d+(?:\.\d+){1,3})\b", value, re.IGNORECASE)
+        if match:
+            return match.group(1).replace("proxmox ve", "Proxmox VE")
+
+    changes = summary_json.get("changes")
+    if isinstance(changes, list):
+        for item in changes:
+            if not isinstance(item, dict):
+                continue
+            text = f"{item.get('title') or ''} {item.get('details') or ''}"
+            match = re.search(r"\b(\d+\.\d+\.\d+)\b", text)
+            if match:
+                return f"Proxmox VE {match.group(1)}"
+    return None
+
+
+def fallback_compact_summary(summary_json: dict[str, Any]) -> str:
+    version = extract_release_version(summary_json) or "Proxmox VE update"
+    tags: list[str] = []
+    seen: set[str] = set()
+    for item in summary_json.get("changes", []) if isinstance(summary_json.get("changes"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        title = re.sub(r"\s+", " ", str(item.get("title") or "").strip())
+        title = title.strip(" .")
+        if not title:
+            continue
+        title = re.sub(r"^new\s+", "", title, flags=re.IGNORECASE)
+        title = re.sub(r"^version bump to\s+", "", title, flags=re.IGNORECASE)
+        title = title.split(":", 1)[0].strip(" .")
+        key = title.lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        tags.append(title)
+        if len(tags) >= 8:
+            break
+    suffix = ", ".join(tags) if tags else "documentation and configuration updates"
+    return f"{version}: {suffix}"
+
+
+def normalize_compact_summary(text: str, version_hint: str | None) -> str:
+    compact = text.strip().strip('`"')
+    compact = re.sub(r"\s+", " ", compact).strip().rstrip(".")
+    if not compact:
+        return ""
+
+    if version_hint:
+        if not compact.lower().startswith(version_hint.lower()):
+            right = compact.split(":", 1)[1].strip() if ":" in compact else compact
+            compact = f"{version_hint}: {right}"
+    elif not compact.lower().startswith("proxmox ve"):
+        compact = f"Proxmox VE update: {compact}"
+
+    if len(compact) > 240:
+        compact = compact[:237].rsplit(" ", 1)[0].rstrip(",;") + "..."
+    return compact
+
+
+def generate_compact_summary(
+    session: requests.Session,
+    config: AIConfig,
+    summary_json: dict[str, Any],
+) -> dict[str, Any]:
+    version_hint = extract_release_version(summary_json)
+    fallback = fallback_compact_summary(summary_json)
+    prompt_payload = {
+        "version_hint": version_hint,
+        "overview": summary_json.get("overview") or "",
+        "change_titles": [
+            str(item.get("title") or "").strip()
+            for item in summary_json.get("changes", [])
+            if isinstance(item, dict)
+        ][:12],
+    }
+    system = (
+        "You write ultra-compact Proxmox changelog headlines. "
+        "Return one plain-text line only, no markdown."
+    )
+    user = (
+        "Create one short headline in this style:\n"
+        "Proxmox VE X.Y.Z: tag1, tag2, tag3, ...\n"
+        "Rules:\n"
+        "- Start with version_hint if present.\n"
+        "- Keep 4-8 concise technology tags.\n"
+        "- English only.\n"
+        "- Max 220 chars.\n"
+        "- No trailing period.\n\n"
+        f"{json.dumps(prompt_payload, ensure_ascii=False)}"
+    )
+
+    model_used = config.brief_model
+    try:
+        raw = workers_ai_chat_text(
+            session,
+            config,
+            config.brief_model,
+            ai_messages(system, user),
+            max_tokens=120,
+        )
+    except Exception:
+        model_used = config.brief_fallback_model
+        try:
+            raw = workers_ai_chat_text(
+                session,
+                config,
+                config.brief_fallback_model,
+                ai_messages(system, user),
+                max_tokens=120,
+            )
+        except Exception:
+            raw = fallback
+            model_used = "fallback"
+
+    text = normalize_compact_summary(raw, version_hint)
+    if not text:
+        text = normalize_compact_summary(fallback, version_hint)
+        model_used = "fallback"
+    return {
+        "text": text,
+        "version": version_hint or "",
+        "model": model_used,
+        "generated_at": now_utc_iso(),
+    }
+
+
 def normalize_summary_payload(payload: Any) -> dict[str, Any]:
     if not isinstance(payload, dict):
         return {}
@@ -871,6 +1008,13 @@ def format_event_row(event: dict[str, Any]) -> str:
         link = "-"
     row_id = event_row_id(event)
     selector = html.escape(str(timestamp))
+    brief_node = event.get("brief") if isinstance(event.get("brief"), dict) else {}
+    brief_text = str(brief_node.get("text") or "").strip()
+    brief_html = (
+        f'<div class="row-brief"><span data-i18n="quick_summary">Quick summary:</span> {html.escape(brief_text)}</div>'
+        if brief_text
+        else ""
+    )
     details_cell = (
         f"{link} "
         '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> '
@@ -878,6 +1022,7 @@ def format_event_row(event: dict[str, Any]) -> str:
         '<input type="checkbox" class="row-select" data-role="row-select"> '
         '<span data-i18n="select_entry">Select</span>'
         "</label>"
+        f"{brief_html}"
     )
 
     return (
@@ -1857,6 +2002,12 @@ def render_docs(
     .row-select {{
       vertical-align: middle;
     }}
+    .row-brief {{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }}
     table {{
       width: 100%;
       border-collapse: collapse;
@@ -2015,6 +2166,7 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Some rights reserved.",
           footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
+          quick_summary: "Quick summary:",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
@@ -2050,6 +2202,7 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Certains droits réservés.",
           footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
+          quick_summary: "Résumé court :",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
@@ -2085,6 +2238,7 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Некоторые права защищены.",
           footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
+          quick_summary: "Коротко:",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
@@ -2471,6 +2625,8 @@ def build_ai_config_from_args(args: argparse.Namespace) -> AIConfig:
         analysis_model=args.ai_analysis_model,
         fallback_model=args.ai_fallback_model,
         translation_model=args.ai_translation_model,
+        brief_model=args.ai_brief_model,
+        brief_fallback_model=args.ai_brief_fallback_model,
         embedding_model=args.ai_embedding_model,
         max_diff_chars=max(10_000, int(args.ai_max_diff_chars)),
         chunk_chars=max(5_000, int(args.ai_chunk_chars)),
@@ -2687,6 +2843,93 @@ def history_ai_translate(
     return 0
 
 
+def history_ai_brief(
+    state_dir: Path,
+    docs_dir: Path,
+    github_repo: str,
+    github_ref: str,
+    github_admin_workflow: str,
+    selectors: list[str],
+    process_all: bool,
+    force: bool,
+    author_name: str,
+    author_url: str | None,
+    ai_config: AIConfig,
+) -> int:
+    history_path = state_dir / HISTORY_FILE
+    history: list[dict[str, Any]] = load_json(history_path, [])
+    if not history:
+        print("History is empty; nothing to summarize.")
+        return 0
+    if not ai_config.enabled:
+        print("AI is disabled. Re-run with --ai-enable.")
+        return 1
+    if not ai_config.account_id or not ai_config.api_token:
+        print("Cloudflare credentials are missing for compact summaries.")
+        return 1
+
+    selected = set(value.strip() for value in selectors if value.strip())
+    if not process_all and not selected:
+        print("No selectors were supplied. Use --history-ai-brief or --history-ai-brief-all.")
+        return 1
+
+    resolved_author_url = resolve_author_url(docs_dir, author_url)
+    session = build_session()
+    updated = 0
+    skipped_missing_en = 0
+
+    for event in history:
+        diff_file = event.get("diff_file")
+        if not diff_file:
+            continue
+        if not process_all and not any(history_entry_matches(event, value) for value in selected):
+            continue
+
+        ai_payload = event.get("ai") if isinstance(event.get("ai"), dict) else {}
+        summary_node = ai_payload.get("summary") if isinstance(ai_payload.get("summary"), dict) else {}
+        summary_en = summary_node.get("en") if isinstance(summary_node.get("en"), dict) else {}
+        if not summary_en or not summary_en.get("overview"):
+            skipped_missing_en += 1
+            continue
+
+        previous_brief = event.get("brief") if isinstance(event.get("brief"), dict) else {}
+        if previous_brief.get("text") and not force:
+            continue
+
+        try:
+            event["brief"] = generate_compact_summary(session, ai_config, summary_en)
+        except Exception as exc:
+            event["brief"] = {
+                "text": normalize_compact_summary(fallback_compact_summary(summary_en), extract_release_version(summary_en)),
+                "model": "fallback",
+                "version": extract_release_version(summary_en) or "",
+                "generated_at": now_utc_iso(),
+                "error": str(exc),
+            }
+
+        updated += 1
+
+    save_json(history_path, history)
+    state_payload = load_json(state_dir / STATE_FILE, {})
+    url = state_payload.get("url") or DEFAULT_URL
+    ensure_diff_html_pages(history, author_name=author_name, author_url=resolved_author_url)
+    render_docs(
+        history,
+        url,
+        docs_dir,
+        author_name=author_name,
+        author_url=resolved_author_url,
+        github_repo=github_repo,
+        github_ref=github_ref,
+        github_admin_workflow=github_admin_workflow,
+    )
+    print(
+        f"AI compact summary completed for {updated} entries."
+        + (f" Skipped without EN summary: {skipped_missing_en}." if skipped_missing_en else "")
+    )
+    return 0
+
+
 def process(
     url: str,
     state_dir: Path,
@@ -2728,6 +2971,7 @@ def process(
             added_lines=0,
             removed_lines=0,
             history_count=0,
+            short_summary=None,
             error=str(exc),
         )
         save_json(result_file, result.to_dict())
@@ -2744,6 +2988,7 @@ def process(
     added_lines = 0
     removed_lines = 0
     vectorize_sync: dict[str, Any] | None = None
+    short_summary: str | None = None
 
     if changed:
         save_text(snapshot_path, normalized)
@@ -2793,6 +3038,22 @@ def process(
                     if vectorize_sync:
                         ai_payload["vectorize_sync"] = vectorize_sync
                     event["ai"] = ai_payload
+                    summary_node = ai_payload.get("summary") if isinstance(ai_payload.get("summary"), dict) else {}
+                    summary_en = summary_node.get("en") if isinstance(summary_node.get("en"), dict) else {}
+                    if ai_payload.get("status") == "ok" and summary_en:
+                        try:
+                            event["brief"] = generate_compact_summary(session, ai_config, summary_en)
+                        except Exception as brief_exc:
+                            event["brief"] = {
+                                "text": normalize_compact_summary(
+                                    fallback_compact_summary(summary_en),
+                                    extract_release_version(summary_en),
+                                ),
+                                "model": "fallback",
+                                "version": extract_release_version(summary_en) or "",
+                                "generated_at": now_utc_iso(),
+                                "error": str(brief_exc),
+                            }
                 except Exception as exc:
                     if isinstance(previous_ai, dict) and previous_ai.get("status") == "ok":
                         preserved = dict(previous_ai)
@@ -2812,6 +3073,8 @@ def process(
                 author_name=author_name,
                 author_url=resolved_author_url,
             )
+            brief_node = event.get("brief") if isinstance(event.get("brief"), dict) else {}
+            short_summary = str(brief_node.get("text") or "").strip() or None
             history.insert(0, event)
             save_json(history_path, history)
         elif bootstrap:
@@ -2846,6 +3109,7 @@ def process(
         added_lines=added_lines,
         removed_lines=removed_lines,
         history_count=len(history),
+        short_summary=short_summary,
         error=None,
     )
     save_json(result_file, result.to_dict())
@@ -2871,6 +3135,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--ai-analysis-model", default=DEFAULT_AI_ANALYSIS_MODEL)
     parser.add_argument("--ai-fallback-model", default=DEFAULT_AI_FALLBACK_MODEL)
     parser.add_argument("--ai-translation-model", default=DEFAULT_AI_TRANSLATION_MODEL)
+    parser.add_argument("--ai-brief-model", default=DEFAULT_AI_BRIEF_MODEL)
+    parser.add_argument("--ai-brief-fallback-model", default=DEFAULT_AI_BRIEF_FALLBACK_MODEL)
     parser.add_argument("--ai-embedding-model", default=DEFAULT_AI_EMBEDDING_MODEL)
     parser.add_argument("--ai-max-diff-chars", type=int, default=DEFAULT_AI_MAX_DIFF_CHARS)
     parser.add_argument("--ai-chunk-chars", type=int, default=DEFAULT_AI_CHUNK_CHARS)
@@ -2939,6 +3205,23 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Regenerate ru/fr translations even if they already exist.",
     )
+    parser.add_argument(
+        "--history-ai-brief",
+        action="append",
+        default=[],
+        metavar="SELECTOR",
+        help="Generate short EN compact summary from existing EN AI changelog for selected history items.",
+    )
+    parser.add_argument(
+        "--history-ai-brief-all",
+        action="store_true",
+        help="Generate short EN compact summary from existing EN AI changelog for all history entries.",
+    )
+    parser.add_argument(
+        "--history-ai-brief-force",
+        action="store_true",
+        help="Regenerate compact summary even if it already exists.",
+    )
     return parser.parse_args(argv)
 
 
@@ -2982,6 +3265,20 @@ def main(argv: list[str]) -> int:
             selectors=args.history_ai_translate,
             process_all=args.history_ai_translate_all,
             force=args.history_ai_translate_force,
+            author_name=args.author_name,
+            author_url=args.author_url,
+            ai_config=ai_config,
+        )
+    if args.history_ai_brief_all or args.history_ai_brief:
+        return history_ai_brief(
+            state_dir=Path(args.state_dir),
+            docs_dir=Path(args.docs_dir),
+            github_repo=args.github_repo,
+            github_ref=args.github_ref,
+            github_admin_workflow=args.github_admin_workflow,
+            selectors=args.history_ai_brief,
+            process_all=args.history_ai_brief_all,
+            force=args.history_ai_brief_force,
             author_name=args.author_name,
             author_url=args.author_url,
             ai_config=ai_config,

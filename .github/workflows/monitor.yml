@@ -50,12 +50,16 @@ jobs:
           from pathlib import Path
 
           result = json.loads(Path("data/last_result.json").read_text(encoding="utf-8"))
+          short_summary = str(result.get("short_summary") or "").replace("\n", " ").strip()
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
               out.write(f"changed={str(result.get('changed', False)).lower()}\n")
               out.write(f"bootstrap={str(result.get('bootstrap', False)).lower()}\n")
               out.write(f"diff_file={result.get('diff_file') or ''}\n")
               out.write(f"added_lines={result.get('added_lines', 0)}\n")
               out.write(f"removed_lines={result.get('removed_lines', 0)}\n")
+              out.write("short_summary<<EOF\n")
+              out.write(f"{short_summary}\n")
+              out.write("EOF\n")
           PY
 
       - name: Commit and push artifacts
@@ -84,6 +88,7 @@ jobs:
           DIFF_FILE: ${{ steps.result.outputs.diff_file }}
           ADDED: ${{ steps.result.outputs.added_lines }}
           REMOVED: ${{ steps.result.outputs.removed_lines }}
+          SHORT_SUMMARY: ${{ steps.result.outputs.short_summary }}
         run: |
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ] || [ -z "$DOMAIN" ]; then
             echo "Required secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, DOMAIN) are not configured; skipping notification."
@@ -106,13 +111,19 @@ jobs:
           else
             DIFF_LABEL="Open diff"
           fi
-          TEXT=$(cat <<EOF
-          Proxmox Admin Guide changed.
-          +${ADDED} / -${REMOVED}
-          Diff: <a href="${DIFF_URL}">${DIFF_LABEL}</a>
-          <a href="${CHANGELOG_URL}">Full changelog</a>
-          EOF
-          )
+          SUMMARY_ESCAPED="$(python - <<'PY'
+          import html
+          import os
+          print(html.escape((os.environ.get("SHORT_SUMMARY") or "").strip()))
+          PY
+          )"
+          TEXT="Proxmox Admin Guide changed."
+          if [ -n "${SUMMARY_ESCAPED}" ]; then
+            TEXT="${TEXT}"$'\n'"${SUMMARY_ESCAPED}"
+          fi
+          TEXT="${TEXT}"$'\n'"+${ADDED} / -${REMOVED}"
+          TEXT="${TEXT}"$'\n'"Diff: <a href=\"${DIFF_URL}\">${DIFF_LABEL}</a>"
+          TEXT="${TEXT}"$'\n'"<a href=\"${CHANGELOG_URL}\">Full changelog</a>"
 
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
