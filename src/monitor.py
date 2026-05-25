@@ -623,6 +623,63 @@ def translate_single_language_summary(
     return normalized if normalized.get("overview") else {}
 
 
+def translate_summary_bundle(
+    session: requests.Session,
+    config: AIConfig,
+    summary_json: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    translation_user = (
+        "Translate this JSON summary to Russian and French.\n"
+        "Return STRICT JSON with keys ru and fr, each preserving the same structure:\n"
+        "overview, professional_assessment, newcomer_explainer, changes[].\n"
+        "Keep technical terms correct for Proxmox.\n\n"
+        f"{json.dumps(summary_json, ensure_ascii=False)}"
+    )
+    translation_system = "You are a professional technical translator. Output valid JSON only."
+    translations: dict[str, Any] = {}
+    try:
+        translated = workers_ai_chat_text(
+            session,
+            config,
+            config.translation_model,
+            ai_messages(translation_system, translation_user),
+            max_tokens=2600,
+        )
+        parsed_translations = parse_json_payload(translated)
+        ru = extract_translation_payload(parsed_translations, "ru")
+        fr = extract_translation_payload(parsed_translations, "fr")
+        if ru:
+            translations["ru"] = ru
+        if fr:
+            translations["fr"] = fr
+    except Exception:
+        translations = {}
+
+    for language in ("ru", "fr"):
+        if language in translations:
+            continue
+        try:
+            fallback_translation = translate_single_language_summary(session, config, summary_json, language)
+            if fallback_translation:
+                translations[language] = fallback_translation
+        except Exception:
+            continue
+
+    translation_status = {
+        "required": ["ru", "fr"],
+        "present": sorted(translations.keys()),
+        "missing": sorted(language for language in ("ru", "fr") if language not in translations),
+    }
+    if config.require_full_translations and translation_status["missing"]:
+        raise RuntimeError(
+            "Missing required translations: "
+            + ", ".join(translation_status["missing"])
+            + ". Re-run translation or verify translation model availability."
+        )
+
+    return translations, translation_status
+
+
 def summarize_diff_with_ai(
     session: requests.Session,
     config: AIConfig,
@@ -701,54 +758,11 @@ def summarize_diff_with_ai(
     if not summary_json:
         raise RuntimeError("AI summary generation failed")
 
-    translation_user = (
-        "Translate this JSON summary to Russian and French.\n"
-        "Return STRICT JSON with keys ru and fr, each preserving the same structure:\n"
-        "overview, professional_assessment, newcomer_explainer, changes[].\n"
-        "Keep technical terms correct for Proxmox.\n\n"
-        f"{json.dumps(summary_json, ensure_ascii=False)}"
+    translations, translation_status = translate_summary_bundle(
+        session=session,
+        config=config,
+        summary_json=summary_json,
     )
-    translation_system = "You are a professional technical translator. Output valid JSON only."
-    translations: dict[str, Any] = {}
-    try:
-        translated = workers_ai_chat_text(
-            session,
-            config,
-            config.translation_model,
-            ai_messages(translation_system, translation_user),
-            max_tokens=2600,
-        )
-        parsed_translations = parse_json_payload(translated)
-        ru = extract_translation_payload(parsed_translations, "ru")
-        fr = extract_translation_payload(parsed_translations, "fr")
-        if ru:
-            translations["ru"] = ru
-        if fr:
-            translations["fr"] = fr
-    except Exception:
-        translations = {}
-
-    for language in ("ru", "fr"):
-        if language in translations:
-            continue
-        try:
-            fallback_translation = translate_single_language_summary(session, config, summary_json, language)
-            if fallback_translation:
-                translations[language] = fallback_translation
-        except Exception:
-            continue
-
-    translation_status = {
-        "required": ["ru", "fr"],
-        "present": sorted(translations.keys()),
-        "missing": sorted(language for language in ("ru", "fr") if language not in translations),
-    }
-    if config.require_full_translations and translation_status["missing"]:
-        raise RuntimeError(
-            "Missing required translations: "
-            + ", ".join(translation_status["missing"])
-            + ". Re-run backfill or verify translation model availability."
-        )
 
     return {
         "status": "ok",
@@ -2506,6 +2520,118 @@ def history_ai_backfill(
     return 0
 
 
+def history_ai_translate(
+    state_dir: Path,
+    docs_dir: Path,
+    github_repo: str,
+    github_ref: str,
+    github_admin_workflow: str,
+    selectors: list[str],
+    process_all: bool,
+    force: bool,
+    author_name: str,
+    author_url: str | None,
+    ai_config: AIConfig,
+) -> int:
+    history_path = state_dir / HISTORY_FILE
+    history: list[dict[str, Any]] = load_json(history_path, [])
+    if not history:
+        print("History is empty; nothing to translate.")
+        return 0
+    if not ai_config.enabled:
+        print("AI is disabled. Re-run with --ai-enable.")
+        return 1
+    if not ai_config.account_id or not ai_config.api_token:
+        print("Cloudflare credentials are missing for translation.")
+        return 1
+
+    selected = set(value.strip() for value in selectors if value.strip())
+    if not process_all and not selected:
+        print("No selectors were supplied. Use --history-ai-translate or --history-ai-translate-all.")
+        return 1
+
+    resolved_author_url = resolve_author_url(docs_dir, author_url)
+    session = build_session()
+    updated = 0
+    skipped_missing_en = 0
+
+    for event in history:
+        diff_file = event.get("diff_file")
+        if not diff_file:
+            continue
+        if not process_all and not any(history_entry_matches(event, value) for value in selected):
+            continue
+
+        ai_payload = event.get("ai") if isinstance(event.get("ai"), dict) else {}
+        summary_node = ai_payload.get("summary") if isinstance(ai_payload.get("summary"), dict) else {}
+        summary_en = summary_node.get("en") if isinstance(summary_node.get("en"), dict) else {}
+        if not summary_en or not summary_en.get("overview"):
+            skipped_missing_en += 1
+            continue
+
+        has_ru = isinstance(summary_node.get("ru"), dict) and bool(summary_node.get("ru", {}).get("overview"))
+        has_fr = isinstance(summary_node.get("fr"), dict) and bool(summary_node.get("fr", {}).get("overview"))
+        if has_ru and has_fr and not force:
+            continue
+
+        try:
+            translations, translation_status = translate_summary_bundle(
+                session=session,
+                config=ai_config,
+                summary_json=summary_en,
+            )
+        except Exception as exc:
+            ai_payload["translation_error"] = str(exc)
+            ai_payload["translation_attempt_at"] = now_utc_iso()
+            event["ai"] = ai_payload
+            continue
+
+        merged_summary = {"en": summary_en, **translations}
+        ai_payload["status"] = "ok"
+        ai_payload["generated_at"] = ai_payload.get("generated_at") or now_utc_iso()
+        ai_payload["translation_generated_at"] = now_utc_iso()
+        ai_payload["translation_model"] = ai_config.translation_model
+        ai_payload["translation_status"] = translation_status
+        ai_payload["summary"] = merged_summary
+        ai_payload["summary_text"] = {
+            "en": format_changes_text(summary_en.get("changes", [])),
+            "ru": format_changes_text(translations.get("ru", {}).get("changes", [])),
+            "fr": format_changes_text(translations.get("fr", {}).get("changes", [])),
+        }
+        ai_payload.pop("translation_error", None)
+        event["ai"] = ai_payload
+
+        diff_path = Path(str(diff_file))
+        if diff_path.exists():
+            render_changelog_html(
+                diff_path,
+                event.get("ai", {}),
+                author_name=author_name,
+                author_url=resolved_author_url,
+            )
+        updated += 1
+
+    save_json(history_path, history)
+    state_payload = load_json(state_dir / STATE_FILE, {})
+    url = state_payload.get("url") or DEFAULT_URL
+    ensure_diff_html_pages(history, author_name=author_name, author_url=resolved_author_url)
+    render_docs(
+        history,
+        url,
+        docs_dir,
+        author_name=author_name,
+        author_url=resolved_author_url,
+        github_repo=github_repo,
+        github_ref=github_ref,
+        github_admin_workflow=github_admin_workflow,
+    )
+    print(
+        f"AI translation completed for {updated} entries."
+        + (f" Skipped without EN summary: {skipped_missing_en}." if skipped_missing_en else "")
+    )
+    return 0
+
+
 def process(
     url: str,
     state_dir: Path,
@@ -2741,6 +2867,23 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="Regenerate AI payload even if entry already has ai.status=ok.",
     )
+    parser.add_argument(
+        "--history-ai-translate",
+        action="append",
+        default=[],
+        metavar="SELECTOR",
+        help="Translate existing EN AI summaries to ru/fr for selected history items.",
+    )
+    parser.add_argument(
+        "--history-ai-translate-all",
+        action="store_true",
+        help="Translate existing EN AI summaries to ru/fr for all history entries.",
+    )
+    parser.add_argument(
+        "--history-ai-translate-force",
+        action="store_true",
+        help="Regenerate ru/fr translations even if they already exist.",
+    )
     return parser.parse_args(argv)
 
 
@@ -2770,6 +2913,20 @@ def main(argv: list[str]) -> int:
             selectors=args.history_ai_backfill,
             process_all=args.history_ai_backfill_all,
             force=args.history_ai_force,
+            author_name=args.author_name,
+            author_url=args.author_url,
+            ai_config=ai_config,
+        )
+    if args.history_ai_translate_all or args.history_ai_translate:
+        return history_ai_translate(
+            state_dir=Path(args.state_dir),
+            docs_dir=Path(args.docs_dir),
+            github_repo=args.github_repo,
+            github_ref=args.github_ref,
+            github_admin_workflow=args.github_admin_workflow,
+            selectors=args.history_ai_translate,
+            process_all=args.history_ai_translate_all,
+            force=args.history_ai_translate_force,
             author_name=args.author_name,
             author_url=args.author_url,
             ai_config=ai_config,

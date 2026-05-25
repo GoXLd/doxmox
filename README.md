@@ -25,6 +25,7 @@ Every 2 hours, GitHub Actions:
 - `docs/AI_PIPELINE.md` - AI architecture, model choices, RAG flow, and tuning notes.
 - `.github/workflows/monitor.yml` - scheduled workflow.
 - `.github/workflows/history-ai-backfill.yml` - manual AI summary backfill.
+- `.github/workflows/history-ai-translate.yml` - manual translation-only run (`en` -> `ru/fr`).
 
 ## Setup
 
@@ -187,6 +188,28 @@ Required environment variables for local runs:
 Optional for Vectorize-based context retrieval:
 
 - `CLOUDFLARE_VECTORIZE_INDEX`
+
+## AI translation-only mode
+
+Use this when English changelog already exists and you only need to (re)generate `ru/fr` translations.
+
+```bash
+# one entry
+python src/monitor.py --ai-enable --history-ai-translate "20260521T130040Z.diff"
+
+# several entries
+python src/monitor.py --ai-enable \
+  --history-ai-translate "20260521T130040Z.diff" \
+  --history-ai-translate "2026-05-20T05:19:06Z"
+
+# all entries with EN summary
+python src/monitor.py --ai-enable --history-ai-translate-all
+
+# force overwrite existing ru/fr
+python src/monitor.py --ai-enable --history-ai-translate-all --history-ai-translate-force
+```
+
+This mode does not regenerate `summary.en`; it only updates translations and re-renders docs pages.
 
 ### Delete from website (safe flow, no tokens in browser)
 

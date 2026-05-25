@@ -50,6 +50,17 @@ Rationale:
    - `docs/changes/<timestamp>.changelog.html` (AI summary page)
    - `docs/index.html` (table links `Changelog | Code Diff`)
 
+### Decoupled translation-only flow
+
+When `summary.en` already exists, translations can be regenerated independently:
+
+1. Read existing `event["ai"]["summary"]["en"]`.
+2. Call translation model only.
+3. Update `summary.ru` and `summary.fr` without touching `summary.en`.
+4. Re-render changelog pages and index.
+
+This avoids unnecessary full EN changelog regeneration when only translation quality is being fixed.
+
 ### Backfill flow
 
 Backfill (`--history-ai-backfill*`) reprocesses existing diff files and refreshes site pages.
