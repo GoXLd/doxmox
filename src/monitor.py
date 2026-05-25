@@ -384,26 +384,48 @@ def workers_ai_embeddings(
         return []
     if not config.account_id or not config.api_token:
         raise RuntimeError("Cloudflare AI credentials are not configured")
-    payload = {"text": texts}
-    result = workers_ai_run(session, config.account_id, config.api_token, config.embedding_model, payload)
-    vectors = workers_ai_extract_embeddings(result)
-    if vectors:
-        return vectors
+    # Workers AI embedding models may differ in accepted payload shape.
+    # Try common variants before failing.
+    bulk_variants: list[dict[str, Any]] = [{"text": texts}, {"input": texts}]
+    if len(texts) == 1:
+        bulk_variants.extend([{"text": texts[0]}, {"input": texts[0]}])
+
+    for payload in bulk_variants:
+        try:
+            result = workers_ai_run(session, config.account_id, config.api_token, config.embedding_model, payload)
+            vectors = workers_ai_extract_embeddings(result)
+            if vectors:
+                if len(texts) == 1:
+                    return [vectors[0]]
+                if len(vectors) == len(texts):
+                    return vectors
+                if vectors:
+                    # Some providers return one vector even for batched input.
+                    return vectors
+        except Exception:
+            continue
 
     fallback_vectors: list[list[float]] = []
     for text in texts:
-        single = workers_ai_run(
-            session,
-            config.account_id,
-            config.api_token,
-            config.embedding_model,
-            {"text": [text]},
-            timeout_seconds=120,
-        )
-        parsed = workers_ai_extract_embeddings(single)
-        if not parsed:
+        parsed_single: list[list[float]] = []
+        for payload in ({"text": [text]}, {"input": [text]}, {"text": text}, {"input": text}):
+            try:
+                single = workers_ai_run(
+                    session,
+                    config.account_id,
+                    config.api_token,
+                    config.embedding_model,
+                    payload,
+                    timeout_seconds=120,
+                )
+                parsed_single = workers_ai_extract_embeddings(single)
+                if parsed_single:
+                    break
+            except Exception:
+                continue
+        if not parsed_single:
             raise RuntimeError("Unable to parse embedding response payload")
-        fallback_vectors.append(parsed[0])
+        fallback_vectors.append(parsed_single[0])
     return fallback_vectors
 
 
@@ -926,6 +948,15 @@ def render_changelog_html(
         </section>
         """
 
+    error_block = ""
+    if str(ai_data.get("status")) == "error":
+        error_message = html.escape(str(ai_data.get("error") or "AI generation failed"))
+        error_block = (
+            '<div class="error-banner">'
+            f"<strong>AI generation error:</strong> {error_message}"
+            "</div>"
+        )
+
     page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -995,6 +1026,15 @@ def render_changelog_html(
     .lang-block[hidden] {{
       display: none;
     }}
+    .error-banner {{
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }}
     ol {{
       padding-left: 20px;
     }}
@@ -1034,6 +1074,7 @@ def render_changelog_html(
         <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
+      {error_block}
       {section_html(summary_en, "en")}
       {section_html(summary_fr, "fr")}
       {section_html(summary_ru, "ru")}
@@ -2413,8 +2454,8 @@ def history_ai_backfill(
         if not process_all:
             if not any(history_entry_matches(event, value) for value in selected):
                 continue
-        ai_payload = event.get("ai")
-        if isinstance(ai_payload, dict) and ai_payload.get("status") == "ok" and not force:
+        previous_ai = event.get("ai") if isinstance(event.get("ai"), dict) else None
+        if isinstance(previous_ai, dict) and previous_ai.get("status") == "ok" and not force:
             continue
         diff_path = Path(str(diff_file))
         if not diff_path.exists():
@@ -2422,14 +2463,23 @@ def history_ai_backfill(
 
         diff_text = diff_path.read_text(encoding="utf-8")
         try:
-            contexts = maybe_fetch_vector_context(session, ai_config, diff_text)
+            try:
+                contexts = maybe_fetch_vector_context(session, ai_config, diff_text)
+            except Exception:
+                contexts = []
             event["ai"] = summarize_diff_with_ai(session, ai_config, diff_text, contexts)
         except Exception as exc:
-            event["ai"] = {
-                "status": "error",
-                "generated_at": now_utc_iso(),
-                "error": str(exc),
-            }
+            if isinstance(previous_ai, dict) and previous_ai.get("status") == "ok":
+                preserved = dict(previous_ai)
+                preserved["last_attempt_error"] = str(exc)
+                preserved["last_attempt_at"] = now_utc_iso()
+                event["ai"] = preserved
+            else:
+                event["ai"] = {
+                    "status": "error",
+                    "generated_at": now_utc_iso(),
+                    "error": str(exc),
+                }
 
         render_changelog_html(diff_path, event.get("ai", {}), author_name=author_name, author_url=resolved_author_url)
         updated += 1
@@ -2552,18 +2602,28 @@ def process(
                 "removed_lines": removed_lines,
             }
             if ai_config.enabled:
+                previous_ai = event.get("ai") if isinstance(event.get("ai"), dict) else None
                 try:
-                    contexts = maybe_fetch_vector_context(session, ai_config, diff_text)
+                    try:
+                        contexts = maybe_fetch_vector_context(session, ai_config, diff_text)
+                    except Exception:
+                        contexts = []
                     ai_payload = summarize_diff_with_ai(session, ai_config, diff_text, contexts)
                     if vectorize_sync:
                         ai_payload["vectorize_sync"] = vectorize_sync
                     event["ai"] = ai_payload
                 except Exception as exc:
-                    event["ai"] = {
-                        "status": "error",
-                        "generated_at": now_utc_iso(),
-                        "error": str(exc),
-                    }
+                    if isinstance(previous_ai, dict) and previous_ai.get("status") == "ok":
+                        preserved = dict(previous_ai)
+                        preserved["last_attempt_error"] = str(exc)
+                        preserved["last_attempt_at"] = now_utc_iso()
+                        event["ai"] = preserved
+                    else:
+                        event["ai"] = {
+                            "status": "error",
+                            "generated_at": now_utc_iso(),
+                            "error": str(exc),
+                        }
 
             render_changelog_html(
                 diff_path,
