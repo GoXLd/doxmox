@@ -864,7 +864,7 @@ def format_event_row(event: dict[str, Any]) -> str:
         html_href = docs_href_from_path(diff_html_path(diff_file))
         changelog_href = docs_href_from_path(diff_changelog_path(diff_file))
         link = (
-            f'<a href="{html.escape(changelog_href)}" target="_blank" rel="noopener noreferrer" data-i18n="changelog">Changelog</a> | '
+            f'<a href="{html.escape(changelog_href)}" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | '
             f'<a href="{html.escape(html_href)}" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a>'
         )
     else:
@@ -1952,7 +1952,7 @@ def render_docs(
           new_hash: "New Hash",
           line_delta: "Line Delta",
           details: "Details",
-          changelog: "Changelog",
+          human_changelog: "Human Changelog",
           code_diff: "Code Diff",
           no_changes: "No changes detected yet.",
           language: "Language",
@@ -1984,7 +1984,7 @@ def render_docs(
           new_hash: "Nouveau hash",
           line_delta: "Delta de lignes",
           details: "Details",
-          changelog: "Changelog",
+          human_changelog: "Human Changelog",
           code_diff: "Code Diff",
           no_changes: "Aucun changement detecte pour le moment.",
           language: "Langue",
@@ -2016,7 +2016,7 @@ def render_docs(
           new_hash: "Новый хэш",
           line_delta: "Изменение строк",
           details: "Детали",
-          changelog: "Changelog",
+          human_changelog: "Human Changelog",
           code_diff: "Code Diff",
           no_changes: "Изменения пока не обнаружены.",
           language: "Язык",
