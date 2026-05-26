@@ -215,6 +215,28 @@ def parse_json_payload(payload: str) -> Any | None:
         return None
 
 
+def looks_like_ai_envelope_text(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    lowered = text.lower()
+    if "chatcmpl-" in lowered:
+        return True
+    if '"object"' in lowered and '"chat.completion"' in lowered:
+        return True
+    if text.startswith("{") and '"result"' in lowered and '"choices"' in lowered:
+        return True
+    if text.startswith("{") and '"success"' in lowered and '"errors"' in lowered:
+        return True
+    if "please provide the text to translate" in lowered:
+        return True
+    if "veuillez fournir le texte" in lowered:
+        return True
+    if "пожалуйста, предоставьте текст" in lowered:
+        return True
+    return False
+
+
 def normalize_html(raw_html: str) -> str:
     normalized_input = raw_html.replace("\r\n", "\n").replace("\r", "\n")
     soup = BeautifulSoup(normalized_input, "html.parser")
@@ -458,7 +480,7 @@ def workers_ai_extract_text(payload: dict[str, Any]) -> str:
     payload_response_text = content_to_text(response)
     if payload_response_text:
         return payload_response_text
-    return json.dumps(payload, ensure_ascii=False)
+    return ""
 
 
 def workers_ai_extract_embeddings(payload: dict[str, Any]) -> list[list[float]]:
@@ -598,7 +620,7 @@ def workers_ai_translate_text(
         try:
             raw = workers_ai_run(session, config.account_id or "", config.api_token or "", model, payload)
             translated = workers_ai_extract_translation_text(raw)
-            if translated:
+            if translated and not looks_like_ai_envelope_text(translated):
                 return translated
             preview = json.dumps(raw, ensure_ascii=False)[:280]
             raise RuntimeError(f"Invalid translation response payload. Preview: {preview}")
@@ -665,7 +687,7 @@ def workers_ai_translate_text_with_llm(
             if refusal:
                 raise RuntimeError(f"refusal={refusal}")
             translated = workers_ai_extract_text(raw).strip()
-            if translated:
+            if translated and not looks_like_ai_envelope_text(translated):
                 return translated
             preview = json.dumps(raw, ensure_ascii=False)[:280]
             raise RuntimeError(f"Invalid LLM translation response payload. Preview: {preview}")
@@ -990,6 +1012,8 @@ def generate_compact_summary(
             raw = fallback
             model_used = "fallback"
 
+    if looks_like_ai_envelope_text(raw):
+        raw = ""
     text = normalize_compact_summary(raw, version_hint)
     if not text:
         text = normalize_compact_summary(fallback, version_hint)
