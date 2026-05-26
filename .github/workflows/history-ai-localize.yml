@@ -1,0 +1,116 @@
+name: Admin AI Localize History
+
+on:
+  workflow_dispatch:
+    inputs:
+      selectors:
+        description: "History selectors (newline-separated timestamps or diff filenames)"
+        required: false
+        type: string
+      all_entries:
+        description: "Process all entries with existing EN summary"
+        required: false
+        default: false
+        type: boolean
+      force_translate:
+        description: "Regenerate ru/fr even if they already exist"
+        required: false
+        default: false
+        type: boolean
+      force_brief:
+        description: "Regenerate compact summary even if it already exists"
+        required: false
+        default: false
+        type: boolean
+      translation_model:
+        description: "Workers AI translation model id"
+        required: false
+        default: "@cf/openai/gpt-oss-120b"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: doxmox-history-ai-localize
+  cancel-in-progress: false
+
+jobs:
+  ai-localize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Translate summaries and refresh compact briefs
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_AUTH_TOKEN: ${{ secrets.CLOUDFLARE_AUTH_TOKEN }}
+        run: |
+          ARGS_TRANSLATE=(--ai-enable --history-ai-translate-all)
+          ARGS_BRIEF=(--ai-enable --history-ai-brief-all)
+          HAS_SELECTOR=false
+
+          if [ "${{ inputs.all_entries }}" = "true" ]; then
+            ARGS_TRANSLATE=(--ai-enable --history-ai-translate-all)
+            ARGS_BRIEF=(--ai-enable --history-ai-brief-all)
+            HAS_SELECTOR=true
+          else
+            ARGS_TRANSLATE=(--ai-enable)
+            ARGS_BRIEF=(--ai-enable)
+            while IFS= read -r line; do
+              selector="$(echo "$line" | xargs)"
+              if [ -z "$selector" ]; then
+                continue
+              fi
+              ARGS_TRANSLATE+=("--history-ai-translate" "$selector")
+              ARGS_BRIEF+=("--history-ai-brief" "$selector")
+              HAS_SELECTOR=true
+            done <<'EOF'
+          ${{ inputs.selectors }}
+          EOF
+          fi
+
+          if [ "${HAS_SELECTOR}" != "true" ]; then
+            echo "No selectors provided and all_entries=false."
+            exit 1
+          fi
+
+          if [ "${{ inputs.force_translate }}" = "true" ]; then
+            ARGS_TRANSLATE+=(--history-ai-translate-force)
+          fi
+
+          if [ "${{ inputs.force_brief }}" = "true" ]; then
+            ARGS_BRIEF+=(--history-ai-brief-force)
+          fi
+
+          if [ -n "${{ inputs.translation_model }}" ]; then
+            ARGS_TRANSLATE+=(--ai-translation-model "${{ inputs.translation_model }}")
+          fi
+
+          python src/monitor.py "${ARGS_TRANSLATE[@]}"
+          python src/monitor.py "${ARGS_BRIEF[@]}"
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json docs
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: localize summaries and refresh compact briefs"
+          git push

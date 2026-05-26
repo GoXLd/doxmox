@@ -916,6 +916,8 @@ def extract_release_version(summary_json: dict[str, Any]) -> str | None:
 
 def fallback_compact_summary(summary_json: dict[str, Any]) -> str:
     version = extract_release_version(summary_json) or "Proxmox VE update"
+    version_num_match = re.search(r"(\d+(?:\.\d+){1,3})", version)
+    version_num = version_num_match.group(1) if version_num_match else ""
     tags: list[str] = []
     seen: set[str] = set()
     for item in summary_json.get("changes", []) if isinstance(summary_json.get("changes"), list) else []:
@@ -928,6 +930,8 @@ def fallback_compact_summary(summary_json: dict[str, Any]) -> str:
         title = re.sub(r"^new\s+", "", title, flags=re.IGNORECASE)
         title = re.sub(r"^version bump to\s+", "", title, flags=re.IGNORECASE)
         title = title.split(":", 1)[0].strip(" .")
+        if version_num and title.strip().lower() in {version_num.lower(), f"proxmox ve {version_num}".lower()}:
+            continue
         key = title.lower()
         if not key or key in seen:
             continue
@@ -949,6 +953,21 @@ def normalize_compact_summary(text: str, version_hint: str | None) -> str:
         if not compact.lower().startswith(version_hint.lower()):
             right = compact.split(":", 1)[1].strip() if ":" in compact else compact
             compact = f"{version_hint}: {right}"
+        else:
+            # Drop duplicated immediate version token:
+            # "Proxmox VE 9.1.4: 9.1.4, ..." -> "Proxmox VE 9.1.4: ..."
+            version_num_match = re.search(r"(\d+(?:\.\d+){1,3})", version_hint)
+            if version_num_match and ":" in compact:
+                version_num = version_num_match.group(1)
+                left, right = compact.split(":", 1)
+                cleaned_right = right.strip()
+                cleaned_right = re.sub(
+                    rf"^(?:proxmox\s+ve\s+)?{re.escape(version_num)}\s*[,:\-]?\s*",
+                    "",
+                    cleaned_right,
+                    flags=re.IGNORECASE,
+                )
+                compact = f"{left.strip()}: {cleaned_right.strip()}" if cleaned_right.strip() else left.strip()
     elif not compact.lower().startswith("proxmox ve"):
         compact = f"Proxmox VE update: {compact}"
 
@@ -1435,6 +1454,14 @@ def localized_brief_text(event: dict[str, Any], language: str, fallback_text: st
     return fallback_text
 
 
+def has_localized_brief(event: dict[str, Any], language: str) -> bool:
+    ai_node = event.get("ai") if isinstance(event.get("ai"), dict) else {}
+    summary_node = ai_node.get("summary") if isinstance(ai_node.get("summary"), dict) else {}
+    lang_summary = summary_node.get(language) if isinstance(summary_node.get(language), dict) else {}
+    overview = compact_brief_text(str(lang_summary.get("overview") or ""))
+    return bool(overview and not looks_like_ai_envelope_text(overview))
+
+
 def format_event_row(event: dict[str, Any]) -> str:
     timestamp = event.get("timestamp", "-")
     timestamp_display = format_utc_display(str(timestamp))
@@ -1464,6 +1491,8 @@ def format_event_row(event: dict[str, Any]) -> str:
             brief_text_en = compact_brief_text(fallback_compact_summary(summary_en))
     brief_text_fr = localized_brief_text(event, "fr", brief_text_en)
     brief_text_ru = localized_brief_text(event, "ru", brief_text_en)
+    brief_fr_localized = has_localized_brief(event, "fr")
+    brief_ru_localized = has_localized_brief(event, "ru")
 
     details_cell = (
         f"{link} "
@@ -1474,8 +1503,9 @@ def format_event_row(event: dict[str, Any]) -> str:
         "</label>"
     )
 
+    main_row_class = "has-brief" if brief_text_en else ""
     main_row = (
-        f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}">'
+        f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}" class="{main_row_class}">'
         f"<td>{timestamp_display}</td>"
         f"<td><code>{new_hash}</code></td>"
         f'<td class="col-line-delta">+{added} / -{removed}</td>'
@@ -1491,7 +1521,8 @@ def format_event_row(event: dict[str, Any]) -> str:
     brief_row = (
         f'<tr data-event-id="{row_id}" data-event-row="brief" data-history-selector="{selector}" class="brief-row">'
         '<td colspan="4" class="brief-cell">'
-        f'<div class="row-brief" data-brief-en="{brief_attr_en}" data-brief-fr="{brief_attr_fr}" data-brief-ru="{brief_attr_ru}">'
+        f'<div class="row-brief" data-brief-en="{brief_attr_en}" data-brief-fr="{brief_attr_fr}" data-brief-ru="{brief_attr_ru}" '
+        f'data-brief-fr-localized="{"1" if brief_fr_localized else "0"}" data-brief-ru-localized="{"1" if brief_ru_localized else "0"}">'
         '<span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> '
         f'<span class="row-brief-text">{html.escape(brief_text_en)}</span>'
         "</div>"
@@ -2475,6 +2506,10 @@ def render_docs(
     .row-brief-label {{
       font-weight: 600;
     }}
+    tr.has-brief > td {{
+      border-bottom: 0;
+      padding-bottom: 8px;
+    }}
     .brief-row td {{
       background: color-mix(in srgb, var(--accent-soft) 36%, transparent);
       border-bottom: 1px solid var(--line);
@@ -2484,6 +2519,7 @@ def render_docs(
     .brief-cell {{
       padding-left: 14px;
       padding-right: 14px;
+      border-left: 3px solid color-mix(in srgb, var(--accent) 60%, transparent);
     }}
     table {{
       width: 100%;
@@ -2505,7 +2541,7 @@ def render_docs(
     }}
     .col-line-delta {{
       white-space: nowrap;
-      min-width: 150px;
+      min-width: 190px;
     }}
     code {{ font-size: 12px; }}
     @media (max-width: 860px) {{
@@ -2894,10 +2930,18 @@ def render_docs(
         themeSelect.options[1].textContent = t(lang, "theme_dark");
         document.querySelectorAll(".row-brief").forEach((node) => {{
           if (!(node instanceof HTMLElement)) return;
+          const labelNode = node.querySelector(".row-brief-label");
           const textNode = node.querySelector(".row-brief-text");
           if (!(textNode instanceof HTMLElement)) return;
           const value = node.getAttribute(`data-brief-${{lang}}`) || node.getAttribute("data-brief-en") || "";
           if (value) textNode.textContent = value;
+          if (labelNode instanceof HTMLElement) {{
+            const hasLocalized =
+              lang === "en" ||
+              (lang === "fr" && node.getAttribute("data-brief-fr-localized") === "1") ||
+              (lang === "ru" && node.getAttribute("data-brief-ru-localized") === "1");
+            labelNode.textContent = hasLocalized ? t(lang, "quick_summary") : t("en", "quick_summary");
+          }}
         }});
       }}
 
