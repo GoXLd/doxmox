@@ -427,6 +427,8 @@ def workers_ai_chat_text(
     model: str,
     messages: list[dict[str, str]],
     max_tokens: int = 1400,
+    response_format: dict[str, Any] | None = None,
+    temperature: float = 0.2,
 ) -> str:
     if not config.account_id or not config.api_token:
         raise RuntimeError("Cloudflare AI credentials are not configured")
@@ -434,8 +436,10 @@ def workers_ai_chat_text(
         "messages": messages,
         "max_completion_tokens": max_tokens,
         "stream": False,
-        "temperature": 0.2,
+        "temperature": temperature,
     }
+    if response_format:
+        payload["response_format"] = response_format
     result = workers_ai_run(session, config.account_id, config.api_token, model, payload)
     return workers_ai_extract_text(result).strip()
 
@@ -814,7 +818,9 @@ def translate_single_language_summary(
         config,
         config.translation_model,
         ai_messages(system, user),
-        max_tokens=1800,
+        max_tokens=3200,
+        response_format={"type": "json_object"},
+        temperature=0.0,
     )
     parsed = parse_json_payload(translated)
     normalized = normalize_summary_payload(parsed)
@@ -829,55 +835,18 @@ def translate_summary_bundle(
     config: AIConfig,
     summary_json: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    translation_user = (
-        "Translate this JSON summary to Russian and French.\n"
-        "Return STRICT JSON with keys ru and fr, each preserving the same structure:\n"
-        "overview, professional_assessment, newcomer_explainer, changes[].\n"
-        "Field names must stay exactly in English (do not translate keys).\n"
-        "Each changes[] item must contain exactly: title, details, impact, recommended_action, severity.\n"
-        "Keep technical terms correct for Proxmox.\n\n"
-        f"{json.dumps(summary_json, ensure_ascii=False)}"
-    )
-    translation_system = "You are a professional technical translator. Output valid JSON only."
     translations: dict[str, Any] = {}
     error_details: dict[str, str] = {}
-    try:
-        translated = workers_ai_chat_text(
-            session,
-            config,
-            config.translation_model,
-            ai_messages(translation_system, translation_user),
-            max_tokens=2600,
-        )
-        parsed_translations = parse_json_payload(translated)
-        if not isinstance(parsed_translations, dict):
-            preview = " ".join(str(translated).split())[:220]
-            error_details["bundle_parse"] = f"Bundled response is not JSON object. Preview: {preview}"
-        ru = extract_translation_payload(parsed_translations, "ru")
-        fr = extract_translation_payload(parsed_translations, "fr")
-        if ru:
-            translations["ru"] = ru
-        else:
-            error_details["bundle_ru"] = "Missing or invalid ru payload in bundled response"
-        if fr:
-            translations["fr"] = fr
-        else:
-            error_details["bundle_fr"] = "Missing or invalid fr payload in bundled response"
-    except Exception as exc:
-        error_details["bundle_request"] = format_exception_message(exc)
-        translations = {}
 
     for language in ("ru", "fr"):
-        if language in translations:
-            continue
         try:
             fallback_translation = translate_single_language_summary(session, config, summary_json, language)
             if fallback_translation:
                 translations[language] = fallback_translation
             else:
-                error_details[f"fallback_{language}"] = f"Missing or invalid {language} payload in fallback response"
+                error_details[f"{language}"] = f"Missing or invalid {language} payload in translation response"
         except Exception as exc:
-            error_details[f"fallback_{language}"] = format_exception_message(exc)
+            error_details[f"{language}"] = format_exception_message(exc)
             continue
 
     translation_status = {
