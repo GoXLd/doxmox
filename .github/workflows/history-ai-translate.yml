@@ -20,7 +20,7 @@ on:
       translation_model:
         description: "Workers AI translation model id"
         required: false
-        default: "@cf/meta/m2m100-1.2b"
+        default: "@cf/openai/gpt-oss-120b"
         type: string
 
 permissions:
