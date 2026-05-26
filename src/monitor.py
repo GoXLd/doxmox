@@ -280,6 +280,27 @@ def ai_messages(system: str, user: str) -> list[dict[str, str]]:
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
 
 
+def format_exception_message(exc: Exception, max_len: int = 600) -> str:
+    message = str(exc).strip()
+    if isinstance(exc, requests.HTTPError):
+        response = exc.response
+        if response is not None:
+            status = response.status_code
+            reason = (response.reason or "").strip()
+            body = response.text.strip()
+            if len(body) > max_len:
+                body = body[:max_len] + "...[truncated]"
+            parts = [f"HTTP {status}"]
+            if reason:
+                parts.append(reason)
+            if body:
+                parts.append(body)
+            message = " | ".join(parts)
+    if not message:
+        message = exc.__class__.__name__
+    return " ".join(message.split())
+
+
 def workers_ai_run(
     session: requests.Session,
     account_id: str,
@@ -757,7 +778,9 @@ def translate_single_language_summary(
     )
     parsed = parse_json_payload(translated)
     normalized = normalize_summary_payload(parsed)
-    return normalized if normalized.get("overview") else {}
+    if not normalized.get("overview"):
+        raise RuntimeError(f"Invalid {language} translation payload: missing overview")
+    return normalized
 
 
 def translate_summary_bundle(
@@ -774,6 +797,7 @@ def translate_summary_bundle(
     )
     translation_system = "You are a professional technical translator. Output valid JSON only."
     translations: dict[str, Any] = {}
+    error_details: dict[str, str] = {}
     try:
         translated = workers_ai_chat_text(
             session,
@@ -787,9 +811,14 @@ def translate_summary_bundle(
         fr = extract_translation_payload(parsed_translations, "fr")
         if ru:
             translations["ru"] = ru
+        else:
+            error_details["bundle_ru"] = "Missing or invalid ru payload in bundled response"
         if fr:
             translations["fr"] = fr
-    except Exception:
+        else:
+            error_details["bundle_fr"] = "Missing or invalid fr payload in bundled response"
+    except Exception as exc:
+        error_details["bundle_request"] = format_exception_message(exc)
         translations = {}
 
     for language in ("ru", "fr"):
@@ -799,19 +828,26 @@ def translate_summary_bundle(
             fallback_translation = translate_single_language_summary(session, config, summary_json, language)
             if fallback_translation:
                 translations[language] = fallback_translation
-        except Exception:
+            else:
+                error_details[f"fallback_{language}"] = f"Missing or invalid {language} payload in fallback response"
+        except Exception as exc:
+            error_details[f"fallback_{language}"] = format_exception_message(exc)
             continue
 
     translation_status = {
         "required": ["ru", "fr"],
         "present": sorted(translations.keys()),
         "missing": sorted(language for language in ("ru", "fr") if language not in translations),
+        "errors": error_details,
     }
     if config.require_full_translations and translation_status["missing"]:
+        details = " | ".join(f"{key}: {value}" for key, value in error_details.items() if value)
+        details_suffix = f" Details: {details}" if details else ""
         raise RuntimeError(
             "Missing required translations: "
             + ", ".join(translation_status["missing"])
             + ". Re-run translation or verify translation model availability."
+            + details_suffix
         )
 
     return translations, translation_status
@@ -2764,6 +2800,8 @@ def history_ai_translate(
     resolved_author_url = resolve_author_url(docs_dir, author_url)
     session = build_session()
     updated = 0
+    eligible = 0
+    failed = 0
     skipped_missing_en = 0
 
     for event in history:
@@ -2785,6 +2823,7 @@ def history_ai_translate(
         if has_ru and has_fr and not force:
             continue
 
+        eligible += 1
         try:
             translations, translation_status = translate_summary_bundle(
                 session=session,
@@ -2795,6 +2834,9 @@ def history_ai_translate(
             ai_payload["translation_error"] = str(exc)
             ai_payload["translation_attempt_at"] = now_utc_iso()
             event["ai"] = ai_payload
+            failed += 1
+            selector = str(event.get("timestamp") or diff_file or "unknown")
+            print(f"[translate][error] {selector}: {ai_payload['translation_error']}")
             continue
 
         merged_summary = {"en": summary_en, **translations}
@@ -2810,6 +2852,7 @@ def history_ai_translate(
             "fr": format_changes_text(translations.get("fr", {}).get("changes", [])),
         }
         ai_payload.pop("translation_error", None)
+        ai_payload.pop("translation_error_details", None)
         event["ai"] = ai_payload
 
         diff_path = Path(str(diff_file))
@@ -2840,6 +2883,12 @@ def history_ai_translate(
         f"AI translation completed for {updated} entries."
         + (f" Skipped without EN summary: {skipped_missing_en}." if skipped_missing_en else "")
     )
+    if eligible > 0 and updated == 0:
+        print(
+            f"AI translation failed: 0/{eligible} entries were updated"
+            + (f" ({failed} errors)." if failed else ".")
+        )
+        return 2
     return 0
 
 
