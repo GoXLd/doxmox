@@ -186,19 +186,6 @@
     h1 { margin: 0 0 8px; font-size: 24px; }
     p { margin: 4px 0; color: var(--muted); }
     a { color: var(--accent); }
-    .row-remove {
-      border: 1px solid var(--control-line);
-      border-radius: 6px;
-      background: var(--control-bg);
-      color: var(--control-text);
-      padding: 2px 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .row-remove:hover {
-      border-color: #dc2626;
-      color: #dc2626;
-    }
     .row-select-wrap {
       color: var(--muted);
       font-size: 12px;
@@ -223,9 +210,6 @@
       width: 3px;
       border-radius: 3px;
       background: color-mix(in srgb, var(--row-accent, var(--accent)) 76%, #ffffff 24%);
-    }
-    .row-brief-label {
-      font-weight: 600;
     }
     tr.has-brief > td {
       border-bottom: 0;
@@ -342,7 +326,6 @@
           <button type="button" id="delete-selected" class="control-btn" data-i18n="copy_selected" disabled>Copy selected</button>
           <span id="admin-status" class="admin-status" data-i18n="tools_status_off">Tools: off</span>
         </span>
-        <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
         <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
@@ -360,7 +343,7 @@
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-26 19:43:08 UTC</p>
+        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-05-26T20:04:35Z" data-iso="2026-05-26T20:04:35Z">2026-05-26 20:04:35 UTC</time></p>
       </div>
       <table>
         <thead>
@@ -372,10 +355,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr data-event-id="43eec277037c8f54" data-event-row="main" data-history-selector="2026-05-21T13:00:40Z" class="has-brief" style="--row-accent: #38bdf8;"><td>2026-05-21 13:00:40 UTC</td><td><code>b743073ca642</code></td><td class="col-line-delta">+945 / -294</td><td class="details-cell"><a href="changes/20260521T130040Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260521T130040Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="43eec277037c8f54" data-event-row="brief" data-history-selector="2026-05-21T13:00:40Z" class="brief-row" style="--row-accent: #38bdf8;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.2.1: Ceph manager default changed to tentacle, CPU model &quot;level&quot; option, Regex patterns now accept newline (\x0a), Expanded container ID mapping documentation, HA auto‑rebalance option added, Node location property..." data-brief-fr="Proxmox VE 9.2.1 introduit plusieurs mises à jour importantes : le backend du gestionnaire Ceph par défaut passe de squid à tentacle, de nouvelles options de modèle CPU et de paramètres de niveau sont ajoutées, la gestion des..." data-brief-ru="Proxmox VE 9.2.1 вводит несколько важных обновлений: бэкенд менеджера Ceph по умолчанию переключается с squid на tentacle, добавлены новые варианты моделей CPU и настройки уровней, обработка регулярных выражений теперь принимает символы..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> <span class="row-brief-text">Proxmox VE 9.2.1: Ceph manager default changed to tentacle, CPU model &quot;level&quot; option, Regex patterns now accept newline (\x0a), Expanded container ID mapping documentation, HA auto‑rebalance option added, Node location property...</span></div></td></tr>
-<tr data-event-id="ddd539be11db75e8" data-event-row="main" data-history-selector="2026-05-20T05:19:06Z" class="has-brief" style="--row-accent: #22c55e;"><td>2026-05-20 05:19:06 UTC</td><td><code>2c1b4d4dc5b2</code></td><td class="col-line-delta">+1091 / -46</td><td class="details-cell"><a href="changes/20260520T051906Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260520T051906Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="ddd539be11db75e8" data-event-row="brief" data-history-selector="2026-05-20T05:19:06Z" class="brief-row" style="--row-accent: #22c55e;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.1.5: ZFS ARC default reduced, Ceph firewall port reminder, FastEC (allow_ec_optimizations) documentation added, PG autoscaler CRUSH rule consistency requirement, BGP configuration expanded under SDN, Load balancer default..." data-brief-fr="Proxmox VE 9.1.5 introduit plusieurs mises à jour importantes qui affectent le stockage, le réseau, le pare‑feu et les paramètres par défaut du système. Les changements visent à améliorer les performances, la sécurité et la facilité de..." data-brief-ru="Proxmox VE 9.1.5 вводит несколько важных обновлений, влияющих на хранилище, сеть, брандмауэр и системные настройки по умолчанию. Эти изменения направлены на повышение производительности, безопасности и упрощение конфигурации, а также..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> <span class="row-brief-text">Proxmox VE 9.1.5: ZFS ARC default reduced, Ceph firewall port reminder, FastEC (allow_ec_optimizations) documentation added, PG autoscaler CRUSH rule consistency requirement, BGP configuration expanded under SDN, Load balancer default...</span></div></td></tr>
-<tr data-event-id="41aa71508b61087d" data-event-row="main" data-history-selector="2026-05-18T05:20:22Z" class="has-brief" style="--row-accent: #f97316;"><td>2026-05-18 05:20:22 UTC</td><td><code>8cd0afe29346</code></td><td class="col-line-delta">+2412 / -351</td><td class="details-cell"><a href="changes/20260518T052022Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260518T052022Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="41aa71508b61087d" data-event-row="brief" data-history-selector="2026-05-18T05:20:22Z" class="brief-row" style="--row-accent: #f97316;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.1.4: Manual distribution of the cluster CA file, pvecm add default API authentication and --use_ssh flag, ZFS encryption documentation, idmap option added to storage definitions, EVPN controller documentation enhancements..." data-brief-fr="Proxmox VE 9.1.4 introduit plusieurs mises à jour de la documentation et des fonctionnalités qui améliorent la sécurité, la gestion du stockage, le réseau et la planification de haute disponibilité. Les changements vont d’une nouvelle..." data-brief-ru="Proxmox VE 9.1.4 вводит несколько обновлений документации и функций, которые улучшают безопасность, работу с хранилищем, сетевые возможности и планирование высокой доступности. Изменения охватывают новые рекомендации по распределению..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> <span class="row-brief-text">Proxmox VE 9.1.4: Manual distribution of the cluster CA file, pvecm add default API authentication and --use_ssh flag, ZFS encryption documentation, idmap option added to storage definitions, EVPN controller documentation enhancements...</span></div></td></tr>
-<tr data-event-id="3cf87087b6350c25" data-event-row="main" data-history-selector="2026-05-14T05:14:52Z" class="has-brief" style="--row-accent: #a855f7;"><td>2026-05-14 05:14:52 UTC</td><td><code>e471464dbf5a</code></td><td class="col-line-delta">+3704 / -1036</td><td class="details-cell"><a href="changes/20260514T051452Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260514T051452Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="3cf87087b6350c25" data-event-row="brief" data-history-selector="2026-05-14T05:14:52Z" class="brief-row" style="--row-accent: #a855f7;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.1.3: Version bump and UI polish, Enhanced node removal workflow with QDevice warning, Ceph network change procedures clarified, HA auto‑rebalance options introduced, Import storage type added, Secure Boot certificate..." data-brief-fr="Proxmox VE 9.1.3 introduit une série d&#x27;améliorations et de clarifications visant à simplifier la gestion du cluster, à améliorer la flexibilité du stockage et du réseau, et à renforcer les contrôles de haute disponibilité (HA). La..." data-brief-ru="Proxmox VE 9.1.3 вводит ряд улучшений и уточнений, направленных на упрощение управления кластером, повышение гибкости хранения и сетевых настроек, а также усиление контроля высокой доступности (HA). В выпуске также обновлена..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> <span class="row-brief-text">Proxmox VE 9.1.3: Version bump and UI polish, Enhanced node removal workflow with QDevice warning, Ceph network change procedures clarified, HA auto‑rebalance options introduced, Import storage type added, Secure Boot certificate...</span></div></td></tr>
+          <tr data-event-id="43eec277037c8f54" data-event-row="main" data-history-selector="2026-05-21T13:00:40Z" class="has-brief" style="--row-accent: #38bdf8;"><td>2026-05-21 13:00:40 UTC</td><td><code>b743073ca642</code></td><td class="col-line-delta">+945 / -294</td><td class="details-cell"><a href="changes/20260521T130040Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260521T130040Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="43eec277037c8f54" data-event-row="brief" data-history-selector="2026-05-21T13:00:40Z" class="brief-row" style="--row-accent: #38bdf8;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.2.1: Ceph manager default changed to tentacle, CPU model &quot;level&quot; option, Regex patterns now accept newline (\x0a), Expanded container ID mapping documentation, HA auto‑rebalance option added, Node location property..." data-brief-fr="Proxmox VE 9.2.1 introduit plusieurs mises à jour importantes : le backend du gestionnaire Ceph par défaut passe de squid à tentacle, de nouvelles options de modèle CPU et de paramètres de niveau sont ajoutées, la gestion des..." data-brief-ru="Proxmox VE 9.2.1 вводит несколько важных обновлений: бэкенд менеджера Ceph по умолчанию переключается с squid на tentacle, добавлены новые варианты моделей CPU и настройки уровней, обработка регулярных выражений теперь принимает символы..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-text">Proxmox VE 9.2.1: Ceph manager default changed to tentacle, CPU model &quot;level&quot; option, Regex patterns now accept newline (\x0a), Expanded container ID mapping documentation, HA auto‑rebalance option added, Node location property...</span></div></td></tr>
+<tr data-event-id="ddd539be11db75e8" data-event-row="main" data-history-selector="2026-05-20T05:19:06Z" class="has-brief" style="--row-accent: #22c55e;"><td>2026-05-20 05:19:06 UTC</td><td><code>2c1b4d4dc5b2</code></td><td class="col-line-delta">+1091 / -46</td><td class="details-cell"><a href="changes/20260520T051906Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260520T051906Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="ddd539be11db75e8" data-event-row="brief" data-history-selector="2026-05-20T05:19:06Z" class="brief-row" style="--row-accent: #22c55e;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.1.5: ZFS ARC default reduced, Ceph firewall port reminder, FastEC (allow_ec_optimizations) documentation added, PG autoscaler CRUSH rule consistency requirement, BGP configuration expanded under SDN, Load balancer default..." data-brief-fr="Proxmox VE 9.1.5 introduit plusieurs mises à jour importantes qui affectent le stockage, le réseau, le pare‑feu et les paramètres par défaut du système. Les changements visent à améliorer les performances, la sécurité et la facilité de..." data-brief-ru="Proxmox VE 9.1.5 вводит несколько важных обновлений, влияющих на хранилище, сеть, брандмауэр и системные настройки по умолчанию. Эти изменения направлены на повышение производительности, безопасности и упрощение конфигурации, а также..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-text">Proxmox VE 9.1.5: ZFS ARC default reduced, Ceph firewall port reminder, FastEC (allow_ec_optimizations) documentation added, PG autoscaler CRUSH rule consistency requirement, BGP configuration expanded under SDN, Load balancer default...</span></div></td></tr>
+<tr data-event-id="41aa71508b61087d" data-event-row="main" data-history-selector="2026-05-18T05:20:22Z" class="has-brief" style="--row-accent: #f97316;"><td>2026-05-18 05:20:22 UTC</td><td><code>8cd0afe29346</code></td><td class="col-line-delta">+2412 / -351</td><td class="details-cell"><a href="changes/20260518T052022Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260518T052022Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="41aa71508b61087d" data-event-row="brief" data-history-selector="2026-05-18T05:20:22Z" class="brief-row" style="--row-accent: #f97316;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.1.4: Manual distribution of the cluster CA file, pvecm add default API authentication and --use_ssh flag, ZFS encryption documentation, idmap option added to storage definitions, EVPN controller documentation enhancements..." data-brief-fr="Proxmox VE 9.1.4 introduit plusieurs mises à jour de la documentation et des fonctionnalités qui améliorent la sécurité, la gestion du stockage, le réseau et la planification de haute disponibilité. Les changements vont d’une nouvelle..." data-brief-ru="Proxmox VE 9.1.4 вводит несколько обновлений документации и функций, которые улучшают безопасность, работу с хранилищем, сетевые возможности и планирование высокой доступности. Изменения охватывают новые рекомендации по распределению..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-text">Proxmox VE 9.1.4: Manual distribution of the cluster CA file, pvecm add default API authentication and --use_ssh flag, ZFS encryption documentation, idmap option added to storage definitions, EVPN controller documentation enhancements...</span></div></td></tr>
+<tr data-event-id="3cf87087b6350c25" data-event-row="main" data-history-selector="2026-05-14T05:14:52Z" class="has-brief" style="--row-accent: #a855f7;"><td>2026-05-14 05:14:52 UTC</td><td><code>e471464dbf5a</code></td><td class="col-line-delta">+3704 / -1036</td><td class="details-cell"><a href="changes/20260514T051452Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | <a href="changes/20260514T051452Z.html" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a> <label class="row-select-wrap" hidden><input type="checkbox" class="row-select" data-role="row-select"> <span data-i18n="select_entry">Select</span></label></td></tr><tr data-event-id="3cf87087b6350c25" data-event-row="brief" data-history-selector="2026-05-14T05:14:52Z" class="brief-row" style="--row-accent: #a855f7;"><td colspan="4" class="brief-cell"><div class="row-brief" data-brief-en="Proxmox VE 9.1.3: Version bump and UI polish, Enhanced node removal workflow with QDevice warning, Ceph network change procedures clarified, HA auto‑rebalance options introduced, Import storage type added, Secure Boot certificate..." data-brief-fr="Proxmox VE 9.1.3 introduit une série d&#x27;améliorations et de clarifications visant à simplifier la gestion du cluster, à améliorer la flexibilité du stockage et du réseau, et à renforcer les contrôles de haute disponibilité (HA). La..." data-brief-ru="Proxmox VE 9.1.3 вводит ряд улучшений и уточнений, направленных на упрощение управления кластером, повышение гибкости хранения и сетевых настроек, а также усиление контроля высокой доступности (HA). В выпуске также обновлена..." data-brief-fr-localized="1" data-brief-ru-localized="1"><span class="row-brief-text">Proxmox VE 9.1.3: Version bump and UI polish, Enhanced node removal workflow with QDevice warning, Ceph network change procedures clarified, HA auto‑rebalance options introduced, Import storage type added, Secure Boot certificate...</span></div></td></tr>
           <tr data-empty-row="true" style="display:none;"><td colspan="4" data-i18n="no_changes">No changes detected yet.</td></tr>
         </tbody>
       </table>
@@ -391,7 +374,6 @@
     (() => {
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
-      const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
       const fallbackLang = "en";
       const GITHUB_REPO = "GoXLd/doxmox";
       const GITHUB_ADMIN_WORKFLOW = "history-admin-delete.yml";
@@ -399,7 +381,7 @@
         en: {
           title: "Proxmox VE Admin Guide Changelog",
           source: "Source:",
-          generated: "Generated (UTC):",
+          generated: "Generated:",
           timestamp: "Timestamp (UTC)",
           hash: "Hash",
           line_delta: "Line Delta",
@@ -411,8 +393,6 @@
           theme: "Theme",
           theme_light: "Light",
           theme_dark: "Dark",
-          reset_hidden: "Reset hidden",
-          hide_entry: "Hide",
           select_entry: "Select",
           copy_selected: "Copy selected",
           open_delete_workflow: "Open delete workflow",
@@ -425,7 +405,6 @@
           footer_license: "Apache-2.0",
           footer_rights: "Some rights reserved.",
           footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
-          quick_summary: "Quick summary:",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
@@ -434,7 +413,7 @@
         fr: {
           title: "Journal des changements du guide Proxmox VE Admin",
           source: "Source :",
-          generated: "Généré (UTC) :",
+          generated: "Généré :",
           timestamp: "Horodatage (UTC)",
           hash: "Hash",
           line_delta: "Delta de lignes",
@@ -446,8 +425,6 @@
           theme: "Theme",
           theme_light: "Clair",
           theme_dark: "Sombre",
-          reset_hidden: "Reinitialiser les caches",
-          hide_entry: "Masquer",
           select_entry: "Selectionner",
           copy_selected: "Copier la selection",
           open_delete_workflow: "Ouvrir le workflow de suppression",
@@ -460,7 +437,6 @@
           footer_license: "Apache-2.0",
           footer_rights: "Certains droits réservés.",
           footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
-          quick_summary: "Résumé court :",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
@@ -469,7 +445,7 @@
         ru: {
           title: "Журнал изменений руководства Proxmox VE Admin",
           source: "Источник:",
-          generated: "Сгенерировано (UTC):",
+          generated: "Сгенерировано:",
           timestamp: "Временная метка (UTC)",
           hash: "Хэш",
           line_delta: "Изменение строк",
@@ -481,8 +457,6 @@
           theme: "Тема",
           theme_light: "Светлая",
           theme_dark: "Тёмная",
-          reset_hidden: "Сбросить скрытые",
-          hide_entry: "Скрыть",
           select_entry: "Выбрать",
           copy_selected: "Скопировать выбранное",
           open_delete_workflow: "Открыть workflow удаления",
@@ -495,7 +469,6 @@
           footer_license: "Apache-2.0",
           footer_rights: "Некоторые права защищены.",
           footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
-          quick_summary: "Коротко:",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
@@ -505,13 +478,11 @@
 
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
-      const resetHiddenButton = document.getElementById("reset-hidden");
       const adminPanel = document.getElementById("admin-panel");
       const openWorkflowButton = document.getElementById("open-workflow");
       const deleteSelectedButton = document.getElementById("delete-selected");
       const adminStatus = document.getElementById("admin-status");
       const tableBody = document.querySelector("tbody");
-      const hiddenRows = new Set();
       let adminPanelUnlocked = false;
       let escHitCounter = 0;
       let escTimer = null;
@@ -576,24 +547,6 @@
         }
       }
 
-      function loadHiddenRows() {
-        try {
-          const raw = localStorage.getItem(HIDDEN_ROWS_KEY);
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return;
-          parsed.forEach((id) => {
-            if (typeof id === "string" && id) hiddenRows.add(id);
-          });
-        } catch {
-          // ignore invalid localStorage payload
-        }
-      }
-
-      function saveHiddenRows() {
-        localStorage.setItem(HIDDEN_ROWS_KEY, JSON.stringify([...hiddenRows]));
-      }
-
       function ensureEmptyRow() {
         let row = tableBody.querySelector('tr[data-empty-row="true"]');
         if (row) return row;
@@ -608,25 +561,26 @@
         return row;
       }
 
-      function applyHiddenRows() {
-        const rows = [...tableBody.querySelectorAll("tr[data-event-id]")];
+      function refreshEmptyRow() {
         const mainRows = [...tableBody.querySelectorAll('tr[data-event-id][data-event-row="main"]')];
-        let visible = 0;
-        rows.forEach((row) => {
-          const id = row.getAttribute("data-event-id");
-          const isHidden = id && hiddenRows.has(id);
-          row.style.display = isHidden ? "none" : "";
-          if (isHidden) {
-            const checkbox = row.querySelector(".row-select");
-            if (checkbox) checkbox.checked = false;
-          }
-        });
-        mainRows.forEach((row) => {
-          if (row.style.display !== "none") visible += 1;
-        });
         const emptyRow = ensureEmptyRow();
-        emptyRow.style.display = visible === 0 ? "" : "none";
+        emptyRow.style.display = mainRows.length === 0 ? "" : "none";
         updateBatchDeleteState();
+      }
+
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function applyGeneratedTime() {
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
       }
 
       function readLang() {
@@ -674,28 +628,20 @@
         themeSelect.options[1].textContent = t(lang, "theme_dark");
         document.querySelectorAll(".row-brief").forEach((node) => {
           if (!(node instanceof HTMLElement)) return;
-          const labelNode = node.querySelector(".row-brief-label");
           const textNode = node.querySelector(".row-brief-text");
           if (!(textNode instanceof HTMLElement)) return;
           const value = node.getAttribute(`data-brief-${lang}`) || node.getAttribute("data-brief-en") || "";
           if (value) textNode.textContent = value;
-          if (labelNode instanceof HTMLElement) {
-            const hasLocalized =
-              lang === "en" ||
-              (lang === "fr" && node.getAttribute("data-brief-fr-localized") === "1") ||
-              (lang === "ru" && node.getAttribute("data-brief-ru-localized") === "1");
-            labelNode.textContent = hasLocalized ? t(lang, "quick_summary") : t("en", "quick_summary");
-          }
         });
       }
 
       const currentLang = readLang();
       const currentTheme = readTheme();
-      loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyGeneratedTime();
       setToolsMode(false);
-      applyHiddenRows();
+      refreshEmptyRow();
 
       document.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
@@ -716,36 +662,11 @@
         }
       });
 
-      tableBody.addEventListener("click", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        const button = target.closest('button[data-action]');
-        if (!button) return;
-        const action = button.getAttribute("data-action");
-        const row = button.closest("tr[data-event-id]");
-        if (!row) return;
-
-        if (action === "hide-row") {
-          const id = row.getAttribute("data-event-id");
-          if (!id) return;
-          hiddenRows.add(id);
-          saveHiddenRows();
-          applyHiddenRows();
-          return;
-        }
-      });
-
       tableBody.addEventListener("change", (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
         if (!target.matches(".row-select")) return;
         updateBatchDeleteState();
-      });
-
-      resetHiddenButton.addEventListener("click", () => {
-        hiddenRows.clear();
-        localStorage.removeItem(HIDDEN_ROWS_KEY);
-        applyHiddenRows();
       });
 
       openWorkflowButton.addEventListener("click", () => {

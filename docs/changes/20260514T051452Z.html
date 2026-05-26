@@ -195,7 +195,7 @@
     </div>
     <div class="head">
       <h1>20260514T051452Z.diff</h1>
-      <p><span data-i18n="generated">Generated (UTC):</span> 2026-05-25 15:51:14 UTC</p>
+      <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-05-26T20:04:35Z" data-iso="2026-05-26T20:04:35Z">2026-05-26 20:04:35 UTC</time></p>
       <p class="nav">
         <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
         <a href="20260514T051452Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
@@ -6373,7 +6373,7 @@
           theme: "Theme",
           theme_light: "Light",
           theme_dark: "Dark",
-          generated: "Generated (UTC):",
+          generated: "Generated:",
           back_to_menu: "Back to main menu",
           open_changelog: "Open changelog",
           footer_by: "Author",
@@ -6390,7 +6390,7 @@
           theme: "Theme",
           theme_light: "Clair",
           theme_dark: "Sombre",
-          generated: "Généré (UTC) :",
+          generated: "Généré :",
           back_to_menu: "Retour au menu principal",
           open_changelog: "Ouvrir le changelog",
           footer_by: "Auteur",
@@ -6407,7 +6407,7 @@
           theme: "Тема",
           theme_light: "Светлая",
           theme_dark: "Тёмная",
-          generated: "Сгенерировано (UTC):",
+          generated: "Сгенерировано:",
           back_to_menu: "Назад в главное меню",
           open_changelog: "Открыть changelog",
           footer_by: "Автор",
@@ -6469,10 +6469,26 @@
         themeSelect.options[1].textContent = t(lang, "theme_dark");
       }
 
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function applyGeneratedTime() {
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+      }
+
       const currentLang = readLang();
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyGeneratedTime();
 
       langSelect.addEventListener("change", () => {
         localStorage.setItem(LANG_KEY, langSelect.value);

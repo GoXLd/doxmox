@@ -1514,7 +1514,6 @@ def format_event_row(event: dict[str, Any], row_index: int) -> str:
 
     details_cell = (
         f"{link} "
-        '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> '
         '<label class="row-select-wrap" hidden>'
         '<input type="checkbox" class="row-select" data-role="row-select"> '
         '<span data-i18n="select_entry">Select</span>'
@@ -1542,7 +1541,6 @@ def format_event_row(event: dict[str, Any], row_index: int) -> str:
         '<td colspan="4" class="brief-cell">'
         f'<div class="row-brief" data-brief-en="{brief_attr_en}" data-brief-fr="{brief_attr_fr}" data-brief-ru="{brief_attr_ru}" '
         f'data-brief-fr-localized="{"1" if brief_fr_localized else "0"}" data-brief-ru-localized="{"1" if brief_ru_localized else "0"}">'
-        '<span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> '
         f'<span class="row-brief-text">{html.escape(brief_text_en)}</span>'
         "</div>"
         "</td>"
@@ -1570,7 +1568,8 @@ def render_changelog_html(
     author_name: str,
     author_url: str,
 ) -> None:
-    generated_at = format_utc_display(now_utc_iso())
+    generated_at_iso = now_utc_iso()
+    generated_at = format_utc_display(generated_at_iso)
     license_url = f"https://github.com/{DEFAULT_GITHUB_REPO}/blob/{DEFAULT_GITHUB_REF}/LICENSE"
     page_title = f"{diff_path.name} - Human Changelog"
     code_diff_href = diff_path.with_suffix(".html").name
@@ -1750,7 +1749,7 @@ def render_changelog_html(
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
+        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="{generated_at_iso}" data-iso="{generated_at_iso}">{generated_at}</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
       {error_block}
@@ -1775,7 +1774,7 @@ def render_changelog_html(
           language: "Language",
           theme: "Theme",
           title: "Human Changelog",
-          generated: "Generated (UTC):",
+          generated: "Generated:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
@@ -1795,7 +1794,7 @@ def render_changelog_html(
           language: "Langue",
           theme: "Theme",
           title: "Journal des changements",
-          generated: "Généré (UTC) :",
+          generated: "Généré :",
           back_menu: "Retour au menu principal",
           open_diff: "Ouvrir le diff de code",
           summary_title: "Résumé",
@@ -1815,7 +1814,7 @@ def render_changelog_html(
           language: "Язык",
           theme: "Тема",
           title: "Журнал изменений",
-          generated: "Сгенерировано (UTC):",
+          generated: "Сгенерировано:",
           back_menu: "Назад в главное меню",
           open_diff: "Открыть code diff",
           summary_title: "Сводка",
@@ -1865,10 +1864,24 @@ def render_changelog_html(
         document.documentElement.setAttribute("data-theme", theme);
         themeSelect.value = theme;
       }}
+      function formatLocalDateTime(isoValue) {{
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${{date.getFullYear()}}-${{pad(date.getMonth() + 1)}}-${{pad(date.getDate())}} ${{pad(date.getHours())}}:${{pad(date.getMinutes())}}:${{pad(date.getSeconds())}}`;
+      }}
+      function applyGeneratedTime() {{
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+      }}
       const currentLang = readLang();
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyGeneratedTime();
       langSelect.addEventListener("change", () => {{
         localStorage.setItem(LANG_KEY, langSelect.value);
         applyLanguage(langSelect.value);
@@ -1901,7 +1914,8 @@ def resolve_author_url(docs_dir: Path, override: str | None) -> str:
 
 
 def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_url: str) -> None:
-    generated_at = format_utc_display(now_utc_iso())
+    generated_at_iso = now_utc_iso()
+    generated_at = format_utc_display(generated_at_iso)
     title = f"{diff_path.name} - Diff Viewer"
     changelog_href = diff_path.with_suffix(".changelog.html").name
     license_url = f"https://github.com/{DEFAULT_GITHUB_REPO}/blob/{DEFAULT_GITHUB_REF}/LICENSE"
@@ -2123,7 +2137,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
     </div>
     <div class="head">
       <h1>{html.escape(diff_path.name)}</h1>
-      <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
+      <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="{generated_at_iso}" data-iso="{generated_at_iso}">{generated_at}</time></p>
       <p class="nav">
         <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
         <a href="{html.escape(changelog_href)}" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
@@ -2148,7 +2162,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           theme: "Theme",
           theme_light: "Light",
           theme_dark: "Dark",
-          generated: "Generated (UTC):",
+          generated: "Generated:",
           back_to_menu: "Back to main menu",
           open_changelog: "Open changelog",
           footer_by: "Author",
@@ -2165,7 +2179,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           theme: "Theme",
           theme_light: "Clair",
           theme_dark: "Sombre",
-          generated: "Généré (UTC) :",
+          generated: "Généré :",
           back_to_menu: "Retour au menu principal",
           open_changelog: "Ouvrir le changelog",
           footer_by: "Auteur",
@@ -2182,7 +2196,7 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
           theme: "Тема",
           theme_light: "Светлая",
           theme_dark: "Тёмная",
-          generated: "Сгенерировано (UTC):",
+          generated: "Сгенерировано:",
           back_to_menu: "Назад в главное меню",
           open_changelog: "Открыть changelog",
           footer_by: "Автор",
@@ -2244,10 +2258,26 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
         themeSelect.options[1].textContent = t(lang, "theme_dark");
       }}
 
+      function formatLocalDateTime(isoValue) {{
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${{date.getFullYear()}}-${{pad(date.getMonth() + 1)}}-${{pad(date.getDate())}} ${{pad(date.getHours())}}:${{pad(date.getMinutes())}}:${{pad(date.getSeconds())}}`;
+      }}
+
+      function applyGeneratedTime() {{
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+      }}
+
       const currentLang = readLang();
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyGeneratedTime();
 
       langSelect.addEventListener("change", () => {{
         localStorage.setItem(LANG_KEY, langSelect.value);
@@ -2306,7 +2336,8 @@ def render_docs(
     docs_dir.mkdir(parents=True, exist_ok=True)
     rows = "\n".join(format_event_row(event, idx) for idx, event in enumerate(history))
 
-    generated_at = format_utc_display(now_utc_iso())
+    generated_at_iso = now_utc_iso()
+    generated_at = format_utc_display(generated_at_iso)
     license_url = f"https://github.com/{github_repo}/blob/{github_ref}/LICENSE"
     page = f"""<!DOCTYPE html>
 <html lang="en">
@@ -2496,19 +2527,6 @@ def render_docs(
     h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
     a {{ color: var(--accent); }}
-    .row-remove {{
-      border: 1px solid var(--control-line);
-      border-radius: 6px;
-      background: var(--control-bg);
-      color: var(--control-text);
-      padding: 2px 8px;
-      font-size: 12px;
-      cursor: pointer;
-    }}
-    .row-remove:hover {{
-      border-color: #dc2626;
-      color: #dc2626;
-    }}
     .row-select-wrap {{
       color: var(--muted);
       font-size: 12px;
@@ -2533,9 +2551,6 @@ def render_docs(
       width: 3px;
       border-radius: 3px;
       background: color-mix(in srgb, var(--row-accent, var(--accent)) 76%, #ffffff 24%);
-    }}
-    .row-brief-label {{
-      font-weight: 600;
     }}
     tr.has-brief > td {{
       border-bottom: 0;
@@ -2652,7 +2667,6 @@ def render_docs(
           <button type="button" id="delete-selected" class="control-btn" data-i18n="copy_selected" disabled>Copy selected</button>
           <span id="admin-status" class="admin-status" data-i18n="tools_status_off">Tools: off</span>
         </span>
-        <button type="button" id="reset-hidden" class="control-btn" data-i18n="reset_hidden">Reset hidden</button>
       </div>
       <div class="toolbar-right">
         <a class="telegram-link" href="https://t.me/proxmox_update" target="_blank" rel="noopener noreferrer">
@@ -2670,7 +2684,7 @@ def render_docs(
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
-        <p><span data-i18n="generated">Generated (UTC):</span> {generated_at}</p>
+        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="{generated_at_iso}" data-iso="{generated_at_iso}">{generated_at}</time></p>
       </div>
       <table>
         <thead>
@@ -2698,7 +2712,6 @@ def render_docs(
     (() => {{
       const LANG_KEY = "doxmox-lang";
       const THEME_KEY = "doxmox-theme";
-      const HIDDEN_ROWS_KEY = "doxmox-hidden-events";
       const fallbackLang = "en";
       const GITHUB_REPO = "{html.escape(github_repo)}";
       const GITHUB_ADMIN_WORKFLOW = "{html.escape(github_admin_workflow)}";
@@ -2706,7 +2719,7 @@ def render_docs(
         en: {{
           title: "Proxmox VE Admin Guide Changelog",
           source: "Source:",
-          generated: "Generated (UTC):",
+          generated: "Generated:",
           timestamp: "Timestamp (UTC)",
           hash: "Hash",
           line_delta: "Line Delta",
@@ -2718,8 +2731,6 @@ def render_docs(
           theme: "Theme",
           theme_light: "Light",
           theme_dark: "Dark",
-          reset_hidden: "Reset hidden",
-          hide_entry: "Hide",
           select_entry: "Select",
           copy_selected: "Copy selected",
           open_delete_workflow: "Open delete workflow",
@@ -2732,7 +2743,6 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Some rights reserved.",
           footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
-          quick_summary: "Quick summary:",
           subscribe_telegram: "Subscribe on Telegram",
           language_en: "English",
           language_fr: "French",
@@ -2741,7 +2751,7 @@ def render_docs(
         fr: {{
           title: "Journal des changements du guide Proxmox VE Admin",
           source: "Source :",
-          generated: "Généré (UTC) :",
+          generated: "Généré :",
           timestamp: "Horodatage (UTC)",
           hash: "Hash",
           line_delta: "Delta de lignes",
@@ -2753,8 +2763,6 @@ def render_docs(
           theme: "Theme",
           theme_light: "Clair",
           theme_dark: "Sombre",
-          reset_hidden: "Reinitialiser les caches",
-          hide_entry: "Masquer",
           select_entry: "Selectionner",
           copy_selected: "Copier la selection",
           open_delete_workflow: "Ouvrir le workflow de suppression",
@@ -2767,7 +2775,6 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Certains droits réservés.",
           footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
-          quick_summary: "Résumé court :",
           subscribe_telegram: "S'abonner sur Telegram",
           language_en: "Anglais",
           language_fr: "Français",
@@ -2776,7 +2783,7 @@ def render_docs(
         ru: {{
           title: "Журнал изменений руководства Proxmox VE Admin",
           source: "Источник:",
-          generated: "Сгенерировано (UTC):",
+          generated: "Сгенерировано:",
           timestamp: "Временная метка (UTC)",
           hash: "Хэш",
           line_delta: "Изменение строк",
@@ -2788,8 +2795,6 @@ def render_docs(
           theme: "Тема",
           theme_light: "Светлая",
           theme_dark: "Тёмная",
-          reset_hidden: "Сбросить скрытые",
-          hide_entry: "Скрыть",
           select_entry: "Выбрать",
           copy_selected: "Скопировать выбранное",
           open_delete_workflow: "Открыть workflow удаления",
@@ -2802,7 +2807,6 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Некоторые права защищены.",
           footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
-          quick_summary: "Коротко:",
           subscribe_telegram: "Подписаться в Telegram",
           language_en: "Английский",
           language_fr: "Французский",
@@ -2812,13 +2816,11 @@ def render_docs(
 
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
-      const resetHiddenButton = document.getElementById("reset-hidden");
       const adminPanel = document.getElementById("admin-panel");
       const openWorkflowButton = document.getElementById("open-workflow");
       const deleteSelectedButton = document.getElementById("delete-selected");
       const adminStatus = document.getElementById("admin-status");
       const tableBody = document.querySelector("tbody");
-      const hiddenRows = new Set();
       let adminPanelUnlocked = false;
       let escHitCounter = 0;
       let escTimer = null;
@@ -2883,24 +2885,6 @@ def render_docs(
         }}
       }}
 
-      function loadHiddenRows() {{
-        try {{
-          const raw = localStorage.getItem(HIDDEN_ROWS_KEY);
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return;
-          parsed.forEach((id) => {{
-            if (typeof id === "string" && id) hiddenRows.add(id);
-          }});
-        }} catch {{
-          // ignore invalid localStorage payload
-        }}
-      }}
-
-      function saveHiddenRows() {{
-        localStorage.setItem(HIDDEN_ROWS_KEY, JSON.stringify([...hiddenRows]));
-      }}
-
       function ensureEmptyRow() {{
         let row = tableBody.querySelector('tr[data-empty-row="true"]');
         if (row) return row;
@@ -2915,25 +2899,26 @@ def render_docs(
         return row;
       }}
 
-      function applyHiddenRows() {{
-        const rows = [...tableBody.querySelectorAll("tr[data-event-id]")];
+      function refreshEmptyRow() {{
         const mainRows = [...tableBody.querySelectorAll('tr[data-event-id][data-event-row="main"]')];
-        let visible = 0;
-        rows.forEach((row) => {{
-          const id = row.getAttribute("data-event-id");
-          const isHidden = id && hiddenRows.has(id);
-          row.style.display = isHidden ? "none" : "";
-          if (isHidden) {{
-            const checkbox = row.querySelector(".row-select");
-            if (checkbox) checkbox.checked = false;
-          }}
-        }});
-        mainRows.forEach((row) => {{
-          if (row.style.display !== "none") visible += 1;
-        }});
         const emptyRow = ensureEmptyRow();
-        emptyRow.style.display = visible === 0 ? "" : "none";
+        emptyRow.style.display = mainRows.length === 0 ? "" : "none";
         updateBatchDeleteState();
+      }}
+
+      function formatLocalDateTime(isoValue) {{
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${{date.getFullYear()}}-${{pad(date.getMonth() + 1)}}-${{pad(date.getDate())}} ${{pad(date.getHours())}}:${{pad(date.getMinutes())}}:${{pad(date.getSeconds())}}`;
+      }}
+
+      function applyGeneratedTime() {{
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
       }}
 
       function readLang() {{
@@ -2981,28 +2966,20 @@ def render_docs(
         themeSelect.options[1].textContent = t(lang, "theme_dark");
         document.querySelectorAll(".row-brief").forEach((node) => {{
           if (!(node instanceof HTMLElement)) return;
-          const labelNode = node.querySelector(".row-brief-label");
           const textNode = node.querySelector(".row-brief-text");
           if (!(textNode instanceof HTMLElement)) return;
           const value = node.getAttribute(`data-brief-${{lang}}`) || node.getAttribute("data-brief-en") || "";
           if (value) textNode.textContent = value;
-          if (labelNode instanceof HTMLElement) {{
-            const hasLocalized =
-              lang === "en" ||
-              (lang === "fr" && node.getAttribute("data-brief-fr-localized") === "1") ||
-              (lang === "ru" && node.getAttribute("data-brief-ru-localized") === "1");
-            labelNode.textContent = hasLocalized ? t(lang, "quick_summary") : t("en", "quick_summary");
-          }}
         }});
       }}
 
       const currentLang = readLang();
       const currentTheme = readTheme();
-      loadHiddenRows();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
+      applyGeneratedTime();
       setToolsMode(false);
-      applyHiddenRows();
+      refreshEmptyRow();
 
       document.addEventListener("keydown", (event) => {{
         if (event.key !== "Escape") return;
@@ -3023,36 +3000,11 @@ def render_docs(
         }}
       }});
 
-      tableBody.addEventListener("click", (event) => {{
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-        const button = target.closest('button[data-action]');
-        if (!button) return;
-        const action = button.getAttribute("data-action");
-        const row = button.closest("tr[data-event-id]");
-        if (!row) return;
-
-        if (action === "hide-row") {{
-          const id = row.getAttribute("data-event-id");
-          if (!id) return;
-          hiddenRows.add(id);
-          saveHiddenRows();
-          applyHiddenRows();
-          return;
-        }}
-      }});
-
       tableBody.addEventListener("change", (event) => {{
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
         if (!target.matches(".row-select")) return;
         updateBatchDeleteState();
-      }});
-
-      resetHiddenButton.addEventListener("click", () => {{
-        hiddenRows.clear();
-        localStorage.removeItem(HIDDEN_ROWS_KEY);
-        applyHiddenRows();
       }});
 
       openWorkflowButton.addEventListener("click", () => {{
