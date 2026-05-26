@@ -466,18 +466,19 @@
       "status": "ok",
       "generated_at": "2026-05-25T14:37:03Z",
       "analysis_model": "@cf/openai/gpt-oss-120b",
-      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "translation_model": "@cf/openai/gpt-oss-120b",
       "embedding_model": "@cf/baai/bge-m3",
       "translation_status": {
         "required": [
           "ru",
           "fr"
         ],
-        "present": [],
-        "missing": [
+        "present": [
           "fr",
           "ru"
-        ]
+        ],
+        "missing": [],
+        "errors": {}
       },
       "summary": {
         "en": {
@@ -563,15 +564,183 @@
               "severity": "low"
             }
           ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.1.4 вводит несколько обновлений документации и функций, которые улучшают безопасность, работу с хранилищем, сетевые возможности и планирование высокой доступности. Изменения охватывают новые рекомендации по распределению сертификата кластера (CA), подробные правила шифрования ZFS, добавленную информацию о контроллере WireGuard и EVPN, а также улучшения Cluster Resource Scheduler (CRS). Операторы получат новые флаги для регенерации токенов и присоединения к кластеру по SSH, а новички выиграют от более ясных объяснений сетевых конструкций, таких как Prefix Lists и Route Maps.",
+          "professional_assessment": "Выпуск добавляет существенные улучшения безопасности и HA, требующие внимания при планировании обновления. Принудительное шифрование ZFS и параметры балансировщика нагрузки CRS могут влиять на размещение рабочих нагрузок и должны быть проверены перед вводом в эксплуатацию. Новая документация по EVEVPN, WireGuard и вариантам хранения idmap расширяет набор функций, предоставляя большую гибкость, но также увеличивая сложность конфигурации. В целом обновление является положительным для стабильности и безопасности, при условии, что операторы проверят новые настройки в тестовой среде.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, эта версия предоставляет более понятные шаги по настройке безопасного кластера, объясняет, как защитить диски ZFS с помощью шифрования, и предлагает легко читаемые руководства по продвинутым сетевым технологиям, таким как WireGuard и EVPN. Также она объясняет, как система определяет, где запускать ваши виртуальные машины, чтобы ваши сервисы работали без сбоев.",
+          "changes": [
+            {
+              "title": "Обновление версии до 9.1.4",
+              "details": "Документация теперь отражает новую версию Proxmox VE 9.1.4 и обновляет метку времени последнего изменения.",
+              "impact": "Обеспечивает, что все ссылки указывают на правильную версию, избегая путаницы при поддержке или процессах обновления.",
+              "recommended_action": "Убедитесь, что ваша среда соответствует задокументированной версии; функциональные изменения не требуются.",
+              "severity": "low"
+            },
+            {
+              "title": "Ручное распределение файла CA кластера",
+              "details": "Добавлен абзац, описывающий, как вручную скопировать сертификат CA кластера на новые узлы, поскольку для этой операции нет API‑endpoint.",
+              "impact": "Операторы должны обеспечить наличие файла CA на каждом узле для поддержания безопасной межузловой связи.",
+              "recommended_action": "Скопируйте файл CA в /etc/pve/cluster/ca.pem на каждом новом узле перед присоединением к кластеру.",
+              "severity": "medium"
+            },
+            {
+              "title": "pvecm add — добавить аутентификацию API по умолчанию и флаг --use_ssh",
+              "details": "Команда pvecm add теперь по умолчанию использует аутентификацию через API, устраняя необходимость в паролях SSH. Новый флаг --use_ssh позволяет выполнять устаревшие присоединения по SSH.",
+              "impact": "Упрощает расширение кластера, одновременно поддерживая старые рабочие процессы.",
+              "recommended_action": "Используйте команду pvecm add по умолчанию для новых узлов; добавляйте --use_ssh только при необходимости для совместимости.",
+              "severity": "medium"
+            },
+            {
+              "title": "Документация по шифрованию ZFS",
+              "details": "Вводит отдельный подраздел ZFS Encryption, охватывающий encryption_root, ограничения миграции и требование, чтобы все хранилища были зашифрованы при использовании этой функции.",
+              "impact": "Предоставляет чёткие рекомендации по защите данных в состоянии покоя; неправильная настройка может помешать миграции ВМ или резервному копированию.",
+              "recommended_action": "Проверьте настройки шифрования перед включением шифрования ZFS и протестируйте миграцию зашифрованных томов.",
+              "severity": "high"
+            },
+            {
+              "title": "Опция idmap добавлена в определения хранилищ.",
+              "details": "Параметр idmap теперь задокументирован для различных типов хранилищ, позволяя настраивать сопоставление ID для каждого монтирования.",
+              "impact": "Обеспечивает более тонкий контроль над трансляцией UID/GID для контейнеров и ВМ, улучшая совместимость со средами с разными пользователями.",
+              "recommended_action": "Добавьте настройки idmap там, где это необходимо в файле storage.cfg; проверьте доступ контейнера после изменений.",
+              "severity": "medium"
+            },
+            {
+              "title": "Улучшения документации контроллера EVPN",
+              "details": "Разделы переименованы в Primary Controller и Additional Controllers, добавлены требования к ASN и введены новые поля (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).",
+              "impact": "Уточняет многоконтроллерные конфигурации и настройку BGP, снижая риск неправильной конфигурации.",
+              "recommended_action": "Следуйте обновлённому руководству при настройке EVPN; убедитесь, что все контроллеры используют один и тот же ASN.",
+              "severity": "medium"
+            },
+            {
+              "title": "Добавлено руководство по конфигурации WireGuard.",
+              "details": "Полная документация по структуре WireGuard, ролям узлов, интерфейсам, пирам, генерации маршрутов, обработке ключей и необходимым пакетам.",
+              "impact": "Расширяет возможности безопасного overlay networking для операторов.",
+              "recommended_action": "Прочтите новый раздел WireGuard перед развертыванием; установите пакет wireguard на всех узлах.",
+              "severity": "low"
+            },
+            {
+              "title": "Документация Prefix Lists и Route Maps",
+              "details": "Новые разделы объясняют синтаксис, номера последовательностей, действия, квалификаторы ge/le, зарезервированные имена и предоставляют примеры использования.",
+              "impact": "Помогает операторам создавать точные политики маршрутизации в SDN.",
+              "recommended_action": "Используйте примеры в качестве шаблонов при создании собственных списков префиксов и карт маршрутизации.",
+              "severity": "low"
+            },
+            {
+              "title": "Режим планировщика ресурсов кластера (CRS) и параметры балансировщика нагрузки",
+              "details": "Добавлен режим планирования CRS (basic, static‑load, dynamic‑load) и детальные настройки балансировщика нагрузки, такие как порог дисбаланса, длительность удержания и метод ребалансировки.",
+              "impact": "Непосредственно влияет на размещение ресурсов HA и решения о миграции; неверные значения могут привести к ненужным миграциям или недостатку ресурсов.",
+              "recommended_action": "Проверьте и скорректируйте настройки CRS в Datacenter → Options, чтобы они соответствовали характеристикам вашей нагрузки; протестируйте в тестовом кластере.",
+              "severity": "high"
+            },
+            {
+              "title": "Флаг регенерации токена API (--regenerate)",
+              "details": "Добавлен новый флаг для команды Update API token, который создаёт новый секрет и аннулирует старый; новый токен позже нельзя получить.",
+              "impact": "Улучшает безопасность, позволяя выполнять ротацию токенов, но требует тщательного обращения, чтобы избежать потери доступа.",
+              "recommended_action": "Сразу сохраните сгенерированный заново токен; обновите все скрипты и сервисы, использующие токен.",
+              "severity": "medium"
+            },
+            {
+              "title": "Обновление regex для Serial device",
+              "details": "Шаблон устройства для параметров --serial изменён с «/dev/.+» на «/dev/[^,]+», чтобы предотвратить принятие запятых в путях к устройствам.",
+              "impact": "Уменьшает ошибки разбора при указании последовательных устройств.",
+              "recommended_action": "Ensure serial device paths do not contain commas; no further action needed for existing configurations.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.1.4 introduit plusieurs mises à jour de la documentation et des fonctionnalités qui améliorent la sécurité, la gestion du stockage, le réseau et la planification de haute disponibilité. Les changements vont d’une nouvelle orientation sur la distribution du CA du cluster à des règles détaillées de chiffrement ZFS, en passant par l’ajout d’informations sur WireGuard et le contrôleur EVPN, ainsi que des améliorations du Cluster Resource Scheduler (CRS). Les opérateurs trouveront de nouveaux indicateurs pour la régénération de jetons et les jointures de cluster basées sur SSH, tandis que les nouveaux utilisateurs bénéficieront d’explications plus claires des constructions réseau telles que les listes de préfixes et les cartes de routage.",
+          "professional_assessment": "La version ajoute des améliorations substantielles de sécurité et de HA qui nécessitent une attention particulière lors de la planification de la mise à jour. L'application du chiffrement ZFS et les paramètres du load‑balancer CRS peuvent impacter le placement des charges de travail et doivent être examinés avant le déploiement en production. La nouvelle documentation sur EVEVPN, WireGuard et les options de stockage idmap élargit le jeu de fonctionnalités, offrant plus de flexibilité mais augmentant également la complexité de la configuration. Dans l’ensemble, la mise à jour est globalement positive pour la stabilité et la sécurité, à condition que les opérateurs valident les nouveaux paramètres dans un environnement de test.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, cette version vous fournit des étapes plus claires pour configurer un cluster sécurisé, explique comment protéger les disques ZFS avec le chiffrement, et propose des guides faciles à lire pour le réseau avancé tel que WireGuard et EVPN. Elle indique également comment le système détermine où exécuter vos machines virtuelles, afin que vous puissiez maintenir vos services en bon fonctionnement.",
+          "changes": [
+            {
+              "title": "Mise à jour de version vers 9.1.4",
+              "details": "La documentation reflète désormais la nouvelle version 9.1.4 de Proxmox VE et met à jour l’horodatage de la dernière modification.",
+              "impact": "Garantit que toutes les références pointent vers la version correcte, évitant la confusion lors des processus de support ou de mise à niveau.",
+              "recommended_action": "Vérifiez que votre environnement correspond à la version documentée ; aucune modification fonctionnelle n’est requise.",
+              "severity": "low"
+            },
+            {
+              "title": "Distribution manuelle du fichier CA du cluster",
+              "details": "Ajout d'un paragraphe décrivant comment copier manuellement le certificat CA du cluster vers les nouveaux nœuds, puisqu'il n'existe aucun point de terminaison API pour cette opération.",
+              "impact": "Les opérateurs doivent s'assurer que le fichier CA est présent sur chaque nœud afin de maintenir une communication inter‑nœuds sécurisée.",
+              "recommended_action": "Copiez le fichier CA dans /etc/pve/cluster/ca.pem sur chaque nouveau nœud avant de rejoindre le cluster.",
+              "severity": "medium"
+            },
+            {
+              "title": "pvecm add authentification API par défaut et l'option --use_ssh",
+              "details": "La commande pvecm add utilise désormais par défaut l'authentification basée sur l'API, supprimant ainsi le besoin de mots de passe SSH. Un nouveau drapeau --use_ssh permet les jointures SSH legacy.",
+              "impact": "Simplifie l'extension du cluster tout en continuant à prendre en charge les anciens flux de travail.",
+              "recommended_action": "Utilisez la commande pvecm add par défaut pour les nouveaux nœuds ; ajoutez --use_ssh uniquement lorsque cela est nécessaire pour la compatibilité.",
+              "severity": "medium"
+            },
+            {
+              "title": "Documentation du chiffrement ZFS",
+              "details": "Introduit une sous-section dédiée au chiffrement ZFS couvrant encryption_root, les contraintes de migration et l'exigence que tous les stockages soient chiffrés lors de l'utilisation de cette fonctionnalité.",
+              "impact": "Fournit des directives claires pour protéger les données au repos ; une mauvaise configuration pourrait empêcher la migration ou la sauvegarde des VM.",
+              "recommended_action": "Review the encryption settings before enabling ZFS encryption and test migration of encrypted volumes.",
+              "severity": "high"
+            },
+            {
+              "title": "option idmap ajoutée aux définitions de stockage",
+              "details": "Le paramètre idmap est désormais documenté pour différents types de stockage, permettant une configuration de mappage d’ID par montage.",
+              "impact": "Permet un contrôle plus fin de la traduction UID/GID pour les conteneurs et les VM, améliorant la compatibilité avec les environnements à utilisateurs mixtes.",
+              "recommended_action": "Ajoutez les paramètres idmap où cela est nécessaire dans storage.cfg ; vérifiez l'accès aux conteneurs après les modifications.",
+              "severity": "medium"
+            },
+            {
+              "title": "Améliorations de la documentation du contrôleur EVPN",
+              "details": "Sections renommées en Primary Controller et Additional Controllers, exigences ASN ajoutées, et nouveaux champs introduits (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).",
+              "impact": "Clarifie les configurations multi‑contrôleurs et la configuration BGP, réduisant le risque de mauvaise configuration.",
+              "recommended_action": "Suivez le guide mis à jour lors de la configuration d'EVPN ; assurez-vous que tous les contrôleurs partagent le même ASN.",
+              "severity": "medium"
+            },
+            {
+              "title": "Guide de configuration WireGuard ajouté",
+              "details": "Documentation complète pour le tissu WireGuard, les rôles des nœuds, les interfaces, les pairs, la génération de routes, la gestion des clés et les paquets requis.",
+              "impact": "Étend les options de réseau superposé sécurisé pour les opérateurs.",
+              "recommended_action": "Lisez la nouvelle section WireGuard avant le déploiement ; installez le package wireguard sur tous les nœuds.",
+              "severity": "low"
+            },
+            {
+              "title": "Documentation des listes de préfixes et des cartes de routage",
+              "details": "Les nouvelles sections expliquent la syntaxe, les numéros de séquence, les actions, les qualificateurs ge/le, les noms réservés et fournissent des exemples d’utilisation.",
+              "impact": "Aide les opérateurs à créer des politiques de routage précises au sein du SDN.",
+              "recommended_action": "Utilisez les exemples comme modèles lors de la création de vos propres listes de préfixes et cartes de routage.",
+              "severity": "low"
+            },
+            {
+              "title": "Mode du Cluster Resource Scheduler (CRS) et paramètres du load‑balancer",
+              "details": "Ajout du mode de planification CRS (basic, static‑load, dynamic‑load) et des paramètres détaillés de l’équilibreur de charge tels que le seuil de déséquilibre, la durée de maintien et la méthode de rééquilibrage.",
+              "impact": "Influence directement le placement des ressources HA et les décisions de migration ; des valeurs incorrectes peuvent entraîner des migrations inutiles ou une pénurie de ressources.",
+              "recommended_action": "Examinez et ajustez les paramètres CRS dans Datacenter → Options pour correspondre aux caractéristiques de votre charge de travail ; testez dans un cluster de préproduction.",
+              "severity": "high"
+            },
+            {
+              "title": "drapeau de régénération du token API (--regenerate)",
+              "details": "Introduit une nouvelle option pour la commande Update API token qui crée un nouveau secret et invalide l'ancien ; le nouveau token ne peut pas être récupéré ultérieurement.",
+              "impact": "Améliore la sécurité en permettant la rotation des jetons, mais nécessite une manipulation soigneuse pour éviter la perte d'accès.",
+              "recommended_action": "Enregistrez immédiatement le jeton régénéré ; mettez à jour tous les scripts ou services qui utilisent le jeton.",
+              "severity": "medium"
+            },
+            {
+              "title": "Mise à jour du regex du périphérique série",
+              "details": "Le motif d’appareil pour les options --serial a changé de « /dev/.+ » à « /dev/[^,]+ » afin d’empêcher les virgules dans les chemins d’appareil d’être acceptées.",
+              "impact": "Réduit les erreurs d'analyse lors de la spécification des périphériques série.",
+              "recommended_action": "Conservez les termes Proxmox précis. Préservez le sens exactement. Ne sortez que le texte traduit, sans JSON, markdown ni commentaire. Assurez-vous que les chemins des périphériques série ne contiennent pas de virgules ; aucune action supplémentaire n’est requise pour les configurations existantes.",
+              "severity": "low"
+            }
+          ]
         }
       },
       "summary_text": {
         "en": "1. Version bump to 9.1.4\n   - Documentation now reflects the new Proxmox VE version 9.1.4 and updates the last‑modified timestamp.\n   - Impact: Ensures all references point to the correct version, avoiding confusion during support or upgrade processes.\n   - Action: Verify that your environment matches the documented version; no functional changes required.\n   - Severity: low\n2. Manual distribution of the cluster CA file\n   - Added a paragraph describing how to copy the cluster CA certificate to new nodes manually, since there is no API endpoint for this operation.\n   - Impact: Operators must ensure the CA file is present on each node to maintain secure inter‑node communication.\n   - Action: Copy the CA file to /etc/pve/cluster/ca.pem on each new node before joining the cluster.\n   - Severity: medium\n3. pvecm add default API authentication and --use_ssh flag\n   - The pvecm add command now defaults to API‑based authentication, removing the need for SSH passwords. A new --use_ssh flag allows legacy SSH joins.\n   - Impact: Simplifies cluster expansion while still supporting older workflows.\n   - Action: Use the default pvecm add command for new nodes; add --use_ssh only when required for compatibility.\n   - Severity: medium\n4. ZFS encryption documentation\n   - Introduces a dedicated ZFS Encryption subsection covering encryption_root, migration constraints, and the requirement that all storages be encrypted when using this feature.\n   - Impact: Provides clear guidance to protect data at rest; misconfiguration could prevent VM migration or backup.\n   - Action: Review the encryption settings before enabling ZFS encryption and test migration of encrypted volumes.\n   - Severity: high\n5. idmap option added to storage definitions\n   - The idmap parameter is now documented for various storage types, allowing per‑mount ID mapping configuration.\n   - Impact: Enables finer control over UID/GID translation for containers and VMs, improving compatibility with mixed‑user environments.\n   - Action: Add idmap settings where needed in storage.cfg; verify container access after changes.\n   - Severity: medium\n6. EVPN controller documentation enhancements\n   - Renamed sections to Primary Controller and Additional Controllers, added ASN requirements, and introduced new fields (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).\n   - Impact: Clarifies multi‑controller setups and BGP configuration, reducing misconfiguration risk.\n   - Action: Follow the updated guide when configuring EVPN; ensure all controllers share the same ASN.\n   - Severity: medium\n7. WireGuard configuration guide added\n   - Comprehensive documentation for WireGuard fabric, node roles, interfaces, peers, route generation, key handling, and required packages.\n   - Impact: Expands secure overlay networking options for operators.\n   - Action: Read the new WireGuard section before deploying; install the wireguard package on all nodes.\n   - Severity: low\n8. Prefix Lists and Route Maps documentation\n   - New sections explain syntax, sequence numbers, actions, ge/le qualifiers, reserved names, and provide usage examples.\n   - Impact: Helps operators create precise routing policies within SDN.\n   - Action: Use the examples as templates when building your own prefix lists and route maps.\n   - Severity: low\n9. Cluster Resource Scheduler (CRS) mode and load‑balancer parameters\n   - Added CRS Scheduling Mode (basic, static‑load, dynamic‑load) and detailed load‑balancer settings such as imbalance threshold, hold duration, and rebalancing method.\n   - Impact: Directly influences HA resource placement and migration decisions; incorrect values can cause unnecessary migrations or resource starvation.\n   - Action: Review and adjust CRS settings in Datacenter → Options to match your workload characteristics; test in a staging cluster.\n   - Severity: high\n10. API token regeneration flag (--regenerate)\n   - Introduces a new flag for the Update API token command that creates a new secret and invalidates the old one; the new token cannot be retrieved later.\n   - Impact: Improves security by allowing token rotation, but requires careful handling to avoid loss of access.\n   - Action: Save the regenerated token immediately; update any scripts or services that use the token.\n   - Severity: medium\n11. Serial device regex update\n   - The device pattern for --serial options changed from \"/dev/.+\" to \"/dev/[^,]+\" to prevent commas in device paths from being accepted.\n   - Impact: Reduces parsing errors when specifying serial devices.\n   - Action: Ensure serial device paths do not contain commas; no further action needed for existing configurations.\n   - Severity: low",
-        "ru": "",
-        "fr": ""
+        "ru": "1. Обновление версии до 9.1.4\n   - Документация теперь отражает новую версию Proxmox VE 9.1.4 и обновляет метку времени последнего изменения.\n   - Impact: Обеспечивает, что все ссылки указывают на правильную версию, избегая путаницы при поддержке или процессах обновления.\n   - Action: Убедитесь, что ваша среда соответствует задокументированной версии; функциональные изменения не требуются.\n   - Severity: low\n2. Ручное распределение файла CA кластера\n   - Добавлен абзац, описывающий, как вручную скопировать сертификат CA кластера на новые узлы, поскольку для этой операции нет API‑endpoint.\n   - Impact: Операторы должны обеспечить наличие файла CA на каждом узле для поддержания безопасной межузловой связи.\n   - Action: Скопируйте файл CA в /etc/pve/cluster/ca.pem на каждом новом узле перед присоединением к кластеру.\n   - Severity: medium\n3. pvecm add — добавить аутентификацию API по умолчанию и флаг --use_ssh\n   - Команда pvecm add теперь по умолчанию использует аутентификацию через API, устраняя необходимость в паролях SSH. Новый флаг --use_ssh позволяет выполнять устаревшие присоединения по SSH.\n   - Impact: Упрощает расширение кластера, одновременно поддерживая старые рабочие процессы.\n   - Action: Используйте команду pvecm add по умолчанию для новых узлов; добавляйте --use_ssh только при необходимости для совместимости.\n   - Severity: medium\n4. Документация по шифрованию ZFS\n   - Вводит отдельный подраздел ZFS Encryption, охватывающий encryption_root, ограничения миграции и требование, чтобы все хранилища были зашифрованы при использовании этой функции.\n   - Impact: Предоставляет чёткие рекомендации по защите данных в состоянии покоя; неправильная настройка может помешать миграции ВМ или резервному копированию.\n   - Action: Проверьте настройки шифрования перед включением шифрования ZFS и протестируйте миграцию зашифрованных томов.\n   - Severity: high\n5. Опция idmap добавлена в определения хранилищ.\n   - Параметр idmap теперь задокументирован для различных типов хранилищ, позволяя настраивать сопоставление ID для каждого монтирования.\n   - Impact: Обеспечивает более тонкий контроль над трансляцией UID/GID для контейнеров и ВМ, улучшая совместимость со средами с разными пользователями.\n   - Action: Добавьте настройки idmap там, где это необходимо в файле storage.cfg; проверьте доступ контейнера после изменений.\n   - Severity: medium\n6. Улучшения документации контроллера EVPN\n   - Разделы переименованы в Primary Controller и Additional Controllers, добавлены требования к ASN и введены новые поля (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).\n   - Impact: Уточняет многоконтроллерные конфигурации и настройку BGP, снижая риск неправильной конфигурации.\n   - Action: Следуйте обновлённому руководству при настройке EVPN; убедитесь, что все контроллеры используют один и тот же ASN.\n   - Severity: medium\n7. Добавлено руководство по конфигурации WireGuard.\n   - Полная документация по структуре WireGuard, ролям узлов, интерфейсам, пирам, генерации маршрутов, обработке ключей и необходимым пакетам.\n   - Impact: Расширяет возможности безопасного overlay networking для операторов.\n   - Action: Прочтите новый раздел WireGuard перед развертыванием; установите пакет wireguard на всех узлах.\n   - Severity: low\n8. Документация Prefix Lists и Route Maps\n   - Новые разделы объясняют синтаксис, номера последовательностей, действия, квалификаторы ge/le, зарезервированные имена и предоставляют примеры использования.\n   - Impact: Помогает операторам создавать точные политики маршрутизации в SDN.\n   - Action: Используйте примеры в качестве шаблонов при создании собственных списков префиксов и карт маршрутизации.\n   - Severity: low\n9. Режим планировщика ресурсов кластера (CRS) и параметры балансировщика нагрузки\n   - Добавлен режим планирования CRS (basic, static‑load, dynamic‑load) и детальные настройки балансировщика нагрузки, такие как порог дисбаланса, длительность удержания и метод ребалансировки.\n   - Impact: Непосредственно влияет на размещение ресурсов HA и решения о миграции; неверные значения могут привести к ненужным миграциям или недостатку ресурсов.\n   - Action: Проверьте и скорректируйте настройки CRS в Datacenter → Options, чтобы они соответствовали характеристикам вашей нагрузки; протестируйте в тестовом кластере.\n   - Severity: high\n10. Флаг регенерации токена API (--regenerate)\n   - Добавлен новый флаг для команды Update API token, который создаёт новый секрет и аннулирует старый; новый токен позже нельзя получить.\n   - Impact: Улучшает безопасность, позволяя выполнять ротацию токенов, но требует тщательного обращения, чтобы избежать потери доступа.\n   - Action: Сразу сохраните сгенерированный заново токен; обновите все скрипты и сервисы, использующие токен.\n   - Severity: medium\n11. Обновление regex для Serial device\n   - Шаблон устройства для параметров --serial изменён с «/dev/.+» на «/dev/[^,]+», чтобы предотвратить принятие запятых в путях к устройствам.\n   - Impact: Уменьшает ошибки разбора при указании последовательных устройств.\n   - Action: Ensure serial device paths do not contain commas; no further action needed for existing configurations.\n   - Severity: low",
+        "fr": "1. Mise à jour de version vers 9.1.4\n   - La documentation reflète désormais la nouvelle version 9.1.4 de Proxmox VE et met à jour l’horodatage de la dernière modification.\n   - Impact: Garantit que toutes les références pointent vers la version correcte, évitant la confusion lors des processus de support ou de mise à niveau.\n   - Action: Vérifiez que votre environnement correspond à la version documentée ; aucune modification fonctionnelle n’est requise.\n   - Severity: low\n2. Distribution manuelle du fichier CA du cluster\n   - Ajout d'un paragraphe décrivant comment copier manuellement le certificat CA du cluster vers les nouveaux nœuds, puisqu'il n'existe aucun point de terminaison API pour cette opération.\n   - Impact: Les opérateurs doivent s'assurer que le fichier CA est présent sur chaque nœud afin de maintenir une communication inter‑nœuds sécurisée.\n   - Action: Copiez le fichier CA dans /etc/pve/cluster/ca.pem sur chaque nouveau nœud avant de rejoindre le cluster.\n   - Severity: medium\n3. pvecm add authentification API par défaut et l'option --use_ssh\n   - La commande pvecm add utilise désormais par défaut l'authentification basée sur l'API, supprimant ainsi le besoin de mots de passe SSH. Un nouveau drapeau --use_ssh permet les jointures SSH legacy.\n   - Impact: Simplifie l'extension du cluster tout en continuant à prendre en charge les anciens flux de travail.\n   - Action: Utilisez la commande pvecm add par défaut pour les nouveaux nœuds ; ajoutez --use_ssh uniquement lorsque cela est nécessaire pour la compatibilité.\n   - Severity: medium\n4. Documentation du chiffrement ZFS\n   - Introduit une sous-section dédiée au chiffrement ZFS couvrant encryption_root, les contraintes de migration et l'exigence que tous les stockages soient chiffrés lors de l'utilisation de cette fonctionnalité.\n   - Impact: Fournit des directives claires pour protéger les données au repos ; une mauvaise configuration pourrait empêcher la migration ou la sauvegarde des VM.\n   - Action: Review the encryption settings before enabling ZFS encryption and test migration of encrypted volumes.\n   - Severity: high\n5. option idmap ajoutée aux définitions de stockage\n   - Le paramètre idmap est désormais documenté pour différents types de stockage, permettant une configuration de mappage d’ID par montage.\n   - Impact: Permet un contrôle plus fin de la traduction UID/GID pour les conteneurs et les VM, améliorant la compatibilité avec les environnements à utilisateurs mixtes.\n   - Action: Ajoutez les paramètres idmap où cela est nécessaire dans storage.cfg ; vérifiez l'accès aux conteneurs après les modifications.\n   - Severity: medium\n6. Améliorations de la documentation du contrôleur EVPN\n   - Sections renommées en Primary Controller et Additional Controllers, exigences ASN ajoutées, et nouveaux champs introduits (Nodes, Peer Group Name, BGP Mode, ebgp‑multihop).\n   - Impact: Clarifie les configurations multi‑contrôleurs et la configuration BGP, réduisant le risque de mauvaise configuration.\n   - Action: Suivez le guide mis à jour lors de la configuration d'EVPN ; assurez-vous que tous les contrôleurs partagent le même ASN.\n   - Severity: medium\n7. Guide de configuration WireGuard ajouté\n   - Documentation complète pour le tissu WireGuard, les rôles des nœuds, les interfaces, les pairs, la génération de routes, la gestion des clés et les paquets requis.\n   - Impact: Étend les options de réseau superposé sécurisé pour les opérateurs.\n   - Action: Lisez la nouvelle section WireGuard avant le déploiement ; installez le package wireguard sur tous les nœuds.\n   - Severity: low\n8. Documentation des listes de préfixes et des cartes de routage\n   - Les nouvelles sections expliquent la syntaxe, les numéros de séquence, les actions, les qualificateurs ge/le, les noms réservés et fournissent des exemples d’utilisation.\n   - Impact: Aide les opérateurs à créer des politiques de routage précises au sein du SDN.\n   - Action: Utilisez les exemples comme modèles lors de la création de vos propres listes de préfixes et cartes de routage.\n   - Severity: low\n9. Mode du Cluster Resource Scheduler (CRS) et paramètres du load‑balancer\n   - Ajout du mode de planification CRS (basic, static‑load, dynamic‑load) et des paramètres détaillés de l’équilibreur de charge tels que le seuil de déséquilibre, la durée de maintien et la méthode de rééquilibrage.\n   - Impact: Influence directement le placement des ressources HA et les décisions de migration ; des valeurs incorrectes peuvent entraîner des migrations inutiles ou une pénurie de ressources.\n   - Action: Examinez et ajustez les paramètres CRS dans Datacenter → Options pour correspondre aux caractéristiques de votre charge de travail ; testez dans un cluster de préproduction.\n   - Severity: high\n10. drapeau de régénération du token API (--regenerate)\n   - Introduit une nouvelle option pour la commande Update API token qui crée un nouveau secret et invalide l'ancien ; le nouveau token ne peut pas être récupéré ultérieurement.\n   - Impact: Améliore la sécurité en permettant la rotation des jetons, mais nécessite une manipulation soigneuse pour éviter la perte d'accès.\n   - Action: Enregistrez immédiatement le jeton régénéré ; mettez à jour tous les scripts ou services qui utilisent le jeton.\n   - Severity: medium\n11. Mise à jour du regex du périphérique série\n   - Le motif d’appareil pour les options --serial a changé de « /dev/.+ » à « /dev/[^,]+ » afin d’empêcher les virgules dans les chemins d’appareil d’être acceptées.\n   - Impact: Réduit les erreurs d'analyse lors de la spécification des périphériques série.\n   - Action: Conservez les termes Proxmox précis. Préservez le sens exactement. Ne sortez que le texte traduit, sans JSON, markdown ni commentaire. Assurez-vous que les chemins des périphériques série ne contiennent pas de virgules ; aucune action supplémentaire n’est requise pour les configurations existantes.\n   - Severity: low"
       },
-      "translation_error": "Missing required translations: fr, ru. Re-run translation or verify translation model availability.",
-      "translation_attempt_at": "2026-05-26T10:29:37Z"
+      "translation_attempt_at": "2026-05-26T10:29:37Z",
+      "translation_generated_at": "2026-05-26T19:25:35Z"
     }
   },
   {
