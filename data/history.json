@@ -222,6 +222,12 @@
       },
       "translation_attempt_at": "2026-05-26T10:29:36Z",
       "translation_generated_at": "2026-05-26T17:47:23Z"
+    },
+    "brief": {
+      "text": "Proxmox VE 9.2.1: {\"id\": \"chatcmpl-fdd9a369251d44b3b2f22193d8bde9e8\", \"object\": \"chat.completion\", \"created\": 1779817895, \"model\": \"@cf/openai/gpt-oss-20b\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null...",
+      "version": "Proxmox VE 9.2.1",
+      "model": "@cf/openai/gpt-oss-20b",
+      "generated_at": "2026-05-26T17:51:36Z"
     }
   },
   {
