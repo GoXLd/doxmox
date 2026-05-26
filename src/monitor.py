@@ -327,6 +327,37 @@ def workers_ai_run(
 
 
 def workers_ai_extract_text(payload: dict[str, Any]) -> str:
+    def content_to_text(content: Any) -> str | None:
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            parts: list[str] = []
+            for item in content:
+                if isinstance(item, str):
+                    parts.append(item)
+                    continue
+                if isinstance(item, dict):
+                    text_value = item.get("text")
+                    if isinstance(text_value, str):
+                        parts.append(text_value)
+                        continue
+                    # Some providers wrap text deeper, e.g. {"type":"output_text","content":"..."}
+                    nested = item.get("content")
+                    if isinstance(nested, str):
+                        parts.append(nested)
+            joined = "\n".join(part.strip() for part in parts if part and part.strip()).strip()
+            return joined or None
+        if isinstance(content, dict):
+            text_value = content.get("text")
+            if isinstance(text_value, str):
+                return text_value
+            nested = content.get("content")
+            if isinstance(nested, str):
+                return nested
+            if isinstance(nested, list):
+                return content_to_text(nested)
+        return None
+
     result = payload.get("result")
     if isinstance(result, str):
         return result
@@ -334,6 +365,9 @@ def workers_ai_extract_text(payload: dict[str, Any]) -> str:
         response = result.get("response")
         if isinstance(response, str):
             return response
+        response_text = content_to_text(response)
+        if response_text:
+            return response_text
         if isinstance(response, list):
             return "\n".join(str(item) for item in response)
         output_text = result.get("output_text")
@@ -346,14 +380,18 @@ def workers_ai_extract_text(payload: dict[str, Any]) -> str:
                 message = first.get("message")
                 if isinstance(message, dict):
                     content = message.get("content")
-                    if isinstance(content, str):
-                        return content
+                    content_text = content_to_text(content)
+                    if content_text:
+                        return content_text
                 text = first.get("text")
                 if isinstance(text, str):
                     return text
     response = payload.get("response")
     if isinstance(response, str):
         return response
+    payload_response_text = content_to_text(response)
+    if payload_response_text:
+        return payload_response_text
     return json.dumps(payload, ensure_ascii=False)
 
 
@@ -779,7 +817,8 @@ def translate_single_language_summary(
     parsed = parse_json_payload(translated)
     normalized = normalize_summary_payload(parsed)
     if not normalized.get("overview"):
-        raise RuntimeError(f"Invalid {language} translation payload: missing overview")
+        preview = " ".join(translated.split())[:220]
+        raise RuntimeError(f"Invalid {language} translation payload: missing overview. Response preview: {preview}")
     return normalized
 
 
@@ -807,6 +846,9 @@ def translate_summary_bundle(
             max_tokens=2600,
         )
         parsed_translations = parse_json_payload(translated)
+        if not isinstance(parsed_translations, dict):
+            preview = " ".join(str(translated).split())[:220]
+            error_details["bundle_parse"] = f"Bundled response is not JSON object. Preview: {preview}"
         ru = extract_translation_payload(parsed_translations, "ru")
         fr = extract_translation_payload(parsed_translations, "fr")
         if ru:
