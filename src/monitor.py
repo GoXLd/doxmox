@@ -385,34 +385,43 @@ def workers_ai_run(
 
 def workers_ai_extract_text(payload: dict[str, Any]) -> str:
     def content_to_text(content: Any) -> str | None:
+        def append_text(parts: list[str], value: Any) -> None:
+            if isinstance(value, str):
+                text = value.strip()
+                if text:
+                    parts.append(text)
+                return
+            if isinstance(value, dict):
+                # Common OpenAI-compatible variants:
+                # {"text":"..."} or {"text":{"value":"..."}}
+                text_field = value.get("text")
+                if isinstance(text_field, str):
+                    append_text(parts, text_field)
+                elif isinstance(text_field, dict):
+                    append_text(parts, text_field.get("value"))
+                # Harmony/Responses-like wrapper:
+                # {"content":"..."} or {"content":[...]}
+                append_text(parts, value.get("content"))
+                append_text(parts, value.get("value"))
+                return
+            if isinstance(value, list):
+                for item in value:
+                    append_text(parts, item)
+
         if isinstance(content, str):
             return content
         if isinstance(content, list):
             parts: list[str] = []
             for item in content:
-                if isinstance(item, str):
-                    parts.append(item)
-                    continue
-                if isinstance(item, dict):
-                    text_value = item.get("text")
-                    if isinstance(text_value, str):
-                        parts.append(text_value)
-                        continue
-                    # Some providers wrap text deeper, e.g. {"type":"output_text","content":"..."}
-                    nested = item.get("content")
-                    if isinstance(nested, str):
-                        parts.append(nested)
+                append_text(parts, item)
             joined = "\n".join(part.strip() for part in parts if part and part.strip()).strip()
             return joined or None
         if isinstance(content, dict):
-            text_value = content.get("text")
-            if isinstance(text_value, str):
-                return text_value
-            nested = content.get("content")
-            if isinstance(nested, str):
-                return nested
-            if isinstance(nested, list):
-                return content_to_text(nested)
+            parts: list[str] = []
+            append_text(parts, content)
+            joined = "\n".join(part.strip() for part in parts if part and part.strip()).strip()
+            if joined:
+                return joined
         return None
 
     result = payload.get("result")
