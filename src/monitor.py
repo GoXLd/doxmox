@@ -982,8 +982,9 @@ def translate_single_language_summary(
     model_name = str(config.translation_model or "").strip()
     if "m2m100-1.2b" in model_name:
         target_lang = {"ru": "russian", "fr": "french"}.get(language, language)
+        soft_failures: list[str] = []
 
-        def tr(text: str, field_name: str) -> str:
+        def tr(text: str, field_name: str, allow_english_fallback: bool = True) -> str:
             value = str(text or "").strip()
             if not value:
                 return ""
@@ -996,7 +997,11 @@ def translate_single_language_summary(
                     target_lang=target_lang,
                 )
             except Exception as exc:
-                raise RuntimeError(f"{field_name}: {format_exception_message(exc)}") from exc
+                detail = f"{field_name}: {format_exception_message(exc)}"
+                if allow_english_fallback:
+                    soft_failures.append(detail)
+                    return value
+                raise RuntimeError(detail) from exc
 
         translated_changes: list[dict[str, str]] = []
         for idx, change in enumerate(summary_json.get("changes", []), start=1):
@@ -1015,7 +1020,7 @@ def translate_single_language_summary(
                 }
             )
 
-        return {
+        translated_summary = {
             "overview": tr(str(summary_json.get("overview") or ""), "overview"),
             "professional_assessment": tr(
                 str(summary_json.get("professional_assessment") or ""),
@@ -1024,6 +1029,18 @@ def translate_single_language_summary(
             "newcomer_explainer": tr(str(summary_json.get("newcomer_explainer") or ""), "newcomer_explainer"),
             "changes": translated_changes,
         }
+
+        if soft_failures:
+            print(
+                "[translate][warn] "
+                + language
+                + " used EN fallback for "
+                + str(len(soft_failures))
+                + " fields: "
+                + " | ".join(soft_failures[:4])
+            )
+
+        return translated_summary
 
     language_label = {"ru": "Russian", "fr": "French"}.get(language, language)
     system = "You are a professional technical translator. Output valid JSON only."
