@@ -453,6 +453,12 @@
       },
       "translation_attempt_at": "2026-05-26T10:29:37Z",
       "translation_generated_at": "2026-05-26T19:17:43Z"
+    },
+    "brief": {
+      "text": "Proxmox VE 9.1.5: ZFS ARC default reduced, Ceph firewall port reminder, FastEC (allow_ec_optimizations) documentation added, PG autoscaler CRUSH rule consistency requirement, BGP configuration expanded under SDN, Load balancer default...",
+      "version": "Proxmox VE 9.1.5",
+      "model": "fallback",
+      "generated_at": "2026-05-26T19:43:07Z"
     }
   },
   {
@@ -741,6 +747,12 @@
       },
       "translation_attempt_at": "2026-05-26T10:29:37Z",
       "translation_generated_at": "2026-05-26T19:25:35Z"
+    },
+    "brief": {
+      "text": "Proxmox VE 9.1.4: Manual distribution of the cluster CA file, pvecm add default API authentication and --use_ssh flag, ZFS encryption documentation, idmap option added to storage definitions, EVPN controller documentation enhancements...",
+      "version": "Proxmox VE 9.1.4",
+      "model": "fallback",
+      "generated_at": "2026-05-26T19:43:08Z"
     }
   },
   {
@@ -1008,6 +1020,12 @@
       },
       "translation_attempt_at": "2026-05-26T10:29:37Z",
       "translation_generated_at": "2026-05-26T19:39:21Z"
+    },
+    "brief": {
+      "text": "Proxmox VE 9.1.3: Version bump and UI polish, Enhanced node removal workflow with QDevice warning, Ceph network change procedures clarified, HA auto‑rebalance options introduced, Import storage type added, Secure Boot certificate...",
+      "version": "Proxmox VE 9.1.3",
+      "model": "fallback",
+      "generated_at": "2026-05-26T19:43:08Z"
     }
   }
 ]
