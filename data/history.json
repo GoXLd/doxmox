@@ -10,18 +10,19 @@
       "status": "ok",
       "generated_at": "2026-05-25T14:32:55Z",
       "analysis_model": "@cf/openai/gpt-oss-120b",
-      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "translation_model": "@cf/openai/gpt-oss-120b",
       "embedding_model": "@cf/baai/bge-m3",
       "translation_status": {
         "required": [
           "ru",
           "fr"
         ],
-        "present": [],
-        "missing": [
+        "present": [
           "fr",
           "ru"
-        ]
+        ],
+        "missing": [],
+        "errors": {}
       },
       "summary": {
         "en": {
@@ -86,15 +87,141 @@
               "severity": "low"
             }
           ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.2.1 вводит несколько важных обновлений: бэкенд менеджера Ceph по умолчанию переключается с squid на tentacle, добавлены новые варианты моделей CPU и настройки уровней, обработка регулярных выражений теперь принимает символы новой строки, а документация по сопоставлению идентификаторов контейнеров и обработке UID/GID расширена. Дополнительные операционные доработки включают автоматический ребаланс HA, обновлённые параметры OSPF, уточнённые настройки резервного копирования и новое свойство расположения узла.",
+          "professional_assessment": "Изменения в основном обратно совместимы, но влияют на скрипты конфигурации кластера и автоматизацию. Операторам следует проверить значения по умолчанию Ceph manager, чтобы избежать неожиданных изменений типа менеджера, скорректировать любые пользовательские определения CPU model, включив новое поле level, и убедиться, что regex‑based фильтры продолжают работать как задумано, теперь когда разрешены символы LF. Настройки HA и сети повышают устойчивость, но могут потребовать настройки параметров. В целом выпуск расширяет набор функций без нарушения существующих развертываний, при условии выполнения рекомендованных действий.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, это обновление добавляет больше вариантов типов виртуальных процессоров, позволяет помечать узлы географическим расположением и делает так, что система хранения Ceph по умолчанию использует более новый компонент менеджера. Некоторые правила сопоставления текста теперь принимают переносы строк, а инструмент резервного копирования имеет более упрощённый набор параметров. Эти изменения делают платформу более гибкой и удобной в управлении, но после обновления вам, возможно, придётся скорректировать несколько настроек.",
+          "changes": [
+            {
+              "title": "Менеджер Ceph по умолчанию изменён на tentacle",
+              "details": "По умолчанию бэкенд менеджера для новых кластеров Ceph теперь «tentacle», а не более старой реализации «squid».",
+              "impact": "Существующие кластеры остаются без изменений, но новые кластеры будут использовать tentacle, который обеспечивает лучшую производительность и поддержку будущих функций.",
+              "recommended_action": "При создании нового кластера Ceph проверьте тип менеджера, если вы полагаетесь на определённые функции squid, или при необходимости явно задайте тип менеджера как squid.",
+              "severity": "medium"
+            },
+            {
+              "title": "Новая опция «level» модели CPU",
+              "details": "В файл cpu-models.conf добавлен параметр «level», позволяющий тонко настраивать выбор наборов функций процессора (например, уровни 1‑5). Также добавлены несколько новых названий моделей, таких как ClearwaterForest‑v2, DiamondRapids и SapphireRapids‑v6.",
+              "impact": "Пользовательские определения модели процессора, в которых опущен уровень, могут использовать значения по умолчанию, что потенциально может повлиять на производительность или совместимость ВМ.",
+              "recommended_action": "Проверьте любые пользовательские записи в cpu-models.conf и добавьте соответствующее значение уровня; протестируйте ВМ после изменений, чтобы убедиться в ожидаемом поведении.",
+              "severity": "high"
+            },
+            {
+              "title": "Шаблоны Regex теперь принимают символ новой строки (\\x0a)",
+              "details": "Регулярные выражения для точки входа и переменных окружения обновлены, чтобы разрешать символ перевода строки, позволяя использовать многострочные значения.",
+              "impact": "Скрипты, которые ранее отклоняли символы новой строки, теперь будут их принимать, что может упростить передачу сложных данных.",
+              "recommended_action": "Проверьте существующие regex‑based фильтры, чтобы убедиться, что они по‑прежнему соответствуют ожидаемым вводам; при появлении нежелательных совпадений скорректируйте шаблоны.",
+              "severity": "low"
+            },
+            {
+              "title": "Расширенная документация по сопоставлению ID контейнеров",
+              "details": "Документация теперь содержит дополнительные примеры и более чёткие абзацы по сопоставлению UID/GID внутри контейнеров.",
+              "impact": "{\"result\": {\"id\": \"chatcmpl-58ff4c62caf14258ba91cfc3af2ccd3e\", \"object\": \"chat.completion\", \"created\": 1779817490, \"model\": \"@cf/openai/gpt-oss-120b\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"refusal\": null, \"annotations\": null, \"audio\": null, \"function_call\": null, \"tool_calls\": [], \"reasoning_content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"length\", \"stop_reason\": null, \"token_ids\": null}], \"service_tier\": null, \"system_fingerprint\": null, \"usage\": {\"prompt_tokens\": 133, \"completion_tokens\": 2200, \"total_tokens\": 2333, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"prompt_logprobs\": null, \"prompt_token_ids\": null, \"kv_transfer_params\": null}, \"success\": true, \"errors\": [], \"messages\": []}",
+              "recommended_action": "Прочитайте обновлённую документацию и примените примерные сопоставления к любым кастомным настройкам контейнеров.",
+              "severity": "low"
+            },
+            {
+              "title": "Добавлена опция автоматического ребалансирования HA.",
+              "details": "Логический флаг «auto-rebalance» (по умолчанию true) теперь доступен для HA‑ресурсов, позволяя кластеру автоматически перемещать ресурсы для более равномерного распределения нагрузки.",
+              "impact": "{\"result\": {\"id\": \"chatcmpl-32eed03a73034ea5a882f312a15e2ed4\", \"object\": \"chat.completion\", \"created\": 1779817522, \"model\": \"@cf/openai/gpt-oss-120b\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"refusal\": null, \"annotations\": null, \"audio\": null, \"function_call\": null, \"tool_calls\": [], \"reasoning_content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"length\", \"stop_reason\": null, \"token_ids\": null}], \"service_tier\": null, \"system_fingerprint\": null, \"usage\": {\"prompt_tokens\": 132, \"completion_tokens\": 2200, \"total_tokens\": 2332, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"prompt_logprobs\": null, \"prompt_token_ids\": null, \"kv_transfer_params\": null}, \"success\": true, \"errors\": [], \"messages\": []}",
+              "recommended_action": "Включайте или отключайте auto‑rebalance в соответствии с вашей политикой; после включения контролируйте журналы HA, чтобы подтвердить ожидаемое поведение.",
+              "severity": "medium"
+            },
+            {
+              "title": "Свойство расположения узла (--location) введено",
+              "details": "Узлы теперь можно пометить географическими координатами (широта, долгота) и необязательным именем с помощью нового свойства «--location».",
+              "impact": "Обеспечивает планирование и отчётность с учётом местоположения, но требует обновления конфигурации узла, если вы используете политики, основанные на местоположении.",
+              "recommended_action": "Пожалуйста, предоставьте текст, который нужно перевести.",
+              "severity": "low"
+            },
+            {
+              "title": "Очистка конфигурации резервного копирования",
+              "details": "Устаревший параметр \"maxfiles\" удалён из настроек задания резервного копирования; теперь задания резервного копирования опираются только на политики удержания.",
+              "impact": "Существующие задания резервного копирования, которые всё ещё ссылаются на maxfiles, не смогут быть разобраны.",
+              "recommended_action": "Отредактируйте затронутые задания резервного копирования, удалив строку maxfiles, и при необходимости настройте удержание с помощью политик в стиле «maxfiles».",
+              "severity": "medium"
+            },
+            {
+              "title": "Уточнено описание размера блока ZFS",
+              "details": "Параметр blocksize теперь явно указывает, что он должен быть степенью двойки с необязательным суффиксом «k» или «m» (например, 4k, 8m).",
+              "impact": "Улучшена проверка ввода пользователем; некорректные значения будут отклоняться с более понятными сообщениями об ошибках.",
+              "recommended_action": "Убедитесь, что любые пользовательские определения хранилища ZFS используют новый синтаксис; при необходимости скорректируйте скрипты, генерирующие значения blocksize.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.2.1 introduit plusieurs mises à jour importantes : le backend du gestionnaire Ceph par défaut passe de squid à tentacle, de nouvelles options de modèle CPU et de paramètres de niveau sont ajoutées, la gestion des expressions régulières accepte désormais les caractères de nouvelle ligne, et la documentation sur le mappage des ID de conteneur ainsi que la gestion UID/GID est étendue. D’autres ajustements opérationnels comprennent le rééquilibrage automatique HA, des options OSPF mises à jour, des paramètres de sauvegarde affinés et une nouvelle propriété de localisation du nœud.",
+          "professional_assessment": "Les changements sont en grande partie rétrocompatibles mais affectent les scripts de configuration du cluster et l’automatisation. Les opérateurs doivent examiner les paramètres par défaut du Ceph manager afin d’éviter des changements inattendus du type de manager, ajuster les définitions de modèles CPU personnalisés pour inclure le nouveau champ level, et vérifier que les filtres basés sur les expressions régulières se comportent toujours comme prévu maintenant que les caractères LF sont autorisés. Les ajustements HA et réseau améliorent la résilience mais peuvent nécessiter un réglage des paramètres. Dans l’ensemble, la version augmente l’ensemble des fonctionnalités sans casser les déploiements existants, à condition de suivre les actions recommandées.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, cette mise à jour ajoute davantage de choix pour les types de CPU virtuels, vous permet d’étiqueter les nœuds avec une localisation géographique, et fait en sorte que le système de stockage Ceph utilise par défaut un composant de gestion plus récent. Certaines règles de correspondance de texte acceptent désormais les sauts de ligne, et l’outil de sauvegarde propose un ensemble d’options plus épuré. Ces changements rendent la plateforme plus flexible et plus facile à gérer, mais il se peut que vous deviez ajuster quelques paramètres après la mise à jour.",
+          "changes": [
+            {
+              "title": "Le gestionnaire Ceph par défaut a été changé en tentacle",
+              "details": "Le backend du gestionnaire par défaut pour les nouveaux clusters Ceph est désormais « tentacle » au lieu de l’ancienne implémentation « squid ».",
+              "impact": "Les clusters existants restent inchangés, mais les clusters nouvellement créés utiliseront tentacle, qui offre de meilleures performances et un support des futures fonctionnalités.",
+              "recommended_action": "Lors de la création d’un nouveau cluster Ceph, vérifiez le type de gestionnaire si vous comptez sur des fonctionnalités spécifiques de squid, ou définissez explicitement le type de gestionnaire sur squid si nécessaire.",
+              "severity": "medium"
+            },
+            {
+              "title": "Nouvelle option « level » du modèle CPU",
+              "details": "Un paramètre « level » a été ajouté à cpu-models.conf, permettant une sélection granulaire des ensembles de fonctionnalités CPU (par ex., niveau 1‑5). Plusieurs nouveaux noms de modèles tels que ClearwaterForest‑v2, DiamondRapids et SapphireRapids‑v6 ont également été ajoutés.",
+              "impact": "Les définitions de modèle CPU personnalisées qui omettent le niveau peuvent revenir aux valeurs par défaut, ce qui peut affecter les performances ou la compatibilité des VM.",
+              "recommended_action": "Examinez toutes les entrées personnalisées de cpu-models.conf et ajoutez une valeur de niveau appropriée ; testez les VMs après les modifications pour garantir le comportement attendu.",
+              "severity": "high"
+            },
+            {
+              "title": "Les modèles Regex acceptent désormais le saut de ligne (\\x0a)",
+              "details": "Les expressions régulières du point d'entrée et des variables d'environnement ont été mises à jour pour autoriser le caractère de saut de ligne, permettant des valeurs multi‑lignes.",
+              "impact": "Les scripts qui rejetaient auparavant les caractères de nouvelle ligne les accepteront désormais, ce qui peut simplifier le passage de données complexes.",
+              "recommended_action": "Validez les filtres existants basés sur les regex pour vous assurer qu'ils correspondent toujours aux entrées prévues ; ajustez les motifs si des correspondances inattendues apparaissent.",
+              "severity": "low"
+            },
+            {
+              "title": "Documentation étendue du mappage des ID de conteneur",
+              "details": "La documentation inclut désormais des exemples supplémentaires et des paragraphes plus clairs pour le mappage UID/GID à l'intérieur des conteneurs.",
+              "impact": "Les opérateurs bénéficient d’une meilleure orientation, réduisant le risque de mauvaise configuration lors du mappage des ID d’hôte aux conteneurs.",
+              "recommended_action": "Lisez la documentation mise à jour et appliquez les correspondances d’exemple à toutes les configurations de conteneurs personnalisées.",
+              "severity": "low"
+            },
+            {
+              "title": "Option d'auto‑rééquilibrage HA ajoutée",
+              "details": "Un drapeau booléen « auto-rebalance » (valeur par défaut true) est désormais disponible pour les ressources HA, permettant au cluster de déplacer automatiquement les ressources afin d’améliorer la répartition de la charge.",
+              "impact": "Les clusters peuvent subir des migrations automatiques après des pannes de nœuds ou des pics de charge, améliorant le temps de disponibilité.",
+              "recommended_action": "Activez ou désactivez l'auto‑rebalance selon votre politique ; surveillez les journaux HA après l'activation pour confirmer le comportement attendu.",
+              "severity": "medium"
+            },
+            {
+              "title": "Propriété d'emplacement du nœud (--location) introduite",
+              "details": "Les nœuds peuvent désormais être étiquetés avec des coordonnées géographiques (latitude, longitude) et un nom optionnel via la nouvelle propriété « --location ».",
+              "impact": "Facilite la planification et le reporting sensibles à la localisation, mais nécessite la mise à jour de la configuration du nœud si vous utilisez des politiques basées sur la localisation.",
+              "recommended_action": "Veuillez fournir le texte à traduire afin que je puisse le traduire en français et ajouter les données de localisation aux nœuds le cas échéant.",
+              "severity": "low"
+            },
+            {
+              "title": "Nettoyage de la configuration de sauvegarde",
+              "details": "L'option « maxfiles » obsolète a été supprimée des paramètres des tâches de sauvegarde ; les tâches de sauvegarde s'appuient désormais uniquement sur les politiques de rétention.",
+              "impact": "Les jobs de sauvegarde existants qui font encore référence à maxfiles échoueront à l'analyse.",
+              "recommended_action": "Modifiez les tâches de sauvegarde concernées pour supprimer la ligne maxfiles et configurez la rétention via des politiques de type « maxfiles » si nécessaire.",
+              "severity": "medium"
+            },
+            {
+              "title": "Description du blocksize ZFS clarifiée",
+              "details": "Le paramètre blocksize indique désormais explicitement qu'il doit être une puissance de deux avec un suffixe optionnel « k » ou « m » (par ex., 4k, 8m).",
+              "impact": "Améliore la validation des entrées utilisateur ; les valeurs incorrectes seront rejetées avec des messages d’erreur plus clairs.",
+              "recommended_action": "Vérifiez que toutes les définitions de stockage ZFS personnalisées utilisent la nouvelle syntaxe ; ajustez les scripts qui génèrent les valeurs de blocksize en conséquence.",
+              "severity": "low"
+            }
+          ]
         }
       },
       "summary_text": {
         "en": "1. Ceph manager default changed to tentacle\n   - The default manager backend for new Ceph clusters is now \"tentacle\" instead of the older \"squid\" implementation.\n   - Impact: Existing clusters remain unchanged, but newly created clusters will use tentacle, which offers better performance and future feature support.\n   - Action: When creating a new Ceph cluster, verify the manager type if you rely on specific squid features, or explicitly set the manager type to squid if needed.\n   - Severity: medium\n2. New CPU model \"level\" option\n   - A \"level\" parameter has been added to cpu-models.conf, allowing fine‑grained selection of CPU feature sets (e.g., level 1‑5). Several new model names such as ClearwaterForest‑v2, DiamondRapids, and SapphireRapids‑v6 have also been added.\n   - Impact: Custom CPU model definitions that omit the level may fall back to defaults, potentially affecting VM performance or compatibility.\n   - Action: Review any custom cpu-models.conf entries and add an appropriate level value; test VMs after changes to ensure expected behavior.\n   - Severity: high\n3. Regex patterns now accept newline (\\x0a)\n   - Entry point and environment variable regexes have been updated to allow the line‑feed character, enabling multi‑line values.\n   - Impact: Scripts that previously rejected newline characters will now accept them, which can simplify passing complex data.\n   - Action: Validate existing regex‑based filters to ensure they still match intended inputs; adjust patterns if unintended matches appear.\n   - Severity: low\n4. Expanded container ID mapping documentation\n   - The documentation now includes additional examples and clearer paragraphs for UID/GID mapping inside containers.\n   - Impact: Operators gain better guidance, reducing misconfiguration risk when mapping host IDs to containers.\n   - Action: Read the updated docs and apply the example mappings to any custom container setups.\n   - Severity: low\n5. HA auto‑rebalance option added\n   - A boolean \"auto-rebalance\" flag (default true) is now available for HA resources, allowing the cluster to automatically move resources for better load distribution.\n   - Impact: Clusters may experience automatic migrations after node failures or load spikes, improving uptime.\n   - Action: Enable or disable auto‑rebalance per your policy; monitor HA logs after enabling to confirm expected behavior.\n   - Severity: medium\n6. Node location property (--location) introduced\n   - Nodes can now be tagged with geographic coordinates (latitude, longitude) and an optional name via the new \"--location\" property.\n   - Impact: Facilitates location‑aware scheduling and reporting, but requires updating node configuration if you use location‑based policies.\n   - Action: Add location data to each node using \"pve node set --location <lat>,<lon>,<name>\" where relevant.\n   - Severity: low\n7. Backup configuration cleanup\n   - The deprecated \"maxfiles\" option has been removed from backup job settings; backup jobs now rely on retention policies only.\n   - Impact: Existing backup jobs that still reference maxfiles will fail to parse.\n   - Action: Edit affected backup jobs to remove the maxfiles line and configure retention via \"maxfiles\"‑style policies if needed.\n   - Severity: medium\n8. ZFS blocksize description clarified\n   - The blocksize parameter now explicitly states it must be a power of two with optional 'k' or 'm' suffix (e.g., 4k, 8m).\n   - Impact: Improves user input validation; incorrect values will be rejected with clearer error messages.\n   - Action: Verify any custom ZFS storage definitions use the new syntax; adjust scripts that generate blocksize values accordingly.\n   - Severity: low",
-        "ru": "",
-        "fr": ""
+        "ru": "1. Менеджер Ceph по умолчанию изменён на tentacle\n   - По умолчанию бэкенд менеджера для новых кластеров Ceph теперь «tentacle», а не более старой реализации «squid».\n   - Impact: Существующие кластеры остаются без изменений, но новые кластеры будут использовать tentacle, который обеспечивает лучшую производительность и поддержку будущих функций.\n   - Action: При создании нового кластера Ceph проверьте тип менеджера, если вы полагаетесь на определённые функции squid, или при необходимости явно задайте тип менеджера как squid.\n   - Severity: medium\n2. Новая опция «level» модели CPU\n   - В файл cpu-models.conf добавлен параметр «level», позволяющий тонко настраивать выбор наборов функций процессора (например, уровни 1‑5). Также добавлены несколько новых названий моделей, таких как ClearwaterForest‑v2, DiamondRapids и SapphireRapids‑v6.\n   - Impact: Пользовательские определения модели процессора, в которых опущен уровень, могут использовать значения по умолчанию, что потенциально может повлиять на производительность или совместимость ВМ.\n   - Action: Проверьте любые пользовательские записи в cpu-models.conf и добавьте соответствующее значение уровня; протестируйте ВМ после изменений, чтобы убедиться в ожидаемом поведении.\n   - Severity: high\n3. Шаблоны Regex теперь принимают символ новой строки (\\x0a)\n   - Регулярные выражения для точки входа и переменных окружения обновлены, чтобы разрешать символ перевода строки, позволяя использовать многострочные значения.\n   - Impact: Скрипты, которые ранее отклоняли символы новой строки, теперь будут их принимать, что может упростить передачу сложных данных.\n   - Action: Проверьте существующие regex‑based фильтры, чтобы убедиться, что они по‑прежнему соответствуют ожидаемым вводам; при появлении нежелательных совпадений скорректируйте шаблоны.\n   - Severity: low\n4. Расширенная документация по сопоставлению ID контейнеров\n   - Документация теперь содержит дополнительные примеры и более чёткие абзацы по сопоставлению UID/GID внутри контейнеров.\n   - Impact: {\"result\": {\"id\": \"chatcmpl-58ff4c62caf14258ba91cfc3af2ccd3e\", \"object\": \"chat.completion\", \"created\": 1779817490, \"model\": \"@cf/openai/gpt-oss-120b\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"refusal\": null, \"annotations\": null, \"audio\": null, \"function_call\": null, \"tool_calls\": [], \"reasoning_content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"length\", \"stop_reason\": null, \"token_ids\": null}], \"service_tier\": null, \"system_fingerprint\": null, \"usage\": {\"prompt_tokens\": 133, \"completion_tokens\": 2200, \"total_tokens\": 2333, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"prompt_logprobs\": null, \"prompt_token_ids\": null, \"kv_transfer_params\": null}, \"success\": true, \"errors\": [], \"messages\": []}\n   - Action: Прочитайте обновлённую документацию и примените примерные сопоставления к любым кастомным настройкам контейнеров.\n   - Severity: low\n5. Добавлена опция автоматического ребалансирования HA.\n   - Логический флаг «auto-rebalance» (по умолчанию true) теперь доступен для HA‑ресурсов, позволяя кластеру автоматически перемещать ресурсы для более равномерного распределения нагрузки.\n   - Impact: {\"result\": {\"id\": \"chatcmpl-32eed03a73034ea5a882f312a15e2ed4\", \"object\": \"chat.completion\", \"created\": 1779817522, \"model\": \"@cf/openai/gpt-oss-120b\", \"choices\": [{\"index\": 0, \"message\": {\"role\": \"assistant\", \"content\": null, \"refusal\": null, \"annotations\": null, \"audio\": null, \"function_call\": null, \"tool_calls\": [], \"reasoning_content\": \"\"}, \"logprobs\": null, \"finish_reason\": \"length\", \"stop_reason\": null, \"token_ids\": null}], \"service_tier\": null, \"system_fingerprint\": null, \"usage\": {\"prompt_tokens\": 132, \"completion_tokens\": 2200, \"total_tokens\": 2332, \"prompt_tokens_details\": {\"cached_tokens\": 0}}, \"prompt_logprobs\": null, \"prompt_token_ids\": null, \"kv_transfer_params\": null}, \"success\": true, \"errors\": [], \"messages\": []}\n   - Action: Включайте или отключайте auto‑rebalance в соответствии с вашей политикой; после включения контролируйте журналы HA, чтобы подтвердить ожидаемое поведение.\n   - Severity: medium\n6. Свойство расположения узла (--location) введено\n   - Узлы теперь можно пометить географическими координатами (широта, долгота) и необязательным именем с помощью нового свойства «--location».\n   - Impact: Обеспечивает планирование и отчётность с учётом местоположения, но требует обновления конфигурации узла, если вы используете политики, основанные на местоположении.\n   - Action: Пожалуйста, предоставьте текст, который нужно перевести.\n   - Severity: low\n7. Очистка конфигурации резервного копирования\n   - Устаревший параметр \"maxfiles\" удалён из настроек задания резервного копирования; теперь задания резервного копирования опираются только на политики удержания.\n   - Impact: Существующие задания резервного копирования, которые всё ещё ссылаются на maxfiles, не смогут быть разобраны.\n   - Action: Отредактируйте затронутые задания резервного копирования, удалив строку maxfiles, и при необходимости настройте удержание с помощью политик в стиле «maxfiles».\n   - Severity: medium\n8. Уточнено описание размера блока ZFS\n   - Параметр blocksize теперь явно указывает, что он должен быть степенью двойки с необязательным суффиксом «k» или «m» (например, 4k, 8m).\n   - Impact: Улучшена проверка ввода пользователем; некорректные значения будут отклоняться с более понятными сообщениями об ошибках.\n   - Action: Убедитесь, что любые пользовательские определения хранилища ZFS используют новый синтаксис; при необходимости скорректируйте скрипты, генерирующие значения blocksize.\n   - Severity: low",
+        "fr": "1. Le gestionnaire Ceph par défaut a été changé en tentacle\n   - Le backend du gestionnaire par défaut pour les nouveaux clusters Ceph est désormais « tentacle » au lieu de l’ancienne implémentation « squid ».\n   - Impact: Les clusters existants restent inchangés, mais les clusters nouvellement créés utiliseront tentacle, qui offre de meilleures performances et un support des futures fonctionnalités.\n   - Action: Lors de la création d’un nouveau cluster Ceph, vérifiez le type de gestionnaire si vous comptez sur des fonctionnalités spécifiques de squid, ou définissez explicitement le type de gestionnaire sur squid si nécessaire.\n   - Severity: medium\n2. Nouvelle option « level » du modèle CPU\n   - Un paramètre « level » a été ajouté à cpu-models.conf, permettant une sélection granulaire des ensembles de fonctionnalités CPU (par ex., niveau 1‑5). Plusieurs nouveaux noms de modèles tels que ClearwaterForest‑v2, DiamondRapids et SapphireRapids‑v6 ont également été ajoutés.\n   - Impact: Les définitions de modèle CPU personnalisées qui omettent le niveau peuvent revenir aux valeurs par défaut, ce qui peut affecter les performances ou la compatibilité des VM.\n   - Action: Examinez toutes les entrées personnalisées de cpu-models.conf et ajoutez une valeur de niveau appropriée ; testez les VMs après les modifications pour garantir le comportement attendu.\n   - Severity: high\n3. Les modèles Regex acceptent désormais le saut de ligne (\\x0a)\n   - Les expressions régulières du point d'entrée et des variables d'environnement ont été mises à jour pour autoriser le caractère de saut de ligne, permettant des valeurs multi‑lignes.\n   - Impact: Les scripts qui rejetaient auparavant les caractères de nouvelle ligne les accepteront désormais, ce qui peut simplifier le passage de données complexes.\n   - Action: Validez les filtres existants basés sur les regex pour vous assurer qu'ils correspondent toujours aux entrées prévues ; ajustez les motifs si des correspondances inattendues apparaissent.\n   - Severity: low\n4. Documentation étendue du mappage des ID de conteneur\n   - La documentation inclut désormais des exemples supplémentaires et des paragraphes plus clairs pour le mappage UID/GID à l'intérieur des conteneurs.\n   - Impact: Les opérateurs bénéficient d’une meilleure orientation, réduisant le risque de mauvaise configuration lors du mappage des ID d’hôte aux conteneurs.\n   - Action: Lisez la documentation mise à jour et appliquez les correspondances d’exemple à toutes les configurations de conteneurs personnalisées.\n   - Severity: low\n5. Option d'auto‑rééquilibrage HA ajoutée\n   - Un drapeau booléen « auto-rebalance » (valeur par défaut true) est désormais disponible pour les ressources HA, permettant au cluster de déplacer automatiquement les ressources afin d’améliorer la répartition de la charge.\n   - Impact: Les clusters peuvent subir des migrations automatiques après des pannes de nœuds ou des pics de charge, améliorant le temps de disponibilité.\n   - Action: Activez ou désactivez l'auto‑rebalance selon votre politique ; surveillez les journaux HA après l'activation pour confirmer le comportement attendu.\n   - Severity: medium\n6. Propriété d'emplacement du nœud (--location) introduite\n   - Les nœuds peuvent désormais être étiquetés avec des coordonnées géographiques (latitude, longitude) et un nom optionnel via la nouvelle propriété « --location ».\n   - Impact: Facilite la planification et le reporting sensibles à la localisation, mais nécessite la mise à jour de la configuration du nœud si vous utilisez des politiques basées sur la localisation.\n   - Action: Veuillez fournir le texte à traduire afin que je puisse le traduire en français et ajouter les données de localisation aux nœuds le cas échéant.\n   - Severity: low\n7. Nettoyage de la configuration de sauvegarde\n   - L'option « maxfiles » obsolète a été supprimée des paramètres des tâches de sauvegarde ; les tâches de sauvegarde s'appuient désormais uniquement sur les politiques de rétention.\n   - Impact: Les jobs de sauvegarde existants qui font encore référence à maxfiles échoueront à l'analyse.\n   - Action: Modifiez les tâches de sauvegarde concernées pour supprimer la ligne maxfiles et configurez la rétention via des politiques de type « maxfiles » si nécessaire.\n   - Severity: medium\n8. Description du blocksize ZFS clarifiée\n   - Le paramètre blocksize indique désormais explicitement qu'il doit être une puissance de deux avec un suffixe optionnel « k » ou « m » (par ex., 4k, 8m).\n   - Impact: Améliore la validation des entrées utilisateur ; les valeurs incorrectes seront rejetées avec des messages d’erreur plus clairs.\n   - Action: Vérifiez que toutes les définitions de stockage ZFS personnalisées utilisent la nouvelle syntaxe ; ajustez les scripts qui génèrent les valeurs de blocksize en conséquence.\n   - Severity: low"
       },
-      "translation_error": "Missing required translations: fr, ru. Re-run translation or verify translation model availability.",
-      "translation_attempt_at": "2026-05-26T10:29:36Z"
+      "translation_attempt_at": "2026-05-26T10:29:36Z",
+      "translation_generated_at": "2026-05-26T17:47:23Z"
     }
   },
   {
