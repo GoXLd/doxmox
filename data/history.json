@@ -241,18 +241,19 @@
       "status": "ok",
       "generated_at": "2026-05-25T14:34:49Z",
       "analysis_model": "@cf/openai/gpt-oss-120b",
-      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "translation_model": "@cf/openai/gpt-oss-120b",
       "embedding_model": "@cf/baai/bge-m3",
       "translation_status": {
         "required": [
           "ru",
           "fr"
         ],
-        "present": [],
-        "missing": [
+        "present": [
           "fr",
           "ru"
-        ]
+        ],
+        "missing": [],
+        "errors": {}
       },
       "summary": {
         "en": {
@@ -317,15 +318,141 @@
               "severity": "low"
             }
           ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.1.5 вводит несколько важных обновлений, влияющих на хранилище, сеть, брандмауэр и системные настройки по умолчанию. Эти изменения направлены на повышение производительности, безопасности и упрощение конфигурации, а также добавляют новые функции, такие как интеграция BGP и поддержка FastEC.",
+          "professional_assessment": "Выпуск сочетает новые возможности с более строгими настройками по умолчанию. Примечательны уменьшенный след ZFS ARC, который помогает хостам с несколькими ВМ, и внедрение FastEC, способного повысить производительность пулов с кодированием стиранием, но требующего тщательного планирования. Операторам сети будет полезно расширенные опции BGP/SDN, однако им придётся скорректировать правила брандмауэра для Ceph и трафика миграции. Общий риск умеренный; большинство изменений являются добавочными, но флаг FastEC необратим без воссоздания пула.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, эта версия делает систему более экономичной по использованию памяти сразу после установки и добавляет руководства по продвинутому сетевому взаимодействию (BGP) и более быстрому хранилищу с кодированием стиранием. Вам потребуется открыть несколько дополнительных портов брандмауэра, и следует учитывать, что некоторые настройки, такие как новая опция FastEC, нельзя легко отменить.",
+          "changes": [
+            {
+              "title": "Обновление версии до 9.1.5",
+              "details": "Документация и метаданные релиза обновлены до версии 9.1.5 с новой датой выпуска.",
+              "impact": "Обеспечивает, что пользователи обращаются к правильной документации и получают последние исправления ошибок.",
+              "recommended_action": "Verify you are consulting the 9.1.5 docs for any configuration tasks.",
+              "severity": "low"
+            },
+            {
+              "title": "ZFS ARC по умолчанию уменьшен",
+              "details": "Размер ARC по умолчанию изменён с 50 % памяти хоста до 10 %, с ограничением в 16 ГиБ. Параметр записывается в /etc/modprobe.d/zfs.conf во время установки для Proxmox VE 8.1+.",
+              "impact": "Снижает нагрузку на память на хостах, работающих с множеством ВМ, улучшая общую стабильность.",
+              "recommended_action": "Отслеживайте использование ARC; при необходимости более крупного кэша для интенсивных нагрузок ZFS отрегулируйте /etc/modprobe.d/zfs.conf.",
+              "severity": "medium"
+            },
+            {
+              "title": "Напоминание о порте брандмауэра Ceph",
+              "details": "В документации теперь явно указано, что firewall должен разрешать порты трафика Ceph. Используйте предоставленный firewall‑macro для простой настройки.",
+              "impact": "Неоткрытые порты могут нарушить связь кластера Ceph, что приводит к недоступности данных.",
+              "recommended_action": "Включите макрос брандмауэра Ceph или вручную откройте необходимые порты (например, 6789, 6800‑7300).",
+              "severity": "high"
+            },
+            {
+              "title": "Документация FastEC (allow_ec_optimizations) добавлена",
+              "details": "Вводит новый флаг для включения быстрых путей ввода‑вывода с кодированием стирания. Требует EC‑пулы, последние версии мониторов и stripe units, выровненные на 4096 байт. Флаг односторонний; его сброс требует воссоздания пула.",
+              "impact": "Потенциальный прирост производительности для EC‑пулов, но может вызвать переизбрание primary и отменить текущие scrub‑ы.",
+              "recommended_action": "Сначала протестируйте FastEC на непроизводственном пуле, затем включите его с помощью 'pveceph set allow_ec_optimizations=1', если результаты будут удовлетворительными.",
+              "severity": "medium"
+            },
+            {
+              "title": "Требование согласованности правила CRUSH автоскейлера PG",
+              "details": "Автоскейлер теперь требует, чтобы все пулы использовали один и тот же тип правила CRUSH (либо класс устройства, либо отсутствие).",
+              "impact": "Смешанные типы правил могут вызвать сбои autoscaler или неравномерное распределение данных.",
+              "recommended_action": "Стандартизируйте правила CRUSH во всех пулах перед включением автоскейлера.",
+              "severity": "low"
+            },
+            {
+              "title": "Конфигурация BGP расширена в рамках SDN",
+              "details": "Новые разделы охватывают параметры BGP уровня fabric и уровня node, включая префиксы IPv4/IPv6, BFD, карты маршрутов, источники перераспределения и поддержку неномеровных интерфейсов. Подложка EVPN требует как минимум один IPv4‑адрес на узел.",
+              "impact": "Включает расширенную маршрутизацию для мультисайтовых кластеров, но увеличивает сложность конфигурации.",
+              "recommended_action": "Следуйте пошаговому руководству по BGP; начните с простой настройки IPv4, прежде чем добавлять расширенные функции.",
+              "severity": "medium"
+            },
+            {
+              "title": "Обновлены пороговые значения балансировщика нагрузки по умолчанию",
+              "details": "Imbalance threshold теперь по умолчанию 30 %, а imbalance improvement — 10 %, при этом значения нормализованы по шкале 0‑100.",
+              "impact": "Улучшает автоматическое распределение нагрузки из коробки.",
+              "recommended_action": "Пересмотрите и при необходимости скорректируйте пороги, если ваша нагрузка требует более строгого балансирования.",
+              "severity": "low"
+            },
+            {
+              "title": "Конфигурация sysctl перемещена в файл‑drop‑in.",
+              "details": "Глобальная настройка rp_filter теперь применяется через /etc/sysctl.d/99-rp-filter.conf вместо прямого редактирования /etc/sysctl.conf.",
+              "impact": "Упрощает управление sysctl и соответствует лучшим практикам обновления пакетов.",
+              "recommended_action": "Убедитесь, что drop‑in файл существует и содержит нужные настройки; перезагрузите sysctl командой `sysctl --system`.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.1.5 introduit plusieurs mises à jour importantes qui affectent le stockage, le réseau, le pare‑feu et les paramètres par défaut du système. Les changements visent à améliorer les performances, la sécurité et la facilité de configuration tout en ajoutant de nouvelles fonctionnalités telles que l’intégration BGP et la prise en charge de FastEC.",
+          "professional_assessment": "La version équilibre de nouvelles fonctionnalités avec des paramètres par défaut plus stricts. Notables sont la réduction de l’empreinte ZFS ARC, qui aide les hôtes multi‑VM, et l’introduction de FastEC, qui peut augmenter les performances des pools en codage d’effacement mais nécessite une planification soigneuse. Les opérateurs réseau bénéficieront d’options BGP/SDN élargies, mais devront ajuster les règles de pare‑feu pour Ceph et le trafic de migration. Le risque global est modéré ; la plupart des changements sont additionnels, mais le drapeau FastEC est irréversible sans recréation du pool.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, cette version rend le système un peu plus économique en mémoire dès l'installation et ajoute des guides pour le réseau avancé (BGP) ainsi qu'un stockage à effacement codé plus rapide. Vous devrez ouvrir quelques ports de pare-feu supplémentaires et être conscient que certains paramètres, comme la nouvelle option FastEC, ne peuvent pas être annulés facilement.",
+          "changes": [
+            {
+              "title": "Mise à jour de version vers 9.1.5",
+              "details": "Documentation et métadonnées de version mises à jour vers la version 9.1.5 avec une nouvelle date de sortie.",
+              "impact": "Garantit que les utilisateurs se réfèrent à la documentation correcte et reçoivent les dernières corrections de bugs.",
+              "recommended_action": "Verify you are consulting the 9.1.5 docs for any configuration tasks.",
+              "severity": "low"
+            },
+            {
+              "title": "Valeur par défaut de l'ARC ZFS réduite",
+              "details": "Taille ARC par défaut modifiée de 50 % de la mémoire de l’hôte à 10 %, plafonnée à 16 GiB. Le paramètre est écrit dans /etc/modprobe.d/zfs.conf lors de l’installation pour Proxmox VE 8.1+.",
+              "impact": "Réduit la pression mémoire sur les hôtes exécutant de nombreuses VMs, améliorant ainsi la stabilité globale.",
+              "recommended_action": "Surveillez l'utilisation de l'ARC ; ajustez /etc/modprobe.d/zfs.conf si un cache plus grand est nécessaire pour des charges de travail ZFS intensives.",
+              "severity": "medium"
+            },
+            {
+              "title": "Rappel des ports du pare-feu Ceph",
+              "details": "La documentation indique désormais explicitement que le firewall doit autoriser les ports de trafic Ceph. Utilisez la macro firewall fournie pour une configuration facile.",
+              "impact": "Des ports non ouverts peuvent interrompre la communication du cluster Ceph, entraînant une indisponibilité des données.",
+              "recommended_action": "Activez la macro du pare-feu Ceph ou ouvrez manuellement les ports requis (par ex., 6789, 6800‑7300).",
+              "severity": "high"
+            },
+            {
+              "title": "Documentation FastEC (allow_ec_optimizations) ajoutée",
+              "details": "Introduit un nouveau flag pour activer les chemins d'E/S codés par effacement rapides. Nécessite des pools EC, des versions récentes du moniteur et des unités de bande alignées à 4096 octets. Le flag est unidirectionnel ; le désactiver nécessite la recréation du pool.",
+              "impact": "Potentiel gain de performance pour les pools EC, mais cela peut déclencher une réélection du primaire et annuler les scrubs en cours.",
+              "recommended_action": "Testez FastEC d’abord sur un pool non‑production, puis activez‑le via « pveceph set allow_ec_optimizations=1 » si les résultats sont satisfaisants.",
+              "severity": "medium"
+            },
+            {
+              "title": "Exigence de cohérence de la règle CRUSH pour l'autoscaler PG",
+              "details": "L'Autoscaler exige désormais que toutes les pools utilisent le même type de règle CRUSH (soit device class, soit aucune).",
+              "impact": "Des types de règles mixtes peuvent entraîner des échecs de l'autoscaler ou une répartition inégale des données.",
+              "recommended_action": "Standardisez les règles CRUSH sur les pools avant d'activer l'autoscaler.",
+              "severity": "low"
+            },
+            {
+              "title": "Configuration BGP étendue sous SDN",
+              "details": "Nouvelles sections couvrent les options BGP au niveau du fabric et au niveau du nœud, y compris les préfixes IPv4/IPv6, BFD, les route maps, les sources de redistribution et la prise en charge des interfaces non numérotées. L'underlay EVPN nécessite au moins une adresse IPv4 par nœud.",
+              "impact": "Active le routage avancé pour les clusters multi‑sites mais ajoute de la complexité de configuration.",
+              "recommended_action": "Suivez le guide BGP étape par étape ; commencez par une configuration IPv4 simple avant d’ajouter des fonctionnalités avancées.",
+              "severity": "medium"
+            },
+            {
+              "title": "Seuils par défaut du Load balancer mis à jour",
+              "details": "Le seuil de déséquilibre est désormais fixé par défaut à 30 % et l’amélioration du déséquilibre à 10 %, les valeurs étant normalisées sur une échelle de 0 à 100.",
+              "impact": "Améliore les décisions de répartition automatique de la charge dès l'installation.",
+              "recommended_action": "Examinez et ajustez les seuils si votre charge de travail nécessite un équilibrage plus strict.",
+              "severity": "low"
+            },
+            {
+              "title": "Configuration Sysctl déplacée vers un fichier drop‑in",
+              "details": "System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.",
+              "impact": "Simplifie la gestion de sysctl et s’aligne sur les meilleures pratiques pour les mises à jour de paquets.",
+              "recommended_action": "Confirmez que le fichier drop‑in existe et contient les paramètres souhaités ; rechargez sysctl avec 'sysctl --system'.",
+              "severity": "low"
+            }
+          ]
         }
       },
       "summary_text": {
         "en": "1. Version bump to 9.1.5\n   - Documentation and release metadata updated to version 9.1.5 with a new release date.\n   - Impact: Ensures users reference the correct documentation and receive the latest bug fixes.\n   - Action: Verify you are consulting the 9.1.5 docs for any configuration tasks.\n   - Severity: low\n2. ZFS ARC default reduced\n   - Default ARC size changed from 50% of host memory to 10%, capped at 16 GiB. The setting is written to /etc/modprobe.d/zfs.conf during installation for Proxmox VE 8.1+.\n   - Impact: Reduces memory pressure on hosts running many VMs, improving overall stability.\n   - Action: Monitor ARC usage; adjust /etc/modprobe.d/zfs.conf if a larger cache is required for heavy ZFS workloads.\n   - Severity: medium\n3. Ceph firewall port reminder\n   - Documentation now explicitly states that the firewall must allow Ceph traffic ports. Use the provided firewall macro for easy configuration.\n   - Impact: Unopened ports can break Ceph cluster communication, leading to data unavailability.\n   - Action: Enable the Ceph firewall macro or manually open the required ports (e.g., 6789, 6800‑7300).\n   - Severity: high\n4. FastEC (allow_ec_optimizations) documentation added\n   - Introduces a new flag to enable fast erasure‑coded I/O paths. Requires EC pools, recent monitor releases, and stripe units aligned to 4096 bytes. The flag is one‑way; clearing it requires pool recreation.\n   - Impact: Potential performance boost for EC pools, but may trigger primary re‑election and cancel ongoing scrubs.\n   - Action: Test FastEC on a non‑production pool first, then enable via 'pveceph set allow_ec_optimizations=1' if results are satisfactory.\n   - Severity: medium\n5. PG autoscaler CRUSH rule consistency requirement\n   - Autoscaler now requires all pools to use the same type of CRUSH rule (either device class or none).\n   - Impact: Mixed rule types can cause autoscaler failures or uneven data distribution.\n   - Action: Standardize CRUSH rules across pools before enabling the autoscaler.\n   - Severity: low\n6. BGP configuration expanded under SDN\n   - New sections cover fabric‑level and node‑level BGP options, including IPv4/IPv6 prefixes, BFD, route maps, redistribution sources, and support for unnumbered interfaces. EVPN underlay requires at least one IPv4 address per node.\n   - Impact: Enables advanced routing for multi‑site clusters but adds configuration complexity.\n   - Action: Follow the step‑by‑step BGP guide; start with a simple IPv4 setup before adding advanced features.\n   - Severity: medium\n7. Load balancer default thresholds updated\n   - Imbalance threshold now defaults to 30 % and imbalance improvement to 10 %, with values normalized to a 0‑100 scale.\n   - Impact: Improves automatic load distribution decisions out of the box.\n   - Action: Review and adjust thresholds if your workload requires tighter balancing.\n   - Severity: low\n8. Sysctl configuration moved to drop‑in file\n   - System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.\n   - Impact: Simplifies sysctl management and aligns with best practices for package upgrades.\n   - Action: Confirm the drop‑in file exists and contains the desired settings; reload sysctl with 'sysctl --system'.\n   - Severity: low",
-        "ru": "",
-        "fr": ""
+        "ru": "1. Обновление версии до 9.1.5\n   - Документация и метаданные релиза обновлены до версии 9.1.5 с новой датой выпуска.\n   - Impact: Обеспечивает, что пользователи обращаются к правильной документации и получают последние исправления ошибок.\n   - Action: Verify you are consulting the 9.1.5 docs for any configuration tasks.\n   - Severity: low\n2. ZFS ARC по умолчанию уменьшен\n   - Размер ARC по умолчанию изменён с 50 % памяти хоста до 10 %, с ограничением в 16 ГиБ. Параметр записывается в /etc/modprobe.d/zfs.conf во время установки для Proxmox VE 8.1+.\n   - Impact: Снижает нагрузку на память на хостах, работающих с множеством ВМ, улучшая общую стабильность.\n   - Action: Отслеживайте использование ARC; при необходимости более крупного кэша для интенсивных нагрузок ZFS отрегулируйте /etc/modprobe.d/zfs.conf.\n   - Severity: medium\n3. Напоминание о порте брандмауэра Ceph\n   - В документации теперь явно указано, что firewall должен разрешать порты трафика Ceph. Используйте предоставленный firewall‑macro для простой настройки.\n   - Impact: Неоткрытые порты могут нарушить связь кластера Ceph, что приводит к недоступности данных.\n   - Action: Включите макрос брандмауэра Ceph или вручную откройте необходимые порты (например, 6789, 6800‑7300).\n   - Severity: high\n4. Документация FastEC (allow_ec_optimizations) добавлена\n   - Вводит новый флаг для включения быстрых путей ввода‑вывода с кодированием стирания. Требует EC‑пулы, последние версии мониторов и stripe units, выровненные на 4096 байт. Флаг односторонний; его сброс требует воссоздания пула.\n   - Impact: Потенциальный прирост производительности для EC‑пулов, но может вызвать переизбрание primary и отменить текущие scrub‑ы.\n   - Action: Сначала протестируйте FastEC на непроизводственном пуле, затем включите его с помощью 'pveceph set allow_ec_optimizations=1', если результаты будут удовлетворительными.\n   - Severity: medium\n5. Требование согласованности правила CRUSH автоскейлера PG\n   - Автоскейлер теперь требует, чтобы все пулы использовали один и тот же тип правила CRUSH (либо класс устройства, либо отсутствие).\n   - Impact: Смешанные типы правил могут вызвать сбои autoscaler или неравномерное распределение данных.\n   - Action: Стандартизируйте правила CRUSH во всех пулах перед включением автоскейлера.\n   - Severity: low\n6. Конфигурация BGP расширена в рамках SDN\n   - Новые разделы охватывают параметры BGP уровня fabric и уровня node, включая префиксы IPv4/IPv6, BFD, карты маршрутов, источники перераспределения и поддержку неномеровных интерфейсов. Подложка EVPN требует как минимум один IPv4‑адрес на узел.\n   - Impact: Включает расширенную маршрутизацию для мультисайтовых кластеров, но увеличивает сложность конфигурации.\n   - Action: Следуйте пошаговому руководству по BGP; начните с простой настройки IPv4, прежде чем добавлять расширенные функции.\n   - Severity: medium\n7. Обновлены пороговые значения балансировщика нагрузки по умолчанию\n   - Imbalance threshold теперь по умолчанию 30 %, а imbalance improvement — 10 %, при этом значения нормализованы по шкале 0‑100.\n   - Impact: Улучшает автоматическое распределение нагрузки из коробки.\n   - Action: Пересмотрите и при необходимости скорректируйте пороги, если ваша нагрузка требует более строгого балансирования.\n   - Severity: low\n8. Конфигурация sysctl перемещена в файл‑drop‑in.\n   - Глобальная настройка rp_filter теперь применяется через /etc/sysctl.d/99-rp-filter.conf вместо прямого редактирования /etc/sysctl.conf.\n   - Impact: Упрощает управление sysctl и соответствует лучшим практикам обновления пакетов.\n   - Action: Убедитесь, что drop‑in файл существует и содержит нужные настройки; перезагрузите sysctl командой `sysctl --system`.\n   - Severity: low",
+        "fr": "1. Mise à jour de version vers 9.1.5\n   - Documentation et métadonnées de version mises à jour vers la version 9.1.5 avec une nouvelle date de sortie.\n   - Impact: Garantit que les utilisateurs se réfèrent à la documentation correcte et reçoivent les dernières corrections de bugs.\n   - Action: Verify you are consulting the 9.1.5 docs for any configuration tasks.\n   - Severity: low\n2. Valeur par défaut de l'ARC ZFS réduite\n   - Taille ARC par défaut modifiée de 50 % de la mémoire de l’hôte à 10 %, plafonnée à 16 GiB. Le paramètre est écrit dans /etc/modprobe.d/zfs.conf lors de l’installation pour Proxmox VE 8.1+.\n   - Impact: Réduit la pression mémoire sur les hôtes exécutant de nombreuses VMs, améliorant ainsi la stabilité globale.\n   - Action: Surveillez l'utilisation de l'ARC ; ajustez /etc/modprobe.d/zfs.conf si un cache plus grand est nécessaire pour des charges de travail ZFS intensives.\n   - Severity: medium\n3. Rappel des ports du pare-feu Ceph\n   - La documentation indique désormais explicitement que le firewall doit autoriser les ports de trafic Ceph. Utilisez la macro firewall fournie pour une configuration facile.\n   - Impact: Des ports non ouverts peuvent interrompre la communication du cluster Ceph, entraînant une indisponibilité des données.\n   - Action: Activez la macro du pare-feu Ceph ou ouvrez manuellement les ports requis (par ex., 6789, 6800‑7300).\n   - Severity: high\n4. Documentation FastEC (allow_ec_optimizations) ajoutée\n   - Introduit un nouveau flag pour activer les chemins d'E/S codés par effacement rapides. Nécessite des pools EC, des versions récentes du moniteur et des unités de bande alignées à 4096 octets. Le flag est unidirectionnel ; le désactiver nécessite la recréation du pool.\n   - Impact: Potentiel gain de performance pour les pools EC, mais cela peut déclencher une réélection du primaire et annuler les scrubs en cours.\n   - Action: Testez FastEC d’abord sur un pool non‑production, puis activez‑le via « pveceph set allow_ec_optimizations=1 » si les résultats sont satisfaisants.\n   - Severity: medium\n5. Exigence de cohérence de la règle CRUSH pour l'autoscaler PG\n   - L'Autoscaler exige désormais que toutes les pools utilisent le même type de règle CRUSH (soit device class, soit aucune).\n   - Impact: Des types de règles mixtes peuvent entraîner des échecs de l'autoscaler ou une répartition inégale des données.\n   - Action: Standardisez les règles CRUSH sur les pools avant d'activer l'autoscaler.\n   - Severity: low\n6. Configuration BGP étendue sous SDN\n   - Nouvelles sections couvrent les options BGP au niveau du fabric et au niveau du nœud, y compris les préfixes IPv4/IPv6, BFD, les route maps, les sources de redistribution et la prise en charge des interfaces non numérotées. L'underlay EVPN nécessite au moins une adresse IPv4 par nœud.\n   - Impact: Active le routage avancé pour les clusters multi‑sites mais ajoute de la complexité de configuration.\n   - Action: Suivez le guide BGP étape par étape ; commencez par une configuration IPv4 simple avant d’ajouter des fonctionnalités avancées.\n   - Severity: medium\n7. Seuils par défaut du Load balancer mis à jour\n   - Le seuil de déséquilibre est désormais fixé par défaut à 30 % et l’amélioration du déséquilibre à 10 %, les valeurs étant normalisées sur une échelle de 0 à 100.\n   - Impact: Améliore les décisions de répartition automatique de la charge dès l'installation.\n   - Action: Examinez et ajustez les seuils si votre charge de travail nécessite un équilibrage plus strict.\n   - Severity: low\n8. Configuration Sysctl déplacée vers un fichier drop‑in\n   - System‑wide rp_filter setting is now applied via /etc/sysctl.d/99-rp-filter.conf instead of editing /etc/sysctl.conf directly.\n   - Impact: Simplifie la gestion de sysctl et s’aligne sur les meilleures pratiques pour les mises à jour de paquets.\n   - Action: Confirmez que le fichier drop‑in existe et contient les paramètres souhaités ; rechargez sysctl avec 'sysctl --system'.\n   - Severity: low"
       },
-      "translation_error": "Missing required translations: fr, ru. Re-run translation or verify translation model availability.",
-      "translation_attempt_at": "2026-05-26T10:29:37Z"
+      "translation_attempt_at": "2026-05-26T10:29:37Z",
+      "translation_generated_at": "2026-05-26T19:17:43Z"
     }
   },
   {
