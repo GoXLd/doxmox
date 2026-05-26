@@ -1414,10 +1414,30 @@ def event_row_id(event: dict[str, Any]) -> str:
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
 
 
+def compact_brief_text(value: str, max_len: int = 240) -> str:
+    text = re.sub(r"\s+", " ", str(value or "").strip())
+    if not text:
+        return ""
+    if len(text) <= max_len:
+        return text
+    return text[: max_len - 3].rsplit(" ", 1)[0].rstrip(",;") + "..."
+
+
+def localized_brief_text(event: dict[str, Any], language: str, fallback_text: str) -> str:
+    if language == "en":
+        return fallback_text
+    ai_node = event.get("ai") if isinstance(event.get("ai"), dict) else {}
+    summary_node = ai_node.get("summary") if isinstance(ai_node.get("summary"), dict) else {}
+    lang_summary = summary_node.get(language) if isinstance(summary_node.get(language), dict) else {}
+    overview = compact_brief_text(str(lang_summary.get("overview") or ""))
+    if overview and not looks_like_ai_envelope_text(overview):
+        return overview
+    return fallback_text
+
+
 def format_event_row(event: dict[str, Any]) -> str:
     timestamp = event.get("timestamp", "-")
     timestamp_display = format_utc_display(str(timestamp))
-    old_hash = (event.get("old_hash") or "-")[:12]
     new_hash = (event.get("new_hash") or "-")[:12]
     added = event.get("added_lines", 0)
     removed = event.get("removed_lines", 0)
@@ -1435,12 +1455,16 @@ def format_event_row(event: dict[str, Any]) -> str:
     row_id = event_row_id(event)
     selector = html.escape(str(timestamp))
     brief_node = event.get("brief") if isinstance(event.get("brief"), dict) else {}
-    brief_text = str(brief_node.get("text") or "").strip()
-    brief_html = (
-        f'<div class="row-brief"><span data-i18n="quick_summary">Quick summary:</span> {html.escape(brief_text)}</div>'
-        if brief_text
-        else ""
-    )
+    brief_text_en = compact_brief_text(str(brief_node.get("text") or ""))
+    if not brief_text_en:
+        ai_node = event.get("ai") if isinstance(event.get("ai"), dict) else {}
+        summary_node = ai_node.get("summary") if isinstance(ai_node.get("summary"), dict) else {}
+        summary_en = summary_node.get("en") if isinstance(summary_node.get("en"), dict) else {}
+        if summary_en:
+            brief_text_en = compact_brief_text(fallback_compact_summary(summary_en))
+    brief_text_fr = localized_brief_text(event, "fr", brief_text_en)
+    brief_text_ru = localized_brief_text(event, "ru", brief_text_en)
+
     details_cell = (
         f"{link} "
         '<button type="button" class="row-remove" data-action="hide-row" data-i18n="hide_entry">Hide</button> '
@@ -1448,18 +1472,33 @@ def format_event_row(event: dict[str, Any]) -> str:
         '<input type="checkbox" class="row-select" data-role="row-select"> '
         '<span data-i18n="select_entry">Select</span>'
         "</label>"
-        f"{brief_html}"
     )
 
-    return (
-        f'<tr data-event-id="{row_id}" data-history-selector="{selector}">'
+    main_row = (
+        f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}">'
         f"<td>{timestamp_display}</td>"
-        f"<td><code>{old_hash}</code></td>"
         f"<td><code>{new_hash}</code></td>"
-        f"<td>+{added} / -{removed}</td>"
+        f'<td class="col-line-delta">+{added} / -{removed}</td>'
         f"<td>{details_cell}</td>"
         "</tr>"
     )
+    if not brief_text_en:
+        return main_row
+
+    brief_attr_en = html.escape(brief_text_en, quote=True)
+    brief_attr_fr = html.escape(brief_text_fr, quote=True)
+    brief_attr_ru = html.escape(brief_text_ru, quote=True)
+    brief_row = (
+        f'<tr data-event-id="{row_id}" data-event-row="brief" data-history-selector="{selector}" class="brief-row">'
+        '<td colspan="4" class="brief-cell">'
+        f'<div class="row-brief" data-brief-en="{brief_attr_en}" data-brief-fr="{brief_attr_fr}" data-brief-ru="{brief_attr_ru}">'
+        '<span class="row-brief-label" data-i18n="quick_summary">Quick summary:</span> '
+        f'<span class="row-brief-text">{html.escape(brief_text_en)}</span>'
+        "</div>"
+        "</td>"
+        "</tr>"
+    )
+    return main_row + brief_row
 
 
 def docs_href_from_path(path: str) -> str:
@@ -2429,10 +2468,22 @@ def render_docs(
       vertical-align: middle;
     }}
     .row-brief {{
-      margin-top: 8px;
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.35;
+      font-size: 13px;
+      line-height: 1.45;
+    }}
+    .row-brief-label {{
+      font-weight: 600;
+    }}
+    .brief-row td {{
+      background: color-mix(in srgb, var(--accent-soft) 36%, transparent);
+      border-bottom: 1px solid var(--line);
+      padding-top: 10px;
+      padding-bottom: 12px;
+    }}
+    .brief-cell {{
+      padding-left: 14px;
+      padding-right: 14px;
     }}
     table {{
       width: 100%;
@@ -2451,6 +2502,10 @@ def render_docs(
       font-weight: 600;
       position: sticky;
       top: 0;
+    }}
+    .col-line-delta {{
+      white-space: nowrap;
+      min-width: 150px;
     }}
     code {{ font-size: 12px; }}
     @media (max-width: 860px) {{
@@ -2534,15 +2589,14 @@ def render_docs(
         <thead>
           <tr>
             <th data-i18n="timestamp">Timestamp (UTC)</th>
-            <th data-i18n="old_hash">Old Hash</th>
-            <th data-i18n="new_hash">New Hash</th>
-            <th data-i18n="line_delta">Line Delta</th>
+            <th data-i18n="hash">Hash</th>
+            <th class="col-line-delta" data-i18n="line_delta">Line Delta</th>
             <th data-i18n="details">Details</th>
           </tr>
         </thead>
         <tbody>
           {rows}
-          <tr data-empty-row="true" style="display:none;"><td colspan="5" data-i18n="no_changes">No changes detected yet.</td></tr>
+          <tr data-empty-row="true" style="display:none;"><td colspan="4" data-i18n="no_changes">No changes detected yet.</td></tr>
         </tbody>
       </table>
     </div>
@@ -2567,8 +2621,7 @@ def render_docs(
           source: "Source:",
           generated: "Generated (UTC):",
           timestamp: "Timestamp (UTC)",
-          old_hash: "Old Hash",
-          new_hash: "New Hash",
+          hash: "Hash",
           line_delta: "Line Delta",
           details: "Details",
           human_changelog: "Human Changelog",
@@ -2603,8 +2656,7 @@ def render_docs(
           source: "Source :",
           generated: "Généré (UTC) :",
           timestamp: "Horodatage (UTC)",
-          old_hash: "Ancien hash",
-          new_hash: "Nouveau hash",
+          hash: "Hash",
           line_delta: "Delta de lignes",
           details: "Details",
           human_changelog: "Human Changelog",
@@ -2639,8 +2691,7 @@ def render_docs(
           source: "Источник:",
           generated: "Сгенерировано (UTC):",
           timestamp: "Временная метка (UTC)",
-          old_hash: "Старый хэш",
-          new_hash: "Новый хэш",
+          hash: "Хэш",
           line_delta: "Изменение строк",
           details: "Детали",
           human_changelog: "Human Changelog",
@@ -2769,7 +2820,7 @@ def render_docs(
         row = document.createElement("tr");
         row.setAttribute("data-empty-row", "true");
         const cell = document.createElement("td");
-        cell.colSpan = 5;
+        cell.colSpan = 4;
         cell.setAttribute("data-i18n", "no_changes");
         cell.textContent = i18n[fallbackLang].no_changes;
         row.appendChild(cell);
@@ -2779,6 +2830,7 @@ def render_docs(
 
       function applyHiddenRows() {{
         const rows = [...tableBody.querySelectorAll("tr[data-event-id]")];
+        const mainRows = [...tableBody.querySelectorAll('tr[data-event-id][data-event-row="main"]')];
         let visible = 0;
         rows.forEach((row) => {{
           const id = row.getAttribute("data-event-id");
@@ -2788,7 +2840,9 @@ def render_docs(
             const checkbox = row.querySelector(".row-select");
             if (checkbox) checkbox.checked = false;
           }}
-          if (!isHidden) visible += 1;
+        }});
+        mainRows.forEach((row) => {{
+          if (row.style.display !== "none") visible += 1;
         }});
         const emptyRow = ensureEmptyRow();
         emptyRow.style.display = visible === 0 ? "" : "none";
@@ -2838,6 +2892,13 @@ def render_docs(
         }}
         themeSelect.options[0].textContent = t(lang, "theme_light");
         themeSelect.options[1].textContent = t(lang, "theme_dark");
+        document.querySelectorAll(".row-brief").forEach((node) => {{
+          if (!(node instanceof HTMLElement)) return;
+          const textNode = node.querySelector(".row-brief-text");
+          if (!(textNode instanceof HTMLElement)) return;
+          const value = node.getAttribute(`data-brief-${{lang}}`) || node.getAttribute("data-brief-en") || "";
+          if (value) textNode.textContent = value;
+        }});
       }}
 
       const currentLang = readLang();
