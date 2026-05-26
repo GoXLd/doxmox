@@ -804,6 +804,8 @@ def translate_single_language_summary(
         f"Translate this JSON summary to {language_label}.\n"
         "Return STRICT JSON object preserving the same structure:\n"
         "overview, professional_assessment, newcomer_explainer, changes[].\n"
+        "Field names must stay exactly in English (do not translate keys).\n"
+        "Each changes[] item must contain exactly: title, details, impact, recommended_action, severity.\n"
         "Keep Proxmox technical terms precise.\n\n"
         f"{json.dumps(summary_json, ensure_ascii=False)}"
     )
@@ -831,6 +833,8 @@ def translate_summary_bundle(
         "Translate this JSON summary to Russian and French.\n"
         "Return STRICT JSON with keys ru and fr, each preserving the same structure:\n"
         "overview, professional_assessment, newcomer_explainer, changes[].\n"
+        "Field names must stay exactly in English (do not translate keys).\n"
+        "Each changes[] item must contain exactly: title, details, impact, recommended_action, severity.\n"
         "Keep technical terms correct for Proxmox.\n\n"
         f"{json.dumps(summary_json, ensure_ascii=False)}"
     )
