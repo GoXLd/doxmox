@@ -754,18 +754,19 @@
       "status": "ok",
       "generated_at": "2026-05-25T14:39:25Z",
       "analysis_model": "@cf/openai/gpt-oss-120b",
-      "translation_model": "@cf/zai-org/glm-4.7-flash",
+      "translation_model": "@cf/openai/gpt-oss-120b",
       "embedding_model": "@cf/baai/bge-m3",
       "translation_status": {
         "required": [
           "ru",
           "fr"
         ],
-        "present": [],
-        "missing": [
+        "present": [
           "fr",
           "ru"
-        ]
+        ],
+        "missing": [],
+        "errors": {}
       },
       "summary": {
         "en": {
@@ -844,15 +845,169 @@
               "severity": "medium"
             }
           ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.1.3 вводит ряд улучшений и уточнений, направленных на упрощение управления кластером, повышение гибкости хранения и сетевых настроек, а также усиление контроля высокой доступности (HA). В выпуске также обновлена документация, отражающая новые рекомендации по лучшим практикам удаления узлов, работе с QDevice и управлению сертификатами Secure Boot.",
+          "professional_assessment": "Обновление предоставляет значительную пошаговую ценность для производственных сред. Примечательны усовершенствованные параметры автоматической балансировки HA, более ясные процедуры изменения сети Ceph и добавление типа хранилища import, которые совместно снижают операционный риск. Улучшения в документации по удалению узлов и требованиям к QDevice помогают избежать распространённых ошибок. Общий риск низок, однако операторам следует изучить новые шаги HA и Ceph перед их применением в критических кластерах.",
+          "newcomer_explainer": "В этой версии добавлены полезные новые функции и более понятные инструкции. Вы увидите новый элемент интерфейса (scroll‑to‑top), больше вариантов хранилища, улучшенные рекомендации по безопасному удалению узла и новые проверки безопасности при изменении сетевых настроек. Если вы используете HA или Ceph, доступны дополнительные параметры для обеспечения стабильной работы ваших сервисов.",
+          "changes": [
+            {
+              "title": "Обновление версии и полировка UI",
+              "details": "Proxmox VE теперь версии 9.1.3. На страницах документации добавлена ссылка «scroll to top», а небольшие изменения формулировок повышают ясность описания UI.",
+              "impact": "Пользователи видят новый номер версии и получают выгоду от более удобной навигации в документации.",
+              "recommended_action": "Обновите кэш веб‑интерфейса и документации, чтобы увидеть последние элементы UI.",
+              "severity": "low"
+            },
+            {
+              "title": "Улучшенный процесс удаления узла с предупреждением о QDevice",
+              "details": "Новая документация требует удаления любого QDevice перед выводом узла из кластера и добавляет подробное пошаговое руководство по безопасному удалению, особенно для узлов с включённым Ceph.",
+              "impact": "Prevents cluster quorum loss and Ceph data inconsistency during node decommissioning.",
+              "recommended_action": "Проверьте статус QDevice, следуйте новому чеклисту удаления и убедитесь, что все ВМ и хранилище перенесены перед продолжением.",
+              "severity": "high"
+            },
+            {
+              "title": "Процедуры изменения сети Ceph уточнены",
+              "details": "В подробном новом разделе (8.13.5) объясняется, как изменять публичные и кластерные сети, включая тестирование MTU, ограничения размеров пакетов IPv4/IPv6 и необходимые перезапуски сервисов.",
+              "impact": "Снижает риск случайного простоя кластера при изменении сетевых настроек.",
+              "recommended_action": "Следуйте пошаговому руководству, протестируйте размеры MTU и перезапустите OSD‑ы по одному хосту за раз, как описано.",
+              "severity": "medium"
+            },
+            {
+              "title": "Введены параметры автоматической балансировки HA",
+              "details": "Новые флаги конфигурации HA (ha-auto-rebalance, ha-auto-rebalance-method и т.д.) позволяют автоматическое перераспределение ресурсов после сбоев, с настраиваемыми пороговыми значениями и длительностью удержания.",
+              "impact": "Повышает устойчивость и уменьшает необходимость ручного вмешательства в HA‑кластерах.",
+              "recommended_action": "Включите ha-auto-rebalance в HA‑менеджере и настройте метод и пороги в соответствии с вашей нагрузкой.",
+              "severity": "medium"
+            },
+            {
+              "title": "Тип хранилища Import добавлен",
+              "details": "Документация теперь включает тип хранилища «import», позволяющий напрямую импортировать внешние наборы данных в пулы хранилищ Proxmox.",
+              "impact": "Упрощает миграцию существующих данных без необходимости промежуточных шагов.",
+              "recommended_action": "Создайте определение импортного хранилища там, где это необходимо, и используйте команды pvesm import для импорта данных.",
+              "severity": "low"
+            },
+            {
+              "title": "Обработка истечения срока действия сертификата Secure Boot",
+              "details": "Новое руководство по сертификатам Microsoft Secure Boot (2023k, 2023w) и способу регистрации обновлённых ключей, включая команды CLI для обновления сертификата.",
+              "impact": "Предотвращает сбои загрузки на системах с просроченными сертификатами Secure Boot.",
+              "recommended_action": "Проверьте текущую версию сертификата на каждом узле и при необходимости выполните предоставленные команды регистрации.",
+              "severity": "high"
+            },
+            {
+              "title": "Список моделей CPU расширен, а значения по умолчанию уточнены.",
+              "details": "Список поддерживаемых моделей CPU теперь включает более новые поколения AMD EPYC и Intel Sapphire/Rapids, а тип CPU по умолчанию установлен в значение «host».",
+              "impact": "Обеспечивает оптимальную производительность на современном оборудовании и уменьшает необходимость ручной настройки CPU.",
+              "recommended_action": "Убедитесь, что ВМ используют модель процессора по умолчанию \"host\", если только не требуется конкретный режим совместимости.",
+              "severity": "low"
+            },
+            {
+              "title": "Параметр простоя миграции ограничен",
+              "details": "Параметр «migration-downtime» теперь имеет максимальное значение 2000 секунд, соответствующее ограничению QEMU.",
+              "impact": "Предотвращает ошибки конфигурации, которые могут привести к сбоям миграции.",
+              "recommended_action": "Отрегулируйте любые пользовательские значения migration-downtime, чтобы они соответствовали новому ограничению.",
+              "severity": "low"
+            },
+            {
+              "title": "Опция CLI \"--max-workers\" заменяет устаревший \"--maxworkers\".",
+              "details": "Введён новый флаг \"--max-workers\" (1‑64) с более понятными значениями по умолчанию; старый флаг \"--maxworkers\" устарел.",
+              "impact": "Обеспечивает более точный контроль над параллельными операциями и соответствует более новым стандартам конфигурации.",
+              "recommended_action": "Обновите скрипты и автоматизацию, чтобы использовать «--max-workers» и удалить ссылки на устаревший флаг.",
+              "severity": "low"
+            },
+            {
+              "title": "Команды менеджера HA для активации/деактивации HA",
+              "details": "Новые команды «crm-command arm-ha» и «crm-command disarm-ha» позволяют администраторам временно отключать HA во время обслуживания, с возможностью заморозить или игнорировать ресурсы.",
+              "impact": "Обеспечивает безопасное обслуживание кластера без запуска отказов HA.",
+              "recommended_action": "Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.",
+              "severity": "medium"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.1.3 introduit une série d'améliorations et de clarifications visant à simplifier la gestion du cluster, à améliorer la flexibilité du stockage et du réseau, et à renforcer les contrôles de haute disponibilité (HA). La version met également à jour la documentation pour refléter les nouvelles procédures de bonnes pratiques concernant la suppression de nœuds, la gestion du QDevice et la gestion des certificats de démarrage sécurisé.",
+          "professional_assessment": "La mise à jour apporte une valeur incrémentale solide pour les environnements de production. Notables sont les options d'auto‑rebalance HA affinées, des procédures de modification du réseau Ceph plus claires, et l'ajout du type de stockage import, qui ensemble réduisent le risque opérationnel. Les améliorations de la documentation concernant la suppression de nœuds et les prérequis QDevice aident à éviter les écueils courants. Le risque global est faible, mais les opérateurs doivent examiner les nouvelles étapes HA et Ceph avant de les appliquer dans des clusters critiques.",
+          "newcomer_explainer": "Cette version ajoute de nouvelles fonctionnalités utiles et des instructions plus claires. Vous verrez un nouvel élément d’interface (défilement vers le haut), davantage d’options de stockage, de meilleurs conseils pour retirer un nœud en toute sécurité, et de nouvelles vérifications de sécurité lors de la modification des paramètres réseau. Si vous utilisez HA ou Ceph, des options supplémentaires sont disponibles pour maintenir vos services en bon fonctionnement.",
+          "changes": [
+            {
+              "title": "Mise à jour de version et amélioration de l’interface utilisateur",
+              "details": "Proxmox VE est maintenant en version 9.1.3. Un lien « scroll to top » a été ajouté aux pages de documentation, et de petites mises à jour de libellé améliorent la clarté de la description de l’interface utilisateur.",
+              "impact": "Les utilisateurs voient le nouveau numéro de version et bénéficient d’une navigation plus facile dans la documentation.",
+              "recommended_action": "Actualisez le cache du Web UI et de la documentation pour afficher les derniers éléments de l'interface.",
+              "severity": "low"
+            },
+            {
+              "title": "Flux de travail amélioré de suppression de nœud avec avertissement QDevice",
+              "details": "La nouvelle documentation exige la suppression de tout QDevice avant de retirer un nœud du cluster et ajoute un guide détaillé étape par étape pour une suppression sécurisée, en particulier pour les nœuds Ceph‑activés.",
+              "impact": "Empêche la perte de quorum du cluster et l'incohérence des données Ceph lors du décommissionnement d'un nœud.",
+              "recommended_action": "Verify QDevice status, follow the new removal checklist, and ensure all VMs and storage are migrated before proceeding.",
+              "severity": "high"
+            },
+            {
+              "title": "Procédures de changement du réseau Ceph clarifiées",
+              "details": "Une section complète nouvelle (8.13.5) explique comment modifier les réseaux public et de cluster, y compris les tests MTU, les limites de taille de paquets IPv4/IPv6 et les redémarrages de services requis.",
+              "impact": "Réduit le risque d’indisponibilité accidentelle du cluster lors de la modification des paramètres réseau.",
+              "recommended_action": "Suivez le guide pas à pas, testez les tailles MTU et redémarrez les OSD un hôte à la fois comme indiqué.",
+              "severity": "medium"
+            },
+            {
+              "title": "Options d'auto‑rééquilibrage HA introduites",
+              "details": "Les nouveaux indicateurs de configuration HA (ha-auto-rebalance, ha-auto-rebalance-method, etc.) permettent la redistribution automatique des ressources après des pannes, avec des seuils et des durées de maintien personnalisables.",
+              "impact": "Améliore la résilience et réduit l'intervention manuelle pour les clusters HA.",
+              "recommended_action": "Activez ha-auto-rebalance dans le gestionnaire HA et ajustez la méthode ainsi que les seuils pour correspondre à votre charge de travail.",
+              "severity": "medium"
+            },
+            {
+              "title": "Import storage type added",
+              "details": "La documentation inclut désormais un type de stockage « import », permettant l’importation directe d’ensembles de données externes dans les pools de stockage Proxmox.",
+              "impact": "Simplifie la migration des données existantes sans nécessiter d'étapes intermédiaires.",
+              "recommended_action": "Créez une définition de stockage d'importation où nécessaire et utilisez les commandes pvesm import pour importer les données.",
+              "severity": "low"
+            },
+            {
+              "title": "Gestion de l'expiration du certificat Secure Boot",
+              "details": "Nouvelles directives concernant les certificats Microsoft Secure Boot (2023k, 2023w) et la façon d’enregistrer les clés mises à jour, y compris les commandes CLI pour le renouvellement du certificat.",
+              "impact": "Empêche les échecs de démarrage sur les systèmes avec des certificats Secure Boot expirés.",
+              "recommended_action": "Vérifiez la version actuelle du certificat sur chaque nœud et exécutez les commandes d'enrôlement fournies si nécessaire.",
+              "severity": "high"
+            },
+            {
+              "title": "Liste des modèles de CPU élargie et valeurs par défaut clarifiées",
+              "details": "La liste des modèles de CPU pris en charge inclut désormais les générations plus récentes d'AMD EPYC et d'Intel Sapphire/Rapids, et le type de CPU par défaut est défini sur l'architecture « host ».",
+              "impact": "Garantit des performances optimales sur le matériel moderne et réduit la configuration manuelle du CPU.",
+              "recommended_action": "Vérifiez que les VM utilisent le modèle CPU « host » par défaut, sauf si un mode de compatibilité spécifique est requis.",
+              "severity": "low"
+            },
+            {
+              "title": "Paramètre de temps d'arrêt de migration limité",
+              "details": "L'option \"migration-downtime\" a maintenant un maximum de 2000 secondes, correspondant à la limite de QEMU.",
+              "impact": "Empêche les erreurs de configuration pouvant entraîner des échecs de migration.",
+              "recommended_action": "Ajustez toutes les valeurs personnalisées de migration-downtime pour rester dans la nouvelle limite.",
+              "severity": "low"
+            },
+            {
+              "title": "L'option CLI « --max‑workers » remplace l'option obsolète « --maxworkers ».",
+              "details": "Un nouveau drapeau « --max-workers » (1‑64) est introduit avec des valeurs par défaut plus claires ; l’ancien drapeau « --maxworkers » est déprécié.",
+              "impact": "Provides better control over parallel operations and aligns with newer configuration standards.",
+              "recommended_action": "Update scripts and automation to use \"--max-workers\" and remove references to the deprecated flag.",
+              "severity": "low"
+            },
+            {
+              "title": "Commandes du gestionnaire HA pour armer/désarmer HA",
+              "details": "Les nouvelles commandes « crm-command arm-ha » et « crm-command disarm-ha » permettent aux administrateurs de désactiver temporairement le HA pendant la maintenance, avec des options pour geler ou ignorer les ressources.",
+              "impact": "Facilite la maintenance sécurisée du cluster sans déclencher de basculements HA.",
+              "recommended_action": "Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.",
+              "severity": "medium"
+            }
+          ]
         }
       },
       "summary_text": {
         "en": "1. Version bump and UI polish\n   - Proxmox VE is now version 9.1.3. A \"scroll to top\" link was added to the documentation pages, and minor wording updates improve clarity across the UI description.\n   - Impact: Users see the new version number and benefit from easier navigation in the docs.\n   - Action: Refresh the web UI and documentation cache to view the latest UI elements.\n   - Severity: low\n2. Enhanced node removal workflow with QDevice warning\n   - New documentation requires removal of any QDevice before taking a node out of the cluster and adds a detailed step‑by‑step guide for safe removal, especially for Ceph‑enabled nodes.\n   - Impact: Prevents cluster quorum loss and Ceph data inconsistency during node decommissioning.\n   - Action: Verify QDevice status, follow the new removal checklist, and ensure all VMs and storage are migrated before proceeding.\n   - Severity: high\n3. Ceph network change procedures clarified\n   - A comprehensive new section (8.13.5) explains how to modify public and cluster networks, including MTU testing, IPv4/IPv6 packet size limits, and required service restarts.\n   - Impact: Reduces risk of accidental cluster downtime when adjusting network settings.\n   - Action: Follow the step‑by‑step guide, test MTU sizes, and restart OSDs one host at a time as described.\n   - Severity: medium\n4. HA auto‑rebalance options introduced\n   - New HA configuration flags (ha-auto-rebalance, ha-auto-rebalance-method, etc.) allow automatic redistribution of resources after failures, with customizable thresholds and hold durations.\n   - Impact: Improves resilience and reduces manual intervention for HA clusters.\n   - Action: Enable ha-auto-rebalance in the HA manager and tune the method and thresholds to match your workload.\n   - Severity: medium\n5. Import storage type added\n   - Documentation now includes an \"import\" storage type, allowing direct import of external data sets into Proxmox storage pools.\n   - Impact: Simplifies migration of existing data without needing intermediate steps.\n   - Action: Create an import storage definition where needed and use the pvesm import commands to bring data in.\n   - Severity: low\n6. Secure Boot certificate expiration handling\n   - New guidance on Microsoft Secure Boot certificates (2023k, 2023w) and how to enroll updated keys, including CLI commands for certificate renewal.\n   - Impact: Prevents boot failures on systems with expired Secure Boot certificates.\n   - Action: Check the current certificate version on each node and run the provided enrollment commands if needed.\n   - Severity: high\n7. CPU model list expanded and defaults clarified\n   - The supported CPU model list now includes newer AMD EPYC and Intel Sapphire/Rapids generations, and the default CPU type is set to \"host\" architecture.\n   - Impact: Ensures optimal performance on modern hardware and reduces manual CPU configuration.\n   - Action: Verify that VMs use the default \"host\" CPU model unless a specific compatibility mode is required.\n   - Severity: low\n8. Migration downtime parameter capped\n   - The \"migration-downtime\" option now has a maximum of 2000 seconds, matching QEMU's limit.\n   - Impact: Prevents configuration errors that could cause migration failures.\n   - Action: Adjust any custom migration-downtime values to stay within the new limit.\n   - Severity: low\n9. CLI option \"--max-workers\" replaces deprecated \"--maxworkers\"\n   - A new \"--max-workers\" flag (1‑64) is introduced with clearer defaults; the old \"--maxworkers\" flag is deprecated.\n   - Impact: Provides better control over parallel operations and aligns with newer configuration standards.\n   - Action: Update scripts and automation to use \"--max-workers\" and remove references to the deprecated flag.\n   - Severity: low\n10. HA manager commands for arm/disarm HA\n   - New commands \"crm-command arm-ha\" and \"crm-command disarm-ha\" allow administrators to temporarily disable HA during maintenance, with options to freeze or ignore resources.\n   - Impact: Facilitates safe cluster maintenance without triggering HA failovers.\n   - Action: Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.\n   - Severity: medium",
-        "ru": "",
-        "fr": ""
+        "ru": "1. Обновление версии и полировка UI\n   - Proxmox VE теперь версии 9.1.3. На страницах документации добавлена ссылка «scroll to top», а небольшие изменения формулировок повышают ясность описания UI.\n   - Impact: Пользователи видят новый номер версии и получают выгоду от более удобной навигации в документации.\n   - Action: Обновите кэш веб‑интерфейса и документации, чтобы увидеть последние элементы UI.\n   - Severity: low\n2. Улучшенный процесс удаления узла с предупреждением о QDevice\n   - Новая документация требует удаления любого QDevice перед выводом узла из кластера и добавляет подробное пошаговое руководство по безопасному удалению, особенно для узлов с включённым Ceph.\n   - Impact: Prevents cluster quorum loss and Ceph data inconsistency during node decommissioning.\n   - Action: Проверьте статус QDevice, следуйте новому чеклисту удаления и убедитесь, что все ВМ и хранилище перенесены перед продолжением.\n   - Severity: high\n3. Процедуры изменения сети Ceph уточнены\n   - В подробном новом разделе (8.13.5) объясняется, как изменять публичные и кластерные сети, включая тестирование MTU, ограничения размеров пакетов IPv4/IPv6 и необходимые перезапуски сервисов.\n   - Impact: Снижает риск случайного простоя кластера при изменении сетевых настроек.\n   - Action: Следуйте пошаговому руководству, протестируйте размеры MTU и перезапустите OSD‑ы по одному хосту за раз, как описано.\n   - Severity: medium\n4. Введены параметры автоматической балансировки HA\n   - Новые флаги конфигурации HA (ha-auto-rebalance, ha-auto-rebalance-method и т.д.) позволяют автоматическое перераспределение ресурсов после сбоев, с настраиваемыми пороговыми значениями и длительностью удержания.\n   - Impact: Повышает устойчивость и уменьшает необходимость ручного вмешательства в HA‑кластерах.\n   - Action: Включите ha-auto-rebalance в HA‑менеджере и настройте метод и пороги в соответствии с вашей нагрузкой.\n   - Severity: medium\n5. Тип хранилища Import добавлен\n   - Документация теперь включает тип хранилища «import», позволяющий напрямую импортировать внешние наборы данных в пулы хранилищ Proxmox.\n   - Impact: Упрощает миграцию существующих данных без необходимости промежуточных шагов.\n   - Action: Создайте определение импортного хранилища там, где это необходимо, и используйте команды pvesm import для импорта данных.\n   - Severity: low\n6. Обработка истечения срока действия сертификата Secure Boot\n   - Новое руководство по сертификатам Microsoft Secure Boot (2023k, 2023w) и способу регистрации обновлённых ключей, включая команды CLI для обновления сертификата.\n   - Impact: Предотвращает сбои загрузки на системах с просроченными сертификатами Secure Boot.\n   - Action: Проверьте текущую версию сертификата на каждом узле и при необходимости выполните предоставленные команды регистрации.\n   - Severity: high\n7. Список моделей CPU расширен, а значения по умолчанию уточнены.\n   - Список поддерживаемых моделей CPU теперь включает более новые поколения AMD EPYC и Intel Sapphire/Rapids, а тип CPU по умолчанию установлен в значение «host».\n   - Impact: Обеспечивает оптимальную производительность на современном оборудовании и уменьшает необходимость ручной настройки CPU.\n   - Action: Убедитесь, что ВМ используют модель процессора по умолчанию \"host\", если только не требуется конкретный режим совместимости.\n   - Severity: low\n8. Параметр простоя миграции ограничен\n   - Параметр «migration-downtime» теперь имеет максимальное значение 2000 секунд, соответствующее ограничению QEMU.\n   - Impact: Предотвращает ошибки конфигурации, которые могут привести к сбоям миграции.\n   - Action: Отрегулируйте любые пользовательские значения migration-downtime, чтобы они соответствовали новому ограничению.\n   - Severity: low\n9. Опция CLI \"--max-workers\" заменяет устаревший \"--maxworkers\".\n   - Введён новый флаг \"--max-workers\" (1‑64) с более понятными значениями по умолчанию; старый флаг \"--maxworkers\" устарел.\n   - Impact: Обеспечивает более точный контроль над параллельными операциями и соответствует более новым стандартам конфигурации.\n   - Action: Обновите скрипты и автоматизацию, чтобы использовать «--max-workers» и удалить ссылки на устаревший флаг.\n   - Severity: low\n10. Команды менеджера HA для активации/деактивации HA\n   - Новые команды «crm-command arm-ha» и «crm-command disarm-ha» позволяют администраторам временно отключать HA во время обслуживания, с возможностью заморозить или игнорировать ресурсы.\n   - Impact: Обеспечивает безопасное обслуживание кластера без запуска отказов HA.\n   - Action: Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.\n   - Severity: medium",
+        "fr": "1. Mise à jour de version et amélioration de l’interface utilisateur\n   - Proxmox VE est maintenant en version 9.1.3. Un lien « scroll to top » a été ajouté aux pages de documentation, et de petites mises à jour de libellé améliorent la clarté de la description de l’interface utilisateur.\n   - Impact: Les utilisateurs voient le nouveau numéro de version et bénéficient d’une navigation plus facile dans la documentation.\n   - Action: Actualisez le cache du Web UI et de la documentation pour afficher les derniers éléments de l'interface.\n   - Severity: low\n2. Flux de travail amélioré de suppression de nœud avec avertissement QDevice\n   - La nouvelle documentation exige la suppression de tout QDevice avant de retirer un nœud du cluster et ajoute un guide détaillé étape par étape pour une suppression sécurisée, en particulier pour les nœuds Ceph‑activés.\n   - Impact: Empêche la perte de quorum du cluster et l'incohérence des données Ceph lors du décommissionnement d'un nœud.\n   - Action: Verify QDevice status, follow the new removal checklist, and ensure all VMs and storage are migrated before proceeding.\n   - Severity: high\n3. Procédures de changement du réseau Ceph clarifiées\n   - Une section complète nouvelle (8.13.5) explique comment modifier les réseaux public et de cluster, y compris les tests MTU, les limites de taille de paquets IPv4/IPv6 et les redémarrages de services requis.\n   - Impact: Réduit le risque d’indisponibilité accidentelle du cluster lors de la modification des paramètres réseau.\n   - Action: Suivez le guide pas à pas, testez les tailles MTU et redémarrez les OSD un hôte à la fois comme indiqué.\n   - Severity: medium\n4. Options d'auto‑rééquilibrage HA introduites\n   - Les nouveaux indicateurs de configuration HA (ha-auto-rebalance, ha-auto-rebalance-method, etc.) permettent la redistribution automatique des ressources après des pannes, avec des seuils et des durées de maintien personnalisables.\n   - Impact: Améliore la résilience et réduit l'intervention manuelle pour les clusters HA.\n   - Action: Activez ha-auto-rebalance dans le gestionnaire HA et ajustez la méthode ainsi que les seuils pour correspondre à votre charge de travail.\n   - Severity: medium\n5. Import storage type added\n   - La documentation inclut désormais un type de stockage « import », permettant l’importation directe d’ensembles de données externes dans les pools de stockage Proxmox.\n   - Impact: Simplifie la migration des données existantes sans nécessiter d'étapes intermédiaires.\n   - Action: Créez une définition de stockage d'importation où nécessaire et utilisez les commandes pvesm import pour importer les données.\n   - Severity: low\n6. Gestion de l'expiration du certificat Secure Boot\n   - Nouvelles directives concernant les certificats Microsoft Secure Boot (2023k, 2023w) et la façon d’enregistrer les clés mises à jour, y compris les commandes CLI pour le renouvellement du certificat.\n   - Impact: Empêche les échecs de démarrage sur les systèmes avec des certificats Secure Boot expirés.\n   - Action: Vérifiez la version actuelle du certificat sur chaque nœud et exécutez les commandes d'enrôlement fournies si nécessaire.\n   - Severity: high\n7. Liste des modèles de CPU élargie et valeurs par défaut clarifiées\n   - La liste des modèles de CPU pris en charge inclut désormais les générations plus récentes d'AMD EPYC et d'Intel Sapphire/Rapids, et le type de CPU par défaut est défini sur l'architecture « host ».\n   - Impact: Garantit des performances optimales sur le matériel moderne et réduit la configuration manuelle du CPU.\n   - Action: Vérifiez que les VM utilisent le modèle CPU « host » par défaut, sauf si un mode de compatibilité spécifique est requis.\n   - Severity: low\n8. Paramètre de temps d'arrêt de migration limité\n   - L'option \"migration-downtime\" a maintenant un maximum de 2000 secondes, correspondant à la limite de QEMU.\n   - Impact: Empêche les erreurs de configuration pouvant entraîner des échecs de migration.\n   - Action: Ajustez toutes les valeurs personnalisées de migration-downtime pour rester dans la nouvelle limite.\n   - Severity: low\n9. L'option CLI « --max‑workers » remplace l'option obsolète « --maxworkers ».\n   - Un nouveau drapeau « --max-workers » (1‑64) est introduit avec des valeurs par défaut plus claires ; l’ancien drapeau « --maxworkers » est déprécié.\n   - Impact: Provides better control over parallel operations and aligns with newer configuration standards.\n   - Action: Update scripts and automation to use \"--max-workers\" and remove references to the deprecated flag.\n   - Severity: low\n10. Commandes du gestionnaire HA pour armer/désarmer HA\n   - Les nouvelles commandes « crm-command arm-ha » et « crm-command disarm-ha » permettent aux administrateurs de désactiver temporairement le HA pendant la maintenance, avec des options pour geler ou ignorer les ressources.\n   - Impact: Facilite la maintenance sécurisée du cluster sans déclencher de basculements HA.\n   - Action: Use \"disarm-ha\" before planned maintenance and \"arm-ha\" afterwards, selecting the appropriate resource mode.\n   - Severity: medium"
       },
-      "translation_error": "Missing required translations: fr, ru. Re-run translation or verify translation model availability.",
-      "translation_attempt_at": "2026-05-26T10:29:37Z"
+      "translation_attempt_at": "2026-05-26T10:29:37Z",
+      "translation_generated_at": "2026-05-26T19:39:21Z"
     }
   }
 ]
