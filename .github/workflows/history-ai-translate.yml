@@ -17,6 +17,11 @@ on:
         required: false
         default: false
         type: boolean
+      translation_model:
+        description: "Workers AI translation model id"
+        required: false
+        default: "@cf/meta/m2m100-1.2b"
+        type: string
 
 permissions:
   contents: write
@@ -74,6 +79,10 @@ jobs:
 
           if [ "${{ inputs.force }}" = "true" ]; then
             ARGS+=(--history-ai-translate-force)
+          fi
+
+          if [ -n "${{ inputs.translation_model }}" ]; then
+            ARGS+=(--ai-translation-model "${{ inputs.translation_model }}")
           fi
 
           python src/monitor.py "${ARGS[@]}"

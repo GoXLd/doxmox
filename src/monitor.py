@@ -33,7 +33,7 @@ DEFAULT_GITHUB_REPO = "GoXLd/doxmox"
 DEFAULT_GITHUB_REF = "main"
 DEFAULT_GITHUB_ADMIN_WORKFLOW = "history-admin-delete.yml"
 DEFAULT_AI_ANALYSIS_MODEL = "@cf/openai/gpt-oss-120b"
-DEFAULT_AI_TRANSLATION_MODEL = "@cf/zai-org/glm-4.7-flash"
+DEFAULT_AI_TRANSLATION_MODEL = "@cf/meta/m2m100-1.2b"
 DEFAULT_AI_BRIEF_MODEL = "@cf/openai/gpt-oss-20b"
 DEFAULT_AI_BRIEF_FALLBACK_MODEL = "@cf/zai-org/glm-4.7-flash"
 DEFAULT_AI_EMBEDDING_MODEL = "@cf/baai/bge-m3"
@@ -492,6 +492,47 @@ def workers_ai_extract_refusal(payload: dict[str, Any]) -> str | None:
     return str(refusal)
 
 
+def workers_ai_extract_translation_text(payload: dict[str, Any]) -> str | None:
+    result = payload.get("result")
+    if isinstance(result, dict):
+        translated = result.get("translated_text")
+        if isinstance(translated, str) and translated.strip():
+            return translated.strip()
+        response = result.get("response")
+        if isinstance(response, str) and response.strip():
+            return response.strip()
+    if isinstance(result, str) and result.strip():
+        return result.strip()
+    translated = payload.get("translated_text")
+    if isinstance(translated, str) and translated.strip():
+        return translated.strip()
+    response = payload.get("response")
+    if isinstance(response, str) and response.strip():
+        return response.strip()
+    return None
+
+
+def workers_ai_translate_text(
+    session: requests.Session,
+    config: AIConfig,
+    model: str,
+    text: str,
+    target_lang: str,
+    source_lang: str = "english",
+) -> str:
+    payload = {
+        "text": text,
+        "source_lang": source_lang,
+        "target_lang": target_lang,
+    }
+    raw = workers_ai_run(session, config.account_id or "", config.api_token or "", model, payload)
+    translated = workers_ai_extract_translation_text(raw)
+    if translated:
+        return translated
+    preview = json.dumps(raw, ensure_ascii=False)[:280]
+    raise RuntimeError(f"Invalid translation response payload. Preview: {preview}")
+
+
 def workers_ai_embeddings(
     session: requests.Session,
     config: AIConfig,
@@ -850,6 +891,52 @@ def translate_single_language_summary(
     summary_json: dict[str, Any],
     language: str,
 ) -> dict[str, Any]:
+    model_name = str(config.translation_model or "").strip()
+    if "m2m100-1.2b" in model_name:
+        target_lang = {"ru": "russian", "fr": "french"}.get(language, language)
+
+        def tr(text: str, field_name: str) -> str:
+            value = str(text or "").strip()
+            if not value:
+                return ""
+            try:
+                return workers_ai_translate_text(
+                    session=session,
+                    config=config,
+                    model=model_name,
+                    text=value,
+                    target_lang=target_lang,
+                )
+            except Exception as exc:
+                raise RuntimeError(f"{field_name}: {format_exception_message(exc)}") from exc
+
+        translated_changes: list[dict[str, str]] = []
+        for idx, change in enumerate(summary_json.get("changes", []), start=1):
+            if not isinstance(change, dict):
+                continue
+            translated_changes.append(
+                {
+                    "title": tr(str(change.get("title") or ""), f"changes[{idx}].title"),
+                    "details": tr(str(change.get("details") or ""), f"changes[{idx}].details"),
+                    "impact": tr(str(change.get("impact") or ""), f"changes[{idx}].impact"),
+                    "recommended_action": tr(
+                        str(change.get("recommended_action") or ""),
+                        f"changes[{idx}].recommended_action",
+                    ),
+                    "severity": str(change.get("severity") or "").strip(),
+                }
+            )
+
+        return {
+            "overview": tr(str(summary_json.get("overview") or ""), "overview"),
+            "professional_assessment": tr(
+                str(summary_json.get("professional_assessment") or ""),
+                "professional_assessment",
+            ),
+            "newcomer_explainer": tr(str(summary_json.get("newcomer_explainer") or ""), "newcomer_explainer"),
+            "changes": translated_changes,
+        }
+
     language_label = {"ru": "Russian", "fr": "French"}.get(language, language)
     system = "You are a professional technical translator. Output valid JSON only."
     user = (
@@ -862,7 +949,7 @@ def translate_single_language_summary(
         f"{json.dumps(summary_json, ensure_ascii=False)}"
     )
     models_to_try: list[str] = []
-    for candidate in (config.translation_model, config.fallback_model, config.analysis_model):
+    for candidate in (config.translation_model,):
         value = str(candidate or "").strip()
         if value and value not in models_to_try:
             models_to_try.append(value)
