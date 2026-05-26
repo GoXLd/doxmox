@@ -1433,6 +1433,24 @@ def event_row_id(event: dict[str, Any]) -> str:
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
 
 
+def row_accent_color(row_index: int) -> str:
+    palette = [
+        "#38bdf8",
+        "#22c55e",
+        "#f97316",
+        "#a855f7",
+        "#eab308",
+        "#ef4444",
+        "#14b8a6",
+        "#3b82f6",
+        "#84cc16",
+        "#f43f5e",
+    ]
+    if row_index < 0:
+        return palette[0]
+    return palette[row_index % len(palette)]
+
+
 def compact_brief_text(value: str, max_len: int = 240) -> str:
     text = re.sub(r"\s+", " ", str(value or "").strip())
     if not text:
@@ -1462,7 +1480,7 @@ def has_localized_brief(event: dict[str, Any], language: str) -> bool:
     return bool(overview and not looks_like_ai_envelope_text(overview))
 
 
-def format_event_row(event: dict[str, Any]) -> str:
+def format_event_row(event: dict[str, Any], row_index: int) -> str:
     timestamp = event.get("timestamp", "-")
     timestamp_display = format_utc_display(str(timestamp))
     new_hash = (event.get("new_hash") or "-")[:12]
@@ -1504,12 +1522,13 @@ def format_event_row(event: dict[str, Any]) -> str:
     )
 
     main_row_class = "has-brief" if brief_text_en else ""
+    accent = row_accent_color(row_index)
     main_row = (
-        f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}" class="{main_row_class}">'
+        f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}" class="{main_row_class}" style="--row-accent: {accent};">'
         f"<td>{timestamp_display}</td>"
         f"<td><code>{new_hash}</code></td>"
         f'<td class="col-line-delta">+{added} / -{removed}</td>'
-        f"<td>{details_cell}</td>"
+        f'<td class="details-cell">{details_cell}</td>'
         "</tr>"
     )
     if not brief_text_en:
@@ -1519,7 +1538,7 @@ def format_event_row(event: dict[str, Any]) -> str:
     brief_attr_fr = html.escape(brief_text_fr, quote=True)
     brief_attr_ru = html.escape(brief_text_ru, quote=True)
     brief_row = (
-        f'<tr data-event-id="{row_id}" data-event-row="brief" data-history-selector="{selector}" class="brief-row">'
+        f'<tr data-event-id="{row_id}" data-event-row="brief" data-history-selector="{selector}" class="brief-row" style="--row-accent: {accent};">'
         '<td colspan="4" class="brief-cell">'
         f'<div class="row-brief" data-brief-en="{brief_attr_en}" data-brief-fr="{brief_attr_fr}" data-brief-ru="{brief_attr_ru}" '
         f'data-brief-fr-localized="{"1" if brief_fr_localized else "0"}" data-brief-ru-localized="{"1" if brief_ru_localized else "0"}">'
@@ -2285,7 +2304,7 @@ def render_docs(
     github_admin_workflow: str,
 ) -> None:
     docs_dir.mkdir(parents=True, exist_ok=True)
-    rows = "\n".join(format_event_row(event) for event in history)
+    rows = "\n".join(format_event_row(event, idx) for idx, event in enumerate(history))
 
     generated_at = format_utc_display(now_utc_iso())
     license_url = f"https://github.com/{github_repo}/blob/{github_ref}/LICENSE"
@@ -2502,6 +2521,18 @@ def render_docs(
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
+      position: relative;
+      padding-left: 16px;
+    }}
+    .row-brief::before {{
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      bottom: 1px;
+      width: 3px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--row-accent, var(--accent)) 76%, #ffffff 24%);
     }}
     .row-brief-label {{
       font-weight: 600;
@@ -2509,6 +2540,25 @@ def render_docs(
     tr.has-brief > td {{
       border-bottom: 0;
       padding-bottom: 8px;
+    }}
+    tr[data-event-row="main"].has-brief > td:first-child {{
+      border-left: 4px solid var(--row-accent, var(--accent));
+      padding-left: 10px;
+      box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--row-accent, var(--accent)) 35%, transparent);
+    }}
+    tr[data-event-row="main"].has-brief > td.details-cell {{
+      position: relative;
+      padding-left: 20px;
+    }}
+    tr[data-event-row="main"].has-brief > td.details-cell::before {{
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      border-radius: 3px;
+      background: color-mix(in srgb, var(--row-accent, var(--accent)) 78%, #ffffff 22%);
     }}
     .brief-row td {{
       background: color-mix(in srgb, var(--accent-soft) 36%, transparent);
@@ -2519,7 +2569,8 @@ def render_docs(
     .brief-cell {{
       padding-left: 14px;
       padding-right: 14px;
-      border-left: 3px solid color-mix(in srgb, var(--accent) 60%, transparent);
+      border-left: 4px solid color-mix(in srgb, var(--row-accent, var(--accent)) 70%, #ffffff 30%);
+      box-shadow: inset 0 1px 0 color-mix(in srgb, var(--row-accent, var(--accent)) 28%, transparent);
     }}
     table {{
       width: 100%;
