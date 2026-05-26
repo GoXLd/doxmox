@@ -630,6 +630,72 @@ def workers_ai_translate_text(
     raise RuntimeError("Unknown translation error")
 
 
+def workers_ai_translate_text_with_llm(
+    session: requests.Session,
+    config: AIConfig,
+    model: str,
+    text: str,
+    target_lang_label: str,
+    allow_split: bool = True,
+) -> str:
+    value = str(text or "").strip()
+    if not value:
+        return ""
+
+    system = "You are a professional technical translator. Return only translated text."
+    user = (
+        f"Translate the following text to {target_lang_label}.\n"
+        "Keep Proxmox terms precise. Preserve meaning exactly.\n"
+        "Output only the translated text, without JSON, markdown, or commentary.\n\n"
+        + value
+    )
+    last_error: Exception | None = None
+
+    for attempt in range(3):
+        try:
+            raw = workers_ai_chat_completion(
+                session=session,
+                config=config,
+                model=model,
+                messages=ai_messages(system, user),
+                max_tokens=2200,
+                temperature=0.0,
+            )
+            refusal = workers_ai_extract_refusal(raw)
+            if refusal:
+                raise RuntimeError(f"refusal={refusal}")
+            translated = workers_ai_extract_text(raw).strip()
+            if translated:
+                return translated
+            preview = json.dumps(raw, ensure_ascii=False)[:280]
+            raise RuntimeError(f"Invalid LLM translation response payload. Preview: {preview}")
+        except Exception as exc:
+            last_error = exc
+            if not is_retryable_translation_error(exc) or attempt == 2:
+                break
+            time.sleep(1.2 * (2**attempt))
+
+    if allow_split and last_error is not None and is_retryable_translation_error(last_error) and len(value) > 420:
+        parts = split_text_for_translation(value, max_len=420)
+        translated_parts: list[str] = []
+        for part in parts:
+            translated_parts.append(
+                workers_ai_translate_text_with_llm(
+                    session=session,
+                    config=config,
+                    model=model,
+                    text=part,
+                    target_lang_label=target_lang_label,
+                    allow_split=False,
+                )
+            )
+        return "\n".join(piece.strip() for piece in translated_parts if piece and piece.strip())
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Unknown LLM translation error")
+
+
 def workers_ai_embeddings(
     session: requests.Session,
     config: AIConfig,
@@ -1051,54 +1117,68 @@ def translate_single_language_summary(
 
         return translated_summary
 
-    language_label = {"ru": "Russian", "fr": "French"}.get(language, language)
-    system = "You are a professional technical translator. Output valid JSON only."
-    user = (
-        f"Translate this JSON summary to {language_label}.\n"
-        "Return STRICT JSON object preserving the same structure:\n"
-        "overview, professional_assessment, newcomer_explainer, changes[].\n"
-        "Field names must stay exactly in English (do not translate keys).\n"
-        "Each changes[] item must contain exactly: title, details, impact, recommended_action, severity.\n"
-        "Keep Proxmox technical terms precise.\n\n"
-        f"{json.dumps(summary_json, ensure_ascii=False)}"
-    )
-    models_to_try: list[str] = []
-    for candidate in (config.translation_model,):
-        value = str(candidate or "").strip()
-        if value and value not in models_to_try:
-            models_to_try.append(value)
+    model = str(config.translation_model or "").strip()
+    if not model:
+        raise RuntimeError("Translation model is not configured")
 
-    errors: list[str] = []
-    for model in models_to_try:
+    language_label = {"ru": "Russian", "fr": "French"}.get(language, language)
+    soft_failures: list[str] = []
+
+    def tr_llm(text: str, field_name: str, allow_english_fallback: bool = True) -> str:
+        value = str(text or "").strip()
+        if not value:
+            return ""
         try:
-            raw = workers_ai_chat_completion(
+            return workers_ai_translate_text_with_llm(
                 session=session,
                 config=config,
                 model=model,
-                messages=ai_messages(system, user),
-                max_tokens=3200,
-                response_format={"type": "json_object"},
-                temperature=0.0,
+                text=value,
+                target_lang_label=language_label,
             )
-            refusal = workers_ai_extract_refusal(raw)
-            if refusal:
-                errors.append(f"{model}: refusal={refusal}")
-                continue
-
-            translated = workers_ai_extract_text(raw).strip()
-            parsed = parse_json_payload(translated)
-            normalized = normalize_summary_payload(parsed)
-            if normalized.get("overview"):
-                return normalized
-            preview = " ".join(translated.split())[:220]
-            errors.append(f"{model}: invalid payload (missing overview). Preview: {preview}")
         except Exception as exc:
-            errors.append(f"{model}: {format_exception_message(exc)}")
+            detail = f"{field_name}: {format_exception_message(exc)}"
+            if allow_english_fallback:
+                soft_failures.append(detail)
+                return value
+            raise RuntimeError(detail) from exc
 
-    raise RuntimeError(
-        f"Invalid {language} translation payload: all models failed. "
-        + " | ".join(errors[:6])
-    )
+    translated_changes: list[dict[str, str]] = []
+    for idx, change in enumerate(summary_json.get("changes", []), start=1):
+        if not isinstance(change, dict):
+            continue
+        translated_changes.append(
+            {
+                "title": tr_llm(str(change.get("title") or ""), f"changes[{idx}].title"),
+                "details": tr_llm(str(change.get("details") or ""), f"changes[{idx}].details"),
+                "impact": tr_llm(str(change.get("impact") or ""), f"changes[{idx}].impact"),
+                "recommended_action": tr_llm(
+                    str(change.get("recommended_action") or ""),
+                    f"changes[{idx}].recommended_action",
+                ),
+                "severity": str(change.get("severity") or "").strip(),
+            }
+        )
+
+    translated_summary = {
+        "overview": tr_llm(str(summary_json.get("overview") or ""), "overview"),
+        "professional_assessment": tr_llm(
+            str(summary_json.get("professional_assessment") or ""),
+            "professional_assessment",
+        ),
+        "newcomer_explainer": tr_llm(str(summary_json.get("newcomer_explainer") or ""), "newcomer_explainer"),
+        "changes": translated_changes,
+    }
+    if soft_failures:
+        print(
+            "[translate][warn] "
+            + language
+            + " used EN fallback for "
+            + str(len(soft_failures))
+            + " fields: "
+            + " | ".join(soft_failures[:4])
+        )
+    return translated_summary
 
 
 def translate_summary_bundle(
