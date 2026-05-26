@@ -444,6 +444,54 @@ def workers_ai_chat_text(
     return workers_ai_extract_text(result).strip()
 
 
+def workers_ai_chat_completion(
+    session: requests.Session,
+    config: AIConfig,
+    model: str,
+    messages: list[dict[str, str]],
+    max_tokens: int = 1400,
+    response_format: dict[str, Any] | None = None,
+    temperature: float = 0.2,
+) -> dict[str, Any]:
+    if not config.account_id or not config.api_token:
+        raise RuntimeError("Cloudflare AI credentials are not configured")
+    payload = {
+        "messages": messages,
+        "max_completion_tokens": max_tokens,
+        "stream": False,
+        "temperature": temperature,
+    }
+    if response_format:
+        payload["response_format"] = response_format
+    return workers_ai_run(session, config.account_id, config.api_token, model, payload)
+
+
+def workers_ai_extract_refusal(payload: dict[str, Any]) -> str | None:
+    result = payload.get("result")
+    if not isinstance(result, dict):
+        return None
+    choices = result.get("choices")
+    if not isinstance(choices, list) or not choices:
+        return None
+    first = choices[0]
+    if not isinstance(first, dict):
+        return None
+    message = first.get("message")
+    if not isinstance(message, dict):
+        return None
+    refusal = message.get("refusal")
+    if refusal is None:
+        return None
+    if isinstance(refusal, str):
+        return refusal.strip() or "(empty refusal)"
+    if isinstance(refusal, dict):
+        try:
+            return json.dumps(refusal, ensure_ascii=False)
+        except Exception:
+            return str(refusal)
+    return str(refusal)
+
+
 def workers_ai_embeddings(
     session: requests.Session,
     config: AIConfig,
@@ -813,21 +861,43 @@ def translate_single_language_summary(
         "Keep Proxmox technical terms precise.\n\n"
         f"{json.dumps(summary_json, ensure_ascii=False)}"
     )
-    translated = workers_ai_chat_text(
-        session,
-        config,
-        config.translation_model,
-        ai_messages(system, user),
-        max_tokens=3200,
-        response_format={"type": "json_object"},
-        temperature=0.0,
+    models_to_try: list[str] = []
+    for candidate in (config.translation_model, config.fallback_model, config.analysis_model):
+        value = str(candidate or "").strip()
+        if value and value not in models_to_try:
+            models_to_try.append(value)
+
+    errors: list[str] = []
+    for model in models_to_try:
+        try:
+            raw = workers_ai_chat_completion(
+                session=session,
+                config=config,
+                model=model,
+                messages=ai_messages(system, user),
+                max_tokens=3200,
+                response_format={"type": "json_object"},
+                temperature=0.0,
+            )
+            refusal = workers_ai_extract_refusal(raw)
+            if refusal:
+                errors.append(f"{model}: refusal={refusal}")
+                continue
+
+            translated = workers_ai_extract_text(raw).strip()
+            parsed = parse_json_payload(translated)
+            normalized = normalize_summary_payload(parsed)
+            if normalized.get("overview"):
+                return normalized
+            preview = " ".join(translated.split())[:220]
+            errors.append(f"{model}: invalid payload (missing overview). Preview: {preview}")
+        except Exception as exc:
+            errors.append(f"{model}: {format_exception_message(exc)}")
+
+    raise RuntimeError(
+        f"Invalid {language} translation payload: all models failed. "
+        + " | ".join(errors[:6])
     )
-    parsed = parse_json_payload(translated)
-    normalized = normalize_summary_payload(parsed)
-    if not normalized.get("overview"):
-        preview = " ".join(translated.split())[:220]
-        raise RuntimeError(f"Invalid {language} translation payload: missing overview. Response preview: {preview}")
-    return normalized
 
 
 def translate_summary_bundle(
