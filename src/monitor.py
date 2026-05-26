@@ -11,6 +11,7 @@ import json
 import os
 import re
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -301,6 +302,62 @@ def format_exception_message(exc: Exception, max_len: int = 600) -> str:
     return " ".join(message.split())
 
 
+def is_retryable_translation_error(exc: Exception) -> bool:
+    if isinstance(exc, requests.HTTPError):
+        response = exc.response
+        if response is not None and response.status_code in {408, 429, 500, 502, 503, 504}:
+            return True
+    message = str(exc).lower()
+    if "request timeout" in message or '"code":3046' in message or '"code":3007' in message:
+        return True
+    return False
+
+
+def split_text_for_translation(text: str, max_len: int = 480) -> list[str]:
+    value = str(text or "").strip()
+    if not value:
+        return []
+    if len(value) <= max_len:
+        return [value]
+
+    blocks = [chunk.strip() for chunk in re.split(r"\n{2,}", value) if chunk.strip()]
+    pieces: list[str] = []
+
+    def append_with_limit(chunk: str) -> None:
+        if len(chunk) <= max_len:
+            pieces.append(chunk)
+            return
+        sentences = re.split(r"(?<=[.!?])\s+", chunk)
+        current = ""
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+            if len(sentence) > max_len:
+                for i in range(0, len(sentence), max_len):
+                    part = sentence[i : i + max_len].strip()
+                    if part:
+                        if current:
+                            pieces.append(current)
+                            current = ""
+                        pieces.append(part)
+                continue
+            candidate = f"{current} {sentence}".strip() if current else sentence
+            if len(candidate) > max_len:
+                if current:
+                    pieces.append(current)
+                current = sentence
+            else:
+                current = candidate
+        if current:
+            pieces.append(current)
+
+    for block in blocks:
+        append_with_limit(block)
+
+    return pieces if pieces else [value]
+
+
 def workers_ai_run(
     session: requests.Session,
     account_id: str,
@@ -519,18 +576,49 @@ def workers_ai_translate_text(
     text: str,
     target_lang: str,
     source_lang: str = "english",
+    allow_split: bool = True,
 ) -> str:
-    payload = {
-        "text": text,
-        "source_lang": source_lang,
-        "target_lang": target_lang,
-    }
-    raw = workers_ai_run(session, config.account_id or "", config.api_token or "", model, payload)
-    translated = workers_ai_extract_translation_text(raw)
-    if translated:
-        return translated
-    preview = json.dumps(raw, ensure_ascii=False)[:280]
-    raise RuntimeError(f"Invalid translation response payload. Preview: {preview}")
+    value = str(text or "").strip()
+    if not value:
+        return ""
+
+    payload = {"text": value, "source_lang": source_lang, "target_lang": target_lang}
+    last_error: Exception | None = None
+
+    for attempt in range(3):
+        try:
+            raw = workers_ai_run(session, config.account_id or "", config.api_token or "", model, payload)
+            translated = workers_ai_extract_translation_text(raw)
+            if translated:
+                return translated
+            preview = json.dumps(raw, ensure_ascii=False)[:280]
+            raise RuntimeError(f"Invalid translation response payload. Preview: {preview}")
+        except Exception as exc:
+            last_error = exc
+            if not is_retryable_translation_error(exc) or attempt == 2:
+                break
+            time.sleep(1.2 * (2**attempt))
+
+    if allow_split and last_error is not None and is_retryable_translation_error(last_error) and len(value) > 420:
+        parts = split_text_for_translation(value, max_len=420)
+        translated_parts: list[str] = []
+        for part in parts:
+            translated_parts.append(
+                workers_ai_translate_text(
+                    session=session,
+                    config=config,
+                    model=model,
+                    text=part,
+                    target_lang=target_lang,
+                    source_lang=source_lang,
+                    allow_split=False,
+                )
+            )
+        return "\n".join(piece.strip() for piece in translated_parts if piece and piece.strip())
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("Unknown translation error")
 
 
 def workers_ai_embeddings(
