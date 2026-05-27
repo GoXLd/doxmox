@@ -1737,19 +1737,19 @@ def render_changelog_html(
       line-height: 1.45;
     }}
     .severity-badge {{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-block;
       min-width: 64px;
       margin-right: 0.5em;
-      padding: 2px 10px;
-      border-radius: 999px;
+      padding: 1px 10px;
+      border-radius: 8px;
       border: 1px solid transparent;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.02em;
       text-transform: uppercase;
-      vertical-align: middle;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
     }}
     .severity-high {{
       background: rgba(239, 68, 68, 0.18);
