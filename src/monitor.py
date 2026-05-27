@@ -2660,6 +2660,9 @@ def render_docs(
       text-decoration: none;
       box-shadow: var(--shadow);
     }}
+    .head .ru-course-link {{
+      margin: 10px 0 8px;
+    }}
     .ru-course-link:hover {{
       border-color: color-mix(in srgb, var(--accent) 55%, var(--line) 45%);
     }}
@@ -2675,6 +2678,25 @@ def render_docs(
       font-size: 12px;
       line-height: 1.25;
       color: var(--muted);
+    }}
+    .ru-course-link .yt-icon {{
+      width: 22px;
+      height: 22px;
+      flex: 0 0 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }}
+    .ru-course-link .yt-icon svg {{
+      width: 22px;
+      height: 22px;
+      display: block;
+    }}
+    .ru-course-link .yt-bg {{
+      fill: #ff0033;
+    }}
+    .ru-course-link .yt-play {{
+      fill: #ffffff;
     }}
     h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
@@ -2779,9 +2801,7 @@ def render_docs(
         width: auto;
         font-size: 14px;
       }}
-      .ru-course-link {{
-        max-width: 100%;
-      }}
+      .ru-course-link {{ max-width: 100%; }}
       table, thead, tbody, th, td, tr {{ display: block; }}
       thead {{ display: none; }}
       tr {{ border-bottom: 1px solid var(--line); }}
@@ -2914,6 +2934,11 @@ def render_docs(
           </span>
           <span data-i18n="subscribe_telegram">Notifications</span>
         </a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <a
           id="ru-course-link"
           class="ru-course-link"
@@ -2922,16 +2947,17 @@ def render_docs(
           rel="noopener noreferrer"
           hidden
         >
+          <span class="yt-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="yt-bg" x="2" y="5" width="20" height="14" rx="4" ry="4"></rect>
+              <path class="yt-play" d="M10 9.2v5.6l5-2.8-5-2.8z"></path>
+            </svg>
+          </span>
           <span>
             <span class="ru-course-title">Proxmox с 0 до 100%. Всё, что нужно знать!</span>
             <span class="ru-course-note">Бесплатный курс для сообщества. Спасибо автору.</span>
           </span>
         </a>
-      </div>
-    </div>
-    <div class="card">
-      <div class="head">
-        <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
         <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
       </div>
@@ -3033,7 +3059,7 @@ def render_docs(
           language_ru: "Russe"
         }},
         ru: {{
-          title: "Журнал изменений руководства Proxmox VE Admin",
+          title: "Изменения руководства Proxmox VE Admin",
           source: "Источник:",
           last_check: "Последняя проверка:",
           generated: "Сгенерировано:",
