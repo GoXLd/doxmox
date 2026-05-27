@@ -2676,7 +2676,7 @@ def render_docs(
               <path class="tg-plane" d="M17.8 7.2 5.8 11.8c-.8.3-.8.7-.1.9l3 .9 1.2 3.5c.1.4.3.6.6.6.2 0 .4-.1.7-.3l1.7-1.7 2.8 2.1c.5.3 1 .2 1.2-.6l2.1-9c.2-.9-.3-1.3-1.2-1zM10 13.2l5.8-4c.3-.2.6.1.3.3l-4.8 4.5-.2 2 .9-2.8z"></path>
             </svg>
           </span>
-          <span data-i18n="subscribe_telegram">Subscribe on Telegram</span>
+          <span data-i18n="subscribe_telegram">Notifications</span>
         </a>
       </div>
     </div>
@@ -2743,7 +2743,7 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Some rights reserved.",
           footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
-          subscribe_telegram: "Subscribe on Telegram",
+          subscribe_telegram: "Notifications",
           language_en: "English",
           language_fr: "French",
           language_ru: "Russian"
@@ -2775,7 +2775,7 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Certains droits réservés.",
           footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
-          subscribe_telegram: "S'abonner sur Telegram",
+          subscribe_telegram: "Notifications",
           language_en: "Anglais",
           language_fr: "Français",
           language_ru: "Russe"
@@ -2807,7 +2807,7 @@ def render_docs(
           footer_license: "Apache-2.0",
           footer_rights: "Некоторые права защищены.",
           footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
-          subscribe_telegram: "Подписаться в Telegram",
+          subscribe_telegram: "Уведомления",
           language_en: "Английский",
           language_fr: "Французский",
           language_ru: "Русский"
