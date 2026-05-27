@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>20260520T051906Z.diff - Human Changelog</title>
+  <title>20260520T051906Z.diff - Changelog</title>
   <style>
     :root {
       --bg: #f3f6fb;
@@ -132,8 +132,8 @@
     </div>
     <div class="card">
       <div class="head">
-        <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T13:51:57Z" data-iso="2026-05-27T13:51:57Z" data-tooltip="">2026-05-27 13:51:57 UTC</time></p>
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T14:01:12Z" data-iso="2026-05-27T14:01:12Z" data-tooltip="">2026-05-27 14:01:12 UTC</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260520T051906Z.html" data-i18n="open_diff">Open code diff</a></p>
       </div>
       
@@ -142,7 +142,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.5 introduces several important updates that affect storage, networking, firewall, and system defaults. The changes aim to improve performance, security, and ease of configuration while adding new features like BGP integration and FastEC support.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> The release balances new capabilities with tighter defaults. Notable are the reduced ZFS ARC footprint, which helps multi‑VM hosts, and the introduction of FastEC, which can boost erasure‑coded pool performance but requires careful planning. Network operators will benefit from expanded BGP/SDN options, yet must adjust firewall rules for Ceph and migration traffic. Overall risk is moderate; most changes are additive, but the FastEC flag is irreversible without pool recreation.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> If you are new to Proxmox, this version makes the system a bit more memory‑friendly out of the box and adds guides for advanced networking (BGP) and faster erasure‑coded storage. You will need to open a few extra firewall ports and be aware that some settings, like the new FastEC option, cannot be undone easily.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-low" aria-hidden="true">●</span>Version bump to 9.1.5</strong><div>Documentation and release metadata updated to version 9.1.5 with a new release date.</div><div><em>Impact:</em> Ensures users reference the correct documentation and receive the latest bug fixes.</div><div><em>Action:</em> Verify you are consulting the 9.1.5 docs for any configuration tasks.</div></li>
@@ -161,7 +160,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.5 introduit plusieurs mises à jour importantes qui affectent le stockage, le réseau, le pare‑feu et les paramètres par défaut du système. Les changements visent à améliorer les performances, la sécurité et la facilité de configuration tout en ajoutant de nouvelles fonctionnalités telles que l’intégration BGP et la prise en charge de FastEC.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> La version équilibre de nouvelles fonctionnalités avec des paramètres par défaut plus stricts. Notables sont la réduction de l’empreinte ZFS ARC, qui aide les hôtes multi‑VM, et l’introduction de FastEC, qui peut augmenter les performances des pools en codage d’effacement mais nécessite une planification soigneuse. Les opérateurs réseau bénéficieront d’options BGP/SDN élargies, mais devront ajuster les règles de pare‑feu pour Ceph et le trafic de migration. Le risque global est modéré ; la plupart des changements sont additionnels, mais le drapeau FastEC est irréversible sans recréation du pool.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> Si vous êtes nouveau sur Proxmox, cette version rend le système un peu plus économique en mémoire dès l&#x27;installation et ajoute des guides pour le réseau avancé (BGP) ainsi qu&#x27;un stockage à effacement codé plus rapide. Vous devrez ouvrir quelques ports de pare-feu supplémentaires et être conscient que certains paramètres, comme la nouvelle option FastEC, ne peuvent pas être annulés facilement.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-low" aria-hidden="true">●</span>Mise à jour de version vers 9.1.5</strong><div>Documentation et métadonnées de version mises à jour vers la version 9.1.5 avec une nouvelle date de sortie.</div><div><em>Impact:</em> Garantit que les utilisateurs se réfèrent à la documentation correcte et reçoivent les dernières corrections de bugs.</div><div><em>Action:</em> Verify you are consulting the 9.1.5 docs for any configuration tasks.</div></li>
@@ -180,7 +178,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.5 вводит несколько важных обновлений, влияющих на хранилище, сеть, брандмауэр и системные настройки по умолчанию. Эти изменения направлены на повышение производительности, безопасности и упрощение конфигурации, а также добавляют новые функции, такие как интеграция BGP и поддержка FastEC.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> Выпуск сочетает новые возможности с более строгими настройками по умолчанию. Примечательны уменьшенный след ZFS ARC, который помогает хостам с несколькими ВМ, и внедрение FastEC, способного повысить производительность пулов с кодированием стиранием, но требующего тщательного планирования. Операторам сети будет полезно расширенные опции BGP/SDN, однако им придётся скорректировать правила брандмауэра для Ceph и трафика миграции. Общий риск умеренный; большинство изменений являются добавочными, но флаг FastEC необратим без воссоздания пула.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> Если вы новичок в Proxmox, эта версия делает систему более экономичной по использованию памяти сразу после установки и добавляет руководства по продвинутому сетевому взаимодействию (BGP) и более быстрому хранилищу с кодированием стиранием. Вам потребуется открыть несколько дополнительных портов брандмауэра, и следует учитывать, что некоторые настройки, такие как новая опция FastEC, нельзя легко отменить.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-low" aria-hidden="true">●</span>Обновление версии до 9.1.5</strong><div>Документация и метаданные релиза обновлены до версии 9.1.5 с новой датой выпуска.</div><div><em>Impact:</em> Обеспечивает, что пользователи обращаются к правильной документации и получают последние исправления ошибок.</div><div><em>Action:</em> Verify you are consulting the 9.1.5 docs for any configuration tasks.</div></li>
@@ -211,14 +208,13 @@
         en: {
           language: "Language",
           theme: "Theme",
-          title: "Human Changelog",
+          title: "Changelog",
           generated: "Generated:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
           overview: "Overview:",
           assessment: "Assessment:",
-          newcomer: "For newcomers:",
           changes_title: "Change list",
           no_items: "No items yet.",
           model_analysis: "Analysis model:",
@@ -238,7 +234,6 @@
           summary_title: "Résumé",
           overview: "Aperçu :",
           assessment: "Évaluation :",
-          newcomer: "Pour les débutants :",
           changes_title: "Liste des changements",
           no_items: "Aucun élément.",
           model_analysis: "Modèle d'analyse :",
@@ -258,7 +253,6 @@
           summary_title: "Сводка",
           overview: "Обзор:",
           assessment: "Оценка:",
-          newcomer: "Для новичков:",
           changes_title: "Список изменений",
           no_items: "Пока нет пунктов.",
           model_analysis: "Модель анализа:",

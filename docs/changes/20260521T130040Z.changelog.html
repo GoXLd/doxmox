@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>20260521T130040Z.diff - Human Changelog</title>
+  <title>20260521T130040Z.diff - Changelog</title>
   <style>
     :root {
       --bg: #f3f6fb;
@@ -132,8 +132,8 @@
     </div>
     <div class="card">
       <div class="head">
-        <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T13:51:57Z" data-iso="2026-05-27T13:51:57Z" data-tooltip="">2026-05-27 13:51:57 UTC</time></p>
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T14:01:12Z" data-iso="2026-05-27T14:01:12Z" data-tooltip="">2026-05-27 14:01:12 UTC</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260521T130040Z.html" data-i18n="open_diff">Open code diff</a></p>
       </div>
       
@@ -142,7 +142,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.1 introduces several important updates: the default Ceph manager backend switches from squid to tentacle, new CPU model options and level settings are added, regex handling now accepts newline characters, and documentation for container ID mapping and UID/GID handling is expanded. Additional operational tweaks include HA auto‑rebalance, updated OSPF options, refined backup settings, and a new node location property.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> The changes are largely backward‑compatible but affect cluster configuration scripts and automation. Operators should review Ceph manager defaults to avoid unexpected manager type changes, adjust any custom CPU model definitions to include the new level field, and verify that regex‑based filters still behave as intended now that LF characters are permitted. HA and networking tweaks improve resilience but may require parameter tuning. Overall, the release raises the feature set without breaking existing deployments, provided the recommended actions are followed.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> If you are new to Proxmox, this update adds more choices for virtual CPU types, lets you tag nodes with a geographic location, and makes the Ceph storage system use a newer manager component by default. Some text‑matching rules now accept line‑breaks, and the backup tool has a cleaner set of options. These changes make the platform more flexible and easier to manage, but you may need to adjust a few settings after upgrading.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-medium" aria-hidden="true">●</span>Ceph manager default changed to tentacle</strong><div>The default manager backend for new Ceph clusters is now &quot;tentacle&quot; instead of the older &quot;squid&quot; implementation.</div><div><em>Impact:</em> Existing clusters remain unchanged, but newly created clusters will use tentacle, which offers better performance and future feature support.</div><div><em>Action:</em> When creating a new Ceph cluster, verify the manager type if you rely on specific squid features, or explicitly set the manager type to squid if needed.</div></li>
@@ -161,7 +160,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.1 introduit plusieurs mises à jour importantes : le backend du gestionnaire Ceph par défaut passe de squid à tentacle, de nouvelles options de modèle CPU et de paramètres de niveau sont ajoutées, la gestion des expressions régulières accepte désormais les caractères de nouvelle ligne, et la documentation sur le mappage des ID de conteneur ainsi que la gestion UID/GID est étendue. D’autres ajustements opérationnels comprennent le rééquilibrage automatique HA, des options OSPF mises à jour, des paramètres de sauvegarde affinés et une nouvelle propriété de localisation du nœud.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> Les changements sont en grande partie rétrocompatibles mais affectent les scripts de configuration du cluster et l’automatisation. Les opérateurs doivent examiner les paramètres par défaut du Ceph manager afin d’éviter des changements inattendus du type de manager, ajuster les définitions de modèles CPU personnalisés pour inclure le nouveau champ level, et vérifier que les filtres basés sur les expressions régulières se comportent toujours comme prévu maintenant que les caractères LF sont autorisés. Les ajustements HA et réseau améliorent la résilience mais peuvent nécessiter un réglage des paramètres. Dans l’ensemble, la version augmente l’ensemble des fonctionnalités sans casser les déploiements existants, à condition de suivre les actions recommandées.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> Si vous êtes nouveau sur Proxmox, cette mise à jour ajoute davantage de choix pour les types de CPU virtuels, vous permet d’étiqueter les nœuds avec une localisation géographique, et fait en sorte que le système de stockage Ceph utilise par défaut un composant de gestion plus récent. Certaines règles de correspondance de texte acceptent désormais les sauts de ligne, et l’outil de sauvegarde propose un ensemble d’options plus épuré. Ces changements rendent la plateforme plus flexible et plus facile à gérer, mais il se peut que vous deviez ajuster quelques paramètres après la mise à jour.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-medium" aria-hidden="true">●</span>Le gestionnaire Ceph par défaut a été changé en tentacle</strong><div>Le backend du gestionnaire par défaut pour les nouveaux clusters Ceph est désormais « tentacle » au lieu de l’ancienne implémentation « squid ».</div><div><em>Impact:</em> Les clusters existants restent inchangés, mais les clusters nouvellement créés utiliseront tentacle, qui offre de meilleures performances et un support des futures fonctionnalités.</div><div><em>Action:</em> Lors de la création d’un nouveau cluster Ceph, vérifiez le type de gestionnaire si vous comptez sur des fonctionnalités spécifiques de squid, ou définissez explicitement le type de gestionnaire sur squid si nécessaire.</div></li>
@@ -180,7 +178,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.1 вводит несколько важных обновлений: бэкенд менеджера Ceph по умолчанию переключается с squid на tentacle, добавлены новые варианты моделей CPU и настройки уровней, обработка регулярных выражений теперь принимает символы новой строки, а документация по сопоставлению идентификаторов контейнеров и обработке UID/GID расширена. Дополнительные операционные доработки включают автоматический ребаланс HA, обновлённые параметры OSPF, уточнённые настройки резервного копирования и новое свойство расположения узла.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> Изменения в основном обратно совместимы, но влияют на скрипты конфигурации кластера и автоматизацию. Операторам следует проверить значения по умолчанию Ceph manager, чтобы избежать неожиданных изменений типа менеджера, скорректировать любые пользовательские определения CPU model, включив новое поле level, и убедиться, что regex‑based фильтры продолжают работать как задумано, теперь когда разрешены символы LF. Настройки HA и сети повышают устойчивость, но могут потребовать настройки параметров. В целом выпуск расширяет набор функций без нарушения существующих развертываний, при условии выполнения рекомендованных действий.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> Если вы новичок в Proxmox, это обновление добавляет больше вариантов типов виртуальных процессоров, позволяет помечать узлы географическим расположением и делает так, что система хранения Ceph по умолчанию использует более новый компонент менеджера. Некоторые правила сопоставления текста теперь принимают переносы строк, а инструмент резервного копирования имеет более упрощённый набор параметров. Эти изменения делают платформу более гибкой и удобной в управлении, но после обновления вам, возможно, придётся скорректировать несколько настроек.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-medium" aria-hidden="true">●</span>Менеджер Ceph по умолчанию изменён на tentacle</strong><div>По умолчанию бэкенд менеджера для новых кластеров Ceph теперь «tentacle», а не более старой реализации «squid».</div><div><em>Impact:</em> Существующие кластеры остаются без изменений, но новые кластеры будут использовать tentacle, который обеспечивает лучшую производительность и поддержку будущих функций.</div><div><em>Action:</em> При создании нового кластера Ceph проверьте тип менеджера, если вы полагаетесь на определённые функции squid, или при необходимости явно задайте тип менеджера как squid.</div></li>
@@ -211,14 +208,13 @@
         en: {
           language: "Language",
           theme: "Theme",
-          title: "Human Changelog",
+          title: "Changelog",
           generated: "Generated:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
           overview: "Overview:",
           assessment: "Assessment:",
-          newcomer: "For newcomers:",
           changes_title: "Change list",
           no_items: "No items yet.",
           model_analysis: "Analysis model:",
@@ -238,7 +234,6 @@
           summary_title: "Résumé",
           overview: "Aperçu :",
           assessment: "Évaluation :",
-          newcomer: "Pour les débutants :",
           changes_title: "Liste des changements",
           no_items: "Aucun élément.",
           model_analysis: "Modèle d'analyse :",
@@ -258,7 +253,6 @@
           summary_title: "Сводка",
           overview: "Обзор:",
           assessment: "Оценка:",
-          newcomer: "Для новичков:",
           changes_title: "Список изменений",
           no_items: "Пока нет пунктов.",
           model_analysis: "Модель анализа:",

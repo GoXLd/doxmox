@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>20260518T052022Z.diff - Human Changelog</title>
+  <title>20260518T052022Z.diff - Changelog</title>
   <style>
     :root {
       --bg: #f3f6fb;
@@ -132,8 +132,8 @@
     </div>
     <div class="card">
       <div class="head">
-        <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T13:51:57Z" data-iso="2026-05-27T13:51:57Z" data-tooltip="">2026-05-27 13:51:57 UTC</time></p>
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T14:01:12Z" data-iso="2026-05-27T14:01:12Z" data-tooltip="">2026-05-27 14:01:12 UTC</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260518T052022Z.html" data-i18n="open_diff">Open code diff</a></p>
       </div>
       
@@ -142,7 +142,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.4 introduces several documentation and feature updates that improve security, storage handling, networking, and high‑availability scheduling. The changes range from new guidance on cluster CA distribution to detailed ZFS encryption rules, added WireGuard and EVPN controller information, and enhancements to the Cluster Resource Scheduler (CRS). Operators will find new flags for token regeneration and SSH‑based cluster joins, while newcomers benefit from clearer explanations of networking constructs like Prefix Lists and Route Maps.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> The release adds substantive security and HA improvements that require attention during upgrade planning. ZFS encryption enforcement and CRS load‑balancer parameters can impact workload placement and must be reviewed before production rollout. New documentation on EVEVPN, WireGuard, and idmap storage options expands the feature set, offering more flexibility but also increasing configuration complexity. Overall, the update is a net positive for stability and security, provided operators validate the new settings in a test environment.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> If you are new to Proxmox, this version gives you clearer steps to set up a secure cluster, explains how to protect ZFS disks with encryption, and introduces easy‑to‑read guides for advanced networking like WireGuard and EVPN. It also tells you how the system decides where to run your virtual machines, so you can keep your services running smoothly.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-low" aria-hidden="true">●</span>Version bump to 9.1.4</strong><div>Documentation now reflects the new Proxmox VE version 9.1.4 and updates the last‑modified timestamp.</div><div><em>Impact:</em> Ensures all references point to the correct version, avoiding confusion during support or upgrade processes.</div><div><em>Action:</em> Verify that your environment matches the documented version; no functional changes required.</div></li>
@@ -164,7 +163,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.4 introduit plusieurs mises à jour de la documentation et des fonctionnalités qui améliorent la sécurité, la gestion du stockage, le réseau et la planification de haute disponibilité. Les changements vont d’une nouvelle orientation sur la distribution du CA du cluster à des règles détaillées de chiffrement ZFS, en passant par l’ajout d’informations sur WireGuard et le contrôleur EVPN, ainsi que des améliorations du Cluster Resource Scheduler (CRS). Les opérateurs trouveront de nouveaux indicateurs pour la régénération de jetons et les jointures de cluster basées sur SSH, tandis que les nouveaux utilisateurs bénéficieront d’explications plus claires des constructions réseau telles que les listes de préfixes et les cartes de routage.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> La version ajoute des améliorations substantielles de sécurité et de HA qui nécessitent une attention particulière lors de la planification de la mise à jour. L&#x27;application du chiffrement ZFS et les paramètres du load‑balancer CRS peuvent impacter le placement des charges de travail et doivent être examinés avant le déploiement en production. La nouvelle documentation sur EVEVPN, WireGuard et les options de stockage idmap élargit le jeu de fonctionnalités, offrant plus de flexibilité mais augmentant également la complexité de la configuration. Dans l’ensemble, la mise à jour est globalement positive pour la stabilité et la sécurité, à condition que les opérateurs valident les nouveaux paramètres dans un environnement de test.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> Si vous êtes nouveau sur Proxmox, cette version vous fournit des étapes plus claires pour configurer un cluster sécurisé, explique comment protéger les disques ZFS avec le chiffrement, et propose des guides faciles à lire pour le réseau avancé tel que WireGuard et EVPN. Elle indique également comment le système détermine où exécuter vos machines virtuelles, afin que vous puissiez maintenir vos services en bon fonctionnement.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-low" aria-hidden="true">●</span>Mise à jour de version vers 9.1.4</strong><div>La documentation reflète désormais la nouvelle version 9.1.4 de Proxmox VE et met à jour l’horodatage de la dernière modification.</div><div><em>Impact:</em> Garantit que toutes les références pointent vers la version correcte, évitant la confusion lors des processus de support ou de mise à niveau.</div><div><em>Action:</em> Vérifiez que votre environnement correspond à la version documentée ; aucune modification fonctionnelle n’est requise.</div></li>
@@ -186,7 +184,6 @@
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.1.4 вводит несколько обновлений документации и функций, которые улучшают безопасность, работу с хранилищем, сетевые возможности и планирование высокой доступности. Изменения охватывают новые рекомендации по распределению сертификата кластера (CA), подробные правила шифрования ZFS, добавленную информацию о контроллере WireGuard и EVPN, а также улучшения Cluster Resource Scheduler (CRS). Операторы получат новые флаги для регенерации токенов и присоединения к кластеру по SSH, а новички выиграют от более ясных объяснений сетевых конструкций, таких как Prefix Lists и Route Maps.</p>
           <p><strong data-i18n="assessment">Assessment:</strong> Выпуск добавляет существенные улучшения безопасности и HA, требующие внимания при планировании обновления. Принудительное шифрование ZFS и параметры балансировщика нагрузки CRS могут влиять на размещение рабочих нагрузок и должны быть проверены перед вводом в эксплуатацию. Новая документация по EVEVPN, WireGuard и вариантам хранения idmap расширяет набор функций, предоставляя большую гибкость, но также увеличивая сложность конфигурации. В целом обновление является положительным для стабильности и безопасности, при условии, что операторы проверят новые настройки в тестовой среде.</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> Если вы новичок в Proxmox, эта версия предоставляет более понятные шаги по настройке безопасного кластера, объясняет, как защитить диски ZFS с помощью шифрования, и предлагает легко читаемые руководства по продвинутым сетевым технологиям, таким как WireGuard и EVPN. Также она объясняет, как система определяет, где запускать ваши виртуальные машины, чтобы ваши сервисы работали без сбоев.</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             <li><strong><span class="severity-icon severity-low" aria-hidden="true">●</span>Обновление версии до 9.1.4</strong><div>Документация теперь отражает новую версию Proxmox VE 9.1.4 и обновляет метку времени последнего изменения.</div><div><em>Impact:</em> Обеспечивает, что все ссылки указывают на правильную версию, избегая путаницы при поддержке или процессах обновления.</div><div><em>Action:</em> Убедитесь, что ваша среда соответствует задокументированной версии; функциональные изменения не требуются.</div></li>
@@ -220,14 +217,13 @@
         en: {
           language: "Language",
           theme: "Theme",
-          title: "Human Changelog",
+          title: "Changelog",
           generated: "Generated:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
           overview: "Overview:",
           assessment: "Assessment:",
-          newcomer: "For newcomers:",
           changes_title: "Change list",
           no_items: "No items yet.",
           model_analysis: "Analysis model:",
@@ -247,7 +243,6 @@
           summary_title: "Résumé",
           overview: "Aperçu :",
           assessment: "Évaluation :",
-          newcomer: "Pour les débutants :",
           changes_title: "Liste des changements",
           no_items: "Aucun élément.",
           model_analysis: "Modèle d'analyse :",
@@ -267,7 +262,6 @@
           summary_title: "Сводка",
           overview: "Обзор:",
           assessment: "Оценка:",
-          newcomer: "Для новичков:",
           changes_title: "Список изменений",
           no_items: "Пока нет пунктов.",
           model_analysis: "Модель анализа:",

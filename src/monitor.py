@@ -1497,7 +1497,7 @@ def format_event_row(event: dict[str, Any], row_index: int) -> str:
         html_href = docs_href_from_path(diff_html_path(diff_file))
         changelog_href = docs_href_from_path(diff_changelog_path(diff_file))
         link = (
-            f'<a href="{html.escape(changelog_href)}" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Human Changelog</a> | '
+            f'<a href="{html.escape(changelog_href)}" target="_blank" rel="noopener noreferrer" data-i18n="human_changelog">Changelog</a> | '
             f'<a href="{html.escape(html_href)}" target="_blank" rel="noopener noreferrer" data-i18n="code_diff">Code diff</a>'
         )
     else:
@@ -1576,7 +1576,7 @@ def render_changelog_html(
     generated_at_iso = now_utc_iso()
     generated_at = format_utc_display(generated_at_iso)
     license_url = f"https://github.com/{DEFAULT_GITHUB_REPO}/blob/{DEFAULT_GITHUB_REF}/LICENSE"
-    page_title = f"{diff_path.name} - Human Changelog"
+    page_title = f"{diff_path.name} - Changelog"
     code_diff_href = diff_path.with_suffix(".html").name
 
     if not ai_data:
@@ -1619,13 +1619,11 @@ def render_changelog_html(
     def section_html(summary: dict[str, Any], lang_code: str) -> str:
         overview = html.escape(str(summary.get("overview") or ""))
         assessment = html.escape(str(summary.get("professional_assessment") or ""))
-        newcomer = html.escape(str(summary.get("newcomer_explainer") or ""))
         return f"""
         <section class="lang-block" data-lang-block="{lang_code}">
           <h2 data-i18n="summary_title">Summary</h2>
           <p><strong data-i18n="overview">Overview:</strong> {overview or '-'}</p>
           <p><strong data-i18n="assessment">Assessment:</strong> {assessment or '-'}</p>
-          <p><strong data-i18n="newcomer">For newcomers:</strong> {newcomer or '-'}</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
             {render_change_list(summary)}
@@ -1776,7 +1774,7 @@ def render_changelog_html(
     </div>
     <div class="card">
       <div class="head">
-        <h1 data-i18n="title">Human Changelog</h1>
+        <h1 data-i18n="title">Changelog</h1>
         <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
@@ -1801,14 +1799,13 @@ def render_changelog_html(
         en: {{
           language: "Language",
           theme: "Theme",
-          title: "Human Changelog",
+          title: "Changelog",
           generated: "Generated:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
           overview: "Overview:",
           assessment: "Assessment:",
-          newcomer: "For newcomers:",
           changes_title: "Change list",
           no_items: "No items yet.",
           model_analysis: "Analysis model:",
@@ -1828,7 +1825,6 @@ def render_changelog_html(
           summary_title: "Résumé",
           overview: "Aperçu :",
           assessment: "Évaluation :",
-          newcomer: "Pour les débutants :",
           changes_title: "Liste des changements",
           no_items: "Aucun élément.",
           model_analysis: "Modèle d'analyse :",
@@ -1848,7 +1844,6 @@ def render_changelog_html(
           summary_title: "Сводка",
           overview: "Обзор:",
           assessment: "Оценка:",
-          newcomer: "Для новичков:",
           changes_title: "Список изменений",
           no_items: "Пока нет пунктов.",
           model_analysis: "Модель анализа:",
@@ -2913,7 +2908,7 @@ def render_docs(
           hash: "Hash",
           line_delta: "Line Delta",
           details: "Details",
-          human_changelog: "Human Changelog",
+          human_changelog: "Changelog",
           code_diff: "Code Diff",
           no_changes: "No changes detected yet.",
           language: "Language",
@@ -2946,7 +2941,7 @@ def render_docs(
           hash: "Hash",
           line_delta: "Delta de lignes",
           details: "Details",
-          human_changelog: "Human Changelog",
+          human_changelog: "Changelog",
           code_diff: "Code Diff",
           no_changes: "Aucun changement detecte pour le moment.",
           language: "Langue",
@@ -2979,7 +2974,7 @@ def render_docs(
           hash: "Хэш",
           line_delta: "Изменение строк",
           details: "Детали",
-          human_changelog: "Human Changelog",
+          human_changelog: "Changelog",
           code_diff: "Code Diff",
           no_changes: "Изменения пока не обнаружены.",
           language: "Язык",
