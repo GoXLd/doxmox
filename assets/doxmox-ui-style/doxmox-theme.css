@@ -1,0 +1,31 @@
+
+:root {
+  --dox-bg: #0D0F12;
+  --dox-surface: #1A1D22;
+  --dox-surface-light: #2A2F37;
+
+  --dox-primary: #FF6A00;
+  --dox-primary-soft: #FF9B4D;
+
+  --dox-text: #E6E8EB;
+
+  --dox-radius: 18px;
+  --dox-transition: 0.2s ease;
+}
+
+body {
+  background: var(--dox-bg);
+  color: var(--dox-text);
+  font-family: Inter, sans-serif;
+}
+
+.card {
+  background: var(--dox-surface);
+  border-radius: var(--dox-radius);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.button-primary {
+  background: linear-gradient(135deg, var(--dox-primary), var(--dox-primary-soft));
+  color: white;
+}
