@@ -2545,8 +2545,10 @@ def render_docs(
     }}
     .toolbar-right {{
       display: inline-flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-end;
       justify-content: flex-end;
+      gap: 8px;
     }}
     .control {{
       display: inline-flex;
@@ -2645,6 +2647,35 @@ def render_docs(
     .telegram-link .tg-plane {{
       fill: #ffffff;
     }}
+    .ru-course-link {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 360px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--accent-soft) 60%, var(--card) 40%);
+      color: var(--text);
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }}
+    .ru-course-link:hover {{
+      border-color: color-mix(in srgb, var(--accent) 55%, var(--line) 45%);
+    }}
+    .ru-course-link .ru-course-title {{
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text);
+    }}
+    .ru-course-link .ru-course-note {{
+      display: block;
+      font-size: 12px;
+      line-height: 1.25;
+      color: var(--muted);
+    }}
     h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
     a {{ color: var(--accent); }}
@@ -2740,12 +2771,16 @@ def render_docs(
       }}
       .toolbar-right {{
         width: 100%;
+        align-items: flex-start;
         justify-content: flex-start;
       }}
       .telegram-link {{
         max-width: 100%;
         width: auto;
         font-size: 14px;
+      }}
+      .ru-course-link {{
+        max-width: 100%;
       }}
       table, thead, tbody, th, td, tr {{ display: block; }}
       thead {{ display: none; }}
@@ -2878,6 +2913,19 @@ def render_docs(
             </svg>
           </span>
           <span data-i18n="subscribe_telegram">Notifications</span>
+        </a>
+        <a
+          id="ru-course-link"
+          class="ru-course-link"
+          href="https://www.youtube.com/watch?v=PPln5TFQDQ4"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          <span>
+            <span class="ru-course-title">Proxmox с 0 до 100%. Всё, что нужно знать!</span>
+            <span class="ru-course-note">Бесплатный курс для сообщества. Спасибо автору.</span>
+          </span>
         </a>
       </div>
     </div>
@@ -3021,6 +3069,7 @@ def render_docs(
 
       const langSelect = document.getElementById("lang-select");
       const themeSelect = document.getElementById("theme-select");
+      const ruCourseLink = document.getElementById("ru-course-link");
       const adminPanel = document.getElementById("admin-panel");
       const openWorkflowButton = document.getElementById("open-workflow");
       const deleteSelectedButton = document.getElementById("delete-selected");
@@ -3197,6 +3246,9 @@ def render_docs(
         }}
         themeSelect.options[0].textContent = t(lang, "theme_light");
         themeSelect.options[1].textContent = t(lang, "theme_dark");
+        if (ruCourseLink) {{
+          ruCourseLink.hidden = lang !== "ru";
+        }}
         document.querySelectorAll(".row-brief").forEach((node) => {{
           if (!(node instanceof HTMLElement)) return;
           const textNode = node.querySelector(".row-brief-text");
