@@ -2422,6 +2422,7 @@ def render_docs(
     generated_at_iso = now_utc_iso()
     generated_at = format_utc_display(generated_at_iso)
     license_url = f"https://github.com/{github_repo}/blob/{github_ref}/LICENSE"
+    github_repo_url = f"https://github.com/{github_repo}"
     page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2724,6 +2725,85 @@ def render_docs(
       color: var(--muted);
       font-size: 13px;
     }}
+    .license-note {{
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }}
+    .github-link {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      vertical-align: text-bottom;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 120ms ease;
+    }}
+    .github-link:hover {{
+      color: var(--accent);
+    }}
+    .github-link:focus-visible {{
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }}
+    .github-link svg {{
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      display: block;
+    }}
+    .hint-tooltip {{
+      position: relative;
+      cursor: help;
+    }}
+    .hint-tooltip::after {{
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }}
+    .hint-tooltip::before {{
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }}
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {{
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }}
   </style>
 </head>
 <body>
@@ -2767,7 +2847,7 @@ def render_docs(
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
-        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="{generated_at_iso}" data-iso="{generated_at_iso}">{generated_at}</time></p>
+        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
       </div>
       <table>
         <thead>
@@ -2789,6 +2869,7 @@ def render_docs(
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
       · <a href="{html.escape(license_url)}" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
       · <span class="license-note hint-tooltip" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" data-tooltip="" tabindex="0">Some rights reserved.</span>
+      · <a class="github-link" href="{html.escape(github_repo_url)}" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" title="GitHub repository"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.93-.89-1.18-.89-1.18-.73-.49.06-.48.06-.48.81.06 1.23.83 1.23.83.72 1.23 1.88.88 2.34.67.07-.52.28-.88.5-1.08-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.58.82-2.14-.08-.2-.36-1.01.08-2.1 0 0 .67-.21 2.2.82A7.64 7.64 0 0 1 8 4.84c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.09.16 1.9.08 2.1.51.56.82 1.27.82 2.14 0 3.07-1.88 3.75-3.67 3.95.29.25.54.74.54 1.49v2.21c0 .22.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path></svg></a>
     </footer>
   </div>
   <script>
