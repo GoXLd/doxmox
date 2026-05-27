@@ -1482,7 +1482,12 @@ def has_localized_brief(event: dict[str, Any], language: str) -> bool:
 
 def format_event_row(event: dict[str, Any], row_index: int) -> str:
     timestamp = event.get("timestamp", "-")
-    timestamp_display = format_utc_display(str(timestamp))
+    timestamp_iso = str(timestamp)
+    try:
+        dt = datetime.fromisoformat(timestamp_iso.replace("Z", "+00:00"))
+        timestamp_display = dt.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        timestamp_display = timestamp_iso
     new_hash = (event.get("new_hash") or "-")[:12]
     added = event.get("added_lines", 0)
     removed = event.get("removed_lines", 0)
@@ -1524,7 +1529,7 @@ def format_event_row(event: dict[str, Any], row_index: int) -> str:
     accent = row_accent_color(row_index)
     main_row = (
         f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}" class="{main_row_class}" style="--row-accent: {accent};">'
-        f"<td>{timestamp_display}</td>"
+        f'<td><time class="event-time hint-tooltip" datetime="{html.escape(timestamp_iso, quote=True)}" data-iso="{html.escape(timestamp_iso, quote=True)}" data-tooltip="" tabindex="0">{timestamp_display}</time></td>'
         f"<td><code>{new_hash}</code></td>"
         f'<td class="col-line-delta">+{added} / -{removed}</td>'
         f'<td class="details-cell">{details_cell}</td>'
@@ -1749,7 +1754,7 @@ def render_changelog_html(
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="{generated_at_iso}" data-iso="{generated_at_iso}">{generated_at}</time></p>
+        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
       {error_block}
@@ -2114,6 +2119,59 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
       border-bottom: 1px dotted currentColor;
       cursor: help;
     }}
+    .hint-tooltip {{
+      position: relative;
+    }}
+    .hint-tooltip::after {{
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }}
+    .hint-tooltip::before {{
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }}
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {{
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }}
+    .license-note {{
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }}
   </style>
 </head>
 <body>
@@ -2265,12 +2323,37 @@ def render_diff_html(diff_path: Path, diff_text: str, author_name: str, author_u
         return `${{date.getFullYear()}}-${{pad(date.getMonth() + 1)}}-${{pad(date.getDate())}} ${{pad(date.getHours())}}:${{pad(date.getMinutes())}}:${{pad(date.getSeconds())}}`;
       }}
 
+      function formatTimezoneHint(date) {{
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+        const offsetMinutes = -date.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? "+" : "-";
+        const absMinutes = Math.abs(offsetMinutes);
+        const hh = String(Math.floor(absMinutes / 60)).padStart(2, "0");
+        const mm = String(absMinutes % 60).padStart(2, "0");
+        return `${{zone}} (UTC${{sign}}${{hh}}:${{mm}})`;
+      }}
+
       function applyGeneratedTime() {{
         const generatedNode = document.getElementById("generated-at");
         if (!(generatedNode instanceof HTMLElement)) return;
         const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return;
         const local = formatLocalDateTime(iso);
         if (local) generatedNode.textContent = local;
+        generatedNode.dataset.tooltip = formatTimezoneHint(date);
+      }}
+
+      function applyEventTimes() {{
+        document.querySelectorAll(".event-time").forEach((node) => {{
+          if (!(node instanceof HTMLElement)) return;
+          const iso = node.getAttribute("data-iso") || node.getAttribute("datetime") || "";
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return;
+          const local = formatLocalDateTime(iso);
+          if (local) node.textContent = local;
+          node.dataset.tooltip = formatTimezoneHint(date);
+        }});
       }}
 
       const currentLang = readLang();
@@ -2689,7 +2772,7 @@ def render_docs(
       <table>
         <thead>
           <tr>
-            <th data-i18n="timestamp">Timestamp (UTC)</th>
+            <th data-i18n="timestamp">Timestamp</th>
             <th data-i18n="hash">Hash</th>
             <th class="col-line-delta" data-i18n="line_delta">Line Delta</th>
             <th data-i18n="details">Details</th>
@@ -2705,7 +2788,7 @@ def render_docs(
       <span data-i18n="footer_by">Author</span>
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
       · <a href="{html.escape(license_url)}" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
-      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
+      · <span class="license-note hint-tooltip" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" data-tooltip="" tabindex="0">Some rights reserved.</span>
     </footer>
   </div>
   <script>
@@ -2720,7 +2803,7 @@ def render_docs(
           title: "Proxmox VE Admin Guide Changelog",
           source: "Source:",
           generated: "Generated:",
-          timestamp: "Timestamp (UTC)",
+          timestamp: "Timestamp",
           hash: "Hash",
           line_delta: "Line Delta",
           details: "Details",
@@ -2752,7 +2835,7 @@ def render_docs(
           title: "Journal des changements du guide Proxmox VE Admin",
           source: "Source :",
           generated: "Généré :",
-          timestamp: "Horodatage (UTC)",
+          timestamp: "Horodatage",
           hash: "Hash",
           line_delta: "Delta de lignes",
           details: "Details",
@@ -2784,7 +2867,7 @@ def render_docs(
           title: "Журнал изменений руководства Proxmox VE Admin",
           source: "Источник:",
           generated: "Сгенерировано:",
-          timestamp: "Временная метка (UTC)",
+          timestamp: "Временная метка",
           hash: "Хэш",
           line_delta: "Изменение строк",
           details: "Детали",
@@ -2952,7 +3035,9 @@ def render_docs(
         }});
         document.querySelectorAll("[data-i18n-title]").forEach((node) => {{
           const key = node.getAttribute("data-i18n-title");
-          node.title = t(lang, key);
+          const value = t(lang, key);
+          node.setAttribute("data-tooltip", value);
+          node.setAttribute("aria-label", value);
         }});
         const langOptions = {{
           en: "language_en",
@@ -2978,6 +3063,7 @@ def render_docs(
       applyLanguage(currentLang);
       applyTheme(currentTheme);
       applyGeneratedTime();
+      applyEventTimes();
       setToolsMode(false);
       refreshEmptyRow();
 
