@@ -2523,6 +2523,9 @@ def render_docs(
       }}
     }}
     * {{ box-sizing: border-box; }}
+    [hidden] {{
+      display: none !important;
+    }}
     body {{
       margin: 0;
       font-family: "Segoe UI", Tahoma, sans-serif;
