@@ -5,17 +5,15 @@ Monitoring repository for:
 
 - `https://pve.proxmox.com/pve-docs/pve-admin-guide.html`
 
-Every 2 hours, GitHub Actions:
-
-<img width="2192" height="1286" alt="image" src="https://github.com/user-attachments/assets/b98904d7-b582-49d8-84ba-2fdff6c7eb2f" />
-
-
+GitHub Actions:
 1. downloads and normalizes page content,
 2. compares it with the previous snapshot,
 3. saves a diff on changes,
 4. generates an AI text changelog (`en`, `ru`, `fr`) for each diff,
 5. updates a static changelog page (`docs/index.html`),
 6. sends a Telegram notification if a real change is detected.
+
+<img width="2192" height="1286" alt="image" src="https://github.com/user-attachments/assets/b98904d7-b582-49d8-84ba-2fdff6c7eb2f" />
 
 ## Repository layout
 
