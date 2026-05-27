@@ -1529,9 +1529,9 @@ def format_event_row(event: dict[str, Any], row_index: int) -> str:
     accent = row_accent_color(row_index)
     main_row = (
         f'<tr data-event-id="{row_id}" data-event-row="main" data-history-selector="{selector}" class="{main_row_class}" style="--row-accent: {accent};">'
-        f'<td><time class="event-time hint-tooltip" datetime="{html.escape(timestamp_iso, quote=True)}" data-iso="{html.escape(timestamp_iso, quote=True)}" data-tooltip="" tabindex="0">{timestamp_display}</time></td>'
-        f"<td><code>{new_hash}</code></td>"
-        f'<td class="col-line-delta">+{added} / -{removed}</td>'
+        f'<td class="timestamp-cell"><time class="event-time hint-tooltip" datetime="{html.escape(timestamp_iso, quote=True)}" data-iso="{html.escape(timestamp_iso, quote=True)}" data-tooltip="" tabindex="0">{timestamp_display}</time></td>'
+        f'<td class="hash-cell"><code>{new_hash}</code></td>'
+        f'<td class="col-line-delta delta-cell">+{added} / -{removed}</td>'
         f'<td class="details-cell">{details_cell}</td>'
         "</tr>"
     )
@@ -2758,6 +2758,12 @@ def render_docs(
       border-bottom: 0;
       padding-bottom: 8px;
     }}
+    tbody tr[data-event-row="main"] td {{
+      border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+    }}
+    tbody tr[data-event-row="main"]:first-child td {{
+      border-top: 0;
+    }}
     tr[data-event-row="main"].has-brief > td:first-child {{
       border-left: 4px solid var(--row-accent, var(--accent));
       padding-left: 10px;
@@ -2847,10 +2853,62 @@ def render_docs(
       }}
       table, thead, tbody, th, td, tr {{ display: block; }}
       thead {{ display: none; }}
-      tr {{ border-bottom: 1px solid var(--line); }}
+      tbody {{
+        display: flex;
+        flex-direction: column;
+      }}
+      tr {{ border-bottom: 0; }}
+      tr[data-event-row="main"] {{
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        column-gap: 10px;
+        row-gap: 8px;
+        margin-top: 10px;
+        padding: 10px 12px 8px;
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        border-radius: 12px 12px 0 0;
+        background: color-mix(in srgb, var(--accent-soft) 24%, transparent);
+      }}
+      tr[data-event-row="main"]:first-child {{
+        margin-top: 0;
+      }}
+      tr[data-event-row="main"] td {{
+        padding: 0;
+        border: 0;
+      }}
+      .timestamp-cell {{
+        grid-column: 1;
+        white-space: nowrap;
+      }}
+      .hash-cell {{
+        grid-column: 2;
+        white-space: nowrap;
+      }}
+      .delta-cell {{
+        grid-column: 3;
+        white-space: nowrap;
+        min-width: 0;
+      }}
+      .details-cell {{
+        grid-column: 1 / -1;
+        padding-top: 2px;
+      }}
+      tr.brief-row {{
+        display: block;
+        border: 1px solid var(--line);
+        border-top: 0;
+        border-radius: 0 0 12px 12px;
+        margin-bottom: 6px;
+        background: color-mix(in srgb, var(--accent-soft) 36%, transparent);
+      }}
       td {{
         border: 0;
-        padding: 8px 14px;
+        padding: 8px 12px;
+      }}
+      .brief-row td {{
+        padding-top: 8px;
+        padding-bottom: 10px;
       }}
     }}
     .footer {{
