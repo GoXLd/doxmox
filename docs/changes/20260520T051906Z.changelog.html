@@ -146,7 +146,7 @@
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Changelog</h1>
-        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T14:16:34Z" data-iso="2026-05-27T14:16:34Z" data-tooltip="">2026-05-27 14:16:34 UTC</time></p>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-05-20T05:19:06Z" data-iso="2026-05-20T05:19:06Z" data-tooltip="">2026-05-20 05:19:06 UTC</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260520T051906Z.html" data-i18n="open_diff">Open code diff</a></p>
       </div>
       
@@ -222,7 +222,7 @@
           language: "Language",
           theme: "Theme",
           title: "Changelog",
-          generated: "Generated:",
+          timestamp_label: "Timestamp:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
@@ -241,7 +241,7 @@
           language: "Langue",
           theme: "Theme",
           title: "Journal des changements",
-          generated: "Généré :",
+          timestamp_label: "Horodatage :",
           back_menu: "Retour au menu principal",
           open_diff: "Ouvrir le diff de code",
           summary_title: "Résumé",
@@ -260,7 +260,7 @@
           language: "Язык",
           theme: "Тема",
           title: "Журнал изменений",
-          generated: "Сгенерировано:",
+          timestamp_label: "Временная метка:",
           back_menu: "Назад в главное меню",
           open_diff: "Открыть code diff",
           summary_title: "Сводка",
@@ -315,18 +315,18 @@
         const pad = (num) => String(num).padStart(2, "0");
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
       }
-      function applyGeneratedTime() {
-        const generatedNode = document.getElementById("generated-at");
-        if (!(generatedNode instanceof HTMLElement)) return;
-        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
         const local = formatLocalDateTime(iso);
-        if (local) generatedNode.textContent = local;
+        if (local) timeNode.textContent = local;
       }
       const currentLang = readLang();
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
-      applyGeneratedTime();
+      applyTimestampTime();
       langSelect.addEventListener("change", () => {
         localStorage.setItem(LANG_KEY, langSelect.value);
         applyLanguage(langSelect.value);

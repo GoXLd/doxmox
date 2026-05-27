@@ -1573,11 +1573,16 @@ def render_changelog_html(
     author_name: str,
     author_url: str,
 ) -> None:
-    generated_at_iso = now_utc_iso()
-    generated_at = format_utc_display(generated_at_iso)
     license_url = f"https://github.com/{DEFAULT_GITHUB_REPO}/blob/{DEFAULT_GITHUB_REF}/LICENSE"
     page_title = f"{diff_path.name} - Changelog"
     code_diff_href = diff_path.with_suffix(".html").name
+    timestamp_match = re.match(r"^(?P<ts>\d{8}T\d{6}Z)$", diff_path.stem)
+    if timestamp_match:
+        parsed_timestamp = datetime.strptime(timestamp_match.group("ts"), "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+        changelog_timestamp_iso = parsed_timestamp.isoformat().replace("+00:00", "Z")
+    else:
+        changelog_timestamp_iso = now_utc_iso()
+    changelog_timestamp_display = format_utc_display(changelog_timestamp_iso)
 
     if not ai_data:
         ai_data = {"status": "skipped", "reason": "ai_data_not_available"}
@@ -1794,7 +1799,7 @@ def render_changelog_html(
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Changelog</h1>
-        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="{changelog_timestamp_iso}" data-iso="{changelog_timestamp_iso}" data-tooltip="">{changelog_timestamp_display}</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
       {error_block}
@@ -1819,7 +1824,7 @@ def render_changelog_html(
           language: "Language",
           theme: "Theme",
           title: "Changelog",
-          generated: "Generated:",
+          timestamp_label: "Timestamp:",
           back_menu: "Back to main menu",
           open_diff: "Open code diff",
           summary_title: "Summary",
@@ -1838,7 +1843,7 @@ def render_changelog_html(
           language: "Langue",
           theme: "Theme",
           title: "Journal des changements",
-          generated: "Généré :",
+          timestamp_label: "Horodatage :",
           back_menu: "Retour au menu principal",
           open_diff: "Ouvrir le diff de code",
           summary_title: "Résumé",
@@ -1857,7 +1862,7 @@ def render_changelog_html(
           language: "Язык",
           theme: "Тема",
           title: "Журнал изменений",
-          generated: "Сгенерировано:",
+          timestamp_label: "Временная метка:",
           back_menu: "Назад в главное меню",
           open_diff: "Открыть code diff",
           summary_title: "Сводка",
@@ -1912,18 +1917,18 @@ def render_changelog_html(
         const pad = (num) => String(num).padStart(2, "0");
         return `${{date.getFullYear()}}-${{pad(date.getMonth() + 1)}}-${{pad(date.getDate())}} ${{pad(date.getHours())}}:${{pad(date.getMinutes())}}:${{pad(date.getSeconds())}}`;
       }}
-      function applyGeneratedTime() {{
-        const generatedNode = document.getElementById("generated-at");
-        if (!(generatedNode instanceof HTMLElement)) return;
-        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+      function applyTimestampTime() {{
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
         const local = formatLocalDateTime(iso);
-        if (local) generatedNode.textContent = local;
+        if (local) timeNode.textContent = local;
       }}
       const currentLang = readLang();
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
-      applyGeneratedTime();
+      applyTimestampTime();
       langSelect.addEventListener("change", () => {{
         localStorage.setItem(LANG_KEY, langSelect.value);
         applyLanguage(langSelect.value);
