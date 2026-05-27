@@ -2430,27 +2430,7 @@ def render_docs(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Doxmox Changelog</title>
   <style>
-    :root,
-    :root[data-theme="dark"] {{
-      --bg: #0d0f12;
-      --card: #1a1d22;
-      --text: #e6e8eb;
-      --muted: #a3acb8;
-      --line: rgba(255, 255, 255, 0.08);
-      --accent: #ff6a00;
-      --accent-soft: #2a2f37;
-      --th-bg: #2a2f37;
-      --th-text: #f4f5f7;
-      --control-bg: #2a2f37;
-      --control-line: rgba(255, 255, 255, 0.14);
-      --control-text: #e6e8eb;
-      --telegram: #229ed9;
-      --telegram-hover: #1d8fc4;
-      --telegram-text: #ffffff;
-      --radius: 18px;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.34);
-    }}
-    :root[data-theme="light"] {{
+    :root {{
       --bg: #f3f6fb;
       --card: #ffffff;
       --text: #0f172a;
@@ -2463,14 +2443,49 @@ def render_docs(
       --control-bg: #ffffff;
       --control-line: #c7d2e0;
       --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
       --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }}
+    :root[data-theme="dark"] {{
+      --bg: #0b1020;
+      --card: #0f172a;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --line: #1e293b;
+      --accent: #93c5fd;
+      --accent-soft: #111827;
+      --th-bg: #111827;
+      --th-text: #dbe7ff;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }}
+    @media (prefers-color-scheme: dark) {{
+      :root:not([data-theme]) {{
+        --bg: #0b1020;
+        --card: #0f172a;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --line: #1e293b;
+        --accent: #93c5fd;
+        --accent-soft: #111827;
+        --th-bg: #111827;
+        --th-text: #dbe7ff;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }}
     }}
     * {{ box-sizing: border-box; }}
     body {{
       margin: 0;
-      font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
+      font-family: "Segoe UI", Tahoma, sans-serif;
       color: var(--text);
-      background: radial-gradient(1200px 600px at 80% -200px, rgba(255, 106, 0, 0.12), transparent 55%), var(--bg);
+      background: var(--bg);
     }}
     .wrap {{
       max-width: 1100px;
@@ -2505,7 +2520,7 @@ def render_docs(
     }}
     .control select {{
       border: 1px solid var(--control-line);
-      border-radius: 10px;
+      border-radius: 8px;
       background: var(--control-bg);
       color: var(--control-text);
       padding: 6px 8px;
@@ -2513,7 +2528,7 @@ def render_docs(
     }}
     .control-btn {{
       border: 1px solid var(--control-line);
-      border-radius: 10px;
+      border-radius: 8px;
       background: var(--control-bg);
       color: var(--control-text);
       padding: 6px 10px;
@@ -2539,13 +2554,13 @@ def render_docs(
     .card {{
       background: var(--card);
       border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 12px;
       box-shadow: var(--shadow);
       overflow: hidden;
     }}
     .head {{
       padding: 20px;
-      background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 92%, transparent), color-mix(in srgb, var(--card) 86%, transparent));
+      background: var(--accent-soft);
       border-bottom: 1px solid var(--line);
     }}
     .telegram-link {{
@@ -2593,13 +2608,7 @@ def render_docs(
     .telegram-link .tg-plane {{
       fill: #ffffff;
     }}
-    h1 {{
-      margin: 0 0 8px;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-      font-family: "Exo 2", "Segoe UI", Tahoma, sans-serif;
-    }}
+    h1 {{ margin: 0 0 8px; font-size: 24px; }}
     p {{ margin: 4px 0; color: var(--muted); }}
     a {{ color: var(--accent); }}
     .row-select-wrap {{
@@ -2684,10 +2693,7 @@ def render_docs(
       white-space: nowrap;
       min-width: 190px;
     }}
-    code {{
-      font-size: 12px;
-      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    }}
+    code {{ font-size: 12px; }}
     @media (max-width: 860px) {{
       .toolbar {{
         gap: 8px;
