@@ -1585,10 +1585,16 @@ def render_changelog_html(
     summary_ru = ai_summary_for_language(ai_data, "ru")
     summary_fr = ai_summary_for_language(ai_data, "fr")
 
-    def render_change_list(summary: dict[str, Any]) -> str:
+    def render_change_list(summary: dict[str, Any], lang_code: str) -> str:
         changes = summary.get("changes")
         if not isinstance(changes, list) or not changes:
             return '<li data-i18n="no_items">No items yet.</li>'
+        severity_labels = {
+            "en": {"high": "High", "medium": "Medium", "low": "Low"},
+            "fr": {"high": "Élevé", "medium": "Moyen", "low": "Faible"},
+            "ru": {"high": "Высокая", "medium": "Средняя", "low": "Низкая"},
+        }
+        labels_for_lang = severity_labels.get(lang_code, severity_labels["en"])
         items = []
         for change in changes:
             if not isinstance(change, dict):
@@ -1598,12 +1604,12 @@ def render_changelog_html(
             impact = html.escape(str(change.get("impact") or "").strip())
             action = html.escape(str(change.get("recommended_action") or "").strip())
             severity_key = str(change.get("severity") or "").strip().lower()
-            severity_icon = "●" if severity_key in {"high", "medium", "low"} else ""
-            severity_class = f"severity-{severity_key}" if severity_icon else ""
+            severity_label = labels_for_lang.get(severity_key, "")
+            severity_class = f"severity-{severity_key}" if severity_label else ""
             title_html = title
-            if title and severity_icon:
+            if title and severity_label:
                 title_html = (
-                    f'<span class="severity-icon {severity_class}" aria-hidden="true">{severity_icon}</span>'
+                    f'<span class="severity-badge {severity_class}">{html.escape(severity_label)}</span>'
                     f"{title}"
                 )
             chunks = [f"<strong>{title_html}</strong>" if title_html else ""]
@@ -1626,7 +1632,7 @@ def render_changelog_html(
           <p><strong data-i18n="assessment">Assessment:</strong> {assessment or '-'}</p>
           <h3 data-i18n="changes_title">Change List</h3>
           <ol>
-            {render_change_list(summary)}
+            {render_change_list(summary, lang_code)}
           </ol>
         </section>
         """
@@ -1725,21 +1731,34 @@ def render_changelog_html(
       margin: 10px 0;
       line-height: 1.45;
     }}
-    .severity-icon {{
-      display: inline-block;
-      width: 0.9em;
-      margin-right: 0.35em;
-      text-align: center;
-      vertical-align: baseline;
-      font-size: 0.92em;
+    .severity-badge {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      vertical-align: middle;
     }}
     .severity-high {{
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
       color: #ef4444;
     }}
     .severity-medium {{
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
       color: #f59e0b;
     }}
     .severity-low {{
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
       color: #22c55e;
     }}
     .footer {{
