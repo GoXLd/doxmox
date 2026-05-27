@@ -1,3 +1,4 @@
+
 # doxmox
 
 Monitoring repository for:
@@ -5,6 +6,9 @@ Monitoring repository for:
 - `https://pve.proxmox.com/pve-docs/pve-admin-guide.html`
 
 Every 2 hours, GitHub Actions:
+
+<img width="2192" height="1286" alt="image" src="https://github.com/user-attachments/assets/b98904d7-b582-49d8-84ba-2fdff6c7eb2f" />
+
 
 1. downloads and normalizes page content,
 2. compares it with the previous snapshot,
