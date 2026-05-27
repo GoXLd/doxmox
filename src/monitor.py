@@ -1597,16 +1597,22 @@ def render_changelog_html(
             details = html.escape(str(change.get("details") or "").strip())
             impact = html.escape(str(change.get("impact") or "").strip())
             action = html.escape(str(change.get("recommended_action") or "").strip())
-            severity = html.escape(str(change.get("severity") or "").strip())
-            chunks = [f"<strong>{title}</strong>" if title else ""]
+            severity_key = str(change.get("severity") or "").strip().lower()
+            severity_icon = "●" if severity_key in {"high", "medium", "low"} else ""
+            severity_class = f"severity-{severity_key}" if severity_icon else ""
+            title_html = title
+            if title and severity_icon:
+                title_html = (
+                    f'<span class="severity-icon {severity_class}" aria-hidden="true">{severity_icon}</span>'
+                    f"{title}"
+                )
+            chunks = [f"<strong>{title_html}</strong>" if title_html else ""]
             if details:
                 chunks.append(f"<div>{details}</div>")
             if impact:
                 chunks.append(f"<div><em>Impact:</em> {impact}</div>")
             if action:
                 chunks.append(f"<div><em>Action:</em> {action}</div>")
-            if severity:
-                chunks.append(f"<div><em>Severity:</em> {severity}</div>")
             items.append(f"<li>{''.join(chunks)}</li>")
         return "\n".join(items) if items else '<li data-i18n="no_items">No items yet.</li>'
 
@@ -1720,6 +1726,23 @@ def render_changelog_html(
     li {{
       margin: 10px 0;
       line-height: 1.45;
+    }}
+    .severity-icon {{
+      display: inline-block;
+      width: 0.9em;
+      margin-right: 0.35em;
+      text-align: center;
+      vertical-align: baseline;
+      font-size: 0.92em;
+    }}
+    .severity-high {{
+      color: #ef4444;
+    }}
+    .severity-medium {{
+      color: #f59e0b;
+    }}
+    .severity-low {{
+      color: #22c55e;
     }}
     .footer {{
       margin-top: 20px;
@@ -2756,6 +2779,7 @@ def render_docs(
     }}
     .hint-tooltip {{
       position: relative;
+      display: inline-block;
       cursor: help;
     }}
     .hint-tooltip::after {{
@@ -3147,6 +3171,7 @@ def render_docs(
           const value = t(lang, key);
           node.setAttribute("data-tooltip", value);
           node.setAttribute("aria-label", value);
+          node.setAttribute("title", value);
         }});
         const langOptions = {{
           en: "language_en",

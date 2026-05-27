@@ -300,6 +300,10 @@
       color: var(--muted);
       font-size: 13px;
     }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
     .github-link {
       display: inline-flex;
       align-items: center;
@@ -324,6 +328,57 @@
       height: 16px;
       fill: currentColor;
       display: block;
+    }
+    .hint-tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: help;
+    }
+    .hint-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -368,7 +423,7 @@
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T12:18:27Z" data-iso="2026-05-27T12:18:27Z" data-tooltip="">2026-05-27 12:18:27 UTC</time></p>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T13:51:57Z" data-iso="2026-05-27T13:51:57Z" data-tooltip="">2026-05-27 13:51:57 UTC</time></p>
       </div>
       <table>
         <thead>
@@ -671,6 +726,7 @@
           const value = t(lang, key);
           node.setAttribute("data-tooltip", value);
           node.setAttribute("aria-label", value);
+          node.setAttribute("title", value);
         });
         const langOptions = {
           en: "language_en",
