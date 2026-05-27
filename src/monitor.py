@@ -1754,7 +1754,7 @@ def render_changelog_html(
     <div class="card">
       <div class="head">
         <h1 data-i18n="title">Human Changelog</h1>
-        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
         <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="{html.escape(code_diff_href)}" data-i18n="open_diff">Open code diff</a></p>
       </div>
       {error_block}
@@ -2847,7 +2847,7 @@ def render_docs(
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
-        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
       </div>
       <table>
         <thead>
@@ -2867,6 +2867,7 @@ def render_docs(
     <footer class="footer">
       <span data-i18n="footer_by">Author</span>
       <a href="{html.escape(author_url)}" target="_blank" rel="noopener noreferrer">{html.escape(author_name)}</a>
+      · <span><span data-i18n="generated">Generated:</span> <time id="generated-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></span>
       · <a href="{html.escape(license_url)}" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
       · <span class="license-note hint-tooltip" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" data-tooltip="" tabindex="0">Some rights reserved.</span>
       · <a class="github-link" href="{html.escape(github_repo_url)}" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" title="GitHub repository"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.93-.89-1.18-.89-1.18-.73-.49.06-.48.06-.48.81.06 1.23.83 1.23.83.72 1.23 1.88.88 2.34.67.07-.52.28-.88.5-1.08-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.58.82-2.14-.08-.2-.36-1.01.08-2.1 0 0 .67-.21 2.2.82A7.64 7.64 0 0 1 8 4.84c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.09.16 1.9.08 2.1.51.56.82 1.27.82 2.14 0 3.07-1.88 3.75-3.67 3.95.29.25.54.74.54 1.49v2.21c0 .22.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path></svg></a>
@@ -2883,6 +2884,7 @@ def render_docs(
         en: {{
           title: "Proxmox VE Admin Guide Changelog",
           source: "Source:",
+          last_check: "Last Check:",
           generated: "Generated:",
           timestamp: "Timestamp",
           hash: "Hash",
@@ -2915,6 +2917,7 @@ def render_docs(
         fr: {{
           title: "Journal des changements du guide Proxmox VE Admin",
           source: "Source :",
+          last_check: "Dernière vérification :",
           generated: "Généré :",
           timestamp: "Horodatage",
           hash: "Hash",
@@ -2947,6 +2950,7 @@ def render_docs(
         ru: {{
           title: "Журнал изменений руководства Proxmox VE Admin",
           source: "Источник:",
+          last_check: "Последняя проверка:",
           generated: "Сгенерировано:",
           timestamp: "Временная метка",
           hash: "Хэш",
@@ -3077,12 +3081,12 @@ def render_docs(
         return `${{date.getFullYear()}}-${{pad(date.getMonth() + 1)}}-${{pad(date.getDate())}} ${{pad(date.getHours())}}:${{pad(date.getMinutes())}}:${{pad(date.getSeconds())}}`;
       }}
 
-      function applyGeneratedTime() {{
-        const generatedNode = document.getElementById("generated-at");
-        if (!(generatedNode instanceof HTMLElement)) return;
-        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+      function applyLocalizedTime(nodeId) {{
+        const timeNode = document.getElementById(nodeId);
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
         const local = formatLocalDateTime(iso);
-        if (local) generatedNode.textContent = local;
+        if (local) timeNode.textContent = local;
       }}
 
       function readLang() {{
@@ -3143,7 +3147,8 @@ def render_docs(
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
-      applyGeneratedTime();
+      applyLocalizedTime("last-check-at");
+      applyLocalizedTime("generated-at");
       applyEventTimes();
       setToolsMode(false);
       refreshEmptyRow();

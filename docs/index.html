@@ -368,7 +368,7 @@
       <div class="head">
         <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
         <p><span data-i18n="source">Source:</span> <a href="https://pve.proxmox.com/pve-docs/pve-admin-guide.html" target="_blank" rel="noopener noreferrer">https://pve.proxmox.com/pve-docs/pve-admin-guide.html</a></p>
-        <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-05-27T12:18:27Z" data-iso="2026-05-27T12:18:27Z">2026-05-27 12:18:27 UTC</time></p>
+        <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="2026-05-27T12:18:27Z" data-iso="2026-05-27T12:18:27Z" data-tooltip="">2026-05-27 12:18:27 UTC</time></p>
       </div>
       <table>
         <thead>
@@ -391,6 +391,7 @@
     <footer class="footer">
       <span data-i18n="footer_by">Author</span>
       <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <span><span data-i18n="generated">Generated:</span> <time id="generated-at" class="hint-tooltip" datetime="2026-05-27T12:18:27Z" data-iso="2026-05-27T12:18:27Z" data-tooltip="">2026-05-27 12:18:27 UTC</time></span>
       · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
       · <span class="license-note hint-tooltip" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" data-tooltip="" tabindex="0">Some rights reserved.</span>
       · <a class="github-link" href="https://github.com/GoXLd/doxmox" target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" title="GitHub repository"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.22.48-2.69-1.07-2.69-1.07-.36-.93-.89-1.18-.89-1.18-.73-.49.06-.48.06-.48.81.06 1.23.83 1.23.83.72 1.23 1.88.88 2.34.67.07-.52.28-.88.5-1.08-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.58.82-2.14-.08-.2-.36-1.01.08-2.1 0 0 .67-.21 2.2.82A7.64 7.64 0 0 1 8 4.84c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.09.16 1.9.08 2.1.51.56.82 1.27.82 2.14 0 3.07-1.88 3.75-3.67 3.95.29.25.54.74.54 1.49v2.21c0 .22.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path></svg></a>
@@ -407,6 +408,7 @@
         en: {
           title: "Proxmox VE Admin Guide Changelog",
           source: "Source:",
+          last_check: "Last Check:",
           generated: "Generated:",
           timestamp: "Timestamp",
           hash: "Hash",
@@ -439,6 +441,7 @@
         fr: {
           title: "Journal des changements du guide Proxmox VE Admin",
           source: "Source :",
+          last_check: "Dernière vérification :",
           generated: "Généré :",
           timestamp: "Horodatage",
           hash: "Hash",
@@ -471,6 +474,7 @@
         ru: {
           title: "Журнал изменений руководства Proxmox VE Admin",
           source: "Источник:",
+          last_check: "Последняя проверка:",
           generated: "Сгенерировано:",
           timestamp: "Временная метка",
           hash: "Хэш",
@@ -601,12 +605,12 @@
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
       }
 
-      function applyGeneratedTime() {
-        const generatedNode = document.getElementById("generated-at");
-        if (!(generatedNode instanceof HTMLElement)) return;
-        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+      function applyLocalizedTime(nodeId) {
+        const timeNode = document.getElementById(nodeId);
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
         const local = formatLocalDateTime(iso);
-        if (local) generatedNode.textContent = local;
+        if (local) timeNode.textContent = local;
       }
 
       function readLang() {
@@ -667,7 +671,8 @@
       const currentTheme = readTheme();
       applyLanguage(currentLang);
       applyTheme(currentTheme);
-      applyGeneratedTime();
+      applyLocalizedTime("last-check-at");
+      applyLocalizedTime("generated-at");
       applyEventTimes();
       setToolsMode(false);
       refreshEmptyRow();
