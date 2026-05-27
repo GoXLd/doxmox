@@ -2610,14 +2610,11 @@ def render_docs(
     .head-title-row {{
       display: flex;
       align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }}
     .head-title-row h1 {{
       margin: 0;
-      flex: 1 1 auto;
-      min-width: 0;
+      white-space: nowrap;
     }}
     .telegram-link {{
       display: inline-flex;
@@ -2668,7 +2665,8 @@ def render_docs(
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      width: min(560px, 48%);
+      width: fit-content;
+      max-width: 390px;
       padding: 8px 10px;
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -2819,9 +2817,8 @@ def render_docs(
         font-size: 14px;
       }}
       .ru-course-link {{ max-width: 100%; }}
-      .head-title-row {{
-        flex-direction: column;
-        align-items: flex-start;
+      .head-title-row h1 {{
+        white-space: normal;
       }}
       .head .ru-course-link {{
         width: 100%;
@@ -2964,26 +2961,26 @@ def render_docs(
       <div class="head">
         <div class="head-title-row">
           <h1 data-i18n="title">Proxmox VE Admin Guide Changelog</h1>
-          <a
-            id="ru-course-link"
-            class="ru-course-link"
-            href="https://www.youtube.com/watch?v=PPln5TFQDQ4"
-            target="_blank"
-            rel="noopener noreferrer"
-            hidden
-          >
-            <span class="yt-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect class="yt-bg" x="2" y="5" width="20" height="14" rx="4" ry="4"></rect>
-                <path class="yt-play" d="M10 9.2v5.6l5-2.8-5-2.8z"></path>
-              </svg>
-            </span>
-            <span>
-              <span class="ru-course-title">Proxmox с 0 до 100%. Всё, что нужно знать!</span>
-              <span class="ru-course-note">Бесплатный курс для сообщества. Спасибо автору.</span>
-            </span>
-          </a>
         </div>
+        <a
+          id="ru-course-link"
+          class="ru-course-link"
+          href="https://www.youtube.com/watch?v=PPln5TFQDQ4"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          <span class="yt-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect class="yt-bg" x="2" y="5" width="20" height="14" rx="4" ry="4"></rect>
+              <path class="yt-play" d="M10 9.2v5.6l5-2.8-5-2.8z"></path>
+            </svg>
+          </span>
+          <span>
+            <span class="ru-course-title">Proxmox с 0 до 100%. Всё, что нужно знать!</span>
+            <span class="ru-course-note">Бесплатный курс для сообщества. Спасибо автору.</span>
+          </span>
+        </a>
         <p><span data-i18n="source">Source:</span> <a href="{html.escape(url)}" target="_blank" rel="noopener noreferrer">{html.escape(url)}</a></p>
         <p><span data-i18n="last_check">Last Check:</span> <time id="last-check-at" class="hint-tooltip" datetime="{generated_at_iso}" data-iso="{generated_at_iso}" data-tooltip="">{generated_at}</time></p>
       </div>
