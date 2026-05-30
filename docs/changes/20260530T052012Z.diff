@@ -1,0 +1,149 @@
+--- previous
++++ current
+@@ -346,10 +346,10 @@
+  </span>
+  <br/>
+  <span id="revnumber">
+-  version 9.2.1,
++  version 9.2.2,
+  </span>
+  <span id="revdate">
+-  Wed May 20 15:46:31 CEST 2026
++  Thu May 21 22:27:14 CEST 2026
+  </span>
+  <div id="toc">
+   <a href="index.html" style="font-size: 0.8em;">
+@@ -68850,21 +68850,46 @@
+         <dd>
+          <p>
+           This is the IP or hostname that other Proxmox VE nodes should use for
+-connecting to this Proxmox VE node. This is used together with the endpoint port
+-when configuring this Proxmox VE node as a peer.
+-         </p>
+-        </dd>
+-        <dt class="hdlist1">
+-         Endpoint Port
+-        </dt>
+-        <dd>
+-         <p>
+-          This is the UDP port that other Proxmox VE nodes should use for
+-connecting to this Proxmox VE node. If unset, it defaults to
++connecting to this Proxmox VE node (e.g.
++          <span class="monospaced">
++           192.0.2.1
++          </span>
++          /
++          <span class="monospaced">
++           2001:db8::1
++          </span>
++          ). This is
++used together with the
++          <em>
++           Listen Port
++          </em>
++          configured on the separate interfaces for
++constructing the actual endpoint. For instance, if a node has the IP
++          <span class="monospaced">
++           192.0.2.1
++          </span>
++          as an
++          <em>
++           Endpoint
++          </em>
++          and an interface
++          <span class="monospaced">
++           wg0
++          </span>
++          with
++          <em>
++           Listen Port
++          </em>
+           <span class="monospaced">
+            51820
+           </span>
+-          .
++          configured,
++then other nodes will use
++          <span class="monospaced">
++           192.0.2.1:51820
++          </span>
++          as endpoint for connecting to this
++node.
+          </p>
+         </dd>
+         <dt class="hdlist1">
+@@ -68919,21 +68944,17 @@
+         </dt>
+         <dd>
+          <p>
+-          The IP or hostname that other nodes use to connect to this external
+-peer.
+-         </p>
+-        </dd>
+-        <dt class="hdlist1">
+-         Endpoint Port
+-        </dt>
+-        <dd>
+-         <p>
+-          The UDP port that other nodes use to connect to this external
+-peer. If unset, it defaults to
++          The IP or hostname together with the port that other nodes use to
++connect to this external peer (e.g.
+           <span class="monospaced">
+-           51820
++           192.0.2.1:51820
+           </span>
+-          .
++          ). If an endpoint uses an
++IPv6 address, then the address needs to be enclosed in square brackets (e.g.
++          <span class="monospaced">
++           [2001:db8::1]:51820
++          </span>
++          ).
+          </p>
+         </dd>
+         <dt class="hdlist1">
+@@ -93406,14 +93427,17 @@
+        </em>
+       </p>
+       <p>
+-       Proxmox VE versions are supported at least as long as the corresponding
+-Debian version, i.e. approximately 3 years after its initial release,
+-see
++       Proxmox VE versions are supported
++       <strong>
++        at least as long
++       </strong>
++       as the corresponding Debian
++version is supported by the Debian Security Team, i.e. approximately 3 years
++after its initial release, see
+        <a href="https://www.debian.org/security/faq#lifespan">
+         Debian lifespan
+        </a>
+-       .
+-Proxmox VE uses a
++       . Proxmox VE uses a
+ rolling release model and using the latest stable version is always
+ recommended.
+       </p>
+@@ -93491,7 +93515,7 @@
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+-            2026-08
++            2026-07
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+@@ -136949,9 +136973,9 @@
+ </div>
+ <div id="footer">
+  <div id="footer-text">
+-  Version 9.2.1
++  Version 9.2.2
+   <br/>
+   Last updated
+- Wed May 20 15:46:31 CEST 2026
++ Thu May 21 22:27:14 CEST 2026
+  </div>
+ </div>

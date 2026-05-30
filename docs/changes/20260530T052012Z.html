@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260530T052012Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+    .hint-tooltip {
+      position: relative;
+    }
+    .hint-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260530T052012Z.diff</h1>
+      <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-05-30T05:20:39Z" data-iso="2026-05-30T05:20:39Z">2026-05-30 05:20:39 UTC</time></p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260530T052012Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -346,10 +346,10 @@</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;br/&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revnumber&quot;&gt;</span>
+<span class="line del">-  version 9.2.1,</span>
+<span class="line add">+  version 9.2.2,</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revdate&quot;&gt;</span>
+<span class="line del">-  Wed May 20 15:46:31 CEST 2026</span>
+<span class="line add">+  Thu May 21 22:27:14 CEST 2026</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;toc&quot;&gt;</span>
+<span class="line ctx">   &lt;a href=&quot;index.html&quot; style=&quot;font-size: 0.8em;&quot;&gt;</span>
+<span class="line hunk">@@ -68850,21 +68850,46 @@</span>
+<span class="line ctx">         &lt;dd&gt;</span>
+<span class="line ctx">          &lt;p&gt;</span>
+<span class="line ctx">           This is the IP or hostname that other Proxmox VE nodes should use for</span>
+<span class="line del">-connecting to this Proxmox VE node. This is used together with the endpoint port</span>
+<span class="line del">-when configuring this Proxmox VE node as a peer.</span>
+<span class="line del">-         &lt;/p&gt;</span>
+<span class="line del">-        &lt;/dd&gt;</span>
+<span class="line del">-        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-         Endpoint Port</span>
+<span class="line del">-        &lt;/dt&gt;</span>
+<span class="line del">-        &lt;dd&gt;</span>
+<span class="line del">-         &lt;p&gt;</span>
+<span class="line del">-          This is the UDP port that other Proxmox VE nodes should use for</span>
+<span class="line del">-connecting to this Proxmox VE node. If unset, it defaults to</span>
+<span class="line add">+connecting to this Proxmox VE node (e.g.</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           192.0.2.1</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          /</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           2001:db8::1</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ). This is</span>
+<span class="line add">+used together with the</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           Listen Port</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          configured on the separate interfaces for</span>
+<span class="line add">+constructing the actual endpoint. For instance, if a node has the IP</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           192.0.2.1</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          as an</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           Endpoint</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          and an interface</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           wg0</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          with</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           Listen Port</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">            51820</span>
+<span class="line ctx">           &lt;/span&gt;</span>
+<span class="line del">-          .</span>
+<span class="line add">+          configured,</span>
+<span class="line add">+then other nodes will use</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           192.0.2.1:51820</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          as endpoint for connecting to this</span>
+<span class="line add">+node.</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/dd&gt;</span>
+<span class="line ctx">         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -68919,21 +68944,17 @@</span>
+<span class="line ctx">         &lt;/dt&gt;</span>
+<span class="line ctx">         &lt;dd&gt;</span>
+<span class="line ctx">          &lt;p&gt;</span>
+<span class="line del">-          The IP or hostname that other nodes use to connect to this external</span>
+<span class="line del">-peer.</span>
+<span class="line del">-         &lt;/p&gt;</span>
+<span class="line del">-        &lt;/dd&gt;</span>
+<span class="line del">-        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-         Endpoint Port</span>
+<span class="line del">-        &lt;/dt&gt;</span>
+<span class="line del">-        &lt;dd&gt;</span>
+<span class="line del">-         &lt;p&gt;</span>
+<span class="line del">-          The UDP port that other nodes use to connect to this external</span>
+<span class="line del">-peer. If unset, it defaults to</span>
+<span class="line add">+          The IP or hostname together with the port that other nodes use to</span>
+<span class="line add">+connect to this external peer (e.g.</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-           51820</span>
+<span class="line add">+           192.0.2.1:51820</span>
+<span class="line ctx">           &lt;/span&gt;</span>
+<span class="line del">-          .</span>
+<span class="line add">+          ). If an endpoint uses an</span>
+<span class="line add">+IPv6 address, then the address needs to be enclosed in square brackets (e.g.</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           [2001:db8::1]:51820</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          ).</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/dd&gt;</span>
+<span class="line ctx">         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -93406,14 +93427,17 @@</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line del">-       Proxmox VE versions are supported at least as long as the corresponding</span>
+<span class="line del">-Debian version, i.e. approximately 3 years after its initial release,</span>
+<span class="line del">-see</span>
+<span class="line add">+       Proxmox VE versions are supported</span>
+<span class="line add">+       &lt;strong&gt;</span>
+<span class="line add">+        at least as long</span>
+<span class="line add">+       &lt;/strong&gt;</span>
+<span class="line add">+       as the corresponding Debian</span>
+<span class="line add">+version is supported by the Debian Security Team, i.e. approximately 3 years</span>
+<span class="line add">+after its initial release, see</span>
+<span class="line ctx">        &lt;a href=&quot;https://www.debian.org/security/faq#lifespan&quot;&gt;</span>
+<span class="line ctx">         Debian lifespan</span>
+<span class="line ctx">        &lt;/a&gt;</span>
+<span class="line del">-       .</span>
+<span class="line del">-Proxmox VE uses a</span>
+<span class="line add">+       . Proxmox VE uses a</span>
+<span class="line ctx"> rolling release model and using the latest stable version is always</span>
+<span class="line ctx"> recommended.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line hunk">@@ -93491,7 +93515,7 @@</span>
+<span class="line ctx">           &lt;/td&gt;</span>
+<span class="line ctx">           &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">            &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-            2026-08</span>
+<span class="line add">+            2026-07</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line ctx">           &lt;/td&gt;</span>
+<span class="line ctx">           &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line hunk">@@ -136949,9 +136973,9 @@</span>
+<span class="line ctx"> &lt;/div&gt;</span>
+<span class="line ctx"> &lt;div id=&quot;footer&quot;&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;footer-text&quot;&gt;</span>
+<span class="line del">-  Version 9.2.1</span>
+<span class="line add">+  Version 9.2.2</span>
+<span class="line ctx">   &lt;br/&gt;</span>
+<span class="line ctx">   Last updated</span>
+<span class="line del">- Wed May 20 15:46:31 CEST 2026</span>
+<span class="line add">+ Thu May 21 22:27:14 CEST 2026</span>
+<span class="line ctx">  &lt;/div&gt;</span>
+<span class="line ctx"> &lt;/div&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Author</span>
+      <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated:",
+          back_to_menu: "Back to main menu",
+          open_changelog: "Open changelog",
+          footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré :",
+          back_to_menu: "Retour au menu principal",
+          open_changelog: "Ouvrir le changelog",
+          footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано:",
+          back_to_menu: "Назад в главное меню",
+          open_changelog: "Открыть changelog",
+          footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }
+
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function formatTimezoneHint(date) {
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+        const offsetMinutes = -date.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? "+" : "-";
+        const absMinutes = Math.abs(offsetMinutes);
+        const hh = String(Math.floor(absMinutes / 60)).padStart(2, "0");
+        const mm = String(absMinutes % 60).padStart(2, "0");
+        return `${zone} (UTC${sign}${hh}:${mm})`;
+      }
+
+      function applyGeneratedTime() {
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return;
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+        generatedNode.dataset.tooltip = formatTimezoneHint(date);
+      }
+
+      function applyEventTimes() {
+        document.querySelectorAll(".event-time").forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          const iso = node.getAttribute("data-iso") || node.getAttribute("datetime") || "";
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return;
+          const local = formatLocalDateTime(iso);
+          if (local) node.textContent = local;
+          node.dataset.tooltip = formatTimezoneHint(date);
+        });
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyGeneratedTime();
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

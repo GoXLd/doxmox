@@ -1,5 +1,196 @@
 [
   {
+    "timestamp": "2026-05-30T05:20:12Z",
+    "old_hash": "b743073ca642a426c81f79d6cbd08d60e8895d41b9e18b87dee4ce53f4f809bc",
+    "new_hash": "2f7b7b5201065a5258f66deab321a284b98f6b8868b16dd1cb1ca00f337cb21a",
+    "diff_file": "docs/changes/20260530T052012Z.diff",
+    "added_lines": 59,
+    "removed_lines": 35,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-05-30T05:23:48Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.2.2 documentation has been updated with a version bump, clarified networking endpoint fields, and revised support lifecycle information. The changes improve configuration accuracy and set clear expectations for product support timelines.",
+          "professional_assessment": "The documentation refinements reduce the risk of misconfiguring WireGuard endpoints and align support statements with Debian security policies. Operators should verify existing configurations against the new examples and adjust monitoring of support dates accordingly.",
+          "newcomer_explainer": "The guide now tells you exactly how to write IP addresses and ports for internal and external connections, shows examples for both IPv4 and IPv6, and explains that Proxmox will be supported as long as its underlying Debian version is supported (about three years).",
+          "changes": [
+            {
+              "title": "Version bump to Proxmox VE 9.2.2",
+              "details": "All documentation now reflects the current release version 9.2.2 and updates the document date to Thu May 21 2026.",
+              "impact": "Ensures users reference the correct version when following guides, preventing version‑specific mismatches.",
+              "recommended_action": "Confirm you are running Proxmox VE 9.2.2 or later before applying the documented steps.",
+              "severity": "low"
+            },
+            {
+              "title": "Expanded description of the internal node Endpoint field",
+              "details": "The Endpoint field now includes concrete examples (e.g., `192.0.2.1`, `2001:db8::1`) and clarifies that it combines with the interface's Listen Port to form the full endpoint string such as `192.0.2.1:51820`.",
+              "impact": "Reduces ambiguity when configuring internal WireGuard peers, leading to fewer connection failures.",
+              "recommended_action": "Update any existing endpoint entries to match the new format and verify the associated Listen Port is correctly set.",
+              "severity": "medium"
+            },
+            {
+              "title": "Clarified behavior of the internal node Endpoint Port field",
+              "details": "Removed the vague “defaults to …” wording. The documentation now states that the port is taken directly from the interface’s Listen Port and shows how the final endpoint string is built.",
+              "impact": "Prevents accidental use of unintended ports, improving network reliability.",
+              "recommended_action": "Check that each interface’s Listen Port matches the intended endpoint port and adjust if necessary.",
+              "severity": "medium"
+            },
+            {
+              "title": "External peer Endpoint format requires IP/hostname and port together",
+              "details": "External endpoints must now be written as `IP:port` (e.g., `192.0.2.1:51820`). For IPv6, the address must be wrapped in brackets, e.g., `[2001:db8::1]:51820`.",
+              "impact": "Incorrect endpoint strings will cause immediate connection failures with external peers.",
+              "recommended_action": "Review all external peer configurations and rewrite them using the new combined syntax, especially for IPv6 entries.",
+              "severity": "high"
+            },
+            {
+              "title": "Support lifecycle paragraph re‑phrased",
+              "details": "The text now emphasizes that Proxmox VE is supported at least as long as the underlying Debian release is maintained by the Debian Security Team, roughly three years.",
+              "impact": "Provides clearer expectations for long‑term maintenance and upgrade planning.",
+              "recommended_action": "Align your upgrade schedule with the Debian release lifecycle to maintain support coverage.",
+              "severity": "low"
+            },
+            {
+              "title": "Support table end‑of‑support month updated",
+              "details": "The end‑of‑support month for the current release has been changed from 2026‑08 to 2026‑07.",
+              "impact": "Shortens the official support window by one month, affecting planning for patches and upgrades.",
+              "recommended_action": "Adjust your support and upgrade timelines to reflect the new 2026‑07 end‑of‑support date.",
+              "severity": "medium"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Документация Proxmox VE 9.2.2 обновлена: увеличена версия, уточнены поля сетевых конечных точек и пересмотрена информация о жизненном цикле поддержки. Эти изменения повышают точность конфигурации и устанавливают чёткие ожидания относительно сроков поддержки продукта.",
+          "professional_assessment": "Уточнения в документации снижают риск неправильной настройки конечных точек WireGuard и согласуют заявления о поддержке с политиками безопасности Debian. Операторам следует проверить существующие конфигурации по сравнению с новыми примерами и соответственно скорректировать мониторинг дат поддержки.",
+          "newcomer_explainer": "В руководстве теперь точно указано, как записывать IP‑адреса и порты для внутренних и внешних соединений, приведены примеры как для IPv4, так и для IPv6, а также объясняется, что Proxmox будет поддерживаться, пока поддерживается его базовая версия Debian (около трёх лет).",
+          "changes": [
+            {
+              "title": "Обновление версии до Proxmox VE 9.2.2",
+              "details": "Вся документация теперь отражает текущую версию выпуска 9.2.2 и обновляет дату документа на четверг, 21 мая 2026 г.",
+              "impact": "Обеспечивает, что пользователи ссылаются на правильную версию при следовании руководствам, предотвращая несоответствия, зависящие от версии.",
+              "recommended_action": "Убедитесь, что вы используете Proxmox VE 9.2.2 или новее, прежде чем применять описанные шаги.",
+              "severity": "low"
+            },
+            {
+              "title": "Расширенное описание поля Endpoint внутреннего узла",
+              "details": "Поле Endpoint теперь содержит конкретные примеры (например, `192.0.2.1`, `2001:db8::1`) и уточняет, что оно объединяется с Listen Port интерфейса, образуя полную строку endpoint, например `192.0.2.1:51820`.",
+              "impact": "Снижает неоднозначность при настройке внутренних пиров WireGuard, что приводит к меньшему количеству сбоев соединения.",
+              "recommended_action": "Обновите любые существующие записи endpoint, чтобы они соответствовали новому формату, и проверьте, что соответствующий Listen Port правильно установлен.",
+              "severity": "medium"
+            },
+            {
+              "title": "Уточнено поведение поля «Endpoint Port» внутреннего узла",
+              "details": "Удалено неопределённое формулирование «defaults to …». В документации теперь указано, что порт берётся непосредственно из «Listen Port» интерфейса и показано, как формируется окончательная строка endpoint.",
+              "impact": "Предотвращает случайное использование непреднамеренных портов, повышая надёжность сети.",
+              "recommended_action": "Проверьте, что Listen Port каждого интерфейса совпадает с целевым портом endpoint, и при необходимости скорректируйте его.",
+              "severity": "medium"
+            },
+            {
+              "title": "Формат внешнего peer Endpoint требует указания IP/hostname и порта вместе.",
+              "details": "Внешние конечные точки теперь должны указываться в виде `IP:порт` (например, `192.0.2.1:51820`). Для IPv6 адрес должен быть заключён в квадратные скобки, например, `[2001:db8::1]:51820`.",
+              "impact": "Неправильные строки конечных точек приведут к немедленным сбоям соединения с внешними узлами.",
+              "recommended_action": "Проверьте все внешние конфигурации пиров и перепишите их, используя новый объединённый синтаксис, особенно для записей IPv6.",
+              "severity": "high"
+            },
+            {
+              "title": "Параграф о жизненном цикле поддержки перефразирован.",
+              "details": "Текст теперь подчёркивает, что Proxmox VE поддерживается как минимум столько же, сколько поддерживается базовый выпуск Debian командой Debian Security, примерно три года.",
+              "impact": "Обеспечивает более чёткие ожидания относительно долгосрочного обслуживания и планирования обновлений.",
+              "recommended_action": "Согласуйте план обновлений с жизненным циклом выпусков Debian, чтобы обеспечить покрытие поддержки.",
+              "severity": "low"
+            },
+            {
+              "title": "Таблица поддержки: обновлён месяц окончания поддержки.",
+              "details": "Месяц окончания поддержки текущего выпуска изменён с 2026‑08 на 2026‑07.",
+              "impact": "Сокращает официальный период поддержки на один месяц, влияя на планирование патчей и обновлений.",
+              "recommended_action": "Скорректируйте сроки поддержки и обновления, чтобы отразить новую дату окончания поддержки 2026‑07.",
+              "severity": "medium"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "La documentation de Proxmox VE 9.2.2 a été mise à jour avec une augmentation de version, des champs d’extrémité réseau clarifiés et des informations révisées sur le cycle de vie du support. Les changements améliorent la précision de la configuration et définissent des attentes claires concernant les délais de support du produit.",
+          "professional_assessment": "Les raffinements de la documentation réduisent le risque de mauvaise configuration des points de terminaison WireGuard et alignent les déclarations de support avec les politiques de sécurité Debian. Les opérateurs doivent vérifier les configurations existantes par rapport aux nouveaux exemples et ajuster la surveillance des dates de support en conséquence.",
+          "newcomer_explainer": "Le guide indique désormais exactement comment écrire les adresses IP et les ports pour les connexions internes et externes, montre des exemples pour IPv4 et IPv6, et explique que Proxmox sera pris en charge tant que la version Debian sous‑jacent est prise en charge (environ trois ans).",
+          "changes": [
+            {
+              "title": "Mise à jour de version vers Proxmox VE 9.2.2",
+              "details": "Toute la documentation reflète désormais la version de publication actuelle 9.2.2 et met à jour la date du document au jeu 21 mai 2026.",
+              "impact": "Assure que les utilisateurs se réfèrent à la version correcte lorsqu'ils suivent les guides, évitant les incompatibilités spécifiques à une version.",
+              "recommended_action": "Confirmez que vous utilisez Proxmox VE 9.2.2 ou une version ultérieure avant d’appliquer les étapes documentées.",
+              "severity": "low"
+            },
+            {
+              "title": "Description détaillée du champ Endpoint du nœud interne",
+              "details": "Le champ Endpoint inclut désormais des exemples concrets (par ex., `192.0.2.1`, `2001:db8::1`) et précise qu’il se combine avec le Listen Port de l’interface pour former la chaîne d’endpoint complète, telle que `192.0.2.1:51820`.",
+              "impact": "Réduit l'ambiguïté lors de la configuration des pairs WireGuard internes, ce qui entraîne moins d'échecs de connexion.",
+              "recommended_action": "Mettez à jour toutes les entrées de point de terminaison existantes pour qu'elles correspondent au nouveau format et vérifiez que le Listen Port associé est correctement défini.",
+              "severity": "medium"
+            },
+            {
+              "title": "Comportement clarifié du champ Endpoint Port du nœud interne",
+              "details": "Supprimé la formulation vague « defaults to … ». La documentation indique désormais que le port est pris directement à partir du Listen Port de l’interface et montre comment la chaîne finale de l’endpoint est construite.",
+              "impact": "Empêche l’utilisation accidentelle de ports non prévus, améliorant la fiabilité du réseau.",
+              "recommended_action": "Vérifiez que le port d'écoute de chaque interface correspond au port de destination prévu et ajustez-le si nécessaire.",
+              "severity": "medium"
+            },
+            {
+              "title": "Le format de l'External peer Endpoint nécessite l'IP/nom d'hôte et le port ensemble",
+              "details": "Les points de terminaison externes doivent désormais être écrits sous la forme `IP:port` (par ex., `192.0.2.1:51820`). Pour IPv6, l'adresse doit être entourée de crochets, par ex., `[2001:db8::1]:51820`.",
+              "impact": "Des chaînes d'endpoint incorrectes entraîneront des échecs de connexion immédiats avec les pairs externes.",
+              "recommended_action": "Examinez toutes les configurations de pairs externes et réécrivez‑les en utilisant la nouvelle syntaxe combinée, en particulier pour les entrées IPv6.",
+              "severity": "high"
+            },
+            {
+              "title": "Paragraphe du cycle de vie du support reformulé",
+              "details": "Le texte souligne maintenant que Proxmox VE est pris en charge au moins tant que la version sous‑jacent de Debian est maintenue par l’équipe de sécurité Debian, soit environ trois ans.",
+              "impact": "Fournit des attentes plus claires pour la maintenance à long terme et la planification des mises à jour.",
+              "recommended_action": "Alignez votre calendrier de mise à jour avec le cycle de vie des versions de Debian afin de maintenir la couverture de support.",
+              "severity": "low"
+            },
+            {
+              "title": "Mois de fin de support du tableau de support mis à jour",
+              "details": "Le mois de fin de support de la release actuelle a été modifié de 2026‑08 à 2026‑07.",
+              "impact": "Raccourcit la fenêtre de support officielle d’un mois, affectant la planification des correctifs et des mises à jour.",
+              "recommended_action": "Ajustez vos calendriers de support et de mise à jour pour refléter la nouvelle date de fin de support 2026‑07.",
+              "severity": "medium"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Version bump to Proxmox VE 9.2.2\n   - All documentation now reflects the current release version 9.2.2 and updates the document date to Thu May 21 2026.\n   - Impact: Ensures users reference the correct version when following guides, preventing version‑specific mismatches.\n   - Action: Confirm you are running Proxmox VE 9.2.2 or later before applying the documented steps.\n   - Severity: low\n2. Expanded description of the internal node Endpoint field\n   - The Endpoint field now includes concrete examples (e.g., `192.0.2.1`, `2001:db8::1`) and clarifies that it combines with the interface's Listen Port to form the full endpoint string such as `192.0.2.1:51820`.\n   - Impact: Reduces ambiguity when configuring internal WireGuard peers, leading to fewer connection failures.\n   - Action: Update any existing endpoint entries to match the new format and verify the associated Listen Port is correctly set.\n   - Severity: medium\n3. Clarified behavior of the internal node Endpoint Port field\n   - Removed the vague “defaults to …” wording. The documentation now states that the port is taken directly from the interface’s Listen Port and shows how the final endpoint string is built.\n   - Impact: Prevents accidental use of unintended ports, improving network reliability.\n   - Action: Check that each interface’s Listen Port matches the intended endpoint port and adjust if necessary.\n   - Severity: medium\n4. External peer Endpoint format requires IP/hostname and port together\n   - External endpoints must now be written as `IP:port` (e.g., `192.0.2.1:51820`). For IPv6, the address must be wrapped in brackets, e.g., `[2001:db8::1]:51820`.\n   - Impact: Incorrect endpoint strings will cause immediate connection failures with external peers.\n   - Action: Review all external peer configurations and rewrite them using the new combined syntax, especially for IPv6 entries.\n   - Severity: high\n5. Support lifecycle paragraph re‑phrased\n   - The text now emphasizes that Proxmox VE is supported at least as long as the underlying Debian release is maintained by the Debian Security Team, roughly three years.\n   - Impact: Provides clearer expectations for long‑term maintenance and upgrade planning.\n   - Action: Align your upgrade schedule with the Debian release lifecycle to maintain support coverage.\n   - Severity: low\n6. Support table end‑of‑support month updated\n   - The end‑of‑support month for the current release has been changed from 2026‑08 to 2026‑07.\n   - Impact: Shortens the official support window by one month, affecting planning for patches and upgrades.\n   - Action: Adjust your support and upgrade timelines to reflect the new 2026‑07 end‑of‑support date.\n   - Severity: medium",
+        "ru": "1. Обновление версии до Proxmox VE 9.2.2\n   - Вся документация теперь отражает текущую версию выпуска 9.2.2 и обновляет дату документа на четверг, 21 мая 2026 г.\n   - Impact: Обеспечивает, что пользователи ссылаются на правильную версию при следовании руководствам, предотвращая несоответствия, зависящие от версии.\n   - Action: Убедитесь, что вы используете Proxmox VE 9.2.2 или новее, прежде чем применять описанные шаги.\n   - Severity: low\n2. Расширенное описание поля Endpoint внутреннего узла\n   - Поле Endpoint теперь содержит конкретные примеры (например, `192.0.2.1`, `2001:db8::1`) и уточняет, что оно объединяется с Listen Port интерфейса, образуя полную строку endpoint, например `192.0.2.1:51820`.\n   - Impact: Снижает неоднозначность при настройке внутренних пиров WireGuard, что приводит к меньшему количеству сбоев соединения.\n   - Action: Обновите любые существующие записи endpoint, чтобы они соответствовали новому формату, и проверьте, что соответствующий Listen Port правильно установлен.\n   - Severity: medium\n3. Уточнено поведение поля «Endpoint Port» внутреннего узла\n   - Удалено неопределённое формулирование «defaults to …». В документации теперь указано, что порт берётся непосредственно из «Listen Port» интерфейса и показано, как формируется окончательная строка endpoint.\n   - Impact: Предотвращает случайное использование непреднамеренных портов, повышая надёжность сети.\n   - Action: Проверьте, что Listen Port каждого интерфейса совпадает с целевым портом endpoint, и при необходимости скорректируйте его.\n   - Severity: medium\n4. Формат внешнего peer Endpoint требует указания IP/hostname и порта вместе.\n   - Внешние конечные точки теперь должны указываться в виде `IP:порт` (например, `192.0.2.1:51820`). Для IPv6 адрес должен быть заключён в квадратные скобки, например, `[2001:db8::1]:51820`.\n   - Impact: Неправильные строки конечных точек приведут к немедленным сбоям соединения с внешними узлами.\n   - Action: Проверьте все внешние конфигурации пиров и перепишите их, используя новый объединённый синтаксис, особенно для записей IPv6.\n   - Severity: high\n5. Параграф о жизненном цикле поддержки перефразирован.\n   - Текст теперь подчёркивает, что Proxmox VE поддерживается как минимум столько же, сколько поддерживается базовый выпуск Debian командой Debian Security, примерно три года.\n   - Impact: Обеспечивает более чёткие ожидания относительно долгосрочного обслуживания и планирования обновлений.\n   - Action: Согласуйте план обновлений с жизненным циклом выпусков Debian, чтобы обеспечить покрытие поддержки.\n   - Severity: low\n6. Таблица поддержки: обновлён месяц окончания поддержки.\n   - Месяц окончания поддержки текущего выпуска изменён с 2026‑08 на 2026‑07.\n   - Impact: Сокращает официальный период поддержки на один месяц, влияя на планирование патчей и обновлений.\n   - Action: Скорректируйте сроки поддержки и обновления, чтобы отразить новую дату окончания поддержки 2026‑07.\n   - Severity: medium",
+        "fr": "1. Mise à jour de version vers Proxmox VE 9.2.2\n   - Toute la documentation reflète désormais la version de publication actuelle 9.2.2 et met à jour la date du document au jeu 21 mai 2026.\n   - Impact: Assure que les utilisateurs se réfèrent à la version correcte lorsqu'ils suivent les guides, évitant les incompatibilités spécifiques à une version.\n   - Action: Confirmez que vous utilisez Proxmox VE 9.2.2 ou une version ultérieure avant d’appliquer les étapes documentées.\n   - Severity: low\n2. Description détaillée du champ Endpoint du nœud interne\n   - Le champ Endpoint inclut désormais des exemples concrets (par ex., `192.0.2.1`, `2001:db8::1`) et précise qu’il se combine avec le Listen Port de l’interface pour former la chaîne d’endpoint complète, telle que `192.0.2.1:51820`.\n   - Impact: Réduit l'ambiguïté lors de la configuration des pairs WireGuard internes, ce qui entraîne moins d'échecs de connexion.\n   - Action: Mettez à jour toutes les entrées de point de terminaison existantes pour qu'elles correspondent au nouveau format et vérifiez que le Listen Port associé est correctement défini.\n   - Severity: medium\n3. Comportement clarifié du champ Endpoint Port du nœud interne\n   - Supprimé la formulation vague « defaults to … ». La documentation indique désormais que le port est pris directement à partir du Listen Port de l’interface et montre comment la chaîne finale de l’endpoint est construite.\n   - Impact: Empêche l’utilisation accidentelle de ports non prévus, améliorant la fiabilité du réseau.\n   - Action: Vérifiez que le port d'écoute de chaque interface correspond au port de destination prévu et ajustez-le si nécessaire.\n   - Severity: medium\n4. Le format de l'External peer Endpoint nécessite l'IP/nom d'hôte et le port ensemble\n   - Les points de terminaison externes doivent désormais être écrits sous la forme `IP:port` (par ex., `192.0.2.1:51820`). Pour IPv6, l'adresse doit être entourée de crochets, par ex., `[2001:db8::1]:51820`.\n   - Impact: Des chaînes d'endpoint incorrectes entraîneront des échecs de connexion immédiats avec les pairs externes.\n   - Action: Examinez toutes les configurations de pairs externes et réécrivez‑les en utilisant la nouvelle syntaxe combinée, en particulier pour les entrées IPv6.\n   - Severity: high\n5. Paragraphe du cycle de vie du support reformulé\n   - Le texte souligne maintenant que Proxmox VE est pris en charge au moins tant que la version sous‑jacent de Debian est maintenue par l’équipe de sécurité Debian, soit environ trois ans.\n   - Impact: Fournit des attentes plus claires pour la maintenance à long terme et la planification des mises à jour.\n   - Action: Alignez votre calendrier de mise à jour avec le cycle de vie des versions de Debian afin de maintenir la couverture de support.\n   - Severity: low\n6. Mois de fin de support du tableau de support mis à jour\n   - Le mois de fin de support de la release actuelle a été modifié de 2026‑08 à 2026‑07.\n   - Impact: Raccourcit la fenêtre de support officielle d’un mois, affectant la planification des correctifs et des mises à jour.\n   - Action: Ajustez vos calendriers de support et de mise à jour pour refléter la nouvelle date de fin de support 2026‑07.\n   - Severity: medium"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 9.2.2: Expanded description of the internal node Endpoint field, Clarified behavior of the internal node Endpoint Port field, External peer Endpoint format requires IP/hostname and port together, Support lifecycle paragraph...",
+      "version": "Proxmox VE 9.2.2",
+      "model": "fallback",
+      "generated_at": "2026-05-30T05:23:49Z"
+    }
+  },
+  {
     "timestamp": "2026-05-21T13:00:40Z",
     "old_hash": "2c1b4d4dc5b234299953c3d414dc28253a4fa688f33767315d8563bbb09124be",
     "new_hash": "b743073ca642a426c81f79d6cbd08d60e8895d41b9e18b87dee4ce53f4f809bc",

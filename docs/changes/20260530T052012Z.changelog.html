@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260530T052012Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-05-30T05:20:12Z" data-iso="2026-05-30T05:20:12Z" data-tooltip="">2026-05-30 05:20:12 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260530T052012Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.2 documentation has been updated with a version bump, clarified networking endpoint fields, and revised support lifecycle information. The changes improve configuration accuracy and set clear expectations for product support timelines.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The documentation refinements reduce the risk of misconfiguring WireGuard endpoints and align support statements with Debian security policies. Operators should verify existing configurations against the new examples and adjust monitoring of support dates accordingly.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Low</span>Version bump to Proxmox VE 9.2.2</strong><div>All documentation now reflects the current release version 9.2.2 and updates the document date to Thu May 21 2026.</div><div><em>Impact:</em> Ensures users reference the correct version when following guides, preventing version‑specific mismatches.</div><div><em>Action:</em> Confirm you are running Proxmox VE 9.2.2 or later before applying the documented steps.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Expanded description of the internal node Endpoint field</strong><div>The Endpoint field now includes concrete examples (e.g., `192.0.2.1`, `2001:db8::1`) and clarifies that it combines with the interface&#x27;s Listen Port to form the full endpoint string such as `192.0.2.1:51820`.</div><div><em>Impact:</em> Reduces ambiguity when configuring internal WireGuard peers, leading to fewer connection failures.</div><div><em>Action:</em> Update any existing endpoint entries to match the new format and verify the associated Listen Port is correctly set.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Clarified behavior of the internal node Endpoint Port field</strong><div>Removed the vague “defaults to …” wording. The documentation now states that the port is taken directly from the interface’s Listen Port and shows how the final endpoint string is built.</div><div><em>Impact:</em> Prevents accidental use of unintended ports, improving network reliability.</div><div><em>Action:</em> Check that each interface’s Listen Port matches the intended endpoint port and adjust if necessary.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>External peer Endpoint format requires IP/hostname and port together</strong><div>External endpoints must now be written as `IP:port` (e.g., `192.0.2.1:51820`). For IPv6, the address must be wrapped in brackets, e.g., `[2001:db8::1]:51820`.</div><div><em>Impact:</em> Incorrect endpoint strings will cause immediate connection failures with external peers.</div><div><em>Action:</em> Review all external peer configurations and rewrite them using the new combined syntax, especially for IPv6 entries.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Support lifecycle paragraph re‑phrased</strong><div>The text now emphasizes that Proxmox VE is supported at least as long as the underlying Debian release is maintained by the Debian Security Team, roughly three years.</div><div><em>Impact:</em> Provides clearer expectations for long‑term maintenance and upgrade planning.</div><div><em>Action:</em> Align your upgrade schedule with the Debian release lifecycle to maintain support coverage.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Support table end‑of‑support month updated</strong><div>The end‑of‑support month for the current release has been changed from 2026‑08 to 2026‑07.</div><div><em>Impact:</em> Shortens the official support window by one month, affecting planning for patches and upgrades.</div><div><em>Action:</em> Adjust your support and upgrade timelines to reflect the new 2026‑07 end‑of‑support date.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> La documentation de Proxmox VE 9.2.2 a été mise à jour avec une augmentation de version, des champs d’extrémité réseau clarifiés et des informations révisées sur le cycle de vie du support. Les changements améliorent la précision de la configuration et définissent des attentes claires concernant les délais de support du produit.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Les raffinements de la documentation réduisent le risque de mauvaise configuration des points de terminaison WireGuard et alignent les déclarations de support avec les politiques de sécurité Debian. Les opérateurs doivent vérifier les configurations existantes par rapport aux nouveaux exemples et ajuster la surveillance des dates de support en conséquence.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Faible</span>Mise à jour de version vers Proxmox VE 9.2.2</strong><div>Toute la documentation reflète désormais la version de publication actuelle 9.2.2 et met à jour la date du document au jeu 21 mai 2026.</div><div><em>Impact:</em> Assure que les utilisateurs se réfèrent à la version correcte lorsqu&#x27;ils suivent les guides, évitant les incompatibilités spécifiques à une version.</div><div><em>Action:</em> Confirmez que vous utilisez Proxmox VE 9.2.2 ou une version ultérieure avant d’appliquer les étapes documentées.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Description détaillée du champ Endpoint du nœud interne</strong><div>Le champ Endpoint inclut désormais des exemples concrets (par ex., `192.0.2.1`, `2001:db8::1`) et précise qu’il se combine avec le Listen Port de l’interface pour former la chaîne d’endpoint complète, telle que `192.0.2.1:51820`.</div><div><em>Impact:</em> Réduit l&#x27;ambiguïté lors de la configuration des pairs WireGuard internes, ce qui entraîne moins d&#x27;échecs de connexion.</div><div><em>Action:</em> Mettez à jour toutes les entrées de point de terminaison existantes pour qu&#x27;elles correspondent au nouveau format et vérifiez que le Listen Port associé est correctement défini.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Comportement clarifié du champ Endpoint Port du nœud interne</strong><div>Supprimé la formulation vague « defaults to … ». La documentation indique désormais que le port est pris directement à partir du Listen Port de l’interface et montre comment la chaîne finale de l’endpoint est construite.</div><div><em>Impact:</em> Empêche l’utilisation accidentelle de ports non prévus, améliorant la fiabilité du réseau.</div><div><em>Action:</em> Vérifiez que le port d&#x27;écoute de chaque interface correspond au port de destination prévu et ajustez-le si nécessaire.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Le format de l&#x27;External peer Endpoint nécessite l&#x27;IP/nom d&#x27;hôte et le port ensemble</strong><div>Les points de terminaison externes doivent désormais être écrits sous la forme `IP:port` (par ex., `192.0.2.1:51820`). Pour IPv6, l&#x27;adresse doit être entourée de crochets, par ex., `[2001:db8::1]:51820`.</div><div><em>Impact:</em> Des chaînes d&#x27;endpoint incorrectes entraîneront des échecs de connexion immédiats avec les pairs externes.</div><div><em>Action:</em> Examinez toutes les configurations de pairs externes et réécrivez‑les en utilisant la nouvelle syntaxe combinée, en particulier pour les entrées IPv6.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Paragraphe du cycle de vie du support reformulé</strong><div>Le texte souligne maintenant que Proxmox VE est pris en charge au moins tant que la version sous‑jacent de Debian est maintenue par l’équipe de sécurité Debian, soit environ trois ans.</div><div><em>Impact:</em> Fournit des attentes plus claires pour la maintenance à long terme et la planification des mises à jour.</div><div><em>Action:</em> Alignez votre calendrier de mise à jour avec le cycle de vie des versions de Debian afin de maintenir la couverture de support.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Mois de fin de support du tableau de support mis à jour</strong><div>Le mois de fin de support de la release actuelle a été modifié de 2026‑08 à 2026‑07.</div><div><em>Impact:</em> Raccourcit la fenêtre de support officielle d’un mois, affectant la planification des correctifs et des mises à jour.</div><div><em>Action:</em> Ajustez vos calendriers de support et de mise à jour pour refléter la nouvelle date de fin de support 2026‑07.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Документация Proxmox VE 9.2.2 обновлена: увеличена версия, уточнены поля сетевых конечных точек и пересмотрена информация о жизненном цикле поддержки. Эти изменения повышают точность конфигурации и устанавливают чёткие ожидания относительно сроков поддержки продукта.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Уточнения в документации снижают риск неправильной настройки конечных точек WireGuard и согласуют заявления о поддержке с политиками безопасности Debian. Операторам следует проверить существующие конфигурации по сравнению с новыми примерами и соответственно скорректировать мониторинг дат поддержки.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Низкая</span>Обновление версии до Proxmox VE 9.2.2</strong><div>Вся документация теперь отражает текущую версию выпуска 9.2.2 и обновляет дату документа на четверг, 21 мая 2026 г.</div><div><em>Impact:</em> Обеспечивает, что пользователи ссылаются на правильную версию при следовании руководствам, предотвращая несоответствия, зависящие от версии.</div><div><em>Action:</em> Убедитесь, что вы используете Proxmox VE 9.2.2 или новее, прежде чем применять описанные шаги.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Расширенное описание поля Endpoint внутреннего узла</strong><div>Поле Endpoint теперь содержит конкретные примеры (например, `192.0.2.1`, `2001:db8::1`) и уточняет, что оно объединяется с Listen Port интерфейса, образуя полную строку endpoint, например `192.0.2.1:51820`.</div><div><em>Impact:</em> Снижает неоднозначность при настройке внутренних пиров WireGuard, что приводит к меньшему количеству сбоев соединения.</div><div><em>Action:</em> Обновите любые существующие записи endpoint, чтобы они соответствовали новому формату, и проверьте, что соответствующий Listen Port правильно установлен.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Уточнено поведение поля «Endpoint Port» внутреннего узла</strong><div>Удалено неопределённое формулирование «defaults to …». В документации теперь указано, что порт берётся непосредственно из «Listen Port» интерфейса и показано, как формируется окончательная строка endpoint.</div><div><em>Impact:</em> Предотвращает случайное использование непреднамеренных портов, повышая надёжность сети.</div><div><em>Action:</em> Проверьте, что Listen Port каждого интерфейса совпадает с целевым портом endpoint, и при необходимости скорректируйте его.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Формат внешнего peer Endpoint требует указания IP/hostname и порта вместе.</strong><div>Внешние конечные точки теперь должны указываться в виде `IP:порт` (например, `192.0.2.1:51820`). Для IPv6 адрес должен быть заключён в квадратные скобки, например, `[2001:db8::1]:51820`.</div><div><em>Impact:</em> Неправильные строки конечных точек приведут к немедленным сбоям соединения с внешними узлами.</div><div><em>Action:</em> Проверьте все внешние конфигурации пиров и перепишите их, используя новый объединённый синтаксис, особенно для записей IPv6.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Параграф о жизненном цикле поддержки перефразирован.</strong><div>Текст теперь подчёркивает, что Proxmox VE поддерживается как минимум столько же, сколько поддерживается базовый выпуск Debian командой Debian Security, примерно три года.</div><div><em>Impact:</em> Обеспечивает более чёткие ожидания относительно долгосрочного обслуживания и планирования обновлений.</div><div><em>Action:</em> Согласуйте план обновлений с жизненным циклом выпусков Debian, чтобы обеспечить покрытие поддержки.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Таблица поддержки: обновлён месяц окончания поддержки.</strong><div>Месяц окончания поддержки текущего выпуска изменён с 2026‑08 на 2026‑07.</div><div><em>Impact:</em> Сокращает официальный период поддержки на один месяц, влияя на планирование патчей и обновлений.</div><div><em>Action:</em> Скорректируйте сроки поддержки и обновления, чтобы отразить новую дату окончания поддержки 2026‑07.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>
