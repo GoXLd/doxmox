@@ -1,0 +1,1105 @@
+--- previous
++++ current
+@@ -346,10 +346,10 @@
+  </span>
+  <br/>
+  <span id="revnumber">
+-  version 9.2.2,
++  version 9.2.3,
+  </span>
+  <span id="revdate">
+-  Thu May 21 22:27:14 CEST 2026
++  Fri Jul  3 11:08:20 CEST 2026
+  </span>
+  <div id="toc">
+   <a href="index.html" style="font-size: 0.8em;">
+@@ -2039,10 +2039,75 @@
+        </li>
+        <li>
+         <p>
+-         For PCI(e) passthrough the CPU needs to support the VT-d/AMD-d flag.
++         For PCI(e) passthrough, the CPU and motherboard need to support IOMMU
++  (Intel VT-d, AMD-Vi).
+         </p>
+        </li>
+       </ul>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Tip" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         IOMMU usually also needs to be enabled in the BIOS/UEFI. See the
++         <a href="#qm_pci_passthrough">
++          PCI(e) Passthrough
++         </a>
++         chapter for details.
++        </td>
++       </tr>
++      </table>
+      </div>
+     </div>
+     <div class="sect3">
+@@ -4589,7 +4654,7 @@
+     <div class="paragraph">
+      <p>
+       A detailed step-by-step how-to can be found on the
+-      <a href="https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm">
++      <a href="https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_13_Trixie">
+        wiki
+       </a>
+       .
+@@ -6049,9 +6114,92 @@
+     </div>
+     <div class="listingblock">
+      <div class="content monospaced">
+-      <pre># apt-get update
+-# apt-get dist-upgrade</pre>
+-     </div>
++      <pre># apt update
++# apt full-upgrade</pre>
++     </div>
++    </div>
++    <div class="admonitionblock">
++     <table>
++      <tr>
++       <td class="icon">
++        <img alt="Warning" src="data:image/png;base64,
++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
++/F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
++       </td>
++       <td class="content">
++        As Proxmox VE uses a rolling release model on top of Debian, performing an
++        <span class="monospaced">
++         apt upgrade
++        </span>
++        may result in a partially upgraded or broken package state. This
++is because
++        <span class="monospaced">
++         apt full-upgrade
++        </span>
++        can also remove existing packages to satisfy
++dependencies if needed, while
++        <span class="monospaced">
++         apt upgrade
++        </span>
++        cannot.
++       </td>
++      </tr>
++     </table>
+     </div>
+     <div class="paragraph">
+      <p>
+@@ -6116,7 +6264,7 @@
+         The APT package management system is very flexible and provides many
+ features, see
+         <span class="monospaced">
+-         man apt-get
++         man apt
+         </span>
+         , or
+         <a href="#Hertzog13">
+@@ -8202,6 +8350,28 @@
+         bridge-fd 0</pre>
+       </div>
+      </div>
++     <div class="paragraph">
++      <p>
++       The
++       <span class="monospaced">
++        vmbr0
++       </span>
++       address
++       <span class="monospaced">
++        203.0.113.17
++       </span>
++       is the first usable host address of the
++       <span class="monospaced">
++        203.0.113.16/28
++       </span>
++       block; the block’s network address
++       <span class="monospaced">
++        203.0.113.16
++       </span>
++       cannot be
++assigned to an interface.
++      </p>
++     </div>
+     </div>
+     <div class="sect3">
+      <h4 id="sysadmin_network_masquerading">
+@@ -11425,7 +11595,7 @@
+       <div class="paragraph">
+        <p>
+         You can also mirror the log device to multiple devices, this is mainly useful to
+-ensure that performance doesn’t immediately degrades if a single log device
++ensure that performance doesn’t immediately degrade if a single log device
+ fails.
+        </p>
+       </div>
+@@ -16730,6 +16900,21 @@
+      </div>
+      <div class="paragraph">
+       <p>
++       If the active boot entry points to
++       <span class="monospaced">
++        \EFI\proxmox\shimx64.efi
++       </span>
++       like in the
++following example, GRUB is used in UEFI mode with Secure Boot enabled.
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content monospaced">
++       <pre>Boot0005* proxmox       [...] File(\EFI\proxmox\shimx64.efi)</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
+        If the output contains a line similar to the following,
+        <span class="monospaced">
+         systemd-boot
+@@ -21054,14 +21239,11 @@
+          Make sure the node to be deleted is not part of any replication job
+   anymore.
+         </p>
+-       </li>
+-      </ul>
+-     </div>
+-     <div class="admonitionblock">
+-      <table>
+-       <tr>
+-        <td class="icon">
+-         <img alt="Caution" src="data:image/png;base64,
++        <div class="admonitionblock">
++         <table>
++          <tr>
++           <td class="icon">
++            <img alt="Caution" src="data:image/png;base64,
+ iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAKdUlEQVRoge1Ze1AV1x3+zt279wEi
+ DWCYGzRVktqa1MEmmtbWR22ncXxUrTDWV/5IqG2wUAUfmUwSkk6V+EAJCEQC6figwZBqZtRxqukf
+ tebRZBpFG1S0hiRErwiaKK977+6eX//YPXt37+UiIJlMZnpmdnb33PP4vt97z2VEhG9yc3zdAO60
+@@ -21110,20 +21292,19 @@
+ VVWRnKx/Jlpt3eVy2QCKu9C68AFr9o0spwd0Oh1ZYggCIlNaiQktiXdhZgKQABcp3ci7LMtM7B0J
+ fsAErJoAYItG1mdr+hfvVlACtHDIXkploYXbHvQOikDEe6/ZmjFmAhf9ZvJxOk2Qol88W4kYz32S
+ GNQfHLG+TyMTkAVEr88xQfVnkBg7GAKixSIykDYQsL21/wFkW/B5QqT9lwAAAABJRU5ErkJggg=="/>
+-        </td>
+-        <td class="content">
+-         If you fail to remove replication jobs from a node before
++           </td>
++           <td class="content">
++            If you fail to remove replication jobs from a node before
+ removing the node itself, the replication job will become irremovable.
+ Note that replication automatically switches direction when a
+ replicated VM is migrated. Therefore, migrating a replicated VM from a
+ node that is going to be deleted will set up replication jobs to that
+ node automatically.
+-        </td>
+-       </tr>
+-      </table>
+-     </div>
+-     <div class="ulist">
+-      <ul>
++           </td>
++          </tr>
++         </table>
++        </div>
++       </li>
+        <li>
+         <p>
+          Ensure that the remaining Ceph cluster has sufficient storage space
+@@ -21139,14 +21320,11 @@
+   of any OSD, especially the last one on a node, will trigger a data
+   rebalance in Ceph.
+         </p>
+-       </li>
+-      </ul>
+-     </div>
+-     <div class="admonitionblock">
+-      <table>
+-       <tr>
+-        <td class="icon">
+-         <img alt="Note" src="data:image/png;base64,
++        <div class="admonitionblock">
++         <table>
++          <tr>
++           <td class="icon">
++            <img alt="Note" src="data:image/png;base64,
+ iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
+ m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
+ CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
+@@ -21191,47 +21369,31 @@
+ lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
+ zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
+ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
+-        </td>
+-        <td class="content">
+-         By default, Ceph pools have a
+-         <span class="monospaced">
+-          size/min_size
+-         </span>
+-         of
+-         <span class="monospaced">
+-          3/2
+-         </span>
+-         and a
+-full node as
+-         <span class="monospaced">
+-          failure domain
+-         </span>
+-         at the object balancer
+-         <a href="#pve_ceph_device_classes">
+-          CRUSH
+-         </a>
+-         . So if less than
+-         <span class="monospaced">
+-          size
+-         </span>
+-         (
+-         <span class="monospaced">
+-          3
+-         </span>
+-         )
+-nodes with running OSDs are online, data redundancy will be degraded.
+-If less than
+-         <span class="monospaced">
+-          min_size
+-         </span>
+-         are online, pool I/O will be blocked and
+-affected guests may crash.
+-        </td>
+-       </tr>
+-      </table>
+-     </div>
+-     <div class="ulist">
+-      <ul>
++           </td>
++           <td class="content">
++            Make sure that there are still enough nodes with OSDs available to satisfy
++the
++            <span class="monospaced">
++             size/min_size
++            </span>
++            parameters configured for the Ceph pools. If there are fewer
++than
++            <span class="monospaced">
++             size
++            </span>
++            (default: 3) nodes available, data redundancy will be degraded. If
++there are fewer than
++            <span class="monospaced">
++             min_size
++            </span>
++            (default: 2) nodes available, the I/O of the
++pools will be blocked until there are enough replicas available. Affected guests
++may crash if their I/O is blocked.
++           </td>
++          </tr>
++         </table>
++        </div>
++       </li>
+        <li>
+         <p>
+          Ensure that sufficient
+@@ -27111,11 +27273,17 @@
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           yes
++          <sup>
++           3
++          </sup>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+-          no
++          yes
++          <sup>
++           4
++          </sup>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+@@ -27143,11 +27311,58 @@
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           yes
++          <sup>
++           3
++          </sup>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+-          no
++          yes
++          <sup>
++           4
++          </sup>
++         </p>
++        </td>
++        <td class="tableblock halign-left valign-top">
++         <p class="tableblock">
++          yes
++         </p>
++        </td>
++       </tr>
++       <tr>
++        <td class="tableblock halign-left valign-top">
++         <p class="tableblock">
++          FC/SAS
++         </p>
++        </td>
++        <td class="tableblock halign-left valign-top">
++         <p class="tableblock monospaced">
++          native
++          <sup>
++           6
++          </sup>
++         </p>
++        </td>
++        <td class="tableblock halign-left valign-top">
++         <p class="tableblock">
++          block
++         </p>
++        </td>
++        <td class="tableblock halign-left valign-top">
++         <p class="tableblock">
++          yes
++          <sup>
++           3
++          </sup>
++         </p>
++        </td>
++        <td class="tableblock halign-left valign-top">
++         <p class="tableblock">
++          yes
++          <sup>
++           4
++          </sup>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+@@ -27264,12 +27479,14 @@
+       <sup>
+        3
+       </sup>
+-      : It is possible to use LVM on top of an iSCSI or FC-based storage.
+-That way you get a
+-      <span class="monospaced">
+-       shared
+-      </span>
+-      LVM storage
++      : With iSCSI, FibreChannel (FC), or SAS block storage as shared storage in a
++cluster, LVM is used to split the LUN into virtual disks. The
++      <a href="https://pve.proxmox.com/wiki/Multipath">
++       Multipath Guide
++      </a>
++      explains how to
++configure it in a cluster, including multipathing which is usually a
++requirement in these scenarios.
+      </p>
+     </div>
+     <div class="paragraph">
+@@ -27296,6 +27513,15 @@
+        5
+       </sup>
+       Technology preview with best-effort support.
++     </p>
++    </div>
++    <div class="paragraph">
++     <p>
++      <sup>
++       6
++      </sup>
++      Fibre Channel (FC) and SAS block storage is handled directly by the host
++without a dedicated storage plugin.
+      </p>
+     </div>
+     <div class="sect3">
+@@ -46151,13 +46377,13 @@
+       <p>
+        Or when starting a backup, the guest is told via the guest agent to sync
+ outstanding writes via the
+-       <em>
+-        fs-freeze
+-       </em>
++       <span class="monospaced">
++        guest-fsfreeze-freeze
++       </span>
+        and
+-       <em>
+-        fs-thaw
+-       </em>
++       <span class="monospaced">
++        guest-fsfreeze-thaw
++       </span>
+        commands.
+       </p>
+      </div>
+@@ -46332,20 +46558,25 @@
+         By default, if the QEMU Guest Agent is enabled in the guest’s config and if the
+ agent is available inside of the guest, then the virtual machine’s filesystems
+ are synced via the
+-        <em>
+-         fs-freeze
+-        </em>
+-        QEMU Guest Agent command when certain operations
+-are performed. This is done to provide data consistency.
++        <span class="monospaced">
++         guest-fsfreeze-freeze
++        </span>
++        QEMU Guest Agent command when certain
++operations are performed. This is done to provide data consistency.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+-        An
+-        <em>
+-         fs-freeze
+-        </em>
+-        will be issued for any of the following operations on a VM:
++        See the
++        <a href="https://www.qemu.org/docs/master/interop/qemu-ga-ref.html">
++         QEMU Guest Agent Protocol Reference
++        </a>
++        for more details.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        A freeze will be issued for any of the following operations on a VM:
+        </p>
+       </div>
+       <div class="ulist">
+@@ -46381,15 +46612,11 @@
+       <div class="paragraph">
+        <p>
+         On Windows guests, some applications might handle consistent backups themselves
+-by hooking into the Windows VSS (Volume Shadow Copy Service) layer, a
+-        <em>
+-         fs-freeze
+-        </em>
+-        then might interfere with that. For example, it has been observed
+-that calling
+-        <em>
+-         fs-freeze
+-        </em>
++by hooking into the Windows VSS (Volume Shadow Copy Service) layer, a freeze
++then might interfere with that. For example, it has been observed that calling
++        <span class="monospaced">
++         guest-fsfreeze-freeze
++        </span>
+         with some SQL Servers triggers VSS to call the SQL
+ Writer VSS module in a mode that breaks the SQL Server backup chain for
+ differential backups.
+@@ -46414,20 +46641,25 @@
+         </li>
+         <li>
+          <p>
+-          Alternatively, you can configure Proxmox VE to not issue a freeze-and-thaw cycle on
+-backup by setting the
++          Alternatively, you can configure Proxmox VE to not issue a freeze-and-thaw cycle
++by disabling the
+           <span class="monospaced">
+-           freeze-fs-on-backup
++           freeze-fs
+           </span>
+-          QGA option to
+-          <span class="monospaced">
+-           0
+-          </span>
+-          . This can also be
+-done via the GUI with the
++          guest agent option. This can also be done in the
++GUI: open the
+           <em>
+-           Freeze/thaw guest filesystems on backup for
+-consistency
++           Options
++          </em>
++          panel of the virtual machine, then the
++          <em>
++           QEMU Guest
++Agent
++          </em>
++          dialog, and disable the
++          <em>
++           Freeze/thaw guest filesystems during certain
++operations for consistency
+           </em>
+           option.
+          </p>
+@@ -67165,7 +67397,7 @@
+        </p>
+       </dd>
+       <dt class="hdlist1">
+-       Comment
++       Alias
+       </dt>
+       <dd>
+        <p>
+@@ -72288,6 +72520,351 @@
+        If you have configured an external BGP router, the BGP-EVPN routes (10.0.1.0/24
+ and 10.0.2.0/24 in this example), will be announced dynamically.
+       </p>
++     </div>
++    </div>
++    <div class="sect3">
++     <h4 id="pvesdn_setup_example_wireguard">
++      12.16.7. WireGuard Setup Example
++      <a class="headerlink" href="#pvesdn_setup_example_wireguard" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       The example assumes a 3-node Proxmox cluster (
++       <em>
++        sdn1
++       </em>
++       ,
++       <em>
++        sdn2
++       </em>
++       and
++       <em>
++        sdn3
++       </em>
++       ) with
++the IP addresses
++       <span class="monospaced">
++        192.0.2.1
++       </span>
++       ,
++       <span class="monospaced">
++        192.0.2.2
++       </span>
++       and
++       <span class="monospaced">
++        192.0.2.3
++       </span>
++       , as well as an
++external WireGuard peer (
++       <em>
++        sdn-router
++       </em>
++       ) with IP address
++       <span class="monospaced">
++        192.0.2.10
++       </span>
++       .
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       In this example the Proxmox nodes as well as the external peer will be connected
++full-mesh via WireGuard in the
++       <span class="monospaced">
++        198.51.100.0/24
++       </span>
++       subnet and additionally the
++       <span class="monospaced">
++        203.0.113.0/24
++       </span>
++       subnet will be routed via the external WireGuard peer,
++       <span class="monospaced">
++        198.51.100.10
++       </span>
++       .
++      </p>
++     </div>
++     <div class="sect4">
++      <h5 id="_set_up_wireguard_fabric">
++       Set Up WireGuard Fabric
++       <a class="headerlink" href="#_set_up_wireguard_fabric" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <a class="image" href="images/screenshot/gui-datacenter-create-fabric-wireguard.png">
++        <img alt="screenshot/gui-datacenter-create-fabric-wireguard.png" src="images/screenshot/gui-datacenter-create-fabric-wireguard.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
++       </a>
++       <p>
++        Click on
++        <em>
++         Datacenter
++        </em>
++        in the left-hand resource tree then navigate to
++        <em>
++         SDN
++        </em>
++        &gt;
++        <em>
++         Fabrics
++        </em>
++        and create a new WireGuard fabric by clicking
++        <em>
++         Create
++        </em>
++        and selecting
++        <em>
++         WireGuard
++        </em>
++        .
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        Choose a name for the fabric, in this case
++        <em>
++         example
++        </em>
++        has been chosen.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_set_up_wireguard_interfaces">
++       Set Up WireGuard Interfaces
++       <a class="headerlink" href="#_set_up_wireguard_interfaces" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <a class="image" href="images/screenshot/gui-datacenter-create-internal-node-wireguard.png">
++        <img alt="screenshot/gui-datacenter-create-internal-node-wireguard.png" src="images/screenshot/gui-datacenter-create-internal-node-wireguard.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
++       </a>
++       <p>
++        Each participating node requires a WireGuard interface. This can be configured
++by adding a new node with type
++        <em>
++         Internal
++        </em>
++        to the WireGuard fabric, selecting the
++respective node and then creating a new WireGuard interface.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        On the node itself, two properties can be configured:
++        <em>
++         Endpoint
++        </em>
++        and
++        <em>
++         Allowed
++IPs
++        </em>
++        .
++        <em>
++         Endpoint
++        </em>
++        refers to the IP/hostname that will be used for connecting to
++this node,
++        <span class="monospaced">
++         192.0.2.1
++        </span>
++        in the case of sdn1. Since no additional subnets should
++be routed via this node in this example, leave the
++        <em>
++         Allowed IPs
++        </em>
++        field empty.
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        Create a new WireGuard interface,
++        <span class="monospaced">
++         wg0
++        </span>
++        , and configure the IP address that
++should be configured on the WireGuard interface,
++        <span class="monospaced">
++         198.51.100.1/24
++        </span>
++        in the case
++of sdn1. The default listen port is
++        <span class="monospaced">
++         51820
++        </span>
++        , but can be manually changed via the
++        <em>
++         Listen Port
++        </em>
++        field. A public/private key pair will be automatically created
++for every new WireGuard interface.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_set_up_external_node">
++       Set Up External Node
++       <a class="headerlink" href="#_set_up_external_node" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <a class="image" href="images/screenshot/gui-datacenter-create-external-node-wireguard.png">
++        <img alt="screenshot/gui-datacenter-create-external-node-wireguard.png" src="images/screenshot/gui-datacenter-create-external-node-wireguard.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
++       </a>
++       <p>
++        In order to add an external node, add another node to the WireGuard fabric, but
++select type
++        <em>
++         External
++        </em>
++        in the node creation dialog. Enter the public key of
++the interface of the external node, as well as the IP/hostname + port that can
++be used to reach this external peer (
++        <span class="monospaced">
++         192.0.2.10:51820
++        </span>
++        in this example). Add
++the IP of the node,
++        <span class="monospaced">
++         198.51.100.10/32
++        </span>
++        , as well as the
++        <span class="monospaced">
++         203.0.113.0/24
++        </span>
++        subnet
++to the allowed IPs field.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_set_up_wireguard_peerings">
++       Set Up WireGuard Peerings
++       <a class="headerlink" href="#_set_up_wireguard_peerings" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <a class="image" href="images/screenshot/gui-datacenter-select-peers-wireguard.png">
++        <img alt="screenshot/gui-datacenter-select-peers-wireguard.png" src="images/screenshot/gui-datacenter-select-peers-wireguard.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
++       </a>
++       <p>
++        Now that all interfaces and external peers have been set up, they can be
++selected as peers in the WireGuard interface configuration. Add the nodes
++        <em>
++         sdn2
++        </em>
++        and
++        <em>
++         sdn3
++        </em>
++        , as well as
++        <em>
++         sdn-router
++        </em>
++        to the peers of the interface
++        <span class="monospaced">
++         wg0
++        </span>
++        on node
++        <em>
++         sdn1
++        </em>
++        :
++       </p>
++      </div>
++      <div class="paragraph">
++       <p>
++        This will generate the following
++        <span class="monospaced">
++         wg0.conf
++        </span>
++        file in
++        <span class="monospaced">
++         /etc/wireguard/proxmox
++        </span>
++        :
++       </p>
++      </div>
++      <div class="listingblock">
++       <div class="content monospaced">
++        <pre>root@sdn1:~# cat /etc/wireguard/proxmox/wg0.conf
++[Interface]
++PrivateKey = EpP9R0kqNA1UjGGeDL0/y9Ok66G44dqa2ALYJ0jTWwQ=
++ListenPort = 51820
++
++[Peer]
++PublicKey = xIlHE6ZA25Qnpa+HYT1un3fbjO5/0A9YUbbRmTyLWW4=
++AllowedIPs = 198.51.100.10/32, 203.0.113.0/24
++Endpoint = 192.0.2.10:51820
++
++[Peer]
++PublicKey = CKClJbQ42U1pQM8MqMGCa1IpZbNcqb+OJBxVWJHIrx4=
++AllowedIPs = 198.51.100.2/32
++Endpoint = 192.0.2.2:51820
++
++[Peer]
++PublicKey = gCXBt+n2VNBR6RiUmUxG3+15G0qnXUzsSxEQvmwGMkw=
++AllowedIPs = 198.51.100.3/32
++Endpoint = 192.0.2.3:51820</pre>
++       </div>
++      </div>
++      <div class="paragraph">
++       <p>
++        There is a
++        <span class="monospaced">
++         [Peer]
++        </span>
++        section for each selected peer. The IP configured on the
++WireGuard interfaces will be added to the
++        <em>
++         Allowed IPs
++        </em>
++        of a peer as well.
++       </p>
++      </div>
++     </div>
++     <div class="sect4">
++      <h5 id="_verifying_the_setup">
++       Verifying the Setup
++       <a class="headerlink" href="#_verifying_the_setup" title="Permalink to this heading">
++       </a>
++      </h5>
++      <div class="paragraph">
++       <p>
++        Verify connectivity to the other participants in the WireGuard fabric by
++pinging:
++       </p>
++      </div>
++      <div class="listingblock">
++       <div class="content monospaced">
++        <pre>root@sdn1:~# ping -c1 198.51.100.2
++PING 198.51.100.2 (198.51.100.2) 56(84) bytes of data.
++64 bytes from 198.51.100.2: icmp_seq=1 ttl=64 time=2.08 ms
++
++--- 198.51.100.2 ping statistics ---
++1 packets transmitted, 1 received, 0% packet loss, time 0ms
++rtt min/avg/max/mdev = 2.083/2.083/2.083/0.000 ms
++
++
++root@sdn1:~# ping -c1 198.51.100.3
++PING 198.51.100.3 (198.51.100.3) 56(84) bytes of data.
++64 bytes from 198.51.100.3: icmp_seq=1 ttl=64 time=2.26 ms
++
++--- 198.51.100.3 ping statistics ---
++1 packets transmitted, 1 received, 0% packet loss, time 0ms
++rtt min/avg/max/mdev = 2.255/2.255/2.255/0.000 ms
++
++
++root@sdn1:~# ping -c1 198.51.100.10
++PING 198.51.100.10 (198.51.100.10) 56(84) bytes of data.
++64 bytes from 198.51.100.10: icmp_seq=1 ttl=64 time=1.29 ms
++
++--- 198.51.100.10 ping statistics ---
++1 packets transmitted, 1 received, 0% packet loss, time 0ms
++rtt min/avg/max/mdev = 1.286/1.286/1.286/0.000 ms</pre>
++       </div>
++      </div>
+      </div>
+     </div>
+    </div>
+@@ -76287,10 +76864,17 @@
+     <div class="paragraph">
+      <p>
+       API tokens allow stateless access to most parts of the REST API from another
+-system, software or API client. Tokens can be generated for individual users
+-and can be given separate permissions and expiration dates to limit the scope
+-and duration of the access. Should the API token get compromised, it can be
+-revoked without disabling the user itself.
++system, software, or API client. Exceptions are endpoints that provide access to
++the virtual machine or system console. These endpoints require user privileges
++and cannot be accessed via an API token.
++     </p>
++    </div>
++    <div class="paragraph">
++     <p>
++      Tokens can be generated for individual users and can be given separate
++permissions and expiration dates to limit the scope and duration of the access.
++Should the API token get compromised, it can be revoked without disabling the
++user itself.
+      </p>
+     </div>
+     <div class="paragraph">
+@@ -85892,71 +86476,6 @@
+       <a class="headerlink" href="#_crs_load_balancer" title="Permalink to this heading">
+       </a>
+      </h4>
+-     <div class="admonitionblock">
+-      <table>
+-       <tr>
+-        <td class="icon">
+-         <img alt="Important" src="data:image/png;base64,
+-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
+-EQn3XQAAAABJRU5ErkJggg=="/>
+-        </td>
+-        <td class="content">
+-         This feature is still in technology preview.
+-        </td>
+-       </tr>
+-      </table>
+-     </div>
+      <div class="paragraph">
+       <p>
+        The utilization of individual cluster nodes can vary greatly depending on where
+@@ -136973,9 +137492,9 @@
+ </div>
+ <div id="footer">
+  <div id="footer-text">
+-  Version 9.2.2
++  Version 9.2.3
+   <br/>
+   Last updated
+- Thu May 21 22:27:14 CEST 2026
++ Fri Jul  3 11:08:20 CEST 2026
+  </div>
+ </div>

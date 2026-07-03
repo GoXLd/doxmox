@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260703T150949Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+    .hint-tooltip {
+      position: relative;
+    }
+    .hint-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260703T150949Z.diff</h1>
+      <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-07-03T15:10:59Z" data-iso="2026-07-03T15:10:59Z">2026-07-03 15:10:59 UTC</time></p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260703T150949Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -346,10 +346,10 @@</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;br/&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revnumber&quot;&gt;</span>
+<span class="line del">-  version 9.2.2,</span>
+<span class="line add">+  version 9.2.3,</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revdate&quot;&gt;</span>
+<span class="line del">-  Thu May 21 22:27:14 CEST 2026</span>
+<span class="line add">+  Fri Jul  3 11:08:20 CEST 2026</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;toc&quot;&gt;</span>
+<span class="line ctx">   &lt;a href=&quot;index.html&quot; style=&quot;font-size: 0.8em;&quot;&gt;</span>
+<span class="line hunk">@@ -2039,10 +2039,75 @@</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         For PCI(e) passthrough the CPU needs to support the VT-d/AMD-d flag.</span>
+<span class="line add">+         For PCI(e) passthrough, the CPU and motherboard need to support IOMMU</span>
+<span class="line add">+  (Intel VT-d, AMD-Vi).</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">       &lt;/ul&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Tip&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAKZUlEQVRoge2aa3BU5RmAn3Pbs7fs</span>
+<span class="line add">+JmwCRGITk0hVLFAtNWoq6pAiU0cKaYfa6ShT+YN4YbQw9F/8QX+UMv6gM3Q6oxMV6TgIbe10Gq2g</span>
+<span class="line add">+cSzDpRaFgmIk4SKB3LP3Pff+SM66m+xuFvEyzvSbeefsbva8+z7nvXzf934RHMfhmzzEr9uAqx3/</span>
+<span class="line add">+B/i6xzceQP6iFDmT1cBxHNzCkFsgBEHIXnNeC1f7u1cN4DiOY9s2rliWhWVZWRDHcbJGC4KAJElI</span>
+<span class="line add">+koQoioii6IiieFUgnxvAtm3HNdg0Tbq6uuju7ubYsWP09vYyMjKCpmmoqkokEqGhoYGFCxfS2tpK</span>
+<span class="line add">+W1sbiqJkRZIkZxLoikGEK50H3CdumiZ9fX3s3LmT3bt3U1V3A0033cKc2nkEQxV4PSqSJOI4Dpqu</span>
+<span class="line add">+k0gkGLx8kZ4T7zF87iSrV69m3bp1NDY2oqoqHo8HWZa5Uo9cEYBt245lWRiGQUdHB9u2beOe1Y8w</span>
+<span class="line add">+/6bFVAT9xJJpYvEUiVSGjG5gmBY4DqIoonoUfF4PoYAfRRE5/8kp3njlD6xfv54tW7YQCATw+Xyu</span>
+<span class="line add">+R8r2RtkAtm07pmly5MgRHn/8cZSaZpbcfjd+n5f+wVEGRqJkdCMv3vME8t77vB6qQn4+OX6YsXPH</span>
+<span class="line add">+2bp1Ky0tLQQCAVRVdb0xI0RZZdQ1ft++fSxbtozrlqzgrnvvI5nRee9UL+f6h9B0A1EQEIsBiOKE</span>
+<span class="line add">+TL7XdJOBkTg1jYtouu1+1qxZw549e4hGo6TTaUzTxLbtGZ/ujEmca/wvHnqYnz/2DLNn19B74TID</span>
+<span class="line add">+I9HPjCvwlLMls4RHdMNC8IRZ8dBmnnp6E7Zts2rVKgB8Ph+yLDulPFEyhBzHcUzT5PDhwyxbtow1</span>
+<span class="line add">+j3YQqanmozOfEk2kChuLQ3x0lGQihmM7qF4vVdWz8fr9hYFyoK30OG/ufpYXXniB1tZWwuEwXq8X</span>
+<span class="line add">+WZaLJnZJAMuyHE3TuPPOO2lcsoLGpmZO9ZzPM37q0x0ZuISla2xY2077j5ZSFargZM9Znt97gE8u</span>
+<span class="line add">+DBb3ziRIfPAcF4/v59VXX6W6uppQKISqqkiSVBCgaA64odPR0YFS00xjUzNnLlwmmkznxbKYI45j</span>
+<span class="line add">+k04mefaZJ3j04VXMqZ6Fx6Pw3QXXs/3Xv6Tp2rnTALL3T8wDBCLz8M2Zz/bt24nFYjPmQ0EAt9b3</span>
+<span class="line add">+9fWxbds2ltxxD0NjMQbdmC+QlIIgIIkSoWCAH971/Wk6PYrCg/f/oHiVmhSP6qWm/gY6Ozvp6ekh</span>
+<span class="line add">+mUyi6zq2bWeXK+UAYFkWO3fu5N72dQT8Pi5cGp6xuoiiiBoMktH0gl5trp87DbqQBEMRbl32U3bt</span>
+<span class="line add">+2kUikUDTtOzypGwAwzDYvXs3316wiEuDoxiGWVaZrAjP4qW/vFUQ4NAHPdlwKQWiqF4qa+ro6uoi</span>
+<span class="line add">+kUiQTqcxDKM8ADd8Xn/9dWZdewMVwSCDo7GicT8NSBTZt/8oT259jgOHThBNpIgmUjy3dz/P7z2Q</span>
+<span class="line add">+r2My7gs9FNUXoPpbN9Ld3Z0FKBRG0+YBN3y6u7tpWnAr8WR6+gxLfr03TYNMMolhGFimiWVbXDzb</span>
+<span class="line add">+x4G3/4XgOIiyTF3DdW45nHG2RhBQfX6q65o5evQoy5cvn9BtWUiSRG5FLQhg2zbHjh3j+tsfKFrv</span>
+<span class="line add">+3R8EGL7UT23NLNraWmi+ro5r5kSYHakiVOHH7/OiyDKxZIonf9NJIpWZMQcEwOPx4vNXcPr0B2Qy</span>
+<span class="line add">+mdxEzrO34ExsWRa9vb3csjzEaP9w1sUFZ1RBQJJk/vjbTdTXzS2kDoBQwI9HmcEDOSJ7PAiiSH9/</span>
+<span class="line add">+P7quY5omlmVN01soB3Ach5GREbyqiqabM8a+NxAglcmvPOf7h9jR+WdOfNQLwNtHTzIeT+XFfdGC</span>
+<span class="line add">+IAiIogSOQzQaxTRNdy4ozwO2baNpGpIkY1j2RAJTeJ0jCAKRmtmcPHORmkglxz48y/5DJ3jrnUPM</span>
+<span class="line add">+b7iGxx7+MZZls/efR0rG/VQPgwMC2eQtZHxRAABVVbM3lEpgV178azcvvfYOgiCgZTJomsbGR9oR</span>
+<span class="line add">+BIHzl4YYGo2VlcCuWOaE5xVFwbbtqVHiCJOZXBQgEomg6zqSKOIUMrqER+LRKItvaubW78wH4NLQ</span>
+<span class="line add">+WNmx7+q1DB1ZkgmFQohifqS7xhcFEEWRhoYGEokEqkeeWPLmurcEiGPbpJJJfvbAPVl95/qHJyYv</span>
+<span class="line add">+mH5/EdG1FA5QW1ubzZvc8pm1deoHroKFCxcycPkiPlWdnmC5iTxlVk2n0wT9Xu69Y3FW51g8OfH3</span>
+<span class="line add">+ye+WnAgnRcukyKQSNDU1Icty7n65NACAJEm0trbSc/zfVAT9JZ/U1NWklslwx/duxqMoWX0Zzcy/</span>
+<span class="line add">+bwr0VCDT0NDTSS6f/ZBFixZlN/ySJJXnAVEUaWtrY6DvOIoiFlx5FhPLsrjl5uvzdPq8nsLfL6I3</span>
+<span class="line add">+FR1FlhUG+v5LS0tLtmtRlgcEYaL5pCgKq1ev5lzPKfxeT8FwKSQA115Tk6eztjpcsubn6rUMnfj4</span>
+<span class="line add">+MLHxIZYuXYrX683rVpQDIIiiiKIorFu3jn+8vIPKCt+0cCkG4m4Bc0fd3OqCoVIIJDo2iCQrvPu3</span>
+<span class="line add">+F1m5cmVeu6VQz6hgDrj1t7GxkfXr1/Px+wdRPcr02C+wmgxVVnLm3KU8ffNmVxX03lSgRHSEVGyc</span>
+<span class="line add">+oYt9tLe3U19fTzAYzAKUVYVyw0hVVbZs2cJw7/uYyZGSIeCCeFWVd499jGGaWX1zq8OfrYOKeC+T</span>
+<span class="line add">+ijM+cBHHsRju/Q9r164lFAoRDAbdPfEVAQiiKOLxeAgEAmzdupW/v/A7RLPEyjTHuGjKYMfLb3B5</span>
+<span class="line add">+eBzdMNl/+CSmZReN+0wqztDFs4iSxIE9O9mwYQPhcJhwOEwgEMhN4GkEZXUlYrEYe/bs4elfbWLF</span>
+<span class="line add">+Q5tQKyJlVaRy+kSJ6AhjA58iihJdf9rBUxufYPny5cyZM6esrkTJxpabzIFAgFWrVmHbNps3b+bu</span>
+<span class="line add">+n6wnVF2H4lHLmlULgZiGTmxkgGR8DNu2efOV3/PUxo20tbURiUSorKwkEAhkk7fYmLE36rZX0uk0</span>
+<span class="line add">+0WiUgwcP0tHRQcW8G5ndsIBgaBYe1TvtyRYDMXWNZGyU+Ngwkiwz+GkfQ73vsWHDBhYvXkwkEmHW</span>
+<span class="line add">+rFmEw2G3M1eyR1pWczcXIh6PMz4+zvbt2+ns7OS2+x6kanYdqjeA1xdAUb3IioIoSjg42JaJaejo</span>
+<span class="line add">+mTRaOoGeTiHJEvGxYd55rZP29nbWrl1LOBymqqqKyspKKioqyjK+bIBcCE3TSCaTxGIxenp62LVr</span>
+<span class="line add">+F11dXdTUL2BO/Xx8/goEUcSxbYSJ2EGS5IlzgnSC/r4PuXzmOEuXLmXlypXU19cTCoUIh8OEQqEr</span>
+<span class="line add">+7k5/7vOBdDpNMpkkkUiQSCTo7u7m6NGjnD59mv7+fqLRKIZhoCgKoVCI2tpampqaWLRoES0tLfh8</span>
+<span class="line add">+Pvx+P8FgkGAw+OWfD7gj94RG13U0TSOdTpNOp8lMbmQ0TcvbArrrK1mW8Xg8eL3e7BLB5/N9dSc0</span>
+<span class="line add">+uSP3jMwwjKy4G3AXwB0ugAsx5YzMndW//DOy3OFMjGwrxrKs7NX9LBfAneFFUcxec6rU5zqpvCqA</span>
+<span class="line add">+qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         IOMMU usually also needs to be enabled in the BIOS/UEFI. See the</span>
+<span class="line add">+         &lt;a href=&quot;#qm_pci_passthrough&quot;&gt;</span>
+<span class="line add">+          PCI(e) Passthrough</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         chapter for details.</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line hunk">@@ -4589,7 +4654,7 @@</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line ctx">       A detailed step-by-step how-to can be found on the</span>
+<span class="line del">-      &lt;a href=&quot;https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_12_Bookworm&quot;&gt;</span>
+<span class="line add">+      &lt;a href=&quot;https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_13_Trixie&quot;&gt;</span>
+<span class="line ctx">        wiki</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">       .</span>
+<span class="line hunk">@@ -6049,9 +6114,92 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line del">-      &lt;pre&gt;# apt-get update</span>
+<span class="line del">-# apt-get dist-upgrade&lt;/pre&gt;</span>
+<span class="line del">-     &lt;/div&gt;</span>
+<span class="line add">+      &lt;pre&gt;# apt update</span>
+<span class="line add">+# apt full-upgrade&lt;/pre&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+     &lt;table&gt;</span>
+<span class="line add">+      &lt;tr&gt;</span>
+<span class="line add">+       &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+        &lt;img alt=&quot;Warning&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAMVUlEQVRogdWZeXDVVZbHP7/f27JB</span>
+<span class="line add">+wtJIiCERRFlbx5FuHRrRBgtBsRIwCCOrFmGmiDBjYVNlQlgiQjU6IjI4xLJxGf5QGp0Cbaftsu3R</span>
+<span class="line add">+hu6aYXqgLZoWEsjyyDP7S972e7/l3vnj5cW3Ji9M/zOn6lRS997fvd/vueece+59ipSS/89iv5mP</span>
+<span class="line add">+ZEQQQsS23RQARVEAUFUVRVFQog0ZyogJSClld3c327Ztw7IsLMuKto90KgBsNhtVVVXMnj2bvLw8</span>
+<span class="line add">+7Ha7HBEJKWXGKoSQXV1dcsuWLfLSpUsyKkKIIdWyrLTqdrvlU089Jc+cOSM9Ho8Mh8NSCCEzxTRi</span>
+<span class="line add">+8JWVlbKtre0vAt6yLGmapmxtbZXr1q2TZ86ckW1tbSMikTH4GzduyKqqqkHwsSA1TZOhUChOg8Hg</span>
+<span class="line add">+oBqGIQ3DSAk+VleuXDliEspwviullD09PbzwwgscO3Yszt91XScQCNDZ2YlhGIPfuFwu7Pb48FJV</span>
+<span class="line add">+lZycnEG/z8/PRwiBqqqDYzweD88//zyrV69m7ty5jBs3DofDMWRgD0lASik9Hg979uzh2LFjcYEa</span>
+<span class="line add">+CoVob2/n2q9+hbZ585BGSCWltbVMr61NtSYbN25k7dq1zJkzZ1gSaqrGWPD79+9PAh8MBuns7OTi</span>
+<span class="line add">+e+8R2rwZCYOaqTTt3cuf6+qSwAMcP36co0eP8vXXX9Pd3Y1hGMg0lk65A1HwdXV1vPHGG0mW7+jo</span>
+<span class="line add">+4A8/+xn2BAAAI0riQOnu3cyork7Zt3btWtavX89dd92VdieSCEgppdvt5sCBAxw5ciSuLxQK0dTU</span>
+<span class="line add">+RMOHHyJ37hwh1NSiAKU7djDzxRdT9q9YsYJt27YxY8aMlCTiCEgp5eXLl6mvr+fVV1+NmygYDNLW</span>
+<span class="line add">+1sY3J09ipLEYQDPw2sBfCTwMLARKgKwhiNxWU8OsXbvi2qLYnnzySSorK1PvRGyqvH79uty6dWtS</span>
+<span class="line add">+Lg8EAvLKlSvyo1275M8hSV8H+eMBvRPkP9Vslp0tV6W3u12+c7hOTgT5NyAXgtwE8gTIUyn0D9XV</span>
+<span class="line add">+0jAMqet6klZUVMjPP/88KcWqUcs3NjZy+PBhDh06FGeFqNtcOnECY8+euICVwDWgFtj/m1/wD+8f</span>
+<span class="line add">+5xtg6uy5ZI+5BSkkU6fexgu7tvLWhd/x1tXL5P/905wAggnzSODavn388Sc/SblDL7/8Mq+99hqX</span>
+<span class="line add">+L1+OC2zb7t27uX79+u7Dhw+ndJvW1lYaP/qI0EDKS1z0XeDjC7/l9llz+d6EWxjv0imdcgeFRcVo</span>
+<span class="line add">+fR46vm1Cx8ndP5hP3qjR/GDuX/GbC5/iberl1qirxGjv73+PYRjc8tBDcVhGjRpFRUUF27dvp7i4</span>
+<span class="line add">+mPz8fFwuV2QHVq1aldLyDQ0NXDt5En91NRIQCRqNHld2HsLUCfu6GD9mNIoVQggDy9RQpYLTbkdV</span>
+<span class="line add">+7Vh6CH9vJ/fcfz/vALsAN2AlzHv1wAEu1tTExUI0Hl555RXq6upobm4mEAhECEyePDkOvK7rtLS0</span>
+<span class="line add">+cOP0aby1tUnAo2oNkFAUSTjoRfN+ix7wgjRBShACVVFQRGSkHvTypwtnmXHPQhrbb3D0k1McAdpi</span>
+<span class="line add">+DBLVhp/+lIvV1UlV7oQJE8jNzcXtduPz+ZIPMtM0aWhooPH99+mtrU1ymVRqUxUQFlJYSBFGCivG</span>
+<span class="line add">+OSyEaSCFAGlhd+Vy7w/n43BmM3POXWx69hl8AyMTDXTl4EEu7t2bCBGAQCCAruupCdjtdrp3705r</span>
+<span class="line add">++ViN22YhsUwdyzRBCpACyzIRMnpngCxXNjYlMk4L+ggoYXxp5pbAlX37cDgcSQSEEAxmoVgQg/9n</span>
+<span class="line add">+AP67bVdAUcFmQ3W6IgtIiWUKLCGwLGvQj69e+m+EsBB6iGB/N/3e9oyNlIgRYm5kiR2JH0L6MkFY</span>
+<span class="line add">+Ei0UQKAycdJUbIodT3Mjpu6n3xfCptoRlomQCqZpRkhLCykMhLBQSV1HJbalKnvSF3MpNO0OSIEw</span>
+<span class="line add">+DWyuPCaVzCRv7ER8Ph+mtJM35lZsdjvuxktYhobDkYOCgqJEDWLLaAfSVc1p78SJO2AAvUBggLUN</span>
+<span class="line add">+KIx2Kgqjv3crY2wOiqaqKKoKihKJCctCC/npbW+jq7sbS7UjkGCZCCkQQkdJsV6mRWHGBH4HLHpx</span>
+<span class="line add">+F3LcGDq6u7nw2S85++V/4gb0kB9hFoAZwuZwgc2BqjpQVRWbzYXd4cDlysHn7WJi0W2EfH24XA6E</span>
+<span class="line add">+jKySqhTPtDRPIjB4XUtoPw3sKV/O+KJipJT4V63mq3/7Obu21/LN/5xl9l/PIys7G2fOaBS7E5vN</span>
+<span class="line add">+QrU7UW0KNlUFp5P8MeO5/8HFhPo7CXr7MMIaQW8neSkMlqnEEYj1s8QJbwXaWpopmDgJh93OqHGF</span>
+<span class="line add">+LFy9jjunTeHNo2uAvUy54/uMuaUYV24BUpVYpoVEwaY4UVUbitNJ9ugxOBw2tEAPfX29QCjuVB9O</span>
+<span class="line add">+EmNBTdeRGEj3A56OdkwtgDDCCKFjz8ql6N55/G3VcRouX+SXH72Ht6udcCg4cJiJSPIn8oCloIKU</span>
+<span class="line add">+KAhURUUIiVCjx128pjtrEiVtFkrMNNOBA+s34XG3YIRDSMtAkSbOrDzuvOchHnmiklEFY3n76G7O</span>
+<span class="line add">+f/nv9Ht7EMJCSjGoljCxjOBAnaSjhYPowevDZrx04FMSGLwnJEzmAOYCn33wAUYoiGXoSMsEoeNw</span>
+<span class="line add">+ZTO2aDrzFpWxck0VJVOn4fd2E/T7oneNyOFlGkjLwNTD6FoILRQEa/hDcyhJIuB0OlFVNeVE04B3</span>
+<span class="line add">+XjnC+d9+hRYKYJlhpDBBGDidDiaUfp/xk24nJ3c0eaPzsKsgzEhtZJkGIuzDNDRCAR99fb309XYh</span>
+<span class="line add">+NAYPsnQ6IgJSSgoKCihavDilJZ4Aajf8HVf/fAnLCCNNAyktECaqIsgbV8So0WMHrn2RGLBMHREO</span>
+<span class="line add">+YBg6eiiIFgzQ7/US8vmYoEDuENa/u6oqcwJRPysoKOC+N9+kcNGiJGvkAQuADY+twn3tCuFg/4CV</span>
+<span class="line add">+DbB0VKHhzHbhdGVhs6kgDKTuR9f86KEAWtBHd0c73p52pB5Av5KewJxnnmHeoUOEw+EkjHEEYi8M</span>
+<span class="line add">+EHlFKyws5IfHjlG4cGHSxJOA1cATPy7nT388j+73YoYDCEuP1DhSRrKOlFhmmLAWQNMCBHw9tHtu</span>
+<span class="line add">+8K2nBcsI8uGxf8HoiRBINNTtjz7KQ/X1xL6iRDHGvubZAfr7+1Nuz+TJk6G+nv/atInmX/86rq8A</span>
+<span class="line add">+WAlUrahk/Fio/8XHjM4fi93pHCgRFCzLQtd1tFAQLeCjs9NNb4cHxdL44J8PozfD7XyXRqNy97p1</span>
+<span class="line add">+PPz220gp0XU9zriKogw+SaqqGtmB48ePU15enkRASklRURH31tcz6cEHk1JrAfAUcEcPLLjvMU69</span>
+<span class="line add">+/694uzsI+X3093TS5blBl8eNt72VHk8Tfd9eR+vv4MQ/HkZpiJwttgTL3/Hoo2nBNzY2smjRIhYs</span>
+<span class="line add">+WEBBQQEulyvyLuT3+2VTUxM7d+7k5MmTKXNuS0sL555+mtYvv0zqE0A7kavhqFL4oAlCCWOygGIi</span>
+<span class="line add">+qTiHyMnuTBgz/bHHKDt9GillnN8D+P1+ysrKWLJkCdOmTWPWrFmUlpZGCAghpN/vp7m5mZqaGl5/</span>
+<span class="line add">+/XUKCwtJFLfbzX+sX8+Nr75K6rtZiXr49KVLKf/4Y4QQ6LqeBP6RRx6hvLycadOmMXPmTEpKSsjN</span>
+<span class="line add">+zf3uZS6WRHV1NadOnUpaTEpJa2sr5zZupOkmSaQqk2csWcLyTz4BQNO0uL7GxkbWr1+fErzNZlMG</span>
+<span class="line add">+w1lVVSUvL4+SkhL27dvH8uXL8Xg8ceABiouLue+ttyieN2+IK2Z6TRx/5+LFacE3NDRQWVmZFjwk</span>
+<span class="line add">+nAOxJF566SW2bNnChQsXkmKipKSEB959l9vmzcvo1pZOpz/8ME98+mla8Bs2bGDZsmVpwUOa5/VE</span>
+<span class="line add">+d0oXE319fXxWXs43Z88m9Q0n03/0I1YPJIRE8OfOnWPHjh2UlZUNCT4tgUQSO3fupKqqigceeGCw</span>
+<span class="line add">+P/a7VM8emUg0VcbK+fPn2bp1KytWrBgW/JAEEknU1NTw7LPPMn/+/GFBZQI8lZw/f57nnnuO5cuX</span>
+<span class="line add">+M2XKlGHBD0sgkURdXR2PP/44FRUVNwV+qP7Tp09z8ODBjNxmRAQSSRw4cIBly5axdOnSvwh4RVH4</span>
+<span class="line add">+4osv2L9/P2VlZRlbfkQEEkls376djo4OQqHE83bk4nK5EEKwZs0aSktLRwR+RATgOxItLS1cu3aN</span>
+<span class="line add">+vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s</span>
+<span class="line add">+/F/lgJiyQFHragAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+       &lt;/td&gt;</span>
+<span class="line add">+       &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+        As Proxmox VE uses a rolling release model on top of Debian, performing an</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         apt upgrade</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        may result in a partially upgraded or broken package state. This</span>
+<span class="line add">+is because</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         apt full-upgrade</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        can also remove existing packages to satisfy</span>
+<span class="line add">+dependencies if needed, while</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         apt upgrade</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        cannot.</span>
+<span class="line add">+       &lt;/td&gt;</span>
+<span class="line add">+      &lt;/tr&gt;</span>
+<span class="line add">+     &lt;/table&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line hunk">@@ -6116,7 +6264,7 @@</span>
+<span class="line ctx">         The APT package management system is very flexible and provides many</span>
+<span class="line ctx"> features, see</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         man apt-get</span>
+<span class="line add">+         man apt</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         , or</span>
+<span class="line ctx">         &lt;a href=&quot;#Hertzog13&quot;&gt;</span>
+<span class="line hunk">@@ -8202,6 +8350,28 @@</span>
+<span class="line ctx">         bridge-fd 0&lt;/pre&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       The</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        vmbr0</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       address</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        203.0.113.17</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       is the first usable host address of the</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        203.0.113.16/28</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       block; the block’s network address</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        203.0.113.16</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       cannot be</span>
+<span class="line add">+assigned to an interface.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;sysadmin_network_masquerading&quot;&gt;</span>
+<span class="line hunk">@@ -11425,7 +11595,7 @@</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         You can also mirror the log device to multiple devices, this is mainly useful to</span>
+<span class="line del">-ensure that performance doesn’t immediately degrades if a single log device</span>
+<span class="line add">+ensure that performance doesn’t immediately degrade if a single log device</span>
+<span class="line ctx"> fails.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line hunk">@@ -16730,6 +16900,21 @@</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line add">+       If the active boot entry points to</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        \EFI\proxmox\shimx64.efi</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       like in the</span>
+<span class="line add">+following example, GRUB is used in UEFI mode with Secure Boot enabled.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+      &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line add">+       &lt;pre&gt;Boot0005* proxmox       [...] File(\EFI\proxmox\shimx64.efi)&lt;/pre&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line ctx">        If the output contains a line similar to the following,</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         systemd-boot</span>
+<span class="line hunk">@@ -21054,14 +21239,11 @@</span>
+<span class="line ctx">          Make sure the node to be deleted is not part of any replication job</span>
+<span class="line ctx">   anymore.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line del">-       &lt;/li&gt;</span>
+<span class="line del">-      &lt;/ul&gt;</span>
+<span class="line del">-     &lt;/div&gt;</span>
+<span class="line del">-     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line del">-      &lt;table&gt;</span>
+<span class="line del">-       &lt;tr&gt;</span>
+<span class="line del">-        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line del">-         &lt;img alt=&quot;Caution&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+        &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+         &lt;table&gt;</span>
+<span class="line add">+          &lt;tr&gt;</span>
+<span class="line add">+           &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+            &lt;img alt=&quot;Caution&quot; src=&quot;data:image/png;base64,</span>
+<span class="line ctx"> iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAKdUlEQVRoge1Ze1AV1x3+zt279wEi</span>
+<span class="line ctx"> DWCYGzRVktqa1MEmmtbWR22ncXxUrTDWV/5IqG2wUAUfmUwSkk6V+EAJCEQC6figwZBqZtRxqukf</span>
+<span class="line ctx"> tebRZBpFG1S0hiRErwiaKK977+6eX//YPXt37+UiIJlMZnpmdnb33PP4vt97z2VEhG9yc3zdAO60</span>
+<span class="line hunk">@@ -21110,20 +21292,19 @@</span>
+<span class="line ctx"> VVWRnKx/Jlpt3eVy2QCKu9C68AFr9o0spwd0Oh1ZYggCIlNaiQktiXdhZgKQABcp3ci7LMtM7B0J</span>
+<span class="line ctx"> fsAErJoAYItG1mdr+hfvVlACtHDIXkploYXbHvQOikDEe6/ZmjFmAhf9ZvJxOk2Qol88W4kYz32S</span>
+<span class="line ctx"> GNQfHLG+TyMTkAVEr88xQfVnkBg7GAKixSIykDYQsL21/wFkW/B5QqT9lwAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line del">-        &lt;/td&gt;</span>
+<span class="line del">-        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line del">-         If you fail to remove replication jobs from a node before</span>
+<span class="line add">+           &lt;/td&gt;</span>
+<span class="line add">+           &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+            If you fail to remove replication jobs from a node before</span>
+<span class="line ctx"> removing the node itself, the replication job will become irremovable.</span>
+<span class="line ctx"> Note that replication automatically switches direction when a</span>
+<span class="line ctx"> replicated VM is migrated. Therefore, migrating a replicated VM from a</span>
+<span class="line ctx"> node that is going to be deleted will set up replication jobs to that</span>
+<span class="line ctx"> node automatically.</span>
+<span class="line del">-        &lt;/td&gt;</span>
+<span class="line del">-       &lt;/tr&gt;</span>
+<span class="line del">-      &lt;/table&gt;</span>
+<span class="line del">-     &lt;/div&gt;</span>
+<span class="line del">-     &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line del">-      &lt;ul&gt;</span>
+<span class="line add">+           &lt;/td&gt;</span>
+<span class="line add">+          &lt;/tr&gt;</span>
+<span class="line add">+         &lt;/table&gt;</span>
+<span class="line add">+        &lt;/div&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          Ensure that the remaining Ceph cluster has sufficient storage space</span>
+<span class="line hunk">@@ -21139,14 +21320,11 @@</span>
+<span class="line ctx">   of any OSD, especially the last one on a node, will trigger a data</span>
+<span class="line ctx">   rebalance in Ceph.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line del">-       &lt;/li&gt;</span>
+<span class="line del">-      &lt;/ul&gt;</span>
+<span class="line del">-     &lt;/div&gt;</span>
+<span class="line del">-     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line del">-      &lt;table&gt;</span>
+<span class="line del">-       &lt;tr&gt;</span>
+<span class="line del">-        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line del">-         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+        &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+         &lt;table&gt;</span>
+<span class="line add">+          &lt;tr&gt;</span>
+<span class="line add">+           &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+            &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line ctx"> iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line ctx"> m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line ctx"> CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line hunk">@@ -21191,47 +21369,31 @@</span>
+<span class="line ctx"> lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line ctx"> zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line ctx"> PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line del">-        &lt;/td&gt;</span>
+<span class="line del">-        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line del">-         By default, Ceph pools have a</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          size/min_size</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         of</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          3/2</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         and a</span>
+<span class="line del">-full node as</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          failure domain</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         at the object balancer</span>
+<span class="line del">-         &lt;a href=&quot;#pve_ceph_device_classes&quot;&gt;</span>
+<span class="line del">-          CRUSH</span>
+<span class="line del">-         &lt;/a&gt;</span>
+<span class="line del">-         . So if less than</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          size</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         (</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          3</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         )</span>
+<span class="line del">-nodes with running OSDs are online, data redundancy will be degraded.</span>
+<span class="line del">-If less than</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          min_size</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         are online, pool I/O will be blocked and</span>
+<span class="line del">-affected guests may crash.</span>
+<span class="line del">-        &lt;/td&gt;</span>
+<span class="line del">-       &lt;/tr&gt;</span>
+<span class="line del">-      &lt;/table&gt;</span>
+<span class="line del">-     &lt;/div&gt;</span>
+<span class="line del">-     &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line del">-      &lt;ul&gt;</span>
+<span class="line add">+           &lt;/td&gt;</span>
+<span class="line add">+           &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+            Make sure that there are still enough nodes with OSDs available to satisfy</span>
+<span class="line add">+the</span>
+<span class="line add">+            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+             size/min_size</span>
+<span class="line add">+            &lt;/span&gt;</span>
+<span class="line add">+            parameters configured for the Ceph pools. If there are fewer</span>
+<span class="line add">+than</span>
+<span class="line add">+            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+             size</span>
+<span class="line add">+            &lt;/span&gt;</span>
+<span class="line add">+            (default: 3) nodes available, data redundancy will be degraded. If</span>
+<span class="line add">+there are fewer than</span>
+<span class="line add">+            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+             min_size</span>
+<span class="line add">+            &lt;/span&gt;</span>
+<span class="line add">+            (default: 2) nodes available, the I/O of the</span>
+<span class="line add">+pools will be blocked until there are enough replicas available. Affected guests</span>
+<span class="line add">+may crash if their I/O is blocked.</span>
+<span class="line add">+           &lt;/td&gt;</span>
+<span class="line add">+          &lt;/tr&gt;</span>
+<span class="line add">+         &lt;/table&gt;</span>
+<span class="line add">+        &lt;/div&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          Ensure that sufficient</span>
+<span class="line hunk">@@ -27111,11 +27273,17 @@</span>
+<span class="line ctx">         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line ctx">           yes</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           3</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/td&gt;</span>
+<span class="line ctx">         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-          no</span>
+<span class="line add">+          yes</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           4</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/td&gt;</span>
+<span class="line ctx">         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line hunk">@@ -27143,11 +27311,58 @@</span>
+<span class="line ctx">         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line ctx">           yes</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           3</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/td&gt;</span>
+<span class="line ctx">         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-          no</span>
+<span class="line add">+          yes</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           4</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+         &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+          yes</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+         &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+          FC/SAS</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+         &lt;p class=&quot;tableblock monospaced&quot;&gt;</span>
+<span class="line add">+          native</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           6</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+         &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+          block</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+         &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+          yes</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           3</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line add">+         &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+          yes</span>
+<span class="line add">+          &lt;sup&gt;</span>
+<span class="line add">+           4</span>
+<span class="line add">+          &lt;/sup&gt;</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/td&gt;</span>
+<span class="line ctx">         &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line hunk">@@ -27264,12 +27479,14 @@</span>
+<span class="line ctx">       &lt;sup&gt;</span>
+<span class="line ctx">        3</span>
+<span class="line ctx">       &lt;/sup&gt;</span>
+<span class="line del">-      : It is possible to use LVM on top of an iSCSI or FC-based storage.</span>
+<span class="line del">-That way you get a</span>
+<span class="line del">-      &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-       shared</span>
+<span class="line del">-      &lt;/span&gt;</span>
+<span class="line del">-      LVM storage</span>
+<span class="line add">+      : With iSCSI, FibreChannel (FC), or SAS block storage as shared storage in a</span>
+<span class="line add">+cluster, LVM is used to split the LUN into virtual disks. The</span>
+<span class="line add">+      &lt;a href=&quot;https://pve.proxmox.com/wiki/Multipath&quot;&gt;</span>
+<span class="line add">+       Multipath Guide</span>
+<span class="line add">+      &lt;/a&gt;</span>
+<span class="line add">+      explains how to</span>
+<span class="line add">+configure it in a cluster, including multipathing which is usually a</span>
+<span class="line add">+requirement in these scenarios.</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -27296,6 +27513,15 @@</span>
+<span class="line ctx">        5</span>
+<span class="line ctx">       &lt;/sup&gt;</span>
+<span class="line ctx">       Technology preview with best-effort support.</span>
+<span class="line add">+     &lt;/p&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+     &lt;p&gt;</span>
+<span class="line add">+      &lt;sup&gt;</span>
+<span class="line add">+       6</span>
+<span class="line add">+      &lt;/sup&gt;</span>
+<span class="line add">+      Fibre Channel (FC) and SAS block storage is handled directly by the host</span>
+<span class="line add">+without a dedicated storage plugin.</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line hunk">@@ -46151,13 +46377,13 @@</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line ctx">        Or when starting a backup, the guest is told via the guest agent to sync</span>
+<span class="line ctx"> outstanding writes via the</span>
+<span class="line del">-       &lt;em&gt;</span>
+<span class="line del">-        fs-freeze</span>
+<span class="line del">-       &lt;/em&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        guest-fsfreeze-freeze</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line ctx">        and</span>
+<span class="line del">-       &lt;em&gt;</span>
+<span class="line del">-        fs-thaw</span>
+<span class="line del">-       &lt;/em&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        guest-fsfreeze-thaw</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line ctx">        commands.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line hunk">@@ -46332,20 +46558,25 @@</span>
+<span class="line ctx">         By default, if the QEMU Guest Agent is enabled in the guest’s config and if the</span>
+<span class="line ctx"> agent is available inside of the guest, then the virtual machine’s filesystems</span>
+<span class="line ctx"> are synced via the</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         fs-freeze</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line del">-        QEMU Guest Agent command when certain operations</span>
+<span class="line del">-are performed. This is done to provide data consistency.</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         guest-fsfreeze-freeze</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        QEMU Guest Agent command when certain</span>
+<span class="line add">+operations are performed. This is done to provide data consistency.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        An</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         fs-freeze</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line del">-        will be issued for any of the following operations on a VM:</span>
+<span class="line add">+        See the</span>
+<span class="line add">+        &lt;a href=&quot;https://www.qemu.org/docs/master/interop/qemu-ga-ref.html&quot;&gt;</span>
+<span class="line add">+         QEMU Guest Agent Protocol Reference</span>
+<span class="line add">+        &lt;/a&gt;</span>
+<span class="line add">+        for more details.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        A freeze will be issued for any of the following operations on a VM:</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line hunk">@@ -46381,15 +46612,11 @@</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         On Windows guests, some applications might handle consistent backups themselves</span>
+<span class="line del">-by hooking into the Windows VSS (Volume Shadow Copy Service) layer, a</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         fs-freeze</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line del">-        then might interfere with that. For example, it has been observed</span>
+<span class="line del">-that calling</span>
+<span class="line del">-        &lt;em&gt;</span>
+<span class="line del">-         fs-freeze</span>
+<span class="line del">-        &lt;/em&gt;</span>
+<span class="line add">+by hooking into the Windows VSS (Volume Shadow Copy Service) layer, a freeze</span>
+<span class="line add">+then might interfere with that. For example, it has been observed that calling</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         guest-fsfreeze-freeze</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line ctx">         with some SQL Servers triggers VSS to call the SQL</span>
+<span class="line ctx"> Writer VSS module in a mode that breaks the SQL Server backup chain for</span>
+<span class="line ctx"> differential backups.</span>
+<span class="line hunk">@@ -46414,20 +46641,25 @@</span>
+<span class="line ctx">         &lt;/li&gt;</span>
+<span class="line ctx">         &lt;li&gt;</span>
+<span class="line ctx">          &lt;p&gt;</span>
+<span class="line del">-          Alternatively, you can configure Proxmox VE to not issue a freeze-and-thaw cycle on</span>
+<span class="line del">-backup by setting the</span>
+<span class="line add">+          Alternatively, you can configure Proxmox VE to not issue a freeze-and-thaw cycle</span>
+<span class="line add">+by disabling the</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-           freeze-fs-on-backup</span>
+<span class="line add">+           freeze-fs</span>
+<span class="line ctx">           &lt;/span&gt;</span>
+<span class="line del">-          QGA option to</span>
+<span class="line del">-          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-           0</span>
+<span class="line del">-          &lt;/span&gt;</span>
+<span class="line del">-          . This can also be</span>
+<span class="line del">-done via the GUI with the</span>
+<span class="line add">+          guest agent option. This can also be done in the</span>
+<span class="line add">+GUI: open the</span>
+<span class="line ctx">           &lt;em&gt;</span>
+<span class="line del">-           Freeze/thaw guest filesystems on backup for</span>
+<span class="line del">-consistency</span>
+<span class="line add">+           Options</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          panel of the virtual machine, then the</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           QEMU Guest</span>
+<span class="line add">+Agent</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          dialog, and disable the</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           Freeze/thaw guest filesystems during certain</span>
+<span class="line add">+operations for consistency</span>
+<span class="line ctx">           &lt;/em&gt;</span>
+<span class="line ctx">           option.</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line hunk">@@ -67165,7 +67397,7 @@</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       Comment</span>
+<span class="line add">+       Alias</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line hunk">@@ -72288,6 +72520,351 @@</span>
+<span class="line ctx">        If you have configured an external BGP router, the BGP-EVPN routes (10.0.1.0/24</span>
+<span class="line ctx"> and 10.0.2.0/24 in this example), will be announced dynamically.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line add">+     &lt;h4 id=&quot;pvesdn_setup_example_wireguard&quot;&gt;</span>
+<span class="line add">+      12.16.7. WireGuard Setup Example</span>
+<span class="line add">+      &lt;a class=&quot;headerlink&quot; href=&quot;#pvesdn_setup_example_wireguard&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+      &lt;/a&gt;</span>
+<span class="line add">+     &lt;/h4&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       The example assumes a 3-node Proxmox cluster (</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        sdn1</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       ,</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        sdn2</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       and</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        sdn3</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       ) with</span>
+<span class="line add">+the IP addresses</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        192.0.2.1</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       ,</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        192.0.2.2</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       and</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        192.0.2.3</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       , as well as an</span>
+<span class="line add">+external WireGuard peer (</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        sdn-router</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+       ) with IP address</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        192.0.2.10</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       .</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       In this example the Proxmox nodes as well as the external peer will be connected</span>
+<span class="line add">+full-mesh via WireGuard in the</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        198.51.100.0/24</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       subnet and additionally the</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        203.0.113.0/24</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       subnet will be routed via the external WireGuard peer,</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        198.51.100.10</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       .</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;_set_up_wireguard_fabric&quot;&gt;</span>
+<span class="line add">+       Set Up WireGuard Fabric</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#_set_up_wireguard_fabric&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;a class=&quot;image&quot; href=&quot;images/screenshot/gui-datacenter-create-fabric-wireguard.png&quot;&gt;</span>
+<span class="line add">+        &lt;img alt=&quot;screenshot/gui-datacenter-create-fabric-wireguard.png&quot; src=&quot;images/screenshot/gui-datacenter-create-fabric-wireguard.png&quot; style=&quot;padding: 0 0 0 10px;float:right;&quot; width=&quot;250&quot;/&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Click on</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Datacenter</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        in the left-hand resource tree then navigate to</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         SDN</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        &amp;gt;</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Fabrics</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        and create a new WireGuard fabric by clicking</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Create</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        and selecting</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         WireGuard</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        .</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Choose a name for the fabric, in this case</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         example</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        has been chosen.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;_set_up_wireguard_interfaces&quot;&gt;</span>
+<span class="line add">+       Set Up WireGuard Interfaces</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#_set_up_wireguard_interfaces&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;a class=&quot;image&quot; href=&quot;images/screenshot/gui-datacenter-create-internal-node-wireguard.png&quot;&gt;</span>
+<span class="line add">+        &lt;img alt=&quot;screenshot/gui-datacenter-create-internal-node-wireguard.png&quot; src=&quot;images/screenshot/gui-datacenter-create-internal-node-wireguard.png&quot; style=&quot;padding: 0 0 0 10px;float:right;&quot; width=&quot;250&quot;/&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Each participating node requires a WireGuard interface. This can be configured</span>
+<span class="line add">+by adding a new node with type</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Internal</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        to the WireGuard fabric, selecting the</span>
+<span class="line add">+respective node and then creating a new WireGuard interface.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        On the node itself, two properties can be configured:</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Endpoint</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        and</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Allowed</span>
+<span class="line add">+IPs</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        .</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Endpoint</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        refers to the IP/hostname that will be used for connecting to</span>
+<span class="line add">+this node,</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         192.0.2.1</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        in the case of sdn1. Since no additional subnets should</span>
+<span class="line add">+be routed via this node in this example, leave the</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Allowed IPs</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        field empty.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Create a new WireGuard interface,</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         wg0</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        , and configure the IP address that</span>
+<span class="line add">+should be configured on the WireGuard interface,</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         198.51.100.1/24</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        in the case</span>
+<span class="line add">+of sdn1. The default listen port is</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         51820</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        , but can be manually changed via the</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Listen Port</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        field. A public/private key pair will be automatically created</span>
+<span class="line add">+for every new WireGuard interface.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;_set_up_external_node&quot;&gt;</span>
+<span class="line add">+       Set Up External Node</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#_set_up_external_node&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;a class=&quot;image&quot; href=&quot;images/screenshot/gui-datacenter-create-external-node-wireguard.png&quot;&gt;</span>
+<span class="line add">+        &lt;img alt=&quot;screenshot/gui-datacenter-create-external-node-wireguard.png&quot; src=&quot;images/screenshot/gui-datacenter-create-external-node-wireguard.png&quot; style=&quot;padding: 0 0 0 10px;float:right;&quot; width=&quot;250&quot;/&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        In order to add an external node, add another node to the WireGuard fabric, but</span>
+<span class="line add">+select type</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         External</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        in the node creation dialog. Enter the public key of</span>
+<span class="line add">+the interface of the external node, as well as the IP/hostname + port that can</span>
+<span class="line add">+be used to reach this external peer (</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         192.0.2.10:51820</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        in this example). Add</span>
+<span class="line add">+the IP of the node,</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         198.51.100.10/32</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        , as well as the</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         203.0.113.0/24</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        subnet</span>
+<span class="line add">+to the allowed IPs field.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;_set_up_wireguard_peerings&quot;&gt;</span>
+<span class="line add">+       Set Up WireGuard Peerings</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#_set_up_wireguard_peerings&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;a class=&quot;image&quot; href=&quot;images/screenshot/gui-datacenter-select-peers-wireguard.png&quot;&gt;</span>
+<span class="line add">+        &lt;img alt=&quot;screenshot/gui-datacenter-select-peers-wireguard.png&quot; src=&quot;images/screenshot/gui-datacenter-select-peers-wireguard.png&quot; style=&quot;padding: 0 0 0 10px;float:right;&quot; width=&quot;250&quot;/&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Now that all interfaces and external peers have been set up, they can be</span>
+<span class="line add">+selected as peers in the WireGuard interface configuration. Add the nodes</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         sdn2</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        and</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         sdn3</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        , as well as</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         sdn-router</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        to the peers of the interface</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         wg0</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        on node</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         sdn1</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        :</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        This will generate the following</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         wg0.conf</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        file in</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         /etc/wireguard/proxmox</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        :</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+       &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line add">+        &lt;pre&gt;root@sdn1:~# cat /etc/wireguard/proxmox/wg0.conf</span>
+<span class="line add">+[Interface]</span>
+<span class="line add">+PrivateKey = EpP9R0kqNA1UjGGeDL0/y9Ok66G44dqa2ALYJ0jTWwQ=</span>
+<span class="line add">+ListenPort = 51820</span>
+<span class="line add">+</span>
+<span class="line add">+[Peer]</span>
+<span class="line add">+PublicKey = xIlHE6ZA25Qnpa+HYT1un3fbjO5/0A9YUbbRmTyLWW4=</span>
+<span class="line add">+AllowedIPs = 198.51.100.10/32, 203.0.113.0/24</span>
+<span class="line add">+Endpoint = 192.0.2.10:51820</span>
+<span class="line add">+</span>
+<span class="line add">+[Peer]</span>
+<span class="line add">+PublicKey = CKClJbQ42U1pQM8MqMGCa1IpZbNcqb+OJBxVWJHIrx4=</span>
+<span class="line add">+AllowedIPs = 198.51.100.2/32</span>
+<span class="line add">+Endpoint = 192.0.2.2:51820</span>
+<span class="line add">+</span>
+<span class="line add">+[Peer]</span>
+<span class="line add">+PublicKey = gCXBt+n2VNBR6RiUmUxG3+15G0qnXUzsSxEQvmwGMkw=</span>
+<span class="line add">+AllowedIPs = 198.51.100.3/32</span>
+<span class="line add">+Endpoint = 192.0.2.3:51820&lt;/pre&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        There is a</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         [Peer]</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        section for each selected peer. The IP configured on the</span>
+<span class="line add">+WireGuard interfaces will be added to the</span>
+<span class="line add">+        &lt;em&gt;</span>
+<span class="line add">+         Allowed IPs</span>
+<span class="line add">+        &lt;/em&gt;</span>
+<span class="line add">+        of a peer as well.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line add">+      &lt;h5 id=&quot;_verifying_the_setup&quot;&gt;</span>
+<span class="line add">+       Verifying the Setup</span>
+<span class="line add">+       &lt;a class=&quot;headerlink&quot; href=&quot;#_verifying_the_setup&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+      &lt;/h5&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Verify connectivity to the other participants in the WireGuard fabric by</span>
+<span class="line add">+pinging:</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+       &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line add">+        &lt;pre&gt;root@sdn1:~# ping -c1 198.51.100.2</span>
+<span class="line add">+PING 198.51.100.2 (198.51.100.2) 56(84) bytes of data.</span>
+<span class="line add">+64 bytes from 198.51.100.2: icmp_seq=1 ttl=64 time=2.08 ms</span>
+<span class="line add">+</span>
+<span class="line add">+--- 198.51.100.2 ping statistics ---</span>
+<span class="line add">+1 packets transmitted, 1 received, 0% packet loss, time 0ms</span>
+<span class="line add">+rtt min/avg/max/mdev = 2.083/2.083/2.083/0.000 ms</span>
+<span class="line add">+</span>
+<span class="line add">+</span>
+<span class="line add">+root@sdn1:~# ping -c1 198.51.100.3</span>
+<span class="line add">+PING 198.51.100.3 (198.51.100.3) 56(84) bytes of data.</span>
+<span class="line add">+64 bytes from 198.51.100.3: icmp_seq=1 ttl=64 time=2.26 ms</span>
+<span class="line add">+</span>
+<span class="line add">+--- 198.51.100.3 ping statistics ---</span>
+<span class="line add">+1 packets transmitted, 1 received, 0% packet loss, time 0ms</span>
+<span class="line add">+rtt min/avg/max/mdev = 2.255/2.255/2.255/0.000 ms</span>
+<span class="line add">+</span>
+<span class="line add">+</span>
+<span class="line add">+root@sdn1:~# ping -c1 198.51.100.10</span>
+<span class="line add">+PING 198.51.100.10 (198.51.100.10) 56(84) bytes of data.</span>
+<span class="line add">+64 bytes from 198.51.100.10: icmp_seq=1 ttl=64 time=1.29 ms</span>
+<span class="line add">+</span>
+<span class="line add">+--- 198.51.100.10 ping statistics ---</span>
+<span class="line add">+1 packets transmitted, 1 received, 0% packet loss, time 0ms</span>
+<span class="line add">+rtt min/avg/max/mdev = 1.286/1.286/1.286/0.000 ms&lt;/pre&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">    &lt;/div&gt;</span>
+<span class="line hunk">@@ -76287,10 +76864,17 @@</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">      &lt;p&gt;</span>
+<span class="line ctx">       API tokens allow stateless access to most parts of the REST API from another</span>
+<span class="line del">-system, software or API client. Tokens can be generated for individual users</span>
+<span class="line del">-and can be given separate permissions and expiration dates to limit the scope</span>
+<span class="line del">-and duration of the access. Should the API token get compromised, it can be</span>
+<span class="line del">-revoked without disabling the user itself.</span>
+<span class="line add">+system, software, or API client. Exceptions are endpoints that provide access to</span>
+<span class="line add">+the virtual machine or system console. These endpoints require user privileges</span>
+<span class="line add">+and cannot be accessed via an API token.</span>
+<span class="line add">+     &lt;/p&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+     &lt;p&gt;</span>
+<span class="line add">+      Tokens can be generated for individual users and can be given separate</span>
+<span class="line add">+permissions and expiration dates to limit the scope and duration of the access.</span>
+<span class="line add">+Should the API token get compromised, it can be revoked without disabling the</span>
+<span class="line add">+user itself.</span>
+<span class="line ctx">      &lt;/p&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -85892,71 +86476,6 @@</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#_crs_load_balancer&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line del">-     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line del">-      &lt;table&gt;</span>
+<span class="line del">-       &lt;tr&gt;</span>
+<span class="line del">-        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line del">-         &lt;img alt=&quot;Important&quot; src=&quot;data:image/png;base64,</span>
+<span class="line del">-iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAALa0lEQVRogdWZa2wc1RXHfzM7O/te</span>
+<span class="line del">-P9e1vXHSmEdjx3YeDkkaF6REKRRCEDSEFNkRjdSWSsgC2iqoRWqLQKiqIBg1NOQDiMeHtkQIQkRR</span>
+<span class="line del">-S9S4aWwgCQoUgl232KkT28J21l6vd3d2dx79sDuTXdtre03Uqlc62tl53Pv/n3PuOffcKxiGwf9z</span>
+<span class="line del">-E//XAL5sk65WR0a6AaDrOjMtKwgCoigiCAKCIAhXa9wvTcAEHhoc5KMjR7jw3nucf+MN67k/GCS4</span>
+<span class="line del">-YQOr77yTpl27kGUZm81mXC0ywlLnQDbwEwcO0P2b3yz4jV5RwZq2Nm5/5BH8fj+SJGGz2b4UiSUR</span>
+<span class="line del">-MAzD0DSNEwcO8MdHHln8d0AcsAUCfOe551h7yy04HA7sdvuSrVEwAV3XjdDgIC/v2cOl06dznqWA</span>
+<span class="line del">-JCAAMvn9MwlEgF1PP8037rsPt9uN3W5fkjUKIqDrujF+4QLP3XQTU0NDOc8UIAa4y8sJtrQQqK/H</span>
+<span class="line del">-7XQSfv99Pn/nHQRRxNB16/0EEAUatm9n76uv4vP5cDgcBZNYNIF84I0MEK20lIZvf5sNe/dSWlqK</span>
+<span class="line del">-1+vFxBEZHubT3/+evqNHmR4dJRWP55BevW0bra+8gt/vx+l0IknSokksikA+8ElgClixYwc3799P</span>
+<span class="line del">-ZWUlTqczbz+x0VFOPvEEQ6dPE/niCwxdt0jUbd1K68svU1xcXBCJBQnMBz5eWkrL/v2s++Y3KSsr</span>
+<span class="line del">-QxQXlxc7f/5zBjo7CQ8NoadSKKQn943t7dyyf79FYjHuNC8BwzAMVVV56Z57+OzNN3PAJ8vK+FZH</span>
+<span class="line del">-B2s2b55X6/nahRMnOP7TnxLOKEXJyO2/+hVf37uXoqIinE6nmfzyksirMjNUvvGjH+WAVwG1vJxb</span>
+<span class="line del">-Dhxg1bp1uFwuMwQWJCu3bWPN3r24SkoAcGbA/OXXv2bws8+IRqOkUqlZGX1RBAzDMHRd51+nTvHe</span>
+<span class="line del">-wYNX7gPTQMO+faxav56SkpIlgTdlU3s7TXv2IGUs6AGioRDH2tuZmJggFouhqirGPCzyEUBVVX7X</span>
+<span class="line del">-1pZzPwI0fP/7bNmzh7KysrzADh8+zP3338++ffs4ePBg3vdEUWTDD3/IsuZmRLsdW4bEpd5eOp99</span>
+<span class="line del">-lnA4jKIoaJqWl8QsAqb2Txw4kDNp40BxXR0bWlspLy/PC+qZZ55hdHQUSZIYHByko6ODxx57bBZw</span>
+<span class="line del">-cy3kq6xk6y9/ib+qCgQBmbQ7nT50iIs9PUSjUZLJJIZhzEliLgKMDQzwp5/9zLqnkQ51W3/xCwKB</span>
+<span class="line del">-AE6nMy+B3t5exsfH6ezspLe3l3g8zuHDh2cBz5bKpibWtrXhLi0FwA3owNsPP8zExATxeBxVVecy</span>
+<span class="line del">-QC4Bc+L+taNjluvU33031dddN6/2BUGgpKSE/v5+JicncweaA3i2tDz8MIHrr0eU0gsQBzDW10ff</span>
+<span class="line del">-yZNEIhESicScrpRDQNd1xgYG+OC3v7XuJQBXIMDWn/yEioqKeUGMjY0hCAKKoszS1MjIyLzfAmx/</span>
+<span class="line del">-4gmKli0DQcBJOmicfOopJicnicfjJoG5LWBq/+Szz+a8oABNe/bgdrvndR1BEKiqqiIejxOLxWYR</span>
+<span class="line del">-CAaDC0alqjVrqGxowFNWhkDalUKff07f3/5mWSFTLFksLAK6rjN+4UKO9lXAUV7O2tbWeaNOthZl</span>
+<span class="line del">-WZ4FHlh0aN3y4IPIHk+6L8AGvNfRQTgctuZCthVEU/u6rnPutddyBk0A9bt3W4us+QY2fbyurg6v</span>
+<span class="line del">-15vTzw033LBoAsHmZoLNzdgcDgBcQKi/n391dTE9PU0ymcyxgkmAVCrF+4cO5WjfFgiwfoGwOTOy</span>
+<span class="line del">-lJWVUVtba1mkUAKCILClvR1veTkA9owVPnzllZy8YFnA1H5/dzfTw8PWgziwcutWfD4fsiwvCNyU</span>
+<span class="line del">-xsZG3G43lZWVVl933XVXQQSq161j+ebNlhXcwBdnzxIOh60lhmkFEUDTNP7++uvWgBrp6mrNHBk3</span>
+<span class="line del">-H/BsAtFoFEdm8GAwyMaNGwsiIAgCjbt346uosKwgAp8cPWolNj1THInmsqHn6FGLQApY1thIxcqV</span>
+<span class="line del">-+Hy+WX6+0ETesWMHLpcLWZZ54IEHCgYvCAKrbrsNyem0JrQEXMzkhKzlBaKu61z+97+ZHhnJmbwr</span>
+<span class="line del">-tm2zJu5CWp8pra2tNDU1sXPnTtrb25dEQBAEvrplC57MXJCB8XPniEQixONxa6Uq6brOQHd3jvvo</span>
+<span class="line del">-QP2ttxZUpMxsL7zwwpK+AyxLXrt9Oxe6uxFEEXvGZc4fO0bVD35AMplM1wuapjGYtbugAp5AgKLq</span>
+<span class="line del">-aquu/W/JTEs37dqFqihWzSADk8PD1jzQNC3tQtmrThUINDbm+H4h0tfXx6OPPsodd9xBW1sbPT09</span>
+<span class="line del">-BQPPluu2b7fWRxIQ6usjFotZBCRN06wZbbZAfT1FRUWWKQtpzz//PMPDw/T09DA1NcXo6CjHjx+f</span>
+<span class="line del">-11Xma95AwHJjEdB0HUVRrhCYuRGrAiXBoFUqFtq6u7sZHx9nJBMUurq65uxnsX0Hm5v56A9/ANIJ</span>
+<span class="line del">-LXrpEolEwgqlUqZQyPlo6OOPlzx5ly1bxnBWQmxpackBW6hSBEC02axrpqasNZGmaek8kN0kYPDj</span>
+<span class="line del">-j1FVdUlz4Mknn6Surs4Cb5aUhYZiUy59+GGOgm3V1WiadiUPCILAV9autV5wAaM9PXQeOWJprBBp</span>
+<span class="line del">-aGjgxIkTpFIpOjs7aWxsXBJwUwZOnUKZmgLS2zl4vUjSlV1XURRFqtavv3IDKAVe/O53efPxx69a</span>
+<span class="line del">-SCxUBs+c4dV77+Vyfz+xy5eBdG3iX7ECm81m9S2JokiwuZmiujrCPT1AuqgOAqcef5zzL77Imt27</span>
+<span class="line del">-uemhhyipqVnYZ5cw8bPbR0eOcOall7g8MEB4aIhEJAJk9qOAwKZNyLJsHpQgRKNRIxQK0XPmDH/+</span>
+<span class="line del">-3vdQQ6G8na/YtIk199zDypYWVmzceFWAT1y8yMWzZzn/9tv0vfsudqeTlKIQHRvL2QSOAqU7d/K1</span>
+<span class="line del">-W2/l2muvpba2Nl3iJhIJIxKJMDw8TO/Zs3zw4x+jTUzkHVCw2fCUleHw+QiuXYu/upqqhgb8VVUY</span>
+<span class="line del">-hkFNczPFweCs7z556y3r+vyxYwiiyD+PHwdBwNB1krEYhqYRC4UwdB2D9LJmmnRtXHz77VTfeCPL</span>
+<span class="line del">-ly+ntraWmpqa9MaaqqqGoiiEQiGGhoYYHBzk00OHiHR2LkqDNlnG7nJhd7nQswqN+ZogiuipFMlY</span>
+<span class="line del">-DDWRgBl5KEF6woqAUFFByc03U756NZWVlSxfvpyamhoCgQAejwdB13VDVVVisRihUIiRkRGGh4cZ</span>
+<span class="line del">-+sc/GO3qIt7VhZGJAle7mVpWuVKDCBng8jXX4N68Gc8111BUVER5eTnV1dVUV1cTCASuFFqGYaDr</span>
+<span class="line del">-upFKpYjH40xMTDA+Ps7Y2Bjj4+OEw2EmenqYPneO1OAgZCWpxTY9S9QMcLhyHGUDRI8HqbISZ309</span>
+<span class="line del">-zoYGnE4nHo8Hv99PaWkpgUCAiooK6/DE4XCkI1HW2a6hqiqKojA9Pc3k5KQl4XCY6elpotFoetuk</span>
+<span class="line del">-v59UKIR66RLToRBJTcMYHUWIRvMSMPO6rbY2/SsIOFatQpYk5NWrkSQJWZZxOBy43W68Xi9+v5+i</span>
+<span class="line del">-oiJKSkooLi7G5/PhdruRZdnads85HzD3hpLJJIqiEIvFiEajRCIRIpEI0WiUWCxGPB631iOKopBK</span>
+<span class="line del">-pazUbi4Oc7Y+snKCzWbDZrMhSRKSJGG3262w6HK5cLlceDwevF4vPp8Pr9eL2+3G5XLhcDjMkxuE</span>
+<span class="line del">-TNibdcBhnv9qmkYqlSKZTJJIJFAUhXg8jqIoKIpCIpGwSCSTSVRVtWSuk3qTiAnebrfngHc4HDid</span>
+<span class="line del">-TpxOJy6Xy7qWZdk6wZzrxCbvCY1JRNd1NE3LAWgSM69ngp+PgCiK1gF3NhFTzHvmO+Y3wCzw8xLI</span>
+<span class="line del">-JpL5tYCZpEyw2f/nWt1ag2UtM0x3Mq1iAp1j+bH0M7KFCGWDnfmbd8AMnuxfUzL/C0rp/wFnFd4n</span>
+<span class="line del">-EQn3XQAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line del">-        &lt;/td&gt;</span>
+<span class="line del">-        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line del">-         This feature is still in technology preview.</span>
+<span class="line del">-        &lt;/td&gt;</span>
+<span class="line del">-       &lt;/tr&gt;</span>
+<span class="line del">-      &lt;/table&gt;</span>
+<span class="line del">-     &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line ctx">        The utilization of individual cluster nodes can vary greatly depending on where</span>
+<span class="line hunk">@@ -136973,9 +137492,9 @@</span>
+<span class="line ctx"> &lt;/div&gt;</span>
+<span class="line ctx"> &lt;div id=&quot;footer&quot;&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;footer-text&quot;&gt;</span>
+<span class="line del">-  Version 9.2.2</span>
+<span class="line add">+  Version 9.2.3</span>
+<span class="line ctx">   &lt;br/&gt;</span>
+<span class="line ctx">   Last updated</span>
+<span class="line del">- Thu May 21 22:27:14 CEST 2026</span>
+<span class="line add">+ Fri Jul  3 11:08:20 CEST 2026</span>
+<span class="line ctx">  &lt;/div&gt;</span>
+<span class="line ctx"> &lt;/div&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Author</span>
+      <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated:",
+          back_to_menu: "Back to main menu",
+          open_changelog: "Open changelog",
+          footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré :",
+          back_to_menu: "Retour au menu principal",
+          open_changelog: "Ouvrir le changelog",
+          footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано:",
+          back_to_menu: "Назад в главное меню",
+          open_changelog: "Открыть changelog",
+          footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }
+
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function formatTimezoneHint(date) {
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+        const offsetMinutes = -date.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? "+" : "-";
+        const absMinutes = Math.abs(offsetMinutes);
+        const hh = String(Math.floor(absMinutes / 60)).padStart(2, "0");
+        const mm = String(absMinutes % 60).padStart(2, "0");
+        return `${zone} (UTC${sign}${hh}:${mm})`;
+      }
+
+      function applyGeneratedTime() {
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return;
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+        generatedNode.dataset.tooltip = formatTimezoneHint(date);
+      }
+
+      function applyEventTimes() {
+        document.querySelectorAll(".event-time").forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          const iso = node.getAttribute("data-iso") || node.getAttribute("datetime") || "";
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return;
+          const local = formatLocalDateTime(iso);
+          if (local) node.textContent = local;
+          node.dataset.tooltip = formatTimezoneHint(date);
+        });
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyGeneratedTime();
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

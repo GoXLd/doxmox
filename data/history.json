@@ -1,5 +1,18 @@
 [
   {
+    "timestamp": "2026-07-03T15:09:49Z",
+    "old_hash": "2f7b7b5201065a5258f66deab321a284b98f6b8868b16dd1cb1ca00f337cb21a",
+    "new_hash": "583b7479c2cf5b9e725e4528ccd78d33884c6129f05c0f99fad641efbb0bf66a",
+    "diff_file": "docs/changes/20260703T150949Z.diff",
+    "added_lines": 710,
+    "removed_lines": 191,
+    "ai": {
+      "status": "error",
+      "generated_at": "2026-07-03T15:12:04Z",
+      "error": "AI summary generation failed"
+    }
+  },
+  {
     "timestamp": "2026-05-30T05:20:12Z",
     "old_hash": "b743073ca642a426c81f79d6cbd08d60e8895d41b9e18b87dee4ce53f4f809bc",
     "new_hash": "2f7b7b5201065a5258f66deab321a284b98f6b8868b16dd1cb1ca00f337cb21a",
