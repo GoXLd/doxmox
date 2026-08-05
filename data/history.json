@@ -1,5 +1,175 @@
 [
   {
+    "timestamp": "2026-08-05T09:35:16Z",
+    "old_hash": "583b7479c2cf5b9e725e4528ccd78d33884c6129f05c0f99fad641efbb0bf66a",
+    "new_hash": "affcd0dd6c7146f04e01e139088c598ee6d6369bf2fa63563ad9f2257367e585",
+    "diff_file": "docs/changes/20260805T093516Z.diff",
+    "added_lines": 1343,
+    "removed_lines": 159,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-08-05T09:39:15Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 8.2 introduces three new command‑line options for HA rule management: --affinity, --comment, and --disable. These options give operators finer control over resource placement, documentation, and rule activation.",
+          "professional_assessment": "The addition of --affinity (positive/negative) is a significant functional change that can affect HA cluster stability if mis‑configured, so it warrants careful review. Re‑adding --comment and adding --disable improve usability and operational safety but have lower risk. Documentation updates round out the release.",
+          "newcomer_explainer": "If you are new to Proxmox, think of HA rules as traffic signs for your virtual machines. The new \"--affinity\" sign tells the cluster whether a VM should stay on certain nodes (positive) or stay away from them (negative). \"--comment\" lets you write a note on the rule, and \"--disable\" lets you turn the rule off without deleting it.",
+          "changes": [
+            {
+              "title": "New --affinity option for HA‑rule commands",
+              "details": "All HA‑rule commands (create, set, modify) now accept \"--affinity <positive|negative>\". The default is \"positive\". Positive affinity forces listed resources to run on the specified nodes, while negative affinity forces them to avoid those nodes.",
+              "impact": "Changes how the cluster schedules resources; incorrect settings can cause VMs to be placed on undesired nodes or prevent failover.",
+              "recommended_action": "Review existing HA rules and explicitly set the desired affinity. Test the new setting in a non‑production environment before applying to critical services.",
+              "severity": "high"
+            },
+            {
+              "title": "Re‑added --comment option for HA‑rule commands",
+              "details": "\"--comment <string>\" is now available again in the option list for HA‑rule create, set, and modify commands, allowing operators to attach a free‑form description to each rule.",
+              "impact": "Improves rule documentation and makes troubleshooting easier, with no effect on rule execution.",
+              "recommended_action": "Add meaningful comments to all HA rules to aid future maintenance and audits.",
+              "severity": "medium"
+            },
+            {
+              "title": "New --disable option for HA‑rule commands",
+              "details": "\"--disable <boolean>\" can be used to enable (false) or disable (true) an HA rule without deleting it.",
+              "impact": "Allows temporary suspension of a rule, reducing the need for rule recreation and minimizing configuration drift.",
+              "recommended_action": "Use \"--disable true\" to pause a rule during maintenance, and re‑enable it with \"--disable false\" when work is complete.",
+              "severity": "medium"
+            },
+            {
+              "title": "Default affinity set to positive",
+              "details": "If the \"--affinity\" flag is omitted, the system now assumes a positive affinity, preserving backward compatibility with earlier releases where only positive placement was possible.",
+              "impact": "Existing scripts that omit the flag will continue to behave as before, but administrators should be aware of the implicit default.",
+              "recommended_action": "Explicitly specify \"--affinity\" in automation scripts to avoid ambiguity.",
+              "severity": "low"
+            },
+            {
+              "title": "Updated CLI help and man pages for HA‑rule options",
+              "details": "The command‑line help output and manual pages now list the new options (--affinity, --comment, --disable) and clarify default behaviors.",
+              "impact": "Operators receive accurate guidance directly from the CLI, reducing the chance of misconfiguration.",
+              "recommended_action": "Run \"pve-ha-manager --help\" or consult the updated man pages after upgrading.",
+              "severity": "low"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 8.2 вводит три новых параметра командной строки для управления правилами HA: --affinity, --comment и --disable. Эти параметры предоставляют операторам более тонкий контроль над размещением ресурсов, документированием и активацией правил.",
+          "professional_assessment": "Добавление параметра --affinity (положительного/отрицательного) представляет собой значительное функциональное изменение, которое может повлиять на стабильность кластера HA при неправильной настройке, поэтому требует тщательного рассмотрения. Возврат параметра --comment и добавление --disable повышают удобство использования и эксплуатационную безопасность, но несут меньший риск. Обновления документации завершают выпуск.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, представьте правила HA как дорожные знаки для ваших виртуальных машин. Новый знак «--affinity» сообщает кластеру, должна ли ВМ оставаться на определённых узлах (положительно) или избегать их (отрицательно). Параметр «--comment» позволяет добавить примечание к правилу, а «--disable» позволяет отключить правило, не удаляя его.",
+          "changes": [
+            {
+              "title": "New --affinity option for HA‑rule commands",
+              "details": "Все команды HA‑rule (create, set, modify) теперь принимают параметр \"--affinity <positive|negative>\". По умолчанию — \"positive\". Положительная аффинность заставляет перечисленные ресурсы работать на указанных узлах, а отрицательная аффинность заставляет их избегать этих узлов.",
+              "impact": "Изменяет способ, которым кластер планирует распределение ресурсов; неверные настройки могут привести к размещению ВМ на нежелательных узлах или препятствовать переключению (failover).",
+              "recommended_action": "Проверьте существующие правила HA и явно задайте требуемую аффинити. Протестируйте новую настройку в непроизводственной среде перед применением к критическим сервисам.",
+              "severity": "high"
+            },
+            {
+              "title": "Снова добавлен параметр --comment для команд HA‑rule.",
+              "details": "«--comment <string>» теперь снова доступен в списке опций команд HA‑rule create, set и modify, позволяя операторам прикреплять свободное описание к каждому правилу.",
+              "impact": "Улучшает документацию правил и упрощает устранение неполадок, не влияя на выполнение правил.",
+              "recommended_action": "Добавьте содержательные комментарии ко всем правилам HA, чтобы облегчить их последующее обслуживание и аудит.",
+              "severity": "medium"
+            },
+            {
+              "title": "Новая опция --disable для команд HA‑rule.",
+              "details": "--disable <boolean> может использоваться для включения (false) или отключения (true) правила HA без его удаления.",
+              "impact": "Позволяет временно приостановить правило, сокращая необходимость в его повторном создании и минимизируя дрейф конфигурации.",
+              "recommended_action": "Используйте «--disable true», чтобы приостановить правило во время обслуживания, и включите его обратно с помощью «--disable false», когда работа завершена.",
+              "severity": "medium"
+            },
+            {
+              "title": "По умолчанию аффинити установлено в положительное.",
+              "details": "Если флаг «--affinity» не указан, система теперь предполагает положительную аффинность, сохраняя обратную совместимость с более ранними версиями, где было возможно только положительное размещение.",
+              "impact": "Существующие скрипты, которые опускают флаг, продолжат вести себя как раньше, но администраторам следует учитывать подразумеваемое значение по умолчанию.",
+              "recommended_action": "Явно указывайте «--affinity» в скриптах автоматизации, чтобы избежать неоднозначности.",
+              "severity": "low"
+            },
+            {
+              "title": "Обновлена справка CLI и man‑страницы для параметров HA‑rule.",
+              "details": "В справке командной строки и в руководствах теперь перечислены новые параметры (--affinity, --comment, --disable) и уточнено поведение по умолчанию.",
+              "impact": "Операторы получают точные указания напрямую из CLI, уменьшая вероятность ошибочной конфигурации.",
+              "recommended_action": "Запустите «pve-ha-manager --help» или обратитесь к обновлённым справочным страницам после обновления.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 8.2 introduit trois nouvelles options en ligne de commande pour la gestion des règles HA : --affinity, --comment et --disable. Ces options offrent aux opérateurs un contrôle plus fin sur le placement des ressources, la documentation et l’activation des règles.",
+          "professional_assessment": "L’ajout de --affinity (positif/négatif) constitue un changement fonctionnel important qui peut affecter la stabilité du cluster HA s’il est mal configuré, il nécessite donc un examen attentif. La réintroduction de --comment et l’ajout de --disable améliorent l’utilisabilité et la sécurité opérationnelle, mais présentent un risque moindre. Les mises à jour de la documentation complètent la version.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, pensez aux règles HA comme des panneaux de signalisation pour vos machines virtuelles. Le nouveau signe « --affinity » indique au cluster si une VM doit rester sur certains nœuds (positif) ou s’en éloigner (négatif). « --comment » vous permet d’ajouter une note à la règle, et « --disable » vous permet de désactiver la règle sans la supprimer.",
+          "changes": [
+            {
+              "title": "Nouvelle option --affinity pour les commandes de règle HA",
+              "details": "Toutes les commandes HA‑rule (create, set, modify) acceptent désormais « --affinity <positive|negative> ». La valeur par défaut est « positive ». L'affinité positive oblige les ressources listées à s'exécuter sur les nœuds spécifiés, tandis que l'affinité négative les contraint à éviter ces nœuds.",
+              "impact": "Modifie la façon dont le cluster planifie les ressources ; des paramètres incorrects peuvent entraîner le placement des VM sur des nœuds indésirables ou empêcher le basculement.",
+              "recommended_action": "Examinez les règles HA existantes et définissez explicitement l'affinité souhaitée. Testez le nouveau paramètre dans un environnement non‑production avant de l'appliquer aux services critiques.",
+              "severity": "high"
+            },
+            {
+              "title": "Option --comment réajoutée aux commandes HA‑rule",
+              "details": "« --comment <string> » est de nouveau disponible dans la liste des options pour les commandes HA‑rule create, set et modify, permettant aux opérateurs d’attacher une description libre à chaque règle.",
+              "impact": "Améliore la documentation des règles et facilite le dépannage, sans aucun impact sur l'exécution des règles.",
+              "recommended_action": "Ajoutez des commentaires pertinents à toutes les règles HA afin de faciliter la maintenance et les audits futurs.",
+              "severity": "medium"
+            },
+            {
+              "title": "Nouvelle option --disable pour les commandes HA‑rule",
+              "details": "\"--disable <boolean>\" peut être utilisé pour activer (false) ou désactiver (true) une règle HA sans la supprimer.",
+              "impact": "Permet la suspension temporaire d’une règle, réduisant le besoin de recréation de règle et minimisant la dérive de configuration.",
+              "recommended_action": "Utilisez \"--disable true\" pour mettre en pause une règle pendant la maintenance, et réactivez‑la avec \"--disable false\" une fois le travail terminé.",
+              "severity": "medium"
+            },
+            {
+              "title": "Affinité par défaut définie sur positive",
+              "details": "Si le drapeau « --affinity » est omis, le système suppose désormais une affinité positive, préservant la compatibilité descendante avec les versions antérieures où seul le placement positif était possible.",
+              "impact": "Existing scripts that omit the flag will continue to behave as before, but administrators should be aware of the implicit default.",
+              "recommended_action": "Spécifiez explicitement \"--affinity\" dans les scripts d'automatisation pour éviter toute ambiguïté.",
+              "severity": "low"
+            },
+            {
+              "title": "Mise à jour de l'aide CLI et des pages de manuel pour les options de règle HA.",
+              "details": "The command‑line help output and manual pages now list the new options (--affinity, --comment, --disable) and clarify default behaviors.",
+              "impact": "Les opérateurs reçoivent des instructions précises directement depuis la CLI, réduisant le risque de mauvaise configuration.",
+              "recommended_action": "Exécutez « pve-ha-manager --help » ou consultez les pages de manuel mises à jour après la mise à niveau.",
+              "severity": "low"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. New --affinity option for HA‑rule commands\n   - All HA‑rule commands (create, set, modify) now accept \"--affinity <positive|negative>\". The default is \"positive\". Positive affinity forces listed resources to run on the specified nodes, while negative affinity forces them to avoid those nodes.\n   - Impact: Changes how the cluster schedules resources; incorrect settings can cause VMs to be placed on undesired nodes or prevent failover.\n   - Action: Review existing HA rules and explicitly set the desired affinity. Test the new setting in a non‑production environment before applying to critical services.\n   - Severity: high\n2. Re‑added --comment option for HA‑rule commands\n   - \"--comment <string>\" is now available again in the option list for HA‑rule create, set, and modify commands, allowing operators to attach a free‑form description to each rule.\n   - Impact: Improves rule documentation and makes troubleshooting easier, with no effect on rule execution.\n   - Action: Add meaningful comments to all HA rules to aid future maintenance and audits.\n   - Severity: medium\n3. New --disable option for HA‑rule commands\n   - \"--disable <boolean>\" can be used to enable (false) or disable (true) an HA rule without deleting it.\n   - Impact: Allows temporary suspension of a rule, reducing the need for rule recreation and minimizing configuration drift.\n   - Action: Use \"--disable true\" to pause a rule during maintenance, and re‑enable it with \"--disable false\" when work is complete.\n   - Severity: medium\n4. Default affinity set to positive\n   - If the \"--affinity\" flag is omitted, the system now assumes a positive affinity, preserving backward compatibility with earlier releases where only positive placement was possible.\n   - Impact: Existing scripts that omit the flag will continue to behave as before, but administrators should be aware of the implicit default.\n   - Action: Explicitly specify \"--affinity\" in automation scripts to avoid ambiguity.\n   - Severity: low\n5. Updated CLI help and man pages for HA‑rule options\n   - The command‑line help output and manual pages now list the new options (--affinity, --comment, --disable) and clarify default behaviors.\n   - Impact: Operators receive accurate guidance directly from the CLI, reducing the chance of misconfiguration.\n   - Action: Run \"pve-ha-manager --help\" or consult the updated man pages after upgrading.\n   - Severity: low",
+        "ru": "1. New --affinity option for HA‑rule commands\n   - Все команды HA‑rule (create, set, modify) теперь принимают параметр \"--affinity <positive|negative>\". По умолчанию — \"positive\". Положительная аффинность заставляет перечисленные ресурсы работать на указанных узлах, а отрицательная аффинность заставляет их избегать этих узлов.\n   - Impact: Изменяет способ, которым кластер планирует распределение ресурсов; неверные настройки могут привести к размещению ВМ на нежелательных узлах или препятствовать переключению (failover).\n   - Action: Проверьте существующие правила HA и явно задайте требуемую аффинити. Протестируйте новую настройку в непроизводственной среде перед применением к критическим сервисам.\n   - Severity: high\n2. Снова добавлен параметр --comment для команд HA‑rule.\n   - «--comment <string>» теперь снова доступен в списке опций команд HA‑rule create, set и modify, позволяя операторам прикреплять свободное описание к каждому правилу.\n   - Impact: Улучшает документацию правил и упрощает устранение неполадок, не влияя на выполнение правил.\n   - Action: Добавьте содержательные комментарии ко всем правилам HA, чтобы облегчить их последующее обслуживание и аудит.\n   - Severity: medium\n3. Новая опция --disable для команд HA‑rule.\n   - --disable <boolean> может использоваться для включения (false) или отключения (true) правила HA без его удаления.\n   - Impact: Позволяет временно приостановить правило, сокращая необходимость в его повторном создании и минимизируя дрейф конфигурации.\n   - Action: Используйте «--disable true», чтобы приостановить правило во время обслуживания, и включите его обратно с помощью «--disable false», когда работа завершена.\n   - Severity: medium\n4. По умолчанию аффинити установлено в положительное.\n   - Если флаг «--affinity» не указан, система теперь предполагает положительную аффинность, сохраняя обратную совместимость с более ранними версиями, где было возможно только положительное размещение.\n   - Impact: Существующие скрипты, которые опускают флаг, продолжат вести себя как раньше, но администраторам следует учитывать подразумеваемое значение по умолчанию.\n   - Action: Явно указывайте «--affinity» в скриптах автоматизации, чтобы избежать неоднозначности.\n   - Severity: low\n5. Обновлена справка CLI и man‑страницы для параметров HA‑rule.\n   - В справке командной строки и в руководствах теперь перечислены новые параметры (--affinity, --comment, --disable) и уточнено поведение по умолчанию.\n   - Impact: Операторы получают точные указания напрямую из CLI, уменьшая вероятность ошибочной конфигурации.\n   - Action: Запустите «pve-ha-manager --help» или обратитесь к обновлённым справочным страницам после обновления.\n   - Severity: low",
+        "fr": "1. Nouvelle option --affinity pour les commandes de règle HA\n   - Toutes les commandes HA‑rule (create, set, modify) acceptent désormais « --affinity <positive|negative> ». La valeur par défaut est « positive ». L'affinité positive oblige les ressources listées à s'exécuter sur les nœuds spécifiés, tandis que l'affinité négative les contraint à éviter ces nœuds.\n   - Impact: Modifie la façon dont le cluster planifie les ressources ; des paramètres incorrects peuvent entraîner le placement des VM sur des nœuds indésirables ou empêcher le basculement.\n   - Action: Examinez les règles HA existantes et définissez explicitement l'affinité souhaitée. Testez le nouveau paramètre dans un environnement non‑production avant de l'appliquer aux services critiques.\n   - Severity: high\n2. Option --comment réajoutée aux commandes HA‑rule\n   - « --comment <string> » est de nouveau disponible dans la liste des options pour les commandes HA‑rule create, set et modify, permettant aux opérateurs d’attacher une description libre à chaque règle.\n   - Impact: Améliore la documentation des règles et facilite le dépannage, sans aucun impact sur l'exécution des règles.\n   - Action: Ajoutez des commentaires pertinents à toutes les règles HA afin de faciliter la maintenance et les audits futurs.\n   - Severity: medium\n3. Nouvelle option --disable pour les commandes HA‑rule\n   - \"--disable <boolean>\" peut être utilisé pour activer (false) ou désactiver (true) une règle HA sans la supprimer.\n   - Impact: Permet la suspension temporaire d’une règle, réduisant le besoin de recréation de règle et minimisant la dérive de configuration.\n   - Action: Utilisez \"--disable true\" pour mettre en pause une règle pendant la maintenance, et réactivez‑la avec \"--disable false\" une fois le travail terminé.\n   - Severity: medium\n4. Affinité par défaut définie sur positive\n   - Si le drapeau « --affinity » est omis, le système suppose désormais une affinité positive, préservant la compatibilité descendante avec les versions antérieures où seul le placement positif était possible.\n   - Impact: Existing scripts that omit the flag will continue to behave as before, but administrators should be aware of the implicit default.\n   - Action: Spécifiez explicitement \"--affinity\" dans les scripts d'automatisation pour éviter toute ambiguïté.\n   - Severity: low\n5. Mise à jour de l'aide CLI et des pages de manuel pour les options de règle HA.\n   - The command‑line help output and manual pages now list the new options (--affinity, --comment, --disable) and clarify default behaviors.\n   - Impact: Les opérateurs reçoivent des instructions précises directement depuis la CLI, réduisant le risque de mauvaise configuration.\n   - Action: Exécutez « pve-ha-manager --help » ou consultez les pages de manuel mises à jour après la mise à niveau.\n   - Severity: low"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 8.2: --affinity option for HA‑rule commands, Re‑added --comment option for HA‑rule commands, --disable option for HA‑rule commands, Default affinity set to positive, Updated CLI help and man pages for HA‑rule options",
+      "version": "Proxmox VE 8.2",
+      "model": "fallback",
+      "generated_at": "2026-08-05T09:39:16Z"
+    }
+  },
+  {
     "timestamp": "2026-07-03T15:09:49Z",
     "old_hash": "2f7b7b5201065a5258f66deab321a284b98f6b8868b16dd1cb1ca00f337cb21a",
     "new_hash": "583b7479c2cf5b9e725e4528ccd78d33884c6129f05c0f99fad641efbb0bf66a",

@@ -1,0 +1,1986 @@
+--- previous
++++ current
+@@ -346,10 +346,10 @@
+  </span>
+  <br/>
+  <span id="revnumber">
+-  version 9.2.3,
++  version 9.2.4,
+  </span>
+  <span id="revdate">
+-  Fri Jul  3 11:08:20 CEST 2026
++  Tue Aug  4 00:30:32 CEST 2026
+  </span>
+  <div id="toc">
+   <a href="index.html" style="font-size: 0.8em;">
+@@ -598,7 +598,7 @@
+ store the configuration of thousands of virtual machines. Corosync
+ replicates these files in real time to all cluster nodes. The file
+ system stores all data inside a persistent database on disk, while a
+-copy resides in RAM, providing a maximum storage size of 30 MB—more
++copy resides in RAM, providing a maximum storage size of 128 MiB—more
+ than enough for thousands of VMs.
+        </p>
+        <div class="paragraph">
+@@ -1947,12 +1947,19 @@
+       <ul>
+        <li>
+         <p>
+-         CPU: 64bit (Intel 64 or AMD64)
++         CPU: 64-bit x86 (Intel 64 or AMD64). Alternatively, 64-bit ARM (arm64,
++  aarch64) with an ARMv8-A or newer CPU, see
++         <a href="#install_arm64_support">
++          64-bit ARM (arm64) Support
++         </a>
++         .
+         </p>
+        </li>
+        <li>
+         <p>
+-         Intel VT/AMD-V capable CPU/motherboard for KVM full virtualization support
++         For x86 hosts, an Intel VT or AMD-V capable CPU and motherboard for KVM full
++  virtualization support. On the supported arm64 platforms, KVM
++  hardware-assisted virtualization needs no equivalent CPU flag.
+         </p>
+        </li>
+        <li>
+@@ -1983,7 +1990,12 @@
+       <ul>
+        <li>
+         <p>
+-         Intel 64 or AMD64 with Intel VT/AMD-V CPU flag.
++         Intel 64 or AMD64 with an Intel VT or AMD-V CPU flag. Alternatively, a 64-bit
++  ARM host with an ARMv9-A or newer CPU, see
++         <a href="#install_arm64_support">
++          64-bit ARM (arm64) Support
++         </a>
++         .
+         </p>
+        </li>
+        <li>
+@@ -2039,8 +2051,9 @@
+        </li>
+        <li>
+         <p>
+-         For PCI(e) passthrough, the CPU and motherboard need to support IOMMU
+-  (Intel VT-d, AMD-Vi).
++         For PCI(e) passthrough, the CPU and motherboard need to support an
++  input/output memory management unit (IOMMU): Intel VT-d or AMD-Vi on x86, or a
++  System Memory Management Unit (SMMU) on arm64.
+         </p>
+        </li>
+       </ul>
+@@ -2111,8 +2124,90 @@
+      </div>
+     </div>
+     <div class="sect3">
++     <h4 id="install_arm64_support">
++      2.1.3. 64-bit ARM (arm64) Support
++      <a class="headerlink" href="#install_arm64_support" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       Proxmox VE supports native 64-bit ARM (arm64, aarch64) on the NVIDIA Grace Hopper
++and NVIDIA Vera platforms. On other UEFI-based ARMv9-A or newer hardware,
++support is best-effort. Device-tree-only single-board computers, such as the
++Raspberry Pi, are not supported.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       An arm64 host must boot through UEFI and describe its hardware through ACPI
++(Advanced Configuration and Power Interface). Proxmox VE does not support
++device-tree-only or legacy BIOS boot on arm64.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Several x86-specific features are not available on arm64:
++      </p>
++     </div>
++     <div class="ulist">
++      <ul>
++       <li>
++        <p>
++         Virtual machines cannot use SeaBIOS. On arm64, guests always boot through
++  UEFI, provided by the ARM build of OVMF, also known as AAVMF.
++        </p>
++       </li>
++       <li>
++        <p>
++         AMD SEV (Secure Encrypted Virtualization) memory encryption and Intel’s
++  GVT-g mediated vGPUs are x86-only.
++        </p>
++       </li>
++       <li>
++        <p>
++         There is no operating-system-level CPU microcode package, unlike
++         <span class="monospaced">
++          intel-microcode
++         </span>
++         and
++         <span class="monospaced">
++          amd64-microcode
++         </span>
++         on x86.
++        </p>
++       </li>
++      </ul>
++     </div>
++     <div class="paragraph">
++      <p>
++       A cluster can contain both x86 and arm64 nodes, but guests cannot move between
++nodes of different architectures while running:
++      </p>
++     </div>
++     <div class="ulist">
++      <ul>
++       <li>
++        <p>
++         Live migration is only possible between nodes of the same architecture,
++  because a running guest’s CPU state cannot be transferred across
++  architectures.
++        </p>
++       </li>
++       <li>
++        <p>
++         A guest, whether a virtual machine or a container, only runs on a node whose
++  architecture matches the guest. Offline migration, backup and restore, or
++  shared storage can move a guest’s data to a node of a different architecture,
++  but the guest still needs to be reinstalled or reconfigured for that
++  architecture before it starts.
++        </p>
++       </li>
++      </ul>
++     </div>
++    </div>
++    <div class="sect3">
+      <h4 id="_simple_performance_overview">
+-      2.1.3. Simple Performance Overview
++      2.1.4. Simple Performance Overview
+       <a class="headerlink" href="#_simple_performance_overview" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -2186,7 +2281,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="_supported_web_browsers_for_accessing_the_web_interface">
+-      2.1.4. Supported Web Browsers for Accessing the Web Interface
++      2.1.5. Supported Web Browsers for Accessing the Web Interface
+       <a class="headerlink" href="#_supported_web_browsers_for_accessing_the_web_interface" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -3435,6 +3530,66 @@
+ of errors. Secure Boot must be turned off in the UEFI firmware setup utility to
+ run this option.
+        </p>
++       <div class="admonitionblock">
++        <table>
++         <tr>
++          <td class="icon">
++           <img alt="Note" src="data:image/png;base64,
++iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
++m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
++CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
++BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
++Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
++vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
++oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
++/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
++Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
++bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
++0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
++rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
++X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
++NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
++cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
++KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
++S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
++UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
++XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
++4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
++nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
++iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
++/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
++qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
++uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
++bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
++NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
++PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
++0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
++1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
++i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
++UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
++4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
++Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
++NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
++ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
++AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
++IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
++W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
++o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
++GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
++lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
++zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
++PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
++          </td>
++          <td class="content">
++           This entry is available on x86 installation media only, as
++           <span class="monospaced">
++            memtest86+
++           </span>
++           does not support arm64.
++          </td>
++         </tr>
++        </table>
++       </div>
+       </dd>
+      </dl>
+     </div>
+@@ -5079,6 +5234,64 @@
+ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
+         </td>
+         <td class="content">
++         Subscription keys are bound to the host architecture. An arm64 host needs
++a dedicated arm64 subscription key; an x86 key is not valid on it, and vice
++versa.
++        </td>
++       </tr>
++      </table>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
++m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
++CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
++BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
++Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
++vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
++oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
++/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
++Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
++bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
++0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
++rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
++X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
++NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
++cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
++KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
++S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
++UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
++XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
++4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
++nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
++iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
++/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
++qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
++uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
++bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
++NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
++PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
++0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
++1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
++i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
++UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
++4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
++Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
++NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
++ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
++AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
++IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
++W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
++o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
++GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
++lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
++zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
++PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
++        </td>
++        <td class="content">
+          You can disable this repository by adding an
+          <span class="monospaced">
+           Enabled: no
+@@ -5298,8 +5511,66 @@
+      </div>
+     </div>
+     <div class="sect3">
++     <h4 id="sysadmin_dbgsym_repo">
++      3.1.6. Proxmox VE Debug Symbol Repository
++      <a class="headerlink" href="#sysadmin_dbgsym_repo" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       Debug symbol packages, named
++       <span class="monospaced">
++        &lt;package&gt;-dbgsym
++       </span>
++       , contain the detached debug
++information for the matching binary package. They are not needed for normal
++operation, but let tools such as
++       <span class="monospaced">
++        gdb
++       </span>
++       ,
++       <span class="monospaced">
++        systemd-coredump
++       </span>
++       or
++       <span class="monospaced">
++        crash
++       </span>
++       produce
++useful backtraces when analyzing a crash or hang. They are provided in a
++dedicated repository, separate from the regular ones, for the Debian Bookworm
++and Trixie based Proxmox VE releases (and newer).
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="title">
++       File
++       <span class="monospaced">
++        /etc/apt/sources.list.d/pve-dbgsym.sources
++       </span>
++      </div>
++      <div class="content monospaced">
++       <pre>Types: deb
++URIs: https://dbgsym.proxmox.com/debian/pve
++Suites: trixie
++Components: pve-dbgsym
++Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       After enabling the repository, install the
++       <span class="monospaced">
++        -dbgsym
++       </span>
++       package that matches the
++binary you want to debug.
++      </p>
++     </div>
++    </div>
++    <div class="sect3">
+      <h4 id="sysadmin_package_repositories_ceph">
+-      3.1.6. Ceph Repositories
++      3.1.7. Ceph Repositories
+       <a class="headerlink" href="#sysadmin_package_repositories_ceph" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -5739,7 +6010,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="sysadmin_debian_firmware_repo">
+-      3.1.7. Debian Firmware Repository
++      3.1.8. Debian Firmware Repository
+       <a class="headerlink" href="#sysadmin_debian_firmware_repo" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -5895,7 +6166,7 @@
+     </div>
+     <div class="sect3">
+      <h4 id="repos_secure_apt">
+-      3.1.8. SecureApt
++      3.1.9. SecureApt
+       <a class="headerlink" href="#repos_secure_apt" title="Permalink to this heading">
+       </a>
+      </h4>
+@@ -6646,6 +6917,64 @@
+       <a class="headerlink" href="#sysadmin_firmware_cpu" title="Permalink to this heading">
+       </a>
+      </h4>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         CPU microcode updates as described in this section are specific to x86
++hosts. There is no equivalent operating-system-level microcode package for
++arm64.
++        </td>
++       </tr>
++      </table>
++     </div>
+      <div class="paragraph">
+       <p>
+        Microcode updates are intended to fix found security vulnerabilities and other
+@@ -16302,6 +16631,72 @@
+        .
+       </p>
+      </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         This applies to x86 hosts. On arm64, Proxmox VE boots through UEFI only, so
++there is no BIOS Boot Partition and no
++         <span class="monospaced">
++          i386-pc
++         </span>
++         GRUB target; GRUB is installed
++in EFI mode using the
++         <span class="monospaced">
++          arm64-efi
++         </span>
++         target instead.
++        </td>
++       </tr>
++      </table>
++     </div>
+     </div>
+     <div class="sect3">
+      <h4 id="sysboot_proxmox_boot_tool">
+@@ -16927,6 +17322,75 @@
+        <pre>Boot0006* Linux Boot Manager    [...] File(\EFI\systemd\systemd-bootx64.efi)</pre>
+       </div>
+      </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         The file names above are for x86 hosts. On arm64, the equivalent binaries
++are named
++         <span class="monospaced">
++          grubaa64.efi
++         </span>
++         ,
++         <span class="monospaced">
++          shimaa64.efi
++         </span>
++         , and
++         <span class="monospaced">
++          systemd-bootaa64.efi
++         </span>
++         .
++        </td>
++       </tr>
++      </table>
++     </div>
+      <div class="paragraph">
+       <p>
+        By running:
+@@ -17566,6 +18030,79 @@
+         </p>
+        </li>
+       </ul>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         The
++         <span class="monospaced">
++          shim-helpers-amd64-signed
++         </span>
++         and
++         <span class="monospaced">
++          grub-efi-amd64-signed
++         </span>
++         package names
++are for x86 hosts. On arm64, the corresponding packages are
++         <span class="monospaced">
++          shim-helpers-arm64-signed
++         </span>
++         and
++         <span class="monospaced">
++          grub-efi-arm64-signed
++         </span>
++         .
++        </td>
++       </tr>
++      </table>
+      </div>
+      <div class="paragraph">
+       <p>
+@@ -41334,12 +41871,12 @@
+    </div>
+    <div class="paragraph">
+     <p>
+-     QEMU can emulate a great variety of hardware from ARM to Sparc, but Proxmox VE is
+-only concerned with 32 and 64 bits PC clone emulation, since it represents the
+-overwhelming majority of server hardware. The emulation of PC clones is also one
+-of the fastest due to the availability of processor extensions which greatly
+-speed up QEMU when the emulated architecture is the same as the host
+-architecture.
++     QEMU can emulate a great variety of hardware, from ARM to Sparc. On x86 hosts,
++Proxmox VE is concerned with 32-bit and 64-bit PC clone emulation, since it
++represents the overwhelming majority of server hardware. On arm64 hosts, Proxmox VE
++emulates 64-bit ARM (aarch64) machines instead. Emulating the same architecture as the host is also one of the
++fastest options, due to the availability of processor extensions which greatly
++speed up QEMU when the emulated architecture matches the host architecture.
+     </p>
+    </div>
+    <div class="admonitionblock">
+@@ -41689,7 +42226,8 @@
+        <a href="#qm_pci_passthrough">
+         PCIe passthrough
+        </a>
+-       .
++       . On arm64 hosts OVMF is the default
++and only option, as SeaBIOS is x86-only.
+       </p>
+      </div>
+      <div class="sect4">
+@@ -41721,6 +42259,68 @@
+         </a>
+         implementation.
+        </p>
++      </div>
++      <div class="admonitionblock">
++       <table>
++        <tr>
++         <td class="icon">
++          <img alt="Note" src="data:image/png;base64,
++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"/>
++         </td>
++         <td class="content">
++          The Intel 440FX and Q35 chipsets are specific to x86 guests. On arm64
++hosts, virtual machines use the
++          <span class="monospaced">
++           virt
++          </span>
++          machine type, which models a generic,
++UEFI-based ARM machine.
++         </td>
++        </tr>
++       </table>
+       </div>
+       <div class="sect5">
+        <h6 id="_machine_version">
+@@ -42736,6 +43336,85 @@
+ host CPU starting from Westmere for Intel or at least a fourth generation
+ Opteron for AMD.
+        </p>
++      </div>
++      <div class="admonitionblock">
++       <table>
++        <tr>
++         <td class="icon">
++          <img alt="Note" src="data:image/png;base64,
++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"/>
++         </td>
++         <td class="content">
++          The
++          <em>
++           kvm64
++          </em>
++          and
++          <em>
++           x86-64-v*
++          </em>
++          CPU models described here are x86-only. On
++arm64 hosts, guests use ARM CPU models:
++          <em>
++           host
++          </em>
++          to expose the physical CPU
++(recommended on the supported hardware), or a generic model such as
++          <em>
++           max
++          </em>
++          ,
++together with the
++          <span class="monospaced">
++           virt
++          </span>
++          machine type.
++         </td>
++        </tr>
++       </table>
+       </div>
+       <div class="paragraph">
+        <p>
+@@ -44896,6 +45575,72 @@
+ standard setups.
+       </p>
+      </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
++m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
++CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
++BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
++Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
++vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
++oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
++/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
++Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
++bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
++0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
++rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
++X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
++NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
++cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
++KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
++S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
++UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
++XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
++4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
++nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
++iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
++/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
++qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
++uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
++bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
++NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
++PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
++0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
++1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
++i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
++UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
++4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
++Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
++NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
++ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
++AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
++IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
++W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
++o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
++GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
++lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
++zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
++PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
++        </td>
++        <td class="content">
++         SeaBIOS, and thus
++         <span class="monospaced">
++          bios=seabios
++         </span>
++         , is available for x86 guests only. On
++arm64 hosts, virtual machines always boot through UEFI, using the ARM build of
++OVMF (AAVMF), so
++         <span class="monospaced">
++          bios=ovmf
++         </span>
++         is the only supported setting there.
++        </td>
++       </tr>
++      </table>
++     </div>
+      <div class="paragraph">
+       <p>
+        Some operating systems (such as Windows 11) may require use of an UEFI
+@@ -47163,6 +47908,64 @@
+        command evocation. The web interface defaults to
+ live migration when the VM is running.
+       </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         Live migration is only possible between hosts of the same CPU
++architecture. A running guest’s CPU state cannot be transferred between an x86
++and an arm64 host.
++        </td>
++       </tr>
++      </table>
+      </div>
+      <div class="sect4">
+       <h5 id="_how_it_works">
+@@ -49745,9 +50548,11 @@
+       </div>
+       <div class="paragraph">
+        <p>
+-        Generally, Intel systems with VT-d and AMD systems with AMD-Vi support this.
+-But it is not guaranteed that everything will work out of the box, due
+-to bad hardware implementation and missing or low quality drivers.
++        Generally, Intel systems with VT-d and AMD systems with AMD-Vi support this. On
++arm64, the equivalent is the System Memory Management Unit (SMMU), provided by
++the supported platforms. But it is not guaranteed that everything will work out
++of the box, due to bad hardware implementation and missing or low quality
++drivers.
+        </p>
+       </div>
+       <div class="paragraph">
+@@ -49831,6 +50636,68 @@
+        <div class="content monospaced">
+         <pre> intel_iommu=on</pre>
+        </div>
++      </div>
++      <div class="admonitionblock">
++       <table>
++        <tr>
++         <td class="icon">
++          <img alt="Note" src="data:image/png;base64,
++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"/>
++         </td>
++         <td class="content">
++          The
++          <span class="monospaced">
++           intel_iommu=on
++          </span>
++          parameter applies to x86 hosts. On arm64, the SMMU is
++enabled through firmware and ACPI, so no such kernel command line parameter is
++needed.
++         </td>
++        </tr>
++       </table>
+       </div>
+       <div class="paragraph">
+        <div class="title">
+@@ -55252,7 +56119,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
++         [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,host-tunnel=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -55311,6 +56178,20 @@
+           <dd>
+            <p>
+             Whether this interface should be protected by the firewall.
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           <span class="monospaced">
++            host-tunnel
++           </span>
++           =
++           <span class="monospaced">
++            &lt;boolean&gt;
++           </span>
++          </dt>
++          <dd>
++           <p>
++            Enable host GSO over UDP tunnel offload (VirtIO only). Requires QEMU &gt; 10.2 and guest and host kernel support. Disabled by default starting with machine version 11.0+pve1 to work around an issue with the virtio-net driver in guest kernels. With machine versions 10.2 and 11.0, this is enabled by default.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -83896,6 +84777,27 @@
+            Places affinity from one or more HA resources to one or
+ more nodes.
+           </p>
++          <p class="tableblock">
++           The affinity
++           <span class="monospaced">
++            positive
++           </span>
++           specifies that HA resources should or must be kept on
++one of the specified nodes, while the affinity
++           <span class="monospaced">
++            negative
++           </span>
++           specifies that the HA
++resources should or must avoid the specified nodes.
++          </p>
++          <p class="tableblock">
++           The strictness attribute
++           <span class="monospaced">
++            strict
++           </span>
++           specifies whether it is a soft constraint
++("should") or whether it is a hard constraint ("must").
++          </p>
+          </td>
+         </tr>
+         <tr>
+@@ -83908,18 +84810,20 @@
+          </td>
+          <td class="tableblock halign-left valign-top">
+           <p class="tableblock">
+-           Places affinity between two or more HA resources. The
+-affinity
++           Places affinity between two or more HA resources.
++          </p>
++          <p class="tableblock">
++           The affinity
++           <span class="monospaced">
++            positive
++           </span>
++           specifies that HA resources must be kept on the same
++node, while the affinity
+            <span class="monospaced">
+             negative
+            </span>
+-           specifies that HA resources are to be kept on separate
+-nodes, while the affinity
+-           <span class="monospaced">
+-            positive
+-           </span>
+-           specifies that HA resources are to be kept
+-on the same node.
++           specifies that HA resources must be kept on
++separate nodes.
+           </p>
+          </td>
+         </tr>
+@@ -83934,9 +84838,9 @@
+       </h5>
+       <div class="paragraph">
+        <p>
+-        By default, a HA resource is able to run on any cluster node, but a common
+-requirement is that a HA resource should run on a specific node. That can be
+-implemented by defining a HA node affinity rule to make the HA resource
++        By default, an HA resource is able to run on any cluster node, but a common
++requirement is that an HA resource should run on a specific node. That can be
++implemented by defining an HA node affinity rule to make the HA resource
+         <span class="monospaced">
+          vm:100
+         </span>
+@@ -83956,8 +84860,8 @@
+        <p>
+         By default, node affinity rules are not strict, i.e., if there is none of the
+ specified nodes available, the HA resource can also be moved to other nodes.
+-If, on the other hand, a HA resource must be restricted to the specified nodes,
+-then the node affinity rule must be set to be strict.
++If, on the other hand, an HA resource must be restricted to the specified
++nodes, then the node affinity rule must be set to be strict.
+        </p>
+       </div>
+       <div class="paragraph">
+@@ -83981,14 +84885,41 @@
+       </div>
+       <div class="paragraph">
+        <p>
+-        For bigger clusters or specific use cases, it makes sense to define a more
+-detailed failover behavior. For example, the resources
++        Furthermore, node affinity rules use positive affinity by default, meaning that
++the preferred cluster nodes must be explicitly specified. However, in larger
++clusters, it is often more practical to define node affinity using an opt-out
++approach to avoid long and verbose lists of cluster nodes. For example, the
++following command defines an HA node affinity rule that makes the HA resources
+         <span class="monospaced">
+-         vm:200
++         ct:200
+         </span>
+         and
+         <span class="monospaced">
+-         ct:300
++         vm:300
++        </span>
++        avoid the node
++        <span class="monospaced">
++         node3
++        </span>
++        :
++       </p>
++      </div>
++      <div class="listingblock">
++       <div class="content monospaced">
++        <pre># ha-manager rules add node-affinity ha-rule-negative \
++        --affinity negative --resources ct:200,vm:300 --nodes node3</pre>
++       </div>
++      </div>
++      <div class="paragraph">
++       <p>
++        Moreover, specific use cases might require defining a more detailed failover
++behavior. For example, the resources
++        <span class="monospaced">
++         vm:400
++        </span>
++        and
++        <span class="monospaced">
++         ct:500
+         </span>
+         should run on
+         <span class="monospaced">
+@@ -83998,8 +84929,7 @@
+         <span class="monospaced">
+          node1
+         </span>
+-        becomes unavailable, the resources should be
+-distributed on
++        becomes unavailable, the resources should be distributed on
+         <span class="monospaced">
+          node2
+         </span>
+@@ -84015,8 +84945,8 @@
+         <span class="monospaced">
+          node3
+         </span>
+-        are also
+-unavailable, the resources should run on
++        are also unavailable, the resources
++should run on
+         <span class="monospaced">
+          node4
+         </span>
+@@ -84054,7 +84984,7 @@
+       <div class="listingblock">
+        <div class="content monospaced">
+         <pre># ha-manager rules add node-affinity priority-cascade \
+-        --resources vm:200,ct:300 --nodes "node1:2,node2:1,node3:1,node4"</pre>
++        --resources vm:400,ct:500 --nodes "node1:2,node2:1,node3:1,node4"</pre>
+        </div>
+       </div>
+       <div class="paragraph">
+@@ -84072,13 +85002,18 @@
+        </div>
+        <div class="content monospaced">
+         <pre>node-affinity: ha-rule-vm100
++        nodes node1
+         resources vm:100
+-        nodes node1
+         strict 1
+ 
++node-affinity: ha-rule-negative
++        nodes node3
++        resources ct:200,vm:300
++        affinity negative
++
+ node-affinity: priority-cascade
+-        resources vm:200,ct:300
+-        nodes node1:2,node2:1,node3:1,node4</pre>
++        nodes node1:2,node2:1,node3:1,node4
++        resources vm:400,ct:500</pre>
+        </div>
+       </div>
+       <div class="sect5">
+@@ -84089,6 +85024,36 @@
+        </h6>
+        <div class="dlist">
+         <dl>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           affinity
++          </span>
++          :
++          <span class="monospaced">
++           &lt;negative | positive&gt;
++          </span>
++          (
++          <em>
++           default =
++          </em>
++          <span class="monospaced">
++           positive
++          </span>
++          )
++         </dt>
++         <dd>
++          <p>
++           Describes whether the HA resources are supposed to be placed on the given nodes (
++           <em>
++            positive
++           </em>
++           ), or are supposed to be placed on any but the given nodes (
++           <em>
++            negative
++           </em>
++           ).
++          </p>
++         </dd>
+          <dt class="hdlist1">
+           <span class="monospaced">
+            nodes
+@@ -84377,8 +85342,8 @@
+        <p>
+         Other than node affinity rules, resource affinity rules are strict by default,
+ i.e., if the constraints imposed by the resource affinity rules cannot be met
+-for a HA resource, the HA Manager will put the HA resource in recovery state in
+-case of a failover or in error state elsewhere.
++for an HA resource, the HA Manager will put the HA resource in recovery state
++in case of a failover or in error state elsewhere.
+        </p>
+       </div>
+       <div class="paragraph">
+@@ -84396,12 +85361,12 @@
+        </div>
+        <div class="content monospaced">
+         <pre>resource-affinity: keep-together
++        affinity positive
+         resources vm:100,vm:200
+-        affinity positive
+ 
+ resource-affinity: keep-separate
+-        resources vm:200,ct:300
+-        affinity negative</pre>
++        affinity negative
++        resources vm:200,ct:300</pre>
+        </div>
+       </div>
+       <div class="sect5">
+@@ -84620,6 +85585,16 @@
+        </li>
+        <li>
+         <p>
++         Negative HA node affinity rules cannot specify node priorities.
++        </p>
++       </li>
++       <li>
++        <p>
++         Negative HA node affinity rules cannot specify all cluster nodes.
++        </p>
++       </li>
++       <li>
++        <p>
+          An HA resource affinity rule must have at least two HA resources.
+         </p>
+        </li>
+@@ -84639,9 +85614,9 @@
+        </li>
+        <li>
+         <p>
+-         An HA resource can only be part of a HA node affinity rule and a HA resource
+-  affinity rule at the same time, if the HA node affinity rule has a single
+-  priority class.
++         An HA resource can only be part of an HA node affinity rule and an HA
++  resource affinity rule at the same time, if the HA node affinity rule has a
++  single priority class.
+         </p>
+        </li>
+        <li>
+@@ -91377,14 +92352,14 @@
+        <li>
+         <p>
+          <span class="monospaced">
+-          match-calendar mon-fri 9:00-17:00
++          match-calendar mon..fri 9:00-17:00
+          </span>
+         </p>
+        </li>
+        <li>
+         <p>
+          <span class="monospaced">
+-          match-calendar sun,tue-wed,fri 9-17
++          match-calendar sun,tue..wed,fri 9-17
+          </span>
+         </p>
+        </li>
+@@ -91538,12 +92513,12 @@
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>matcher: workday
+-        match-calendar mon-fri 9-17
++        match-calendar mon..fri 9-17
+         target admin
+         comment Notify admins during working hours
+ 
+ matcher: night-and-weekend
+-        match-calendar mon-fri 9-17
++        match-calendar mon..fri 9-17
+         invert-match true
+         target on-call-admins
+         comment Separate target for non-working hours</pre>
+@@ -93779,8 +94754,9 @@
+        </em>
+       </p>
+       <p>
+-       Proxmox VE works only on 64-bit CPUs (AMD or Intel). There is no plan
+-for 32-bit for the platform.
++       Proxmox VE works only on 64-bit CPUs. The supported architectures are x86_64 (AMD64
++or Intel 64) and aarch64 on the NVIDIA Grace Hopper and NVIDIA Vera platforms.
++There is no plan to support 32-bit hosts.
+       </p>
+       <div class="admonitionblock">
+        <table>
+@@ -93861,6 +94837,64 @@
+         <pre>egrep '(vmx|svm)' /proc/cpuinfo</pre>
+        </div>
+       </div>
++      <div class="admonitionblock">
++       <table>
++        <tr>
++         <td class="icon">
++          <img alt="Note" src="data:image/png;base64,
++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"/>
++         </td>
++         <td class="content">
++          This check applies to x86 hosts only. On the supported arm64 platforms,
++KVM hardware-assisted virtualization is available and reports no equivalent CPU
++flag.
++         </td>
++        </tr>
++       </table>
++      </div>
+      </li>
+      <li>
+       <p>
+@@ -93895,6 +94929,20 @@
+ Virtualization Technology (AMD-V)
+        </a>
+        support.
++      </p>
++     </li>
++     <li>
++      <p>
++       <em>
++        Supported arm64 platforms
++       </em>
++      </p>
++      <p>
++       The NVIDIA Grace Hopper and NVIDIA Vera platforms. See
++       <a href="#install_arm64_support">
++        64-bit ARM (arm64) Support
++       </a>
++       for details.
+       </p>
+      </li>
+      <li>
+@@ -98518,7 +99566,7 @@
+        </span>
+        :
+        <span class="monospaced">
+-        \s*pve([1248])([cbsp])-[0-9a-f]{10}\s*
++        \s*pve([1248])([cbsp])-(arm-)?[0-9a-f]{10}\s*
+        </span>
+       </dt>
+       <dd>
+@@ -103118,7 +104166,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Target format for file storage. Only valid for full clone.
++        Target disk format. Only valid for full clone. If the target storage does not support the format, the storage’s default format is used instead.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -104401,7 +105449,7 @@
+         --net[n]
+        </span>
+        <span class="monospaced">
+-        [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
++        [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,host-tunnel=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -105524,7 +106572,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Target Format.
++        Target disk format. Only used when moving to a different storage. If the target storage does not support the format, the storage’s default format is used instead.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -107086,7 +108134,7 @@
+         --net[n]
+        </span>
+        <span class="monospaced">
+-        [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
++        [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,host-tunnel=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -108581,7 +109629,7 @@
+       </dt>
+       <dd>
+        <p>
+-        no description available
++        Do not check whether the VM is running, used internally during migration. Only root may use this option.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -109683,7 +110731,7 @@
+         --net[n]
+        </span>
+        <span class="monospaced">
+-        [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
++        [model=]&lt;enum&gt; [,bridge=&lt;bridge&gt;] [,firewall=&lt;1|0&gt;] [,host-tunnel=&lt;1|0&gt;] [,link_down=&lt;1|0&gt;] [,macaddr=&lt;XX:XX:XX:XX:XX:XX&gt;] [,mtu=&lt;integer&gt;] [,queues=&lt;integer&gt;] [,rate=&lt;number&gt;] [,tag=&lt;integer&gt;] [,trunks=&lt;vlanid[;vlanid...]&gt;] [,&lt;model&gt;=&lt;macaddr&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -124603,7 +125651,7 @@
+        ha-manager rules add
+       </strong>
+       <span class="monospaced">
+-       &lt;type&gt; &lt;rule&gt; --resources &lt;string&gt;
++       &lt;type&gt; &lt;rule&gt;
+       </span>
+       <span class="monospaced">
+        [OPTIONS]
+@@ -124647,45 +125695,6 @@
+         HA rule identifier.
+        </p>
+       </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --comment
+-       </span>
+-       <span class="monospaced">
+-        &lt;string&gt;
+-       </span>
+-      </dt>
+-      <dd>
+-       <p>
+-        HA rule description.
+-       </p>
+-      </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --disable
+-       </span>
+-       <span class="monospaced">
+-        &lt;boolean&gt;
+-       </span>
+-      </dt>
+-      <dd>
+-       <p>
+-        Whether the HA rule is disabled.
+-       </p>
+-      </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --resources
+-       </span>
+-       <span class="monospaced">
+-        &lt;type&gt;:&lt;name&gt;{,&lt;type&gt;:&lt;name&gt;}*
+-       </span>
+-      </dt>
+-      <dd>
+-       <p>
+-        List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).
+-       </p>
+-      </dd>
+      </dl>
+     </div>
+     <div class="paragraph">
+@@ -124705,6 +125714,61 @@
+       <dd>
+        <div class="dlist">
+         <dl>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --affinity
++          </span>
++          <span class="monospaced">
++           &lt;negative | positive&gt;
++          </span>
++          (
++          <em>
++           default =
++          </em>
++          <span class="monospaced">
++           positive
++          </span>
++          )
++         </dt>
++         <dd>
++          <p>
++           Describes whether the HA resources are supposed to be placed on the given nodes (
++           <em>
++            positive
++           </em>
++           ), or are supposed to be placed on any but the given nodes (
++           <em>
++            negative
++           </em>
++           ).
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --comment
++          </span>
++          <span class="monospaced">
++           &lt;string&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           HA rule description.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --disable
++          </span>
++          <span class="monospaced">
++           &lt;boolean&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           Whether the HA rule is disabled.
++          </p>
++         </dd>
+          <dt class="hdlist1">
+           <span class="monospaced">
+            --nodes
+@@ -124716,6 +125780,19 @@
+          <dd>
+           <p>
+            List of cluster node names with optional priority.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --resources
++          </span>
++          <span class="monospaced">
++           &lt;type&gt;:&lt;name&gt;{,&lt;type&gt;:&lt;name&gt;}*
++          </span>
++         </dt>
++         <dd>
++          <p>
++           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).
+           </p>
+          </dd>
+          <dt class="hdlist1">
+@@ -124771,6 +125848,45 @@
+            ).
+           </p>
+          </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --comment
++          </span>
++          <span class="monospaced">
++           &lt;string&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           HA rule description.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --disable
++          </span>
++          <span class="monospaced">
++           &lt;boolean&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           Whether the HA rule is disabled.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --resources
++          </span>
++          <span class="monospaced">
++           &lt;type&gt;:&lt;name&gt;{,&lt;type&gt;:&lt;name&gt;}*
++          </span>
++         </dt>
++         <dd>
++          <p>
++           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).
++          </p>
++         </dd>
+         </dl>
+        </div>
+       </dd>
+@@ -124963,7 +126079,7 @@
+       </dd>
+       <dt class="hdlist1">
+        <span class="monospaced">
+-        --comment
++        --delete
+        </span>
+        <span class="monospaced">
+         &lt;string&gt;
+@@ -124971,12 +126087,12 @@
+       </dt>
+       <dd>
+        <p>
+-        HA rule description.
+-       </p>
+-      </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --delete
++        A list of settings you want to delete.
++       </p>
++      </dd>
++      <dt class="hdlist1">
++       <span class="monospaced">
++        --digest
+        </span>
+        <span class="monospaced">
+         &lt;string&gt;
+@@ -124984,46 +126100,7 @@
+       </dt>
+       <dd>
+        <p>
+-        A list of settings you want to delete.
+-       </p>
+-      </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --digest
+-       </span>
+-       <span class="monospaced">
+-        &lt;string&gt;
+-       </span>
+-      </dt>
+-      <dd>
+-       <p>
+         Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.
+-       </p>
+-      </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --disable
+-       </span>
+-       <span class="monospaced">
+-        &lt;boolean&gt;
+-       </span>
+-      </dt>
+-      <dd>
+-       <p>
+-        Whether the HA rule is disabled.
+-       </p>
+-      </dd>
+-      <dt class="hdlist1">
+-       <span class="monospaced">
+-        --resources
+-       </span>
+-       <span class="monospaced">
+-        &lt;type&gt;:&lt;name&gt;{,&lt;type&gt;:&lt;name&gt;}*
+-       </span>
+-      </dt>
+-      <dd>
+-       <p>
+-        List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).
+        </p>
+       </dd>
+      </dl>
+@@ -125045,6 +126122,61 @@
+       <dd>
+        <div class="dlist">
+         <dl>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --affinity
++          </span>
++          <span class="monospaced">
++           &lt;negative | positive&gt;
++          </span>
++          (
++          <em>
++           default =
++          </em>
++          <span class="monospaced">
++           positive
++          </span>
++          )
++         </dt>
++         <dd>
++          <p>
++           Describes whether the HA resources are supposed to be placed on the given nodes (
++           <em>
++            positive
++           </em>
++           ), or are supposed to be placed on any but the given nodes (
++           <em>
++            negative
++           </em>
++           ).
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --comment
++          </span>
++          <span class="monospaced">
++           &lt;string&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           HA rule description.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --disable
++          </span>
++          <span class="monospaced">
++           &lt;boolean&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           Whether the HA rule is disabled.
++          </p>
++         </dd>
+          <dt class="hdlist1">
+           <span class="monospaced">
+            --nodes
+@@ -125056,6 +126188,19 @@
+          <dd>
+           <p>
+            List of cluster node names with optional priority.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --resources
++          </span>
++          <span class="monospaced">
++           &lt;type&gt;:&lt;name&gt;{,&lt;type&gt;:&lt;name&gt;}*
++          </span>
++         </dt>
++         <dd>
++          <p>
++           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).
+           </p>
+          </dd>
+          <dt class="hdlist1">
+@@ -125109,6 +126254,45 @@
+             negative
+            </em>
+            ).
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --comment
++          </span>
++          <span class="monospaced">
++           &lt;string&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           HA rule description.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --disable
++          </span>
++          <span class="monospaced">
++           &lt;boolean&gt;
++          </span>
++         </dt>
++         <dd>
++          <p>
++           Whether the HA rule is disabled.
++          </p>
++         </dd>
++         <dt class="hdlist1">
++          <span class="monospaced">
++           --resources
++          </span>
++          <span class="monospaced">
++           &lt;type&gt;:&lt;name&gt;{,&lt;type&gt;:&lt;name&gt;}*
++          </span>
++         </dt>
++         <dd>
++          <p>
++           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).
+           </p>
+          </dd>
+         </dl>
+@@ -137492,9 +138676,9 @@
+ </div>
+ <div id="footer">
+  <div id="footer-text">
+-  Version 9.2.3
++  Version 9.2.4
+   <br/>
+   Last updated
+- Fri Jul  3 11:08:20 CEST 2026
++ Tue Aug  4 00:30:32 CEST 2026
+  </div>
+ </div>

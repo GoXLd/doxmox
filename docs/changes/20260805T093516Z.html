@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260805T093516Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+    .hint-tooltip {
+      position: relative;
+    }
+    .hint-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260805T093516Z.diff</h1>
+      <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-08-05T09:36:19Z" data-iso="2026-08-05T09:36:19Z">2026-08-05 09:36:19 UTC</time></p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260805T093516Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -346,10 +346,10 @@</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;br/&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revnumber&quot;&gt;</span>
+<span class="line del">-  version 9.2.3,</span>
+<span class="line add">+  version 9.2.4,</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revdate&quot;&gt;</span>
+<span class="line del">-  Fri Jul  3 11:08:20 CEST 2026</span>
+<span class="line add">+  Tue Aug  4 00:30:32 CEST 2026</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;toc&quot;&gt;</span>
+<span class="line ctx">   &lt;a href=&quot;index.html&quot; style=&quot;font-size: 0.8em;&quot;&gt;</span>
+<span class="line hunk">@@ -598,7 +598,7 @@</span>
+<span class="line ctx"> store the configuration of thousands of virtual machines. Corosync</span>
+<span class="line ctx"> replicates these files in real time to all cluster nodes. The file</span>
+<span class="line ctx"> system stores all data inside a persistent database on disk, while a</span>
+<span class="line del">-copy resides in RAM, providing a maximum storage size of 30 MB—more</span>
+<span class="line add">+copy resides in RAM, providing a maximum storage size of 128 MiB—more</span>
+<span class="line ctx"> than enough for thousands of VMs.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -1947,12 +1947,19 @@</span>
+<span class="line ctx">       &lt;ul&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         CPU: 64bit (Intel 64 or AMD64)</span>
+<span class="line add">+         CPU: 64-bit x86 (Intel 64 or AMD64). Alternatively, 64-bit ARM (arm64,</span>
+<span class="line add">+  aarch64) with an ARMv8-A or newer CPU, see</span>
+<span class="line add">+         &lt;a href=&quot;#install_arm64_support&quot;&gt;</span>
+<span class="line add">+          64-bit ARM (arm64) Support</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         .</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         Intel VT/AMD-V capable CPU/motherboard for KVM full virtualization support</span>
+<span class="line add">+         For x86 hosts, an Intel VT or AMD-V capable CPU and motherboard for KVM full</span>
+<span class="line add">+  virtualization support. On the supported arm64 platforms, KVM</span>
+<span class="line add">+  hardware-assisted virtualization needs no equivalent CPU flag.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line hunk">@@ -1983,7 +1990,12 @@</span>
+<span class="line ctx">       &lt;ul&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         Intel 64 or AMD64 with Intel VT/AMD-V CPU flag.</span>
+<span class="line add">+         Intel 64 or AMD64 with an Intel VT or AMD-V CPU flag. Alternatively, a 64-bit</span>
+<span class="line add">+  ARM host with an ARMv9-A or newer CPU, see</span>
+<span class="line add">+         &lt;a href=&quot;#install_arm64_support&quot;&gt;</span>
+<span class="line add">+          64-bit ARM (arm64) Support</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         .</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line hunk">@@ -2039,8 +2051,9 @@</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         For PCI(e) passthrough, the CPU and motherboard need to support IOMMU</span>
+<span class="line del">-  (Intel VT-d, AMD-Vi).</span>
+<span class="line add">+         For PCI(e) passthrough, the CPU and motherboard need to support an</span>
+<span class="line add">+  input/output memory management unit (IOMMU): Intel VT-d or AMD-Vi on x86, or a</span>
+<span class="line add">+  System Memory Management Unit (SMMU) on arm64.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">       &lt;/ul&gt;</span>
+<span class="line hunk">@@ -2111,8 +2124,90 @@</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line add">+     &lt;h4 id=&quot;install_arm64_support&quot;&gt;</span>
+<span class="line add">+      2.1.3. 64-bit ARM (arm64) Support</span>
+<span class="line add">+      &lt;a class=&quot;headerlink&quot; href=&quot;#install_arm64_support&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+      &lt;/a&gt;</span>
+<span class="line add">+     &lt;/h4&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       Proxmox VE supports native 64-bit ARM (arm64, aarch64) on the NVIDIA Grace Hopper</span>
+<span class="line add">+and NVIDIA Vera platforms. On other UEFI-based ARMv9-A or newer hardware,</span>
+<span class="line add">+support is best-effort. Device-tree-only single-board computers, such as the</span>
+<span class="line add">+Raspberry Pi, are not supported.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       An arm64 host must boot through UEFI and describe its hardware through ACPI</span>
+<span class="line add">+(Advanced Configuration and Power Interface). Proxmox VE does not support</span>
+<span class="line add">+device-tree-only or legacy BIOS boot on arm64.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       Several x86-specific features are not available on arm64:</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+      &lt;ul&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Virtual machines cannot use SeaBIOS. On arm64, guests always boot through</span>
+<span class="line add">+  UEFI, provided by the ARM build of OVMF, also known as AAVMF.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         AMD SEV (Secure Encrypted Virtualization) memory encryption and Intel’s</span>
+<span class="line add">+  GVT-g mediated vGPUs are x86-only.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         There is no operating-system-level CPU microcode package, unlike</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          intel-microcode</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         and</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          amd64-microcode</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         on x86.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+      &lt;/ul&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       A cluster can contain both x86 and arm64 nodes, but guests cannot move between</span>
+<span class="line add">+nodes of different architectures while running:</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;ulist&quot;&gt;</span>
+<span class="line add">+      &lt;ul&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Live migration is only possible between nodes of the same architecture,</span>
+<span class="line add">+  because a running guest’s CPU state cannot be transferred across</span>
+<span class="line add">+  architectures.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         A guest, whether a virtual machine or a container, only runs on a node whose</span>
+<span class="line add">+  architecture matches the guest. Offline migration, backup and restore, or</span>
+<span class="line add">+  shared storage can move a guest’s data to a node of a different architecture,</span>
+<span class="line add">+  but the guest still needs to be reinstalled or reconfigured for that</span>
+<span class="line add">+  architecture before it starts.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+      &lt;/ul&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;_simple_performance_overview&quot;&gt;</span>
+<span class="line del">-      2.1.3. Simple Performance Overview</span>
+<span class="line add">+      2.1.4. Simple Performance Overview</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#_simple_performance_overview&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line hunk">@@ -2186,7 +2281,7 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;_supported_web_browsers_for_accessing_the_web_interface&quot;&gt;</span>
+<span class="line del">-      2.1.4. Supported Web Browsers for Accessing the Web Interface</span>
+<span class="line add">+      2.1.5. Supported Web Browsers for Accessing the Web Interface</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#_supported_web_browsers_for_accessing_the_web_interface&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line hunk">@@ -3435,6 +3530,66 @@</span>
+<span class="line ctx"> of errors. Secure Boot must be turned off in the UEFI firmware setup utility to</span>
+<span class="line ctx"> run this option.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line add">+       &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+        &lt;table&gt;</span>
+<span class="line add">+         &lt;tr&gt;</span>
+<span class="line add">+          &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+           &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+          &lt;/td&gt;</span>
+<span class="line add">+          &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+           This entry is available on x86 installation media only, as</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            memtest86+</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           does not support arm64.</span>
+<span class="line add">+          &lt;/td&gt;</span>
+<span class="line add">+         &lt;/tr&gt;</span>
+<span class="line add">+        &lt;/table&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line hunk">@@ -5079,6 +5234,64 @@</span>
+<span class="line ctx"> PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line ctx">         &lt;/td&gt;</span>
+<span class="line ctx">         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         Subscription keys are bound to the host architecture. An arm64 host needs</span>
+<span class="line add">+a dedicated arm64 subscription key; an x86 key is not valid on it, and vice</span>
+<span class="line add">+versa.</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line ctx">          You can disable this repository by adding an</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">           Enabled: no</span>
+<span class="line hunk">@@ -5298,8 +5511,66 @@</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line add">+     &lt;h4 id=&quot;sysadmin_dbgsym_repo&quot;&gt;</span>
+<span class="line add">+      3.1.6. Proxmox VE Debug Symbol Repository</span>
+<span class="line add">+      &lt;a class=&quot;headerlink&quot; href=&quot;#sysadmin_dbgsym_repo&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+      &lt;/a&gt;</span>
+<span class="line add">+     &lt;/h4&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       Debug symbol packages, named</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        &amp;lt;package&amp;gt;-dbgsym</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       , contain the detached debug</span>
+<span class="line add">+information for the matching binary package. They are not needed for normal</span>
+<span class="line add">+operation, but let tools such as</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        gdb</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       ,</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        systemd-coredump</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       or</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        crash</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       produce</span>
+<span class="line add">+useful backtraces when analyzing a crash or hang. They are provided in a</span>
+<span class="line add">+dedicated repository, separate from the regular ones, for the Debian Bookworm</span>
+<span class="line add">+and Trixie based Proxmox VE releases (and newer).</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+      &lt;div class=&quot;title&quot;&gt;</span>
+<span class="line add">+       File</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        /etc/apt/sources.list.d/pve-dbgsym.sources</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line add">+       &lt;pre&gt;Types: deb</span>
+<span class="line add">+URIs: https://dbgsym.proxmox.com/debian/pve</span>
+<span class="line add">+Suites: trixie</span>
+<span class="line add">+Components: pve-dbgsym</span>
+<span class="line add">+Signed-By: /usr/share/keyrings/proxmox-archive-keyring.gpg&lt;/pre&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       After enabling the repository, install the</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        -dbgsym</span>
+<span class="line add">+       &lt;/span&gt;</span>
+<span class="line add">+       package that matches the</span>
+<span class="line add">+binary you want to debug.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+    &lt;/div&gt;</span>
+<span class="line add">+    &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;sysadmin_package_repositories_ceph&quot;&gt;</span>
+<span class="line del">-      3.1.6. Ceph Repositories</span>
+<span class="line add">+      3.1.7. Ceph Repositories</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#sysadmin_package_repositories_ceph&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line hunk">@@ -5739,7 +6010,7 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;sysadmin_debian_firmware_repo&quot;&gt;</span>
+<span class="line del">-      3.1.7. Debian Firmware Repository</span>
+<span class="line add">+      3.1.8. Debian Firmware Repository</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#sysadmin_debian_firmware_repo&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line hunk">@@ -5895,7 +6166,7 @@</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;repos_secure_apt&quot;&gt;</span>
+<span class="line del">-      3.1.8. SecureApt</span>
+<span class="line add">+      3.1.9. SecureApt</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#repos_secure_apt&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line hunk">@@ -6646,6 +6917,64 @@</span>
+<span class="line ctx">       &lt;a class=&quot;headerlink&quot; href=&quot;#sysadmin_firmware_cpu&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line ctx">       &lt;/a&gt;</span>
+<span class="line ctx">      &lt;/h4&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         CPU microcode updates as described in this section are specific to x86</span>
+<span class="line add">+hosts. There is no equivalent operating-system-level microcode package for</span>
+<span class="line add">+arm64.</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line ctx">        Microcode updates are intended to fix found security vulnerabilities and other</span>
+<span class="line hunk">@@ -16302,6 +16631,72 @@</span>
+<span class="line ctx">        .</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         This applies to x86 hosts. On arm64, Proxmox VE boots through UEFI only, so</span>
+<span class="line add">+there is no BIOS Boot Partition and no</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          i386-pc</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         GRUB target; GRUB is installed</span>
+<span class="line add">+in EFI mode using the</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          arm64-efi</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         target instead.</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;sect3&quot;&gt;</span>
+<span class="line ctx">      &lt;h4 id=&quot;sysboot_proxmox_boot_tool&quot;&gt;</span>
+<span class="line hunk">@@ -16927,6 +17322,75 @@</span>
+<span class="line ctx">        &lt;pre&gt;Boot0006* Linux Boot Manager    [...] File(\EFI\systemd\systemd-bootx64.efi)&lt;/pre&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         The file names above are for x86 hosts. On arm64, the equivalent binaries</span>
+<span class="line add">+are named</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          grubaa64.efi</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         ,</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          shimaa64.efi</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         , and</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          systemd-bootaa64.efi</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         .</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line ctx">        By running:</span>
+<span class="line hunk">@@ -17566,6 +18030,79 @@</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">       &lt;/ul&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         The</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          shim-helpers-amd64-signed</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         and</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          grub-efi-amd64-signed</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         package names</span>
+<span class="line add">+are for x86 hosts. On arm64, the corresponding packages are</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          shim-helpers-arm64-signed</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         and</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          grub-efi-arm64-signed</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         .</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line hunk">@@ -41334,12 +41871,12 @@</span>
+<span class="line ctx">    &lt;/div&gt;</span>
+<span class="line ctx">    &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">     &lt;p&gt;</span>
+<span class="line del">-     QEMU can emulate a great variety of hardware from ARM to Sparc, but Proxmox VE is</span>
+<span class="line del">-only concerned with 32 and 64 bits PC clone emulation, since it represents the</span>
+<span class="line del">-overwhelming majority of server hardware. The emulation of PC clones is also one</span>
+<span class="line del">-of the fastest due to the availability of processor extensions which greatly</span>
+<span class="line del">-speed up QEMU when the emulated architecture is the same as the host</span>
+<span class="line del">-architecture.</span>
+<span class="line add">+     QEMU can emulate a great variety of hardware, from ARM to Sparc. On x86 hosts,</span>
+<span class="line add">+Proxmox VE is concerned with 32-bit and 64-bit PC clone emulation, since it</span>
+<span class="line add">+represents the overwhelming majority of server hardware. On arm64 hosts, Proxmox VE</span>
+<span class="line add">+emulates 64-bit ARM (aarch64) machines instead. Emulating the same architecture as the host is also one of the</span>
+<span class="line add">+fastest options, due to the availability of processor extensions which greatly</span>
+<span class="line add">+speed up QEMU when the emulated architecture matches the host architecture.</span>
+<span class="line ctx">     &lt;/p&gt;</span>
+<span class="line ctx">    &lt;/div&gt;</span>
+<span class="line ctx">    &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line hunk">@@ -41689,7 +42226,8 @@</span>
+<span class="line ctx">        &lt;a href=&quot;#qm_pci_passthrough&quot;&gt;</span>
+<span class="line ctx">         PCIe passthrough</span>
+<span class="line ctx">        &lt;/a&gt;</span>
+<span class="line del">-       .</span>
+<span class="line add">+       . On arm64 hosts OVMF is the default</span>
+<span class="line add">+and only option, as SeaBIOS is x86-only.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line hunk">@@ -41721,6 +42259,68 @@</span>
+<span class="line ctx">         &lt;/a&gt;</span>
+<span class="line ctx">         implementation.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          The Intel 440FX and Q35 chipsets are specific to x86 guests. On arm64</span>
+<span class="line add">+hosts, virtual machines use the</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           virt</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          machine type, which models a generic,</span>
+<span class="line add">+UEFI-based ARM machine.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line ctx">        &lt;h6 id=&quot;_machine_version&quot;&gt;</span>
+<span class="line hunk">@@ -42736,6 +43336,85 @@</span>
+<span class="line ctx"> host CPU starting from Westmere for Intel or at least a fourth generation</span>
+<span class="line ctx"> Opteron for AMD.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          The</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           kvm64</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          and</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           x86-64-v*</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          CPU models described here are x86-only. On</span>
+<span class="line add">+arm64 hosts, guests use ARM CPU models:</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           host</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          to expose the physical CPU</span>
+<span class="line add">+(recommended on the supported hardware), or a generic model such as</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           max</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          ,</span>
+<span class="line add">+together with the</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           virt</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          machine type.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line hunk">@@ -44896,6 +45575,72 @@</span>
+<span class="line ctx"> standard setups.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         SeaBIOS, and thus</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          bios=seabios</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         , is available for x86 guests only. On</span>
+<span class="line add">+arm64 hosts, virtual machines always boot through UEFI, using the ARM build of</span>
+<span class="line add">+OVMF (AAVMF), so</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          bios=ovmf</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         is the only supported setting there.</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line ctx">        Some operating systems (such as Windows 11) may require use of an UEFI</span>
+<span class="line hunk">@@ -47163,6 +47908,64 @@</span>
+<span class="line ctx">        command evocation. The web interface defaults to</span>
+<span class="line ctx"> live migration when the VM is running.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line add">+     &lt;/div&gt;</span>
+<span class="line add">+     &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+      &lt;table&gt;</span>
+<span class="line add">+       &lt;tr&gt;</span>
+<span class="line add">+        &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+         &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+        &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+         Live migration is only possible between hosts of the same CPU</span>
+<span class="line add">+architecture. A running guest’s CPU state cannot be transferred between an x86</span>
+<span class="line add">+and an arm64 host.</span>
+<span class="line add">+        &lt;/td&gt;</span>
+<span class="line add">+       &lt;/tr&gt;</span>
+<span class="line add">+      &lt;/table&gt;</span>
+<span class="line ctx">      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;div class=&quot;sect4&quot;&gt;</span>
+<span class="line ctx">       &lt;h5 id=&quot;_how_it_works&quot;&gt;</span>
+<span class="line hunk">@@ -49745,9 +50548,11 @@</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Generally, Intel systems with VT-d and AMD systems with AMD-Vi support this.</span>
+<span class="line del">-But it is not guaranteed that everything will work out of the box, due</span>
+<span class="line del">-to bad hardware implementation and missing or low quality drivers.</span>
+<span class="line add">+        Generally, Intel systems with VT-d and AMD systems with AMD-Vi support this. On</span>
+<span class="line add">+arm64, the equivalent is the System Memory Management Unit (SMMU), provided by</span>
+<span class="line add">+the supported platforms. But it is not guaranteed that everything will work out</span>
+<span class="line add">+of the box, due to bad hardware implementation and missing or low quality</span>
+<span class="line add">+drivers.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -49831,6 +50636,68 @@</span>
+<span class="line ctx">        &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">         &lt;pre&gt; intel_iommu=on&lt;/pre&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          The</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           intel_iommu=on</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          parameter applies to x86 hosts. On arm64, the SMMU is</span>
+<span class="line add">+enabled through firmware and ACPI, so no such kernel command line parameter is</span>
+<span class="line add">+needed.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;title&quot;&gt;</span>
+<span class="line hunk">@@ -55252,7 +56119,7 @@</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         :</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line add">+         [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,host-tunnel=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">        &lt;/dt&gt;</span>
+<span class="line ctx">        &lt;dd&gt;</span>
+<span class="line hunk">@@ -55311,6 +56178,20 @@</span>
+<span class="line ctx">           &lt;dd&gt;</span>
+<span class="line ctx">            &lt;p&gt;</span>
+<span class="line ctx">             Whether this interface should be protected by the firewall.</span>
+<span class="line add">+           &lt;/p&gt;</span>
+<span class="line add">+          &lt;/dd&gt;</span>
+<span class="line add">+          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            host-tunnel</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           =</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+          &lt;/dt&gt;</span>
+<span class="line add">+          &lt;dd&gt;</span>
+<span class="line add">+           &lt;p&gt;</span>
+<span class="line add">+            Enable host GSO over UDP tunnel offload (VirtIO only). Requires QEMU &amp;gt; 10.2 and guest and host kernel support. Disabled by default starting with machine version 11.0+pve1 to work around an issue with the virtio-net driver in guest kernels. With machine versions 10.2 and 11.0, this is enabled by default.</span>
+<span class="line ctx">            &lt;/p&gt;</span>
+<span class="line ctx">           &lt;/dd&gt;</span>
+<span class="line ctx">           &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -83896,6 +84777,27 @@</span>
+<span class="line ctx">            Places affinity from one or more HA resources to one or</span>
+<span class="line ctx"> more nodes.</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           The affinity</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            positive</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           specifies that HA resources should or must be kept on</span>
+<span class="line add">+one of the specified nodes, while the affinity</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            negative</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           specifies that the HA</span>
+<span class="line add">+resources should or must avoid the specified nodes.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           The strictness attribute</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            strict</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           specifies whether it is a soft constraint</span>
+<span class="line add">+(&quot;should&quot;) or whether it is a hard constraint (&quot;must&quot;).</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">         &lt;/tr&gt;</span>
+<span class="line ctx">         &lt;tr&gt;</span>
+<span class="line hunk">@@ -83908,18 +84810,20 @@</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">          &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">           &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-           Places affinity between two or more HA resources. The</span>
+<span class="line del">-affinity</span>
+<span class="line add">+           Places affinity between two or more HA resources.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+          &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line add">+           The affinity</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            positive</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           specifies that HA resources must be kept on the same</span>
+<span class="line add">+node, while the affinity</span>
+<span class="line ctx">            &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">             negative</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line del">-           specifies that HA resources are to be kept on separate</span>
+<span class="line del">-nodes, while the affinity</span>
+<span class="line del">-           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-            positive</span>
+<span class="line del">-           &lt;/span&gt;</span>
+<span class="line del">-           specifies that HA resources are to be kept</span>
+<span class="line del">-on the same node.</span>
+<span class="line add">+           specifies that HA resources must be kept on</span>
+<span class="line add">+separate nodes.</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/td&gt;</span>
+<span class="line ctx">         &lt;/tr&gt;</span>
+<span class="line hunk">@@ -83934,9 +84838,9 @@</span>
+<span class="line ctx">       &lt;/h5&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        By default, a HA resource is able to run on any cluster node, but a common</span>
+<span class="line del">-requirement is that a HA resource should run on a specific node. That can be</span>
+<span class="line del">-implemented by defining a HA node affinity rule to make the HA resource</span>
+<span class="line add">+        By default, an HA resource is able to run on any cluster node, but a common</span>
+<span class="line add">+requirement is that an HA resource should run on a specific node. That can be</span>
+<span class="line add">+implemented by defining an HA node affinity rule to make the HA resource</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          vm:100</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line hunk">@@ -83956,8 +84860,8 @@</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         By default, node affinity rules are not strict, i.e., if there is none of the</span>
+<span class="line ctx"> specified nodes available, the HA resource can also be moved to other nodes.</span>
+<span class="line del">-If, on the other hand, a HA resource must be restricted to the specified nodes,</span>
+<span class="line del">-then the node affinity rule must be set to be strict.</span>
+<span class="line add">+If, on the other hand, an HA resource must be restricted to the specified</span>
+<span class="line add">+nodes, then the node affinity rule must be set to be strict.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -83981,14 +84885,41 @@</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        For bigger clusters or specific use cases, it makes sense to define a more</span>
+<span class="line del">-detailed failover behavior. For example, the resources</span>
+<span class="line add">+        Furthermore, node affinity rules use positive affinity by default, meaning that</span>
+<span class="line add">+the preferred cluster nodes must be explicitly specified. However, in larger</span>
+<span class="line add">+clusters, it is often more practical to define node affinity using an opt-out</span>
+<span class="line add">+approach to avoid long and verbose lists of cluster nodes. For example, the</span>
+<span class="line add">+following command defines an HA node affinity rule that makes the HA resources</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         vm:200</span>
+<span class="line add">+         ct:200</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         and</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-         ct:300</span>
+<span class="line add">+         vm:300</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        avoid the node</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         node3</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        :</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+       &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line add">+        &lt;pre&gt;# ha-manager rules add node-affinity ha-rule-negative \</span>
+<span class="line add">+        --affinity negative --resources ct:200,vm:300 --nodes node3&lt;/pre&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+       &lt;p&gt;</span>
+<span class="line add">+        Moreover, specific use cases might require defining a more detailed failover</span>
+<span class="line add">+behavior. For example, the resources</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         vm:400</span>
+<span class="line add">+        &lt;/span&gt;</span>
+<span class="line add">+        and</span>
+<span class="line add">+        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+         ct:500</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         should run on</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line hunk">@@ -83998,8 +84929,7 @@</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          node1</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line del">-        becomes unavailable, the resources should be</span>
+<span class="line del">-distributed on</span>
+<span class="line add">+        becomes unavailable, the resources should be distributed on</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          node2</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line hunk">@@ -84015,8 +84945,8 @@</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          node3</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line del">-        are also</span>
+<span class="line del">-unavailable, the resources should run on</span>
+<span class="line add">+        are also unavailable, the resources</span>
+<span class="line add">+should run on</span>
+<span class="line ctx">         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">          node4</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line hunk">@@ -84054,7 +84984,7 @@</span>
+<span class="line ctx">       &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">         &lt;pre&gt;# ha-manager rules add node-affinity priority-cascade \</span>
+<span class="line del">-        --resources vm:200,ct:300 --nodes &quot;node1:2,node2:1,node3:1,node4&quot;&lt;/pre&gt;</span>
+<span class="line add">+        --resources vm:400,ct:500 --nodes &quot;node1:2,node2:1,node3:1,node4&quot;&lt;/pre&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -84072,13 +85002,18 @@</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">         &lt;pre&gt;node-affinity: ha-rule-vm100</span>
+<span class="line add">+        nodes node1</span>
+<span class="line ctx">         resources vm:100</span>
+<span class="line del">-        nodes node1</span>
+<span class="line ctx">         strict 1</span>
+<span class="line ctx"> </span>
+<span class="line add">+node-affinity: ha-rule-negative</span>
+<span class="line add">+        nodes node3</span>
+<span class="line add">+        resources ct:200,vm:300</span>
+<span class="line add">+        affinity negative</span>
+<span class="line add">+</span>
+<span class="line ctx"> node-affinity: priority-cascade</span>
+<span class="line del">-        resources vm:200,ct:300</span>
+<span class="line del">-        nodes node1:2,node2:1,node3:1,node4&lt;/pre&gt;</span>
+<span class="line add">+        nodes node1:2,node2:1,node3:1,node4</span>
+<span class="line add">+        resources vm:400,ct:500&lt;/pre&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line hunk">@@ -84089,6 +85024,36 @@</span>
+<span class="line ctx">        &lt;/h6&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line ctx">         &lt;dl&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           affinity</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          :</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;negative | positive&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          (</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           default =</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           positive</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          )</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Describes whether the HA resources are supposed to be placed on the given nodes (</span>
+<span class="line add">+           &lt;em&gt;</span>
+<span class="line add">+            positive</span>
+<span class="line add">+           &lt;/em&gt;</span>
+<span class="line add">+           ), or are supposed to be placed on any but the given nodes (</span>
+<span class="line add">+           &lt;em&gt;</span>
+<span class="line add">+            negative</span>
+<span class="line add">+           &lt;/em&gt;</span>
+<span class="line add">+           ).</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line ctx">          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">            nodes</span>
+<span class="line hunk">@@ -84377,8 +85342,8 @@</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line ctx">         Other than node affinity rules, resource affinity rules are strict by default,</span>
+<span class="line ctx"> i.e., if the constraints imposed by the resource affinity rules cannot be met</span>
+<span class="line del">-for a HA resource, the HA Manager will put the HA resource in recovery state in</span>
+<span class="line del">-case of a failover or in error state elsewhere.</span>
+<span class="line add">+for an HA resource, the HA Manager will put the HA resource in recovery state</span>
+<span class="line add">+in case of a failover or in error state elsewhere.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -84396,12 +85361,12 @@</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">         &lt;pre&gt;resource-affinity: keep-together</span>
+<span class="line add">+        affinity positive</span>
+<span class="line ctx">         resources vm:100,vm:200</span>
+<span class="line del">-        affinity positive</span>
+<span class="line ctx"> </span>
+<span class="line ctx"> resource-affinity: keep-separate</span>
+<span class="line del">-        resources vm:200,ct:300</span>
+<span class="line del">-        affinity negative&lt;/pre&gt;</span>
+<span class="line add">+        affinity negative</span>
+<span class="line add">+        resources vm:200,ct:300&lt;/pre&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line hunk">@@ -84620,6 +85585,16 @@</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line add">+         Negative HA node affinity rules cannot specify node priorities.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Negative HA node affinity rules cannot specify all cluster nodes.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/li&gt;</span>
+<span class="line add">+       &lt;li&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line ctx">          An HA resource affinity rule must have at least two HA resources.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line hunk">@@ -84639,9 +85614,9 @@</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         An HA resource can only be part of a HA node affinity rule and a HA resource</span>
+<span class="line del">-  affinity rule at the same time, if the HA node affinity rule has a single</span>
+<span class="line del">-  priority class.</span>
+<span class="line add">+         An HA resource can only be part of an HA node affinity rule and an HA</span>
+<span class="line add">+  resource affinity rule at the same time, if the HA node affinity rule has a</span>
+<span class="line add">+  single priority class.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line hunk">@@ -91377,14 +92352,14 @@</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          match-calendar mon-fri 9:00-17:00</span>
+<span class="line add">+          match-calendar mon..fri 9:00-17:00</span>
+<span class="line ctx">          &lt;/span&gt;</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;li&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          match-calendar sun,tue-wed,fri 9-17</span>
+<span class="line add">+          match-calendar sun,tue..wed,fri 9-17</span>
+<span class="line ctx">          &lt;/span&gt;</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/li&gt;</span>
+<span class="line hunk">@@ -91538,12 +92513,12 @@</span>
+<span class="line ctx">      &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;content monospaced&quot;&gt;</span>
+<span class="line ctx">        &lt;pre&gt;matcher: workday</span>
+<span class="line del">-        match-calendar mon-fri 9-17</span>
+<span class="line add">+        match-calendar mon..fri 9-17</span>
+<span class="line ctx">         target admin</span>
+<span class="line ctx">         comment Notify admins during working hours</span>
+<span class="line ctx"> </span>
+<span class="line ctx"> matcher: night-and-weekend</span>
+<span class="line del">-        match-calendar mon-fri 9-17</span>
+<span class="line add">+        match-calendar mon..fri 9-17</span>
+<span class="line ctx">         invert-match true</span>
+<span class="line ctx">         target on-call-admins</span>
+<span class="line ctx">         comment Separate target for non-working hours&lt;/pre&gt;</span>
+<span class="line hunk">@@ -93779,8 +94754,9 @@</span>
+<span class="line ctx">        &lt;/em&gt;</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line del">-       Proxmox VE works only on 64-bit CPUs (AMD or Intel). There is no plan</span>
+<span class="line del">-for 32-bit for the platform.</span>
+<span class="line add">+       Proxmox VE works only on 64-bit CPUs. The supported architectures are x86_64 (AMD64</span>
+<span class="line add">+or Intel 64) and aarch64 on the NVIDIA Grace Hopper and NVIDIA Vera platforms.</span>
+<span class="line add">+There is no plan to support 32-bit hosts.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line ctx">        &lt;table&gt;</span>
+<span class="line hunk">@@ -93861,6 +94837,64 @@</span>
+<span class="line ctx">         &lt;pre&gt;egrep &#x27;(vmx|svm)&#x27; /proc/cpuinfo&lt;/pre&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;admonitionblock&quot;&gt;</span>
+<span class="line add">+       &lt;table&gt;</span>
+<span class="line add">+        &lt;tr&gt;</span>
+<span class="line add">+         &lt;td class=&quot;icon&quot;&gt;</span>
+<span class="line add">+          &lt;img alt=&quot;Note&quot; src=&quot;data:image/png;base64,</span>
+<span class="line add">+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v</span>
+<span class="line add">+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC</span>
+<span class="line add">+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5</span>
+<span class="line add">+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+</span>
+<span class="line add">+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI</span>
+<span class="line add">+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD</span>
+<span class="line add">+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4</span>
+<span class="line add">+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I</span>
+<span class="line add">+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv</span>
+<span class="line add">+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF</span>
+<span class="line add">+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7</span>
+<span class="line add">+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9</span>
+<span class="line add">+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD</span>
+<span class="line add">+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP</span>
+<span class="line add">+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8</span>
+<span class="line add">+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz</span>
+<span class="line add">+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO</span>
+<span class="line add">+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A</span>
+<span class="line add">+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF</span>
+<span class="line add">+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY</span>
+<span class="line add">+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY</span>
+<span class="line add">+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc</span>
+<span class="line add">+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA</span>
+<span class="line add">+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv</span>
+<span class="line add">+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP</span>
+<span class="line add">+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6</span>
+<span class="line add">+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83</span>
+<span class="line add">+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc</span>
+<span class="line add">+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75</span>
+<span class="line add">+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6</span>
+<span class="line add">+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq</span>
+<span class="line add">+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI</span>
+<span class="line add">+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO</span>
+<span class="line add">+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH</span>
+<span class="line add">+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU</span>
+<span class="line add">+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK</span>
+<span class="line add">+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW</span>
+<span class="line add">+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO</span>
+<span class="line add">+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ</span>
+<span class="line add">+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1</span>
+<span class="line add">+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL</span>
+<span class="line add">+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX</span>
+<span class="line add">+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5</span>
+<span class="line add">+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg==&quot;/&gt;</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+         &lt;td class=&quot;content&quot;&gt;</span>
+<span class="line add">+          This check applies to x86 hosts only. On the supported arm64 platforms,</span>
+<span class="line add">+KVM hardware-assisted virtualization is available and reports no equivalent CPU</span>
+<span class="line add">+flag.</span>
+<span class="line add">+         &lt;/td&gt;</span>
+<span class="line add">+        &lt;/tr&gt;</span>
+<span class="line add">+       &lt;/table&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line ctx">      &lt;/li&gt;</span>
+<span class="line ctx">      &lt;li&gt;</span>
+<span class="line ctx">       &lt;p&gt;</span>
+<span class="line hunk">@@ -93895,6 +94929,20 @@</span>
+<span class="line ctx"> Virtualization Technology (AMD-V)</span>
+<span class="line ctx">        &lt;/a&gt;</span>
+<span class="line ctx">        support.</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+     &lt;/li&gt;</span>
+<span class="line add">+     &lt;li&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       &lt;em&gt;</span>
+<span class="line add">+        Supported arm64 platforms</span>
+<span class="line add">+       &lt;/em&gt;</span>
+<span class="line add">+      &lt;/p&gt;</span>
+<span class="line add">+      &lt;p&gt;</span>
+<span class="line add">+       The NVIDIA Grace Hopper and NVIDIA Vera platforms. See</span>
+<span class="line add">+       &lt;a href=&quot;#install_arm64_support&quot;&gt;</span>
+<span class="line add">+        64-bit ARM (arm64) Support</span>
+<span class="line add">+       &lt;/a&gt;</span>
+<span class="line add">+       for details.</span>
+<span class="line ctx">       &lt;/p&gt;</span>
+<span class="line ctx">      &lt;/li&gt;</span>
+<span class="line ctx">      &lt;li&gt;</span>
+<span class="line hunk">@@ -98518,7 +99566,7 @@</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        :</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        \s*pve([1248])([cbsp])-[0-9a-f]{10}\s*</span>
+<span class="line add">+        \s*pve([1248])([cbsp])-(arm-)?[0-9a-f]{10}\s*</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -103118,7 +104166,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Target format for file storage. Only valid for full clone.</span>
+<span class="line add">+        Target disk format. Only valid for full clone. If the target storage does not support the format, the storage’s default format is used instead.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -104401,7 +105449,7 @@</span>
+<span class="line ctx">         --net[n]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line add">+        [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,host-tunnel=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -105524,7 +106572,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        Target Format.</span>
+<span class="line add">+        Target disk format. Only used when moving to a different storage. If the target storage does not support the format, the storage’s default format is used instead.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -107086,7 +108134,7 @@</span>
+<span class="line ctx">         --net[n]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line add">+        [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,host-tunnel=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -108581,7 +109629,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        no description available</span>
+<span class="line add">+        Do not check whether the VM is running, used internally during migration. Only root may use this option.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -109683,7 +110731,7 @@</span>
+<span class="line ctx">         --net[n]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line add">+        [model=]&amp;lt;enum&amp;gt; [,bridge=&amp;lt;bridge&amp;gt;] [,firewall=&amp;lt;1|0&amp;gt;] [,host-tunnel=&amp;lt;1|0&amp;gt;] [,link_down=&amp;lt;1|0&amp;gt;] [,macaddr=&amp;lt;XX:XX:XX:XX:XX:XX&amp;gt;] [,mtu=&amp;lt;integer&amp;gt;] [,queues=&amp;lt;integer&amp;gt;] [,rate=&amp;lt;number&amp;gt;] [,tag=&amp;lt;integer&amp;gt;] [,trunks=&amp;lt;vlanid[;vlanid...]&amp;gt;] [,&amp;lt;model&amp;gt;=&amp;lt;macaddr&amp;gt;]</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line hunk">@@ -124603,7 +125651,7 @@</span>
+<span class="line ctx">        ha-manager rules add</span>
+<span class="line ctx">       &lt;/strong&gt;</span>
+<span class="line ctx">       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-       &amp;lt;type&amp;gt; &amp;lt;rule&amp;gt; --resources &amp;lt;string&amp;gt;</span>
+<span class="line add">+       &amp;lt;type&amp;gt; &amp;lt;rule&amp;gt;</span>
+<span class="line ctx">       &lt;/span&gt;</span>
+<span class="line ctx">       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">        [OPTIONS]</span>
+<span class="line hunk">@@ -124647,45 +125695,6 @@</span>
+<span class="line ctx">         HA rule identifier.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --comment</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;string&amp;gt;</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        HA rule description.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --disable</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;boolean&amp;gt;</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        Whether the HA rule is disabled.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --resources</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;{,&amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;}*</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line ctx">     &lt;/div&gt;</span>
+<span class="line ctx">     &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -124705,6 +125714,61 @@</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line ctx">         &lt;dl&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --affinity</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;negative | positive&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          (</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           default =</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           positive</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          )</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Describes whether the HA resources are supposed to be placed on the given nodes (</span>
+<span class="line add">+           &lt;em&gt;</span>
+<span class="line add">+            positive</span>
+<span class="line add">+           &lt;/em&gt;</span>
+<span class="line add">+           ), or are supposed to be placed on any but the given nodes (</span>
+<span class="line add">+           &lt;em&gt;</span>
+<span class="line add">+            negative</span>
+<span class="line add">+           &lt;/em&gt;</span>
+<span class="line add">+           ).</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --comment</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;string&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           HA rule description.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --disable</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Whether the HA rule is disabled.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line ctx">          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">            --nodes</span>
+<span class="line hunk">@@ -124716,6 +125780,19 @@</span>
+<span class="line ctx">          &lt;dd&gt;</span>
+<span class="line ctx">           &lt;p&gt;</span>
+<span class="line ctx">            List of cluster node names with optional priority.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --resources</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;{,&amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;}*</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/dd&gt;</span>
+<span class="line ctx">          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -124771,6 +125848,45 @@</span>
+<span class="line ctx">            ).</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --comment</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;string&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           HA rule description.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --disable</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Whether the HA rule is disabled.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --resources</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;{,&amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;}*</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line ctx">         &lt;/dl&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line hunk">@@ -124963,7 +126079,7 @@</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">       &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --comment</span>
+<span class="line add">+        --delete</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         &amp;lt;string&amp;gt;</span>
+<span class="line hunk">@@ -124971,12 +126087,12 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        HA rule description.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --delete</span>
+<span class="line add">+        A list of settings you want to delete.</span>
+<span class="line add">+       &lt;/p&gt;</span>
+<span class="line add">+      &lt;/dd&gt;</span>
+<span class="line add">+      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+        --digest</span>
+<span class="line ctx">        &lt;/span&gt;</span>
+<span class="line ctx">        &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">         &amp;lt;string&amp;gt;</span>
+<span class="line hunk">@@ -124984,46 +126100,7 @@</span>
+<span class="line ctx">       &lt;/dt&gt;</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;p&gt;</span>
+<span class="line del">-        A list of settings you want to delete.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --digest</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;string&amp;gt;</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line ctx">         Prevent changes if current configuration file has a different digest. This can be used to prevent concurrent modifications.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --disable</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;boolean&amp;gt;</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        Whether the HA rule is disabled.</span>
+<span class="line del">-       &lt;/p&gt;</span>
+<span class="line del">-      &lt;/dd&gt;</span>
+<span class="line del">-      &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        --resources</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-       &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-        &amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;{,&amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;}*</span>
+<span class="line del">-       &lt;/span&gt;</span>
+<span class="line del">-      &lt;/dt&gt;</span>
+<span class="line del">-      &lt;dd&gt;</span>
+<span class="line del">-       &lt;p&gt;</span>
+<span class="line del">-        List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/dd&gt;</span>
+<span class="line ctx">      &lt;/dl&gt;</span>
+<span class="line hunk">@@ -125045,6 +126122,61 @@</span>
+<span class="line ctx">       &lt;dd&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;dlist&quot;&gt;</span>
+<span class="line ctx">         &lt;dl&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --affinity</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;negative | positive&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          (</span>
+<span class="line add">+          &lt;em&gt;</span>
+<span class="line add">+           default =</span>
+<span class="line add">+          &lt;/em&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           positive</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          )</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Describes whether the HA resources are supposed to be placed on the given nodes (</span>
+<span class="line add">+           &lt;em&gt;</span>
+<span class="line add">+            positive</span>
+<span class="line add">+           &lt;/em&gt;</span>
+<span class="line add">+           ), or are supposed to be placed on any but the given nodes (</span>
+<span class="line add">+           &lt;em&gt;</span>
+<span class="line add">+            negative</span>
+<span class="line add">+           &lt;/em&gt;</span>
+<span class="line add">+           ).</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --comment</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;string&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           HA rule description.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --disable</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Whether the HA rule is disabled.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line ctx">          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">            --nodes</span>
+<span class="line hunk">@@ -125056,6 +126188,19 @@</span>
+<span class="line ctx">          &lt;dd&gt;</span>
+<span class="line ctx">           &lt;p&gt;</span>
+<span class="line ctx">            List of cluster node names with optional priority.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --resources</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;{,&amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;}*</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/dd&gt;</span>
+<span class="line ctx">          &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -125109,6 +126254,45 @@</span>
+<span class="line ctx">             negative</span>
+<span class="line ctx">            &lt;/em&gt;</span>
+<span class="line ctx">            ).</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --comment</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;string&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           HA rule description.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --disable</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;boolean&amp;gt;</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Whether the HA rule is disabled.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/dd&gt;</span>
+<span class="line add">+         &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           --resources</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+           &amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;{,&amp;lt;type&amp;gt;:&amp;lt;name&amp;gt;}*</span>
+<span class="line add">+          &lt;/span&gt;</span>
+<span class="line add">+         &lt;/dt&gt;</span>
+<span class="line add">+         &lt;dd&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           List of HA resource IDs. This consists of a list of resource types followed by a resource specific name separated with a colon (example: vm:100,ct:101).</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/dd&gt;</span>
+<span class="line ctx">         &lt;/dl&gt;</span>
+<span class="line hunk">@@ -137492,9 +138676,9 @@</span>
+<span class="line ctx"> &lt;/div&gt;</span>
+<span class="line ctx"> &lt;div id=&quot;footer&quot;&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;footer-text&quot;&gt;</span>
+<span class="line del">-  Version 9.2.3</span>
+<span class="line add">+  Version 9.2.4</span>
+<span class="line ctx">   &lt;br/&gt;</span>
+<span class="line ctx">   Last updated</span>
+<span class="line del">- Fri Jul  3 11:08:20 CEST 2026</span>
+<span class="line add">+ Tue Aug  4 00:30:32 CEST 2026</span>
+<span class="line ctx">  &lt;/div&gt;</span>
+<span class="line ctx"> &lt;/div&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Author</span>
+      <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated:",
+          back_to_menu: "Back to main menu",
+          open_changelog: "Open changelog",
+          footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré :",
+          back_to_menu: "Retour au menu principal",
+          open_changelog: "Ouvrir le changelog",
+          footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано:",
+          back_to_menu: "Назад в главное меню",
+          open_changelog: "Открыть changelog",
+          footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }
+
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function formatTimezoneHint(date) {
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+        const offsetMinutes = -date.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? "+" : "-";
+        const absMinutes = Math.abs(offsetMinutes);
+        const hh = String(Math.floor(absMinutes / 60)).padStart(2, "0");
+        const mm = String(absMinutes % 60).padStart(2, "0");
+        return `${zone} (UTC${sign}${hh}:${mm})`;
+      }
+
+      function applyGeneratedTime() {
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return;
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+        generatedNode.dataset.tooltip = formatTimezoneHint(date);
+      }
+
+      function applyEventTimes() {
+        document.querySelectorAll(".event-time").forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          const iso = node.getAttribute("data-iso") || node.getAttribute("datetime") || "";
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return;
+          const local = formatLocalDateTime(iso);
+          if (local) node.textContent = local;
+          node.dataset.tooltip = formatTimezoneHint(date);
+        });
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyGeneratedTime();
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

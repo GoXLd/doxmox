@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260805T093516Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-08-05T09:35:16Z" data-iso="2026-08-05T09:35:16Z" data-tooltip="">2026-08-05 09:35:16 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260805T093516Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 8.2 introduces three new command‑line options for HA rule management: --affinity, --comment, and --disable. These options give operators finer control over resource placement, documentation, and rule activation.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The addition of --affinity (positive/negative) is a significant functional change that can affect HA cluster stability if mis‑configured, so it warrants careful review. Re‑adding --comment and adding --disable improve usability and operational safety but have lower risk. Documentation updates round out the release.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-high">High</span>New --affinity option for HA‑rule commands</strong><div>All HA‑rule commands (create, set, modify) now accept &quot;--affinity &lt;positive|negative&gt;&quot;. The default is &quot;positive&quot;. Positive affinity forces listed resources to run on the specified nodes, while negative affinity forces them to avoid those nodes.</div><div><em>Impact:</em> Changes how the cluster schedules resources; incorrect settings can cause VMs to be placed on undesired nodes or prevent failover.</div><div><em>Action:</em> Review existing HA rules and explicitly set the desired affinity. Test the new setting in a non‑production environment before applying to critical services.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Re‑added --comment option for HA‑rule commands</strong><div>&quot;--comment &lt;string&gt;&quot; is now available again in the option list for HA‑rule create, set, and modify commands, allowing operators to attach a free‑form description to each rule.</div><div><em>Impact:</em> Improves rule documentation and makes troubleshooting easier, with no effect on rule execution.</div><div><em>Action:</em> Add meaningful comments to all HA rules to aid future maintenance and audits.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>New --disable option for HA‑rule commands</strong><div>&quot;--disable &lt;boolean&gt;&quot; can be used to enable (false) or disable (true) an HA rule without deleting it.</div><div><em>Impact:</em> Allows temporary suspension of a rule, reducing the need for rule recreation and minimizing configuration drift.</div><div><em>Action:</em> Use &quot;--disable true&quot; to pause a rule during maintenance, and re‑enable it with &quot;--disable false&quot; when work is complete.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Default affinity set to positive</strong><div>If the &quot;--affinity&quot; flag is omitted, the system now assumes a positive affinity, preserving backward compatibility with earlier releases where only positive placement was possible.</div><div><em>Impact:</em> Existing scripts that omit the flag will continue to behave as before, but administrators should be aware of the implicit default.</div><div><em>Action:</em> Explicitly specify &quot;--affinity&quot; in automation scripts to avoid ambiguity.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Updated CLI help and man pages for HA‑rule options</strong><div>The command‑line help output and manual pages now list the new options (--affinity, --comment, --disable) and clarify default behaviors.</div><div><em>Impact:</em> Operators receive accurate guidance directly from the CLI, reducing the chance of misconfiguration.</div><div><em>Action:</em> Run &quot;pve-ha-manager --help&quot; or consult the updated man pages after upgrading.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 8.2 introduit trois nouvelles options en ligne de commande pour la gestion des règles HA : --affinity, --comment et --disable. Ces options offrent aux opérateurs un contrôle plus fin sur le placement des ressources, la documentation et l’activation des règles.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> L’ajout de --affinity (positif/négatif) constitue un changement fonctionnel important qui peut affecter la stabilité du cluster HA s’il est mal configuré, il nécessite donc un examen attentif. La réintroduction de --comment et l’ajout de --disable améliorent l’utilisabilité et la sécurité opérationnelle, mais présentent un risque moindre. Les mises à jour de la documentation complètent la version.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-high">Élevé</span>Nouvelle option --affinity pour les commandes de règle HA</strong><div>Toutes les commandes HA‑rule (create, set, modify) acceptent désormais « --affinity &lt;positive|negative&gt; ». La valeur par défaut est « positive ». L&#x27;affinité positive oblige les ressources listées à s&#x27;exécuter sur les nœuds spécifiés, tandis que l&#x27;affinité négative les contraint à éviter ces nœuds.</div><div><em>Impact:</em> Modifie la façon dont le cluster planifie les ressources ; des paramètres incorrects peuvent entraîner le placement des VM sur des nœuds indésirables ou empêcher le basculement.</div><div><em>Action:</em> Examinez les règles HA existantes et définissez explicitement l&#x27;affinité souhaitée. Testez le nouveau paramètre dans un environnement non‑production avant de l&#x27;appliquer aux services critiques.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Option --comment réajoutée aux commandes HA‑rule</strong><div>« --comment &lt;string&gt; » est de nouveau disponible dans la liste des options pour les commandes HA‑rule create, set et modify, permettant aux opérateurs d’attacher une description libre à chaque règle.</div><div><em>Impact:</em> Améliore la documentation des règles et facilite le dépannage, sans aucun impact sur l&#x27;exécution des règles.</div><div><em>Action:</em> Ajoutez des commentaires pertinents à toutes les règles HA afin de faciliter la maintenance et les audits futurs.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Nouvelle option --disable pour les commandes HA‑rule</strong><div>&quot;--disable &lt;boolean&gt;&quot; peut être utilisé pour activer (false) ou désactiver (true) une règle HA sans la supprimer.</div><div><em>Impact:</em> Permet la suspension temporaire d’une règle, réduisant le besoin de recréation de règle et minimisant la dérive de configuration.</div><div><em>Action:</em> Utilisez &quot;--disable true&quot; pour mettre en pause une règle pendant la maintenance, et réactivez‑la avec &quot;--disable false&quot; une fois le travail terminé.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Affinité par défaut définie sur positive</strong><div>Si le drapeau « --affinity » est omis, le système suppose désormais une affinité positive, préservant la compatibilité descendante avec les versions antérieures où seul le placement positif était possible.</div><div><em>Impact:</em> Existing scripts that omit the flag will continue to behave as before, but administrators should be aware of the implicit default.</div><div><em>Action:</em> Spécifiez explicitement &quot;--affinity&quot; dans les scripts d&#x27;automatisation pour éviter toute ambiguïté.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Mise à jour de l&#x27;aide CLI et des pages de manuel pour les options de règle HA.</strong><div>The command‑line help output and manual pages now list the new options (--affinity, --comment, --disable) and clarify default behaviors.</div><div><em>Impact:</em> Les opérateurs reçoivent des instructions précises directement depuis la CLI, réduisant le risque de mauvaise configuration.</div><div><em>Action:</em> Exécutez « pve-ha-manager --help » ou consultez les pages de manuel mises à jour après la mise à niveau.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 8.2 вводит три новых параметра командной строки для управления правилами HA: --affinity, --comment и --disable. Эти параметры предоставляют операторам более тонкий контроль над размещением ресурсов, документированием и активацией правил.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Добавление параметра --affinity (положительного/отрицательного) представляет собой значительное функциональное изменение, которое может повлиять на стабильность кластера HA при неправильной настройке, поэтому требует тщательного рассмотрения. Возврат параметра --comment и добавление --disable повышают удобство использования и эксплуатационную безопасность, но несут меньший риск. Обновления документации завершают выпуск.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-high">Высокая</span>New --affinity option for HA‑rule commands</strong><div>Все команды HA‑rule (create, set, modify) теперь принимают параметр &quot;--affinity &lt;positive|negative&gt;&quot;. По умолчанию — &quot;positive&quot;. Положительная аффинность заставляет перечисленные ресурсы работать на указанных узлах, а отрицательная аффинность заставляет их избегать этих узлов.</div><div><em>Impact:</em> Изменяет способ, которым кластер планирует распределение ресурсов; неверные настройки могут привести к размещению ВМ на нежелательных узлах или препятствовать переключению (failover).</div><div><em>Action:</em> Проверьте существующие правила HA и явно задайте требуемую аффинити. Протестируйте новую настройку в непроизводственной среде перед применением к критическим сервисам.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Снова добавлен параметр --comment для команд HA‑rule.</strong><div>«--comment &lt;string&gt;» теперь снова доступен в списке опций команд HA‑rule create, set и modify, позволяя операторам прикреплять свободное описание к каждому правилу.</div><div><em>Impact:</em> Улучшает документацию правил и упрощает устранение неполадок, не влияя на выполнение правил.</div><div><em>Action:</em> Добавьте содержательные комментарии ко всем правилам HA, чтобы облегчить их последующее обслуживание и аудит.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Новая опция --disable для команд HA‑rule.</strong><div>--disable &lt;boolean&gt; может использоваться для включения (false) или отключения (true) правила HA без его удаления.</div><div><em>Impact:</em> Позволяет временно приостановить правило, сокращая необходимость в его повторном создании и минимизируя дрейф конфигурации.</div><div><em>Action:</em> Используйте «--disable true», чтобы приостановить правило во время обслуживания, и включите его обратно с помощью «--disable false», когда работа завершена.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>По умолчанию аффинити установлено в положительное.</strong><div>Если флаг «--affinity» не указан, система теперь предполагает положительную аффинность, сохраняя обратную совместимость с более ранними версиями, где было возможно только положительное размещение.</div><div><em>Impact:</em> Существующие скрипты, которые опускают флаг, продолжат вести себя как раньше, но администраторам следует учитывать подразумеваемое значение по умолчанию.</div><div><em>Action:</em> Явно указывайте «--affinity» в скриптах автоматизации, чтобы избежать неоднозначности.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Обновлена справка CLI и man‑страницы для параметров HA‑rule.</strong><div>В справке командной строки и в руководствах теперь перечислены новые параметры (--affinity, --comment, --disable) и уточнено поведение по умолчанию.</div><div><em>Impact:</em> Операторы получают точные указания напрямую из CLI, уменьшая вероятность ошибочной конфигурации.</div><div><em>Action:</em> Запустите «pve-ha-manager --help» или обратитесь к обновлённым справочным страницам после обновления.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>
