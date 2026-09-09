@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260909T030717Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-09-09T03:07:17Z" data-iso="2026-09-09T03:07:17Z" data-tooltip="">2026-09-09 03:07:17 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260909T030717Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> This release updates the Proxmox Ceph integration documentation and tools. It removes outdated key‑ring copy instructions, renumbers several sections, adds a health‑check mute feature, introduces a migration path from AES to AES‑256‑K for CephX keys, provides a helper utility for the migration, and adds a new CLI command to view key status. Operators get clearer guidance and new safety mechanisms; newcomers see a more streamlined learning path.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The documentation overhaul improves operational clarity and reduces the risk of mis‑configuration. The most critical change is the AES‑256‑K migration, which addresses CVE‑2025‑30156 and strengthens cluster security. The mute health‑check feature aids alert management but must be used carefully to avoid hiding real issues. Overall, the release balances security hardening with usability enhancements, making it a net positive for production environments.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Low</span>Removal of outdated key‑ring copy example</strong><div>The documentation no longer includes the `mkdir /etc/pve/priv/ceph … cp …` snippet that was previously used to copy Ceph key‑rings manually.</div><div><em>Impact:</em> Operators who followed the old guide may need to adjust their scripts; the new process relies on the automated migration helper.</div><div><em>Action:</em> Review any custom automation that uses the removed commands and replace them with the new helper tool or standard Ceph key management commands.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Section renumbering for CephFS and Ceph Maintenance</strong><div>All subsections under CephFS and Ceph Maintenance have been incremented by one level (e.g., CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).</div><div><em>Impact:</em> Links or bookmarks to specific sections may break.</div><div><em>Action:</em> Update internal documentation or scripts that reference the old section numbers.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>New &quot;Mute a Health Check&quot; feature</strong><div>Introduces `ceph health mute &lt;CHECK&gt; &lt;duration&gt;` (e.g., `2w`) and a UI workflow (Datacenter → Ceph → Mute/Unmute). Includes a `--sticky` option to keep the mute active even when new items appear.</div><div><em>Impact:</em> Allows operators to silence non‑critical alerts temporarily, reducing noise in monitoring dashboards.</div><div><em>Action:</em> Use the mute command or UI only for alerts that are understood and being addressed elsewhere; always document the mute duration and reason.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>Migration of CephX keys from AES to AES‑256‑K</strong><div>Adds a dedicated section explaining why health checks appear after upgrading to Ceph Squid 19.2.6 / Tentacle 20.2.4 and outlines the security rationale (CVE‑2025‑30156).</div><div><em>Impact:</em> Clusters using older AES ciphers are vulnerable; migration is required to maintain compliance and security.</div><div><em>Action:</em> Plan and execute the key‑migration using the provided helper tool; verify that all clients support AES‑256‑K before applying.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>CephX key‑migration helper utility</strong><div>New documentation covers staged keys, confirmation flags, abort procedures, emergency cipher override, and recovery steps. Key flags include `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed &lt;USER&gt;`, `--abort‑staged‑key &lt;USER&gt; --apply`, and `--confirm‑abort‑clients‑refreshed &lt;USER&gt; --apply`.</div><div><em>Impact:</em> Provides a safe, automated way to transition keys without service interruption, but misuse can lock out clients.</div><div><em>Action:</em> Run the helper in a test environment first, follow the step‑by‑step checklist, and ensure you have backups of existing key files (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>New CLI command `pveceph auth status`</strong><div>Displays current CephX key ciphers and reports any prerequisites for the AES‑256‑K migration. Supports standard format options for scripting.</div><div><em>Impact:</em> Operators can quickly verify migration readiness and audit key status across the cluster.</div><div><em>Action:</em> Integrate `pveceph auth status` into health‑check scripts and run it before starting the migration process.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Emergency Cipher Override configuration</strong><div>Introduces the `mon_auth_emergency_allowed_ciphers` setting and its interaction with `AUTH_EMERGENCY_CIPHERS_SET` to allow temporary fallback to weaker ciphers during migration emergencies.</div><div><em>Impact:</em> Provides a safety valve if a migration fails, but using weaker ciphers reduces security temporarily.</div><div><em>Action:</em> Only enable the override in a controlled emergency; revert to the default cipher set as soon as the migration completes.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Cette version met à jour la documentation et les outils d’intégration Proxmox Ceph. Elle supprime les instructions obsolètes de copie du key‑ring, renumérote plusieurs sections, ajoute une fonction de mise en sourdine du health‑check, introduit un chemin de migration d’AES vers AES‑256‑K pour les clés CephX, fournit un utilitaire d’aide à la migration, et ajoute une nouvelle commande CLI pour afficher l’état des clés. Les opérateurs bénéficient d’instructions plus claires et de nouveaux mécanismes de sécurité ; les nouveaux arrivants disposent d’un parcours d’apprentissage plus simplifié.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> La refonte de la documentation améliore la clarté opérationnelle et réduit le risque de mauvaise configuration. Le changement le plus critique est la migration AES‑256‑K, qui traite la CVE‑2025‑30156 et renforce la sécurité du cluster. La fonction de mise en sourdine du health‑check facilite la gestion des alertes mais doit être utilisée avec précaution afin de ne pas masquer de vrais problèmes. Dans l’ensemble, la version équilibre le renforcement de la sécurité avec des améliorations de convivialité, ce qui en fait un avantage net pour les environnements de production.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Faible</span>Suppression de l&#x27;exemple de copie de key‑ring obsolète</strong><div>La documentation n’inclut plus le fragment `mkdir /etc/pve/priv/ceph … cp …` qui était auparavant utilisé pour copier manuellement les key‑rings Ceph.</div><div><em>Impact:</em> Les opérateurs qui ont suivi l’ancien guide pourraient devoir ajuster leurs scripts ; le nouveau processus repose sur le migration helper automatisé.</div><div><em>Action:</em> Examinez toute automatisation personnalisée qui utilise les commandes supprimées et remplacez‑les par le nouvel outil d’assistance ou les commandes standard de gestion des clés Ceph.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Renumérotation des sections pour CephFS et la maintenance Ceph</strong><div>Toutes les sous‑sections sous CephFS et Ceph Maintenance ont été incrémentées d’un niveau (par ex., CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).</div><div><em>Impact:</em> Links or bookmarks to specific sections may break.</div><div><em>Action:</em> Mettez à jour la documentation interne ou les scripts qui font référence aux anciens numéros de section.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Nouvelle fonctionnalité « Mute a Health Check »</strong><div>Introduit `ceph health mute &lt;CHECK&gt; &lt;duration&gt;` (par ex., `2w`) et un flux de travail UI (Datacenter → Ceph → Mute/Unmute). Inclut une option `--sticky` pour maintenir la mise en sourdine active même lorsque de nouveaux éléments apparaissent.</div><div><em>Impact:</em> Permet aux opérateurs de mettre en sourdine les alertes non critiques temporairement, réduisant le bruit sur les tableaux de bord de surveillance.</div><div><em>Action:</em> Utilisez la commande mute ou l&#x27;UI uniquement pour les alertes qui sont comprises et traitées ailleurs ; documentez toujours la durée du mute et la raison.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Migration des clés CephX d&#x27;AES vers AES‑256‑K</strong><div>Ajoute une section dédiée expliquant pourquoi les contrôles de santé apparaissent après la mise à jour vers Ceph Squid 19.2.6 / Tentacle 20.2.4 et décrit la justification de sécurité (CVE‑2025‑30156).</div><div><em>Impact:</em> Les clusters utilisant d&#x27;anciens chiffrements AES sont vulnérables ; une migration est nécessaire pour garantir la conformité et la sécurité.</div><div><em>Action:</em> Planifiez et exécutez la migration de clés à l’aide de l’outil d’assistance fourni ; vérifiez que tous les clients prennent en charge AES‑256‑K avant de l’appliquer.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Outil d&#x27;aide à la migration de clé CephX</strong><div>La nouvelle documentation couvre les clés mises en scène, les drapeaux de confirmation, les procédures d’annulation, le contournement d’urgence du chiffrement et les étapes de récupération. Les drapeaux de clé incluent `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed &lt;USER&gt;`, `--abort‑staged‑key &lt;USER&gt; --apply`, et `--confirm‑abort‑clients‑refreshed &lt;USER&gt; --apply`.</div><div><em>Impact:</em> Fournit un moyen sûr et automatisé de faire la transition des clés sans interruption de service, mais une mauvaise utilisation peut bloquer les clients.</div><div><em>Action:</em> Exécutez d&#x27;abord l’assistant dans un environnement de test, suivez la liste de contrôle étape par étape et assurez‑vous d’avoir des sauvegardes des fichiers de clés existants (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Nouvelle commande CLI `pveceph auth status`</strong><div>Affiche les chiffrements de clés CephX actuels et signale les prérequis éventuels pour la migration AES‑256‑K. Prend en charge les options de format standard pour le scripting.</div><div><em>Impact:</em> Les opérateurs peuvent rapidement vérifier la disponibilité de la migration et le statut des clés d’audit sur l’ensemble du cluster.</div><div><em>Action:</em> Intégrez `pveceph auth status` dans les scripts de vérification de l’état de santé et exécutez‑le avant de lancer le processus de migration.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Configuration de la dérogation d&#x27;urgence du chiffrement</strong><div>Introduit le paramètre `mon_auth_emergency_allowed_ciphers` et son interaction avec `AUTH_EMERGENCY_CIPHERS_SET` pour permettre un repli temporaire vers des chiffrements plus faibles lors d&#x27;urgences de migration.</div><div><em>Impact:</em> Fournit une soupape de sécurité en cas d&#x27;échec d&#x27;une migration, mais l&#x27;utilisation de chiffrements plus faibles réduit temporairement la sécurité.</div><div><em>Action:</em> Activez l&#x27;override uniquement en cas d&#x27;urgence contrôlée ; revenez à l&#x27;ensemble de chiffrements par défaut dès que la migration est terminée.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Этот релиз обновляет документацию и инструменты интеграции Proxmox Ceph. Он удаляет устаревшие инструкции по копированию key‑ring, перенумеровывает несколько разделов, добавляет возможность отключения health‑check, вводит путь миграции с AES на AES‑256‑K для ключей CephX, предоставляет вспомогательную утилиту для миграции и добавляет новую CLI‑команду для просмотра статуса ключа. Операторы получают более чёткие рекомендации и новые механизмы безопасности; новички видят более упрощённый путь обучения.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Полный пересмотр документации повышает операционную ясность и снижает риск неправильной конфигурации. Самым критическим изменением является миграция AES‑256‑K, которая устраняет CVE‑2025‑30156 и усиливает безопасность кластера. Функция mute health‑check помогает управлять оповещениями, но должна использоваться осторожно, чтобы не скрывать реальные проблемы. В целом выпуск сочетает укрепление безопасности с улучшениями удобства использования, что делает его положительным для производственных сред.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Низкая</span>Удаление устаревшего примера копии key‑ring</strong><div>В документации больше нет фрагмента `mkdir /etc/pve/priv/ceph … cp …`, который ранее использовался для ручного копирования ключевых колец Ceph.</div><div><em>Impact:</em> Операторам, которые следовали старому руководству, возможно, придётся скорректировать свои скрипты; новый процесс опирается на автоматический помощник миграции.</div><div><em>Action:</em> Проверьте любую пользовательскую автоматизацию, использующую удалённые команды, и замените их новым вспомогательным инструментом или стандартными командами управления ключами Ceph.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Перенумерация разделов для CephFS и обслуживания Ceph</strong><div>Все подразделы в разделе CephFS и Ceph Maintenance были повышены на один уровень (например, CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).</div><div><em>Impact:</em> Links or bookmarks to specific sections may break.</div><div><em>Action:</em> Обновите внутреннюю документацию или скрипты, которые ссылаются на старые номера разделов.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Новая функция «Отключить проверку состояния»</strong><div>Вводит `ceph health mute &lt;CHECK&gt; &lt;duration&gt;` (например, `2w`) и UI‑процесс (Datacenter → Ceph → Mute/Unmute). Включает параметр `--sticky`, позволяющий сохранять отключение звука даже при появлении новых элементов.</div><div><em>Impact:</em> Позволяет операторам временно заглушать некритические оповещения, уменьшая шум в дашбордах мониторинга.</div><div><em>Action:</em> Используйте команду mute или UI только для оповещений, которые понятны и решаются в другом месте; всегда фиксируйте длительность mute и причину.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Миграция ключей CephX с AES на AES‑256‑K</strong><div>Добавлен отдельный раздел, объясняющий, почему после обновления до Ceph Squid 19.2.6 / Tentacle 20.2.4 появляются проверки состояния, и излагающий обоснование безопасности (CVE‑2025‑30156).</div><div><em>Impact:</em> Кластеры, использующие устаревшие шифры AES, уязвимы; требуется миграция для обеспечения соответствия и безопасности.</div><div><em>Action:</em> Спланируйте и выполните миграцию ключа с помощью предоставленного вспомогательного инструмента; убедитесь, что все клиенты поддерживают AES‑256‑K перед применением.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Вспомогательная утилита миграции ключей CephX</strong><div>Новая документация охватывает staged keys, флаги подтверждения, процедуры отмены, экстренный переопределитель шифра и шаги восстановления. Флаги ключа включают `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed &lt;USER&gt;`, `--abort‑staged‑key &lt;USER&gt; --apply` и `--confirm‑abort‑clients‑refreshed &lt;USER&gt; --apply`.</div><div><em>Impact:</em> Обеспечивает безопасный, автоматизированный способ перехода ключей без прерывания обслуживания, однако неправильное использование может заблокировать клиентов.</div><div><em>Action:</em> Сначала запустите помощник в тестовой среде, следуйте пошаговому чек‑листу и убедитесь, что у вас есть резервные копии существующих ключевых файлов (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Новая команда CLI `pveceph auth status`</strong><div>Отображает текущие шифры ключей CephX и сообщает о любых предварительных требованиях для миграции AES‑256‑K. Поддерживает стандартные параметры формата для скриптов.</div><div><em>Impact:</em> Операторы могут быстро проверить готовность к миграции и выполнить аудит статуса ключа во всём кластере.</div><div><em>Action:</em> Интегрируйте `pveceph auth status` в скрипты проверки состояния и выполните его перед запуском процесса миграции.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Конфигурация аварийного переопределения Cipher</strong><div>Вводит параметр `mon_auth_emergency_allowed_ciphers` и его взаимодействие с `AUTH_EMERGENCY_CIPHERS_SET`, позволяющие временно переключаться на более слабые шифры в случае чрезвычайных ситуаций миграции.</div><div><em>Impact:</em> Обеспечивает предохранительный механизм в случае неудачной миграции, но использование более слабых шифров временно снижает безопасность.</div><div><em>Action:</em> Включайте переопределение только в контролируемой чрезвычайной ситуации; возвращайтесь к набору шифров по умолчанию, как только миграция завершится.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

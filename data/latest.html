@@ -346,10 +346,10 @@ ICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg==" title="Proxmox VE Administration G
  </span>
  <br/>
  <span id="revnumber">
-  version 9.2.4,
+  version 9.2.10,
  </span>
  <span id="revdate">
-  Tue Aug  4 00:30:32 CEST 2026
+  Tue Sep  8 21:32:09 CEST 2026
  </span>
  <div id="toc">
   <a href="index.html" style="font-size: 0.8em;">
@@ -8986,6 +8986,85 @@ traffic.
 using the corresponding bonding mode (802.3ad). Otherwise you should generally
 use the active-backup mode.
       </p>
+     </div>
+     <div class="admonitionblock">
+      <table>
+       <tr>
+        <td class="icon">
+         <img alt="Warning" src="data:image/png;base64,
+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
+/F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
+        </td>
+        <td class="content">
+         The bond modes
+         <em>
+          balance-alb
+         </em>
+         and
+         <em>
+          balance-tlb
+         </em>
+         are not suitable when
+the local addresses are not known to the host. These bond modes should not be
+used when a Linux bridge with guests is used in combination with the bond.
+        </td>
+       </tr>
+      </table>
      </div>
      <div class="paragraph">
       <p>
@@ -30166,12 +30245,13 @@ It will be saved in a file only readable by root
        </dt>
        <dd>
         <p>
-         SMB protocol Version. Optional, default is
+         SMB protocol version. Optional, when set to
          <span class="monospaced">
-          3
+          default
          </span>
-         .
-SMB1 is not supported due to security issues.
+         or when unset, negotiates
+the highest SMB2+ version supported by both the client and server. SMB1 is not
+supported due to security issues.
         </p>
        </dd>
        <dt class="hdlist1">
@@ -32768,9 +32848,15 @@ Proxmox VE cluster.
        </dt>
        <dd>
         <p>
-         RBD user ID. Optional, only needed if Ceph is not running on the Proxmox VE cluster.
-Note that only the user ID should be used. The "client." type prefix must be
-left out.
+         Ceph client ID. Optional, defaults to
+         <span class="monospaced">
+          admin
+         </span>
+         . Use only the ID without the
+         <span class="monospaced">
+          client.
+         </span>
+         prefix.
         </p>
        </dd>
        <dt class="hdlist1">
@@ -32845,7 +32931,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
      </div>
      <div class="listingblock">
       <div class="title">
-       Configuration Example for a external Ceph cluster (
+       Configuration Example for an external Ceph cluster (
        <span class="monospaced">
         /etc/pve/storage.cfg
        </span>
@@ -32856,7 +32942,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         monhost 10.1.1.20 10.1.1.21 10.1.1.22
         pool ceph-external
         content images
-        username admin</pre>
+        username pve-rbd</pre>
       </div>
      </div>
      <div class="admonitionblock">
@@ -32925,9 +33011,9 @@ qTCT16/0nPgLA/i6xjf+Xw3+B2ll/uiqTaJTAAAAAElFTkSuQmCC"/>
      </div>
     </div>
     <div class="sect3">
-     <h4 id="_authentication">
+     <h4 id="storage_rbd_auth">
       7.14.2. Authentication
-      <a class="headerlink" href="#_authentication" title="Permalink to this heading">
+      <a class="headerlink" href="#storage_rbd_auth" title="Permalink to this heading">
       </a>
      </h4>
      <div class="admonitionblock">
@@ -32993,45 +33079,74 @@ automatically when adding the storage.
        <span class="monospaced">
         cephx
        </span>
-       authentication, which is enabled by default, you need to
-provide the keyring from the external Ceph cluster.
+       authentication, which is enabled by default, provide a
+keyring from the external Ceph cluster. Obtain or create a dedicated identity
+with only the capabilities required for this storage, as described in
+Ceph User Management.
+       <span class="footnote" id="_footnote_cephusermgmt">
+        <br/>
+        [
+        <a href="https://docs.ceph.com/en/tentacle/rados/operations/user-management/">
+         Ceph User Management
+        </a>
+        ]
+        <br/>
+       </span>
+       The example below uses
+       <span class="monospaced">
+        client.pve-rbd
+       </span>
+       ; do not copy
+       <span class="monospaced">
+        client.admin
+       </span>
+       to a storage
+client.
       </p>
      </div>
      <div class="paragraph">
       <p>
-       To configure the storage via the CLI, you first need to make the file
-containing the keyring available. One way is to copy the file from the external
-Ceph cluster directly to one of the Proxmox VE nodes. The following example will
-copy it to the
-       <span class="monospaced">
-        /root
-       </span>
-       directory of the node on which we run it:
+       Copy the keyring to one Proxmox VE node:
       </p>
      </div>
      <div class="listingblock">
       <div class="content monospaced">
-       <pre># scp &lt;external cephserver&gt;:/etc/ceph/ceph.client.admin.keyring /root/rbd.keyring</pre>
+       <pre># scp &lt;external-ceph-server&gt;:/etc/ceph/ceph.client.pve-rbd.keyring /root/rbd.keyring</pre>
       </div>
      </div>
      <div class="paragraph">
       <p>
-       Then use the
+       Then pass that file and the identity without its
+       <span class="monospaced">
+        client.
+       </span>
+       prefix to
        <span class="monospaced">
         pvesm
        </span>
-       CLI tool to configure the external RBD storage, use the
-       <span class="monospaced">
-        --keyring
-       </span>
-       parameter, which needs to be a path to the keyring file that you
-copied.  For example:
+       :
       </p>
      </div>
      <div class="listingblock">
       <div class="content monospaced">
-       <pre># pvesm add rbd &lt;name&gt; --monhost "10.1.1.20 10.1.1.21 10.1.1.22" --content images --keyring /root/rbd.keyring</pre>
+       <pre># pvesm add rbd &lt;name&gt; --monhost "10.1.1.20 10.1.1.21 10.1.1.22" \
+    --pool ceph-external --content images --username pve-rbd \
+    --keyring /root/rbd.keyring</pre>
       </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       After
+       <span class="monospaced">
+        pvesm
+       </span>
+       succeeds, remove
+       <span class="monospaced">
+        /root/rbd.keyring
+       </span>
+       because it contains the key
+in plain text.
+      </p>
      </div>
      <div class="paragraph">
       <p>
@@ -33049,76 +33164,12 @@ the keyring into the appropriate field.
        <pre># /etc/pve/priv/ceph/&lt;STORAGE_ID&gt;.keyring</pre>
       </div>
      </div>
-     <div class="admonitionblock">
-      <table>
-       <tr>
-        <td class="icon">
-         <img alt="Tip" src="data:image/png;base64,
-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"/>
-        </td>
-        <td class="content">
-         Creating a keyring with only the needed capabilities is recommended when
-connecting to an external cluster. For further information on Ceph user
-management, see the Ceph docs.
-         <span class="footnote" id="_footnote_cephusermgmt">
-          <br/>
-          [
-          <a href="https://docs.ceph.com/en/tentacle/rados/operations/user-management/">
-           Ceph User Management
-          </a>
-          ]
-          <br/>
-         </span>
-        </td>
-       </tr>
-      </table>
+     <div class="paragraph">
+      <p>
+       If the external cluster rotates this identity, replace the stored keyring before
+refreshing its consumers. The local cephx migration helper never rotates keys
+of external clusters.
+      </p>
      </div>
     </div>
     <div class="sect3">
@@ -33552,12 +33603,15 @@ on the Proxmox VE cluster.
        </dt>
        <dd>
         <p>
-         Ceph user id. Optional, only needed if Ceph is not running on the Proxmox VE cluster,
-where it defaults to
+         Ceph client ID. Optional, defaults to
          <span class="monospaced">
           admin
          </span>
-         .
+         . Use only the ID without the
+         <span class="monospaced">
+          client.
+         </span>
+         prefix.
         </p>
        </dd>
        <dt class="hdlist1">
@@ -33600,7 +33654,7 @@ to
         monhost 10.1.1.20 10.1.1.21 10.1.1.22
         path /mnt/pve/cephfs-external
         content backup
-        username admin
+        username pve-cephfs
         fs-name cephfs</pre>
       </div>
      </div>
@@ -33663,9 +33717,9 @@ disabled.
      </div>
     </div>
     <div class="sect3">
-     <h4 id="_authentication_2">
+     <h4 id="storage_cephfs_auth">
       7.15.2. Authentication
-      <a class="headerlink" href="#_authentication_2" title="Permalink to this heading">
+      <a class="headerlink" href="#storage_cephfs_auth" title="Permalink to this heading">
       </a>
      </h4>
      <div class="admonitionblock">
@@ -33731,87 +33785,10 @@ automatically when adding the storage.
        <span class="monospaced">
         cephx
        </span>
-       authentication, which is enabled by default, you need to
-provide the secret from the external Ceph cluster.
-      </p>
-     </div>
-     <div class="paragraph">
-      <p>
-       To configure the storage via the CLI, you first need to make the file
-containing the secret available. One way is to copy the file from the external
-Ceph cluster directly to one of the Proxmox VE nodes. The following example will
-copy it to the
-       <span class="monospaced">
-        /root
-       </span>
-       directory of the node on which we run it:
-      </p>
-     </div>
-     <div class="listingblock">
-      <div class="content monospaced">
-       <pre># scp &lt;external cephserver&gt;:/etc/ceph/cephfs.secret /root/cephfs.secret</pre>
-      </div>
-     </div>
-     <div class="paragraph">
-      <p>
-       Then use the
-       <span class="monospaced">
-        pvesm
-       </span>
-       CLI tool to configure the external CephFS storage, use
-the
-       <span class="monospaced">
-        --keyring
-       </span>
-       parameter, which needs to be a path to the secret file that
-you copied.  For example:
-      </p>
-     </div>
-     <div class="listingblock">
-      <div class="content monospaced">
-       <pre># pvesm add cephfs &lt;name&gt; --monhost "10.1.1.20 10.1.1.21 10.1.1.22" --content backup --keyring /root/cephfs.secret</pre>
-      </div>
-     </div>
-     <div class="paragraph">
-      <p>
-       When configuring an external CephFS storage via the GUI, you can copy and
-paste the secret into the appropriate field.
-      </p>
-     </div>
-     <div class="paragraph">
-      <p>
-       The secret is only the key itself, as opposed to the
-       <span class="monospaced">
-        rbd
-       </span>
-       backend which also
-contains a
-       <span class="monospaced">
-        [client.userid]
-       </span>
-       section.
-      </p>
-     </div>
-     <div class="paragraph">
-      <p>
-       The secret will be stored at
-      </p>
-     </div>
-     <div class="listingblock">
-      <div class="content monospaced">
-       <pre># /etc/pve/priv/ceph/&lt;STORAGE_ID&gt;.secret</pre>
-      </div>
-     </div>
-     <div class="paragraph">
-      <p>
-       A secret can be received from the Ceph cluster (as Ceph admin) by issuing the
-command below, where
-       <span class="monospaced">
-        userid
-       </span>
-       is the client ID that has been configured to
-access the cluster. For further information on Ceph user management, see the
-Ceph docs.
+       authentication, which is enabled by default, provide the
+secret of a dedicated identity with only the capabilities required for this
+storage. Obtain or create the identity as described in
+Ceph User Management.
        <span class="footnoteref">
         <br/>
         <a href="#_footnote_cephusermgmt">
@@ -33819,12 +33796,84 @@ Ceph docs.
         </a>
         <br/>
        </span>
+       The example below uses
+       <span class="monospaced">
+        client.pve-cephfs
+       </span>
+       ; do not use
+       <span class="monospaced">
+        client.admin
+       </span>
+       for a
+storage client.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       Export the bare key through SSH to one Proxmox VE node:
       </p>
      </div>
      <div class="listingblock">
       <div class="content monospaced">
-       <pre># ceph auth get-key client.userid &gt; cephfs.secret</pre>
+       <pre># ssh root@&lt;external-ceph-server&gt; \
+    'ceph auth get-key client.pve-cephfs' &gt; /root/cephfs.secret</pre>
       </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       Then pass that file and the identity without its
+       <span class="monospaced">
+        client.
+       </span>
+       prefix to
+       <span class="monospaced">
+        pvesm
+       </span>
+       :
+      </p>
+     </div>
+     <div class="listingblock">
+      <div class="content monospaced">
+       <pre># pvesm add cephfs &lt;name&gt; --monhost "10.1.1.20 10.1.1.21 10.1.1.22" \
+    --fs-name cephfs --content backup --username pve-cephfs \
+    --keyring /root/cephfs.secret</pre>
+      </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       After
+       <span class="monospaced">
+        pvesm
+       </span>
+       succeeds, remove
+       <span class="monospaced">
+        /root/cephfs.secret
+       </span>
+       because it contains the key
+in plain text.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       When configuring an external CephFS storage in the web interface, paste the
+secret into the appropriate field. CephFS uses the bare key, not the RBD keyring
+format with a
+       <span class="monospaced">
+        [client.&lt;USER&gt;]
+       </span>
+       section. Proxmox VE stores the secret at
+       <span class="monospaced">
+        /etc/pve/priv/ceph/&lt;STORAGE_ID&gt;.secret
+       </span>
+       .
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       If the external cluster rotates this identity, replace the stored secret before
+remounting the storage. The local cephx migration helper never rotates keys of
+external clusters.
+      </p>
      </div>
     </div>
     <div class="sect3">
@@ -38769,9 +38818,282 @@ pools and their
     </div>
    </div>
    <div class="sect2">
+    <h3 id="pveceph_cephx_how_it_works">
+     <span>
+      8.11. Cephx Authentication
+     </span>
+     <a class="headerlink" href="#pveceph_cephx_how_it_works" title="Permalink to this heading">
+     </a>
+    </h3>
+    <div class="paragraph">
+     <p>
+      Cephx
+      <span class="footnote">
+       <br/>
+       [Cephx authorization and authentication protocol
+       <a href="https://docs.ceph.com/en/tentacle/dev/cephx_protocol/">
+        https://docs.ceph.com/en/tentacle/dev/cephx_protocol/
+       </a>
+       ]
+       <br/>
+      </span>
+      protects access to a Ceph cluster.
+     </p>
+    </div>
+    <div class="paragraph">
+     <p>
+      Every Ceph service and client, including storage consumers and tools,
+authenticates to a monitor as a Ceph user, such as
+      <span class="monospaced">
+       client.admin
+      </span>
+      or
+      <span class="monospaced">
+       osd.3
+      </span>
+      ,
+with that user’s long-term secret key. The monitor then issues temporary
+credentials called tickets:
+     </p>
+    </div>
+    <div style="overflow-x:auto">
+     <table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+      <col style="width:28%;"/>
+      <col style="width:71%;"/>
+      <thead>
+       <tr>
+        <th class="tableblock halign-left valign-top">
+         Term
+        </th>
+        <th class="tableblock halign-left valign-top">
+         Purpose
+        </th>
+       </tr>
+      </thead>
+      <tbody>
+       <tr>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          User key
+         </p>
+        </td>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Long-term secret used by a client or Ceph service to authenticate to a monitor.
+         </p>
+        </td>
+       </tr>
+       <tr>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Monitor ticket
+         </p>
+        </td>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Lets an authenticated Ceph user request tickets for Ceph services.
+         </p>
+        </td>
+       </tr>
+       <tr>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Service ticket
+         </p>
+        </td>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Grants temporary access to an OSD, manager, or metadata server.
+         </p>
+        </td>
+       </tr>
+       <tr>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Rotating service key
+         </p>
+        </td>
+        <td class="tableblock halign-left valign-top">
+         <p class="tableblock">
+          Lets Ceph services validate service tickets. Monitors
+replace these keys automatically.
+         </p>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+    </div>
+    <div class="paragraph">
+     <p>
+      A running client usually reads its user key only when it starts. Updating a
+saved key or keyring file does not update that process. Existing tickets and
+connections can also remain usable for some time. A key rotation must
+therefore account for running and temporarily disconnected clients.
+     </p>
+    </div>
+    <div class="sect3">
+     <h4 id="pveceph_keyrings">
+      8.11.1. Keyring Locations
+      <a class="headerlink" href="#pveceph_keyrings" title="Permalink to this heading">
+      </a>
+     </h4>
+     <div class="paragraph">
+      <p>
+       The authoritative
+       <span class="monospaced">
+        client.admin
+       </span>
+       keyring in a Proxmox VE Ceph cluster is
+       <span class="monospaced">
+        /etc/pve/priv/ceph.client.admin.keyring
+       </span>
+       , not the copy in
+       <span class="monospaced">
+        /etc/ceph
+       </span>
+       . The
+       <a href="#chapter_pmxcfs">
+        Proxmox cluster file system (pmxcfs)
+       </a>
+       synchronizes it to
+every node. Credentials for managed Ceph storages are below
+       <span class="monospaced">
+        /etc/pve/priv/ceph/
+       </span>
+       .
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       Keyrings below
+       <span class="monospaced">
+        /var/lib/ceph
+       </span>
+       belong to one Ceph service and are local to its
+node.
+       <span class="monospaced">
+        /etc/pve/priv/ceph.mon.keyring
+       </span>
+       contains both the shared
+       <span class="monospaced">
+        mon.
+       </span>
+       key and
+       <span class="monospaced">
+        client.admin
+       </span>
+       . Always merge updates into this file instead of overwriting it.
+       <span class="monospaced">
+        pveceph mon create
+       </span>
+       uses its
+       <span class="monospaced">
+        mon.
+       </span>
+       entry when it initializes a monitor.
+      </p>
+     </div>
+    </div>
+    <div class="sect3">
+     <h4 id="pveceph_cephx_lockbox">
+      8.11.2. Encrypted OSD Lockbox Keys
+      <a class="headerlink" href="#pveceph_cephx_lockbox" title="Permalink to this heading">
+      </a>
+     </h4>
+     <div class="paragraph">
+      <p>
+       Each encrypted OSD uses a dedicated Ceph user named
+       <span class="monospaced">
+        client.osd-lockbox.&lt;UUID&gt;
+       </span>
+       . Its authentication key is called the lockbox key.
+It is not the disk-encryption key itself: it lets the OSD retrieve that key
+from Ceph and unlock its storage when it starts. Ceph and the OSD’s block
+device must contain matching copies of the lockbox key.
+      </p>
+     </div>
+     <div class="admonitionblock">
+      <table>
+       <tr>
+        <td class="icon">
+         <img alt="Warning" src="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAMVUlEQVRogdWZeXDVVZbHP7/f27JB
+wtJIiCERRFlbx5FuHRrRBgtBsRIwCCOrFmGmiDBjYVNlQlgiQjU6IjI4xLJxGf5QGp0Cbaftsu3R
+hu6aYXqgLZoWEsjyyDP7S972e7/l3vnj5cW3Ji9M/zOn6lRS997fvd/vueece+59ipSS/89iv5mP
+ZEQQQsS23RQARVEAUFUVRVFQog0ZyogJSClld3c327Ztw7IsLMuKto90KgBsNhtVVVXMnj2bvLw8
+7Ha7HBEJKWXGKoSQXV1dcsuWLfLSpUsyKkKIIdWyrLTqdrvlU089Jc+cOSM9Ho8Mh8NSCCEzxTRi
+8JWVlbKtre0vAt6yLGmapmxtbZXr1q2TZ86ckW1tbSMikTH4GzduyKqqqkHwsSA1TZOhUChOg8Hg
+oBqGIQ3DSAk+VleuXDliEspwviullD09PbzwwgscO3Yszt91XScQCNDZ2YlhGIPfuFwu7Pb48FJV
+lZycnEG/z8/PRwiBqqqDYzweD88//zyrV69m7ty5jBs3DofDMWRgD0lASik9Hg979uzh2LFjcYEa
+CoVob2/n2q9+hbZ585BGSCWltbVMr61NtSYbN25k7dq1zJkzZ1gSaqrGWPD79+9PAh8MBuns7OTi
+e+8R2rwZCYOaqTTt3cuf6+qSwAMcP36co0eP8vXXX9Pd3Y1hGMg0lk65A1HwdXV1vPHGG0mW7+jo
+4A8/+xn2BAAAI0riQOnu3cyork7Zt3btWtavX89dd92VdieSCEgppdvt5sCBAxw5ciSuLxQK0dTU
+RMOHHyJ37hwh1NSiAKU7djDzxRdT9q9YsYJt27YxY8aMlCTiCEgp5eXLl6mvr+fVV1+NmygYDNLW
+1sY3J09ipLEYQDPw2sBfCTwMLARKgKwhiNxWU8OsXbvi2qLYnnzySSorK1PvRGyqvH79uty6dWtS
+Lg8EAvLKlSvyo1275M8hSV8H+eMBvRPkP9Vslp0tV6W3u12+c7hOTgT5NyAXgtwE8gTIUyn0D9XV
+0jAMqet6klZUVMjPP/88KcWqUcs3NjZy+PBhDh06FGeFqNtcOnECY8+euICVwDWgFtj/m1/wD+8f
+5xtg6uy5ZI+5BSkkU6fexgu7tvLWhd/x1tXL5P/905wAggnzSODavn388Sc/SblDL7/8Mq+99hqX
+L1+OC2zb7t27uX79+u7Dhw+ndJvW1lYaP/qI0EDKS1z0XeDjC7/l9llz+d6EWxjv0imdcgeFRcVo
+fR46vm1Cx8ndP5hP3qjR/GDuX/GbC5/iberl1qirxGjv73+PYRjc8tBDcVhGjRpFRUUF27dvp7i4
+mPz8fFwuV2QHVq1aldLyDQ0NXDt5En91NRIQCRqNHld2HsLUCfu6GD9mNIoVQggDy9RQpYLTbkdV
+7Vh6CH9vJ/fcfz/vALsAN2AlzHv1wAEu1tTExUI0Hl555RXq6upobm4mEAhECEyePDkOvK7rtLS0
+cOP0aby1tUnAo2oNkFAUSTjoRfN+ix7wgjRBShACVVFQRGSkHvTypwtnmXHPQhrbb3D0k1McAdpi
+DBLVhp/+lIvV1UlV7oQJE8jNzcXtduPz+ZIPMtM0aWhooPH99+mtrU1ymVRqUxUQFlJYSBFGCivG
+OSyEaSCFAGlhd+Vy7w/n43BmM3POXWx69hl8AyMTDXTl4EEu7t2bCBGAQCCAruupCdjtdrp3705r
++ViN22YhsUwdyzRBCpACyzIRMnpngCxXNjYlMk4L+ggoYXxp5pbAlX37cDgcSQSEEAxmoVgQg/9n
+AP67bVdAUcFmQ3W6IgtIiWUKLCGwLGvQj69e+m+EsBB6iGB/N/3e9oyNlIgRYm5kiR2JH0L6MkFY
+Ei0UQKAycdJUbIodT3Mjpu6n3xfCptoRlomQCqZpRkhLCykMhLBQSV1HJbalKnvSF3MpNO0OSIEw
+DWyuPCaVzCRv7ER8Ph+mtJM35lZsdjvuxktYhobDkYOCgqJEDWLLaAfSVc1p78SJO2AAvUBggLUN
+KIx2Kgqjv3crY2wOiqaqKKoKihKJCctCC/npbW+jq7sbS7UjkGCZCCkQQkdJsV6mRWHGBH4HLHpx
+F3LcGDq6u7nw2S85++V/4gb0kB9hFoAZwuZwgc2BqjpQVRWbzYXd4cDlysHn7WJi0W2EfH24XA6E
+jKySqhTPtDRPIjB4XUtoPw3sKV/O+KJipJT4V63mq3/7Obu21/LN/5xl9l/PIys7G2fOaBS7E5vN
+QrU7UW0KNlUFp5P8MeO5/8HFhPo7CXr7MMIaQW8neSkMlqnEEYj1s8QJbwXaWpopmDgJh93OqHGF
+LFy9jjunTeHNo2uAvUy54/uMuaUYV24BUpVYpoVEwaY4UVUbitNJ9ugxOBw2tEAPfX29QCjuVB9O
+EmNBTdeRGEj3A56OdkwtgDDCCKFjz8ql6N55/G3VcRouX+SXH72Ht6udcCg4cJiJSPIn8oCloIKU
+KAhURUUIiVCjx128pjtrEiVtFkrMNNOBA+s34XG3YIRDSMtAkSbOrDzuvOchHnmiklEFY3n76G7O
+f/nv9Ht7EMJCSjGoljCxjOBAnaSjhYPowevDZrx04FMSGLwnJEzmAOYCn33wAUYoiGXoSMsEoeNw
+ZTO2aDrzFpWxck0VJVOn4fd2E/T7oneNyOFlGkjLwNTD6FoILRQEa/hDcyhJIuB0OlFVNeVE04B3
+XjnC+d9+hRYKYJlhpDBBGDidDiaUfp/xk24nJ3c0eaPzsKsgzEhtZJkGIuzDNDRCAR99fb309XYh
+NAYPsnQ6IgJSSgoKCihavDilJZ4Aajf8HVf/fAnLCCNNAyktECaqIsgbV8So0WMHrn2RGLBMHREO
+YBg6eiiIFgzQ7/US8vmYoEDuENa/u6oqcwJRPysoKOC+N9+kcNGiJGvkAQuADY+twn3tCuFg/4CV
+DbB0VKHhzHbhdGVhs6kgDKTuR9f86KEAWtBHd0c73p52pB5Av5KewJxnnmHeoUOEw+EkjHEEYi8M
+EHlFKyws5IfHjlG4cGHSxJOA1cATPy7nT388j+73YoYDCEuP1DhSRrKOlFhmmLAWQNMCBHw9tHtu
+8K2nBcsI8uGxf8HoiRBINNTtjz7KQ/X1xL6iRDHGvubZAfr7+1Nuz+TJk6G+nv/atInmX/86rq8A
+WAlUrahk/Fio/8XHjM4fi93pHCgRFCzLQtd1tFAQLeCjs9NNb4cHxdL44J8PozfD7XyXRqNy97p1
+PPz220gp0XU9zriKogw+SaqqGtmB48ePU15enkRASklRURH31tcz6cEHk1JrAfAUcEcPLLjvMU69
+/694uzsI+X3093TS5blBl8eNt72VHk8Tfd9eR+vv4MQ/HkZpiJwttgTL3/Hoo2nBNzY2smjRIhYs
+WEBBQQEulyvyLuT3+2VTUxM7d+7k5MmTKXNuS0sL555+mtYvv0zqE0A7kavhqFL4oAlCCWOygGIi
+qTiHyMnuTBgz/bHHKDt9GillnN8D+P1+ysrKWLJkCdOmTWPWrFmUlpZGCAghpN/vp7m5mZqaGl5/
+/XUKCwtJFLfbzX+sX8+Nr75K6rtZiXr49KVLKf/4Y4QQ6LqeBP6RRx6hvLycadOmMXPmTEpKSsjN
+zf3uZS6WRHV1NadOnUpaTEpJa2sr5zZupOkmSaQqk2csWcLyTz4BQNO0uL7GxkbWr1+fErzNZlMG
+w1lVVSUvL4+SkhL27dvH8uXL8Xg8ceABiouLue+ttyieN2+IK2Z6TRx/5+LFacE3NDRQWVmZFjwk
+nAOxJF566SW2bNnChQsXkmKipKSEB959l9vmzcvo1pZOpz/8ME98+mla8Bs2bGDZsmVpwUOa5/VE
+d0oXE319fXxWXs43Z88m9Q0n03/0I1YPJIRE8OfOnWPHjh2UlZUNCT4tgUQSO3fupKqqigceeGCw
+P/a7VM8emUg0VcbK+fPn2bp1KytWrBgW/JAEEknU1NTw7LPPMn/+/GFBZQI8lZw/f57nnnuO5cuX
+M2XKlGHBD0sgkURdXR2PP/44FRUVNwV+qP7Tp09z8ODBjNxmRAQSSRw4cIBly5axdOnSvwh4RVH4
+4osv2L9/P2VlZRlbfkQEEkls376djo4OQqHE83bk4nK5EEKwZs0aSktLRwR+RATgOxItLS1cu3aN
+vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
+/F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
+        </td>
+        <td class="content">
+         Never rotate a lockbox key with
+         <span class="monospaced">
+          ceph auth
+         </span>
+         alone. Use the migration
+helper, which verifies the OSD identity and updates both copies together.
+        </td>
+       </tr>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="sect2">
     <h3 id="_ceph_client">
      <span>
-      8.11. Ceph Client
+      8.12. Ceph Client
      </span>
      <a class="headerlink" href="#_ceph_client" title="Permalink to this heading">
      </a>
@@ -38781,121 +39103,25 @@ pools and their
       <img alt="screenshot/gui-ceph-log.png" src="images/screenshot/gui-ceph-log.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
      </a>
      <p>
-      Following the setup from the previous sections, you can configure Proxmox VE to use
-such pools to store VM and Container images. Simply use the GUI to add a new
-      <span class="monospaced">
-       RBD
-      </span>
-      storage (see section
+      Add an
       <a href="#ceph_rados_block_devices">
-       Ceph RADOS Block Devices (RBD)
+       RBD storage
       </a>
-      ).
+      in the web interface to use
+a Ceph pool for virtual machine and container disks. For an external cluster,
+follow the
+      <a href="#storage_rbd_auth">
+       authentication instructions
+      </a>
+      to configure a
+dedicated Ceph user and its keyring.
      </p>
-    </div>
-    <div class="paragraph">
-     <p>
-      You also need to copy the keyring to a predefined location for an external Ceph
-cluster. If Ceph is installed on the Proxmox nodes itself, then this will be
-done automatically.
-     </p>
-    </div>
-    <div class="admonitionblock">
-     <table>
-      <tr>
-       <td class="icon">
-        <img alt="Note" src="data:image/png;base64,
-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"/>
-       </td>
-       <td class="content">
-        The filename needs to be
-        <span class="monospaced">
-         &lt;storage_id&gt; + `.keyring
-        </span>
-        , where
-        <span class="monospaced">
-         &lt;storage_id&gt;
-        </span>
-        is
-the expression after
-        <em>
-         rbd:
-        </em>
-        in
-        <span class="monospaced">
-         /etc/pve/storage.cfg
-        </span>
-        . In the following example,
-        <span class="monospaced">
-         my-ceph-storage
-        </span>
-        is the
-        <span class="monospaced">
-         &lt;storage_id&gt;
-        </span>
-        :
-       </td>
-      </tr>
-     </table>
-    </div>
-    <div class="listingblock">
-     <div class="content">
-      <!-- Generator: GNU source-highlight
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-      <pre><tt>mkdir /etc/pve/priv/ceph
-cp /etc/ceph/ceph<span style="color: #990000">.</span>client<span style="color: #990000">.</span>admin<span style="color: #990000">.</span>keyring /etc/pve/priv/ceph/my-ceph-storage<span style="color: #990000">.</span>keyring</tt></pre>
-     </div>
     </div>
    </div>
    <div class="sect2">
     <h3 id="pveceph_fs">
      <span>
-      8.12. CephFS
+      8.13. CephFS
      </span>
      <a class="headerlink" href="#pveceph_fs" title="Permalink to this heading">
      </a>
@@ -38947,7 +39173,7 @@ templates.
     </div>
     <div class="sect3">
      <h4 id="pveceph_fs_mds">
-      8.12.1. Metadata Server (MDS)
+      8.13.1. Metadata Server (MDS)
       <a class="headerlink" href="#pveceph_fs_mds" title="Permalink to this heading">
       </a>
      </h4>
@@ -39105,7 +39331,7 @@ system. If you want to set this up, please refer to the Ceph documentation.
     </div>
     <div class="sect3">
      <h4 id="pveceph_fs_create">
-      8.12.2. Create CephFS
+      8.13.2. Create CephFS
       <a class="headerlink" href="#pveceph_fs_create" title="Permalink to this heading">
       </a>
      </h4>
@@ -39231,7 +39457,7 @@ storage configuration after it has been created successfully.
     </div>
     <div class="sect3">
      <h4 id="_destroy_cephfs">
-      8.12.3. Destroy CephFS
+      8.13.3. Destroy CephFS
       <a class="headerlink" href="#_destroy_cephfs" title="Permalink to this heading">
       </a>
      </h4>
@@ -39438,14 +39664,14 @@ to act as standbys.
    <div class="sect2">
     <h3 id="_ceph_maintenance">
      <span>
-      8.13. Ceph Maintenance
+      8.14. Ceph Maintenance
      </span>
      <a class="headerlink" href="#_ceph_maintenance" title="Permalink to this heading">
      </a>
     </h3>
     <div class="sect3">
      <h4 id="pve_ceph_osd_replace">
-      8.13.1. Replace OSDs
+      8.14.1. Replace OSDs
       <a class="headerlink" href="#pve_ceph_osd_replace" title="Permalink to this heading">
       </a>
      </h4>
@@ -39518,7 +39744,7 @@ http://www.gnu.org/software/src-highlite -->
     </div>
     <div class="sect3">
      <h4 id="_trim_discard">
-      8.13.2. Trim/Discard
+      8.14.2. Trim/Discard
       <a class="headerlink" href="#_trim_discard" title="Permalink to this heading">
       </a>
      </h4>
@@ -39542,7 +39768,7 @@ Machines enable the
     </div>
     <div class="sect3">
      <h4 id="pveceph_scrub">
-      8.13.3. Scrub &amp; Deep Scrub
+      8.14.3. Scrub &amp; Deep Scrub
       <a class="headerlink" href="#pveceph_scrub" title="Permalink to this heading">
       </a>
      </h4>
@@ -39572,8 +39798,1195 @@ scrubs
      </div>
     </div>
     <div class="sect3">
+     <h4 id="pveceph_mute_health_check">
+      8.14.4. Mute a Health Check
+      <a class="headerlink" href="#pveceph_mute_health_check" title="Permalink to this heading">
+      </a>
+     </h4>
+     <div class="paragraph">
+      <p>
+       Muting a health check keeps it visible but excludes it from the overall health
+status, making new problems easier to notice. Ceph continues evaluating the
+check. Use a duration so that a deferred warning returns automatically, for
+example after two weeks:
+      </p>
+     </div>
+     <div class="listingblock">
+      <div class="content">
+       <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+       <pre><tt>ceph health mute <span style="color: #990000">&lt;</span>CHECK<span style="color: #990000">&gt;</span> 2w</tt></pre>
+      </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       In the web interface, expand the check under
+       <strong>
+        Datacenter → Ceph
+       </strong>
+       , click
+       <em>
+        Mute
+       </em>
+       , and set a duration. The check stays in the list, marked as muted; use
+       <em>
+        Unmute
+       </em>
+       in the same place to restore it earlier.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       By default, a mute clears when more items become affected. Enable
+       <em>
+        Keep Mute
+       </em>
+       ,
+or add
+       <span class="monospaced">
+        --sticky
+       </span>
+       to the command, only if the check should stay muted in that
+case. This does not change the duration: a timed sticky mute still expires.
+      </p>
+     </div>
+     <div class="admonitionblock">
+      <table>
+       <tr>
+        <td class="icon">
+         <img alt="Note" src="data:image/png;base64,
+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"/>
+        </td>
+        <td class="content">
+         Muting does not resolve the condition. You accept its risk for as long
+as the mute lasts.
+        </td>
+       </tr>
+      </table>
+     </div>
+    </div>
+    <div class="sect3">
+     <h4 id="pveceph_cephx_migration">
+      8.14.5. Migrate Cephx Keys from
+      <span class="monospaced">
+       aes
+      </span>
+      to
+      <span class="monospaced">
+       aes256k
+      </span>
+      <a class="headerlink" href="#pveceph_cephx_migration" title="Permalink to this heading">
+      </a>
+     </h4>
+     <div class="paragraph">
+      <p>
+       This section explains how to migrate the cluster-owned keys and the keys of
+compatible Ceph users from
+       <span class="monospaced">
+        aes
+       </span>
+       to
+       <span class="monospaced">
+        aes256k
+       </span>
+       . For an explanation of Ceph
+users, tickets, and key storage, see
+       <a href="#pveceph_cephx_how_it_works">
+        Cephx Authentication
+       </a>
+       .
+      </p>
+     </div>
+     <div class="sect4">
+      <h5 id="_why_the_health_checks_appear">
+       Why the Health Checks Appear
+       <a class="headerlink" href="#_why_the_health_checks_appear" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="paragraph">
+       <p>
+        Ceph Squid 19.2.6 and Ceph Tentacle 20.2.4 add health checks for keys and
+temporary access credentials that use the older
+        <span class="monospaced">
+         aes
+        </span>
+        encryption method. The
+checks can therefore appear directly after an upgrade even if the cluster
+worked without warnings before. The older method is affected by
+        <a href="https://docs.ceph.com/en/latest/security/CVE-2025-30156">
+         <em>
+          CVE-2025-30156
+         </em>
+        </a>
+        .
+See the upstream release announcement for background
+        <span class="footnote">
+         <br/>
+         [Ceph: Squid
+v19.2.6 and Tentacle v20.2.4 released
+         <a href="https://ceph.io/en/news/blog/2026/v20-2-4-v19-2-6-combo-released/">
+          https://ceph.io/en/news/blog/2026/v20-2-4-v19-2-6-combo-released/
+         </a>
+         ]
+         <br/>
+        </span>
+        .
+       </p>
+      </div>
+      <div class="paragraph">
+       <p>
+        Two checks set the cluster status to
+        <em>
+         HEALTH_ERR
+        </em>
+        . This does not mean that
+storage access or a Ceph service has failed. Follow the steps below to migrate
+to
+        <span class="monospaced">
+         aes256k
+        </span>
+        and, when all clients support it, disable the vulnerable method.
+       </p>
+      </div>
+     </div>
+     <div class="sect4">
+      <h5 id="pveceph_cephx_migration_helper">
+       Migration Steps
+       <a class="headerlink" href="#pveceph_cephx_migration_helper" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="paragraph">
+       <p>
+        The migration helper checks the cluster, rotates keys, and resumes interrupted
+work. Review each dry run before applying its plan; add
+        <span class="monospaced">
+         --verbose
+        </span>
+        for full
+node, keyring, and device inventories.
+       </p>
+      </div>
+      <div class="paragraph">
+       <p>
+        Reruns do not rotate completed keys again. After each run, invoke the helper
+without options to check the current state and follow the next steps it prints.
+       </p>
+      </div>
+      <div class="ulist">
+       <div class="title">
+        Before You Begin
+       </div>
+       <ul>
+        <li>
+         <p>
+          Upgrade
+          <span class="monospaced">
+           pve-manager
+          </span>
+          to 9.2.17 or newer and install the latest Ceph
+  packages on every node. Staged client-key rotation requires Ceph
+  19.2.6-pve3, 20.2.4-pve3, or newer on every monitor. Then complete the
+  rolling restart of all Ceph services.
+         </p>
+        </li>
+        <li>
+         <p>
+          Resolve health warnings and errors not listed in
+          <a href="#pveceph_cephx_health_check_reference">
+           Health Check Reference
+          </a>
+          . Ensure
+  every node is reachable over SSH.
+         </p>
+        </li>
+        <li>
+         <p>
+          Run the helper as
+          <span class="monospaced">
+           root
+          </span>
+          on one node only. Do not start another migration,
+  a rolling restart, or change Ceph keys with other tools while it runs. The
+  helper’s lock does not block direct Ceph authentication commands.
+         </p>
+        </li>
+       </ul>
+      </div>
+      <div class="sect5">
+       <h6 id="_1_migrate_the_cluster_owned_keys">
+        1. Migrate the Cluster-Owned Keys
+        <a class="headerlink" href="#_1_migrate_the_cluster_owned_keys" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         Review the cluster-owned migration in the default dry-run mode:
+        </p>
+       </div>
+       <div class="listingblock">
+        <div class="content">
+         <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --rotate-cluster-keys</tt></pre>
+        </div>
+       </div>
+       <div class="paragraph">
+        <p>
+         If the plan reports no blocker, apply the same selection:
+        </p>
+       </div>
+       <div class="listingblock">
+        <div class="content">
+         <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --rotate-cluster-keys --apply</tt></pre>
+        </div>
+       </div>
+       <div class="paragraph">
+        <p>
+         The helper rotates the manager, metadata server, OSD, monitor, bootstrap, crash,
+and
+         <a href="#pveceph_cephx_lockbox">
+          encrypted OSD lockbox keys
+         </a>
+         . It restarts services
+one at a time when needed, including monitors. Storage-user keys and
+         <span class="monospaced">
+          client.admin
+         </span>
+         stay unchanged, existing tickets remain valid, and the old
+cipher stays enabled.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         After Ceph updates its health status, the two error-severity checks clear. The
+warning about rotating service keys can remain for a few hours and clears
+automatically.
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="pveceph_cephx_migration_clients">
+        2. Migrate the Keys of Compatible Ceph Users
+        <a class="headerlink" href="#pveceph_cephx_migration_clients" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph" id="pveceph_cipher_support">
+        <div class="title">
+         Check compatibility
+        </div>
+        <p>
+         Several workloads can share one Ceph user. Migrate its key only when every
+client supports
+         <span class="monospaced">
+          aes256k
+         </span>
+         , including disconnected and external clients.
+Ceph programs from the updated Proxmox VE packages support it; kernel clients
+require a
+         <strong>
+          running
+         </strong>
+         kernel version 7.0 or newer.
+         <a class="headerlink" href="#pveceph_cipher_support" title="Permalink to this heading">
+         </a>
+        </p>
+       </div>
+       <div style="overflow-x:auto">
+        <table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+         <col style="width:40%;"/>
+         <col style="width:60%;"/>
+         <tbody>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Virtual machine with RBD disks
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Userspace, unless
+             <span class="monospaced">
+              krbd
+             </span>
+             is enabled.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Container on RBD
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Always the kernel client.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             CephFS mount
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Kernel, unless
+             <span class="monospaced">
+              fuse
+             </span>
+             is enabled.
+            </p>
+           </td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+       <div class="paragraph">
+        <p>
+         Check external systems too. If any affected client is incompatible or
+unknown, leave its user’s key unchanged and postpone this step.
+        </p>
+       </div>
+       <div class="paragraph">
+        <div class="title">
+         Stage the keys
+        </div>
+        <p>
+         Use
+         <span class="monospaced">
+          --rotate-all-storage-keys
+         </span>
+         for the dedicated users of managed local RBD
+and CephFS storages, together with
+         <span class="monospaced">
+          --rotate-admin-key
+         </span>
+         for
+         <span class="monospaced">
+          client.admin
+         </span>
+         ,
+which the command line and storages without their own user share. Every
+client of these users is affected; storages of external clusters are
+excluded.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         The helper stages each new key and writes it to the managed keyring and secret
+files. Both keys remain valid until confirmation, allowing clients to refresh
+before the old key is retired. If a monitor cannot keep both keys valid, the
+helper refuses staging and names the monitor to update or restart.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         Review the combined plan:
+        </p>
+       </div>
+       <div class="listingblock">
+        <div class="content">
+         <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys <span style="color: #990000">\</span>
+    --rotate-all-storage-keys --rotate-admin-key</tt></pre>
+        </div>
+       </div>
+       <div class="paragraph">
+        <p>
+         If the plan reports no blocker, apply it:
+        </p>
+       </div>
+       <div class="listingblock">
+        <div class="content">
+         <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys <span style="color: #990000">\</span>
+    --rotate-all-storage-keys --rotate-admin-key --apply</tt></pre>
+        </div>
+       </div>
+       <div class="paragraph">
+        <p>
+         While a key is staged, do not add or downgrade monitors or change that user’s
+keys with other tools. Its
+         <span class="monospaced">
+          AUTH_INSECURE_CLIENT_KEY_TYPE
+         </span>
+         warning remains
+until confirmation makes the new key current and invalidates the old one.
+        </p>
+       </div>
+       <div class="ulist" id="pveceph_cephx_refresh_clients">
+        <div class="title">
+         Refresh Clients
+        </div>
+        <ul>
+         <li>
+          <p>
+           Live-migrate affected virtual machines in the web interface, or stop and
+  start them. A guest reboot is not enough.
+          </p>
+         </li>
+         <li>
+          <p>
+           Stop and start affected containers and other RBD clients.
+          </p>
+         </li>
+         <li>
+          <p>
+           Let backups, restores, disk imports, and clones on Ceph storage finish
+  before confirmation; these operations can retain the key they started with.
+          </p>
+         </li>
+         <li>
+          <p>
+           The helper refreshes idle CephFS mounts and leaves busy or unresponsive
+  mounts alone. Once nothing uses them, rerun the helper with
+           <span class="monospaced">
+            --apply
+           </span>
+           to
+  retry the outstanding mounts.
+          </p>
+         </li>
+         <li>
+          <p>
+           For clients outside Proxmox VE, distribute the staged credential from the
+           <a href="#pveceph_cephx_external_copies">
+            managed key files
+           </a>
+           , then restart or remount
+  those clients.
+          </p>
+         </li>
+        </ul>
+       </div>
+       <div class="paragraph">
+        <p>
+         The helper reports sessions that may still hold an old key. Client names
+are hints, not a complete workload inventory; check disconnected clients
+and external key copies yourself.
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="pveceph_cephx_finish">
+        3. Finish or Pause the Migration
+        <a class="headerlink" href="#pveceph_cephx_finish" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         Run a final dry run to check for remaining old-key sessions. It offers a
+confirmation command when its observed checks pass, but cannot verify
+disconnected clients or external key copies for you.
+        </p>
+       </div>
+       <div class="listingblock">
+        <div class="content">
+         <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys</tt></pre>
+        </div>
+       </div>
+       <div class="admonitionblock">
+        <table>
+         <tr>
+          <td class="icon">
+           <img alt="Warning" src="data:image/png;base64,
+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
+/F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
+          </td>
+          <td class="content">
+           Clients that still need an old key or cipher cannot authenticate
+after this step. Existing IO can appear to work until a reconnect and then
+fail. Do not use
+           <span class="monospaced">
+            --force
+           </span>
+           to bypass a blocker.
+          </td>
+         </tr>
+        </table>
+       </div>
+       <div class="paragraph">
+        <p>
+         After checking disconnected clients and external copies, run the exact
+command the dry run prints. When every rotation is ready and no key needs the
+old cipher, it is:
+        </p>
+       </div>
+       <div class="listingblock">
+        <div class="content">
+         <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --apply <span style="color: #990000">\</span>
+    --confirm-all-clients-refreshed --restrict-ciphers</tt></pre>
+        </div>
+       </div>
+       <div class="paragraph">
+        <p>
+         If any client remains incompatible, keep its key unchanged and the old cipher
+enabled rather than restricting it. You can
+         <a href="#pveceph_mute_health_check">
+          mute the remaining warnings
+         </a>
+         while waiting for
+those clients to upgrade.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         Use
+         <span class="monospaced">
+          pveceph auth status
+         </span>
+         for current and pending key ciphers, as
+         <span class="monospaced">
+          ceph auth ls
+         </span>
+         does not list pending keys.
+        </p>
+       </div>
+       <div class="admonitionblock">
+        <table>
+         <tr>
+          <td class="icon">
+           <img alt="Note" src="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
+          </td>
+          <td class="content">
+           <span class="monospaced">
+            /etc/pve/priv/cephx-key-migration.json
+           </span>
+           records progress and contains
+secret old keys. Protect it and keep it until the migration is complete and
+every client has been refreshed. Deleting it earlier loses the records
+needed to resume.
+          </td>
+         </tr>
+        </table>
+       </div>
+      </div>
+     </div>
+     <div class="sect4">
+      <h5 id="_additional_migration_details">
+       Additional Migration Details
+       <a class="headerlink" href="#_additional_migration_details" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="sect5">
+       <h6 id="pveceph_cephx_health_check_reference">
+        Health Check Reference
+        <a class="headerlink" href="#pveceph_cephx_health_check_reference" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div style="overflow-x:auto">
+        <table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+         <col style="width:27%;"/>
+         <col style="width:36%;"/>
+         <col style="width:36%;"/>
+         <thead>
+          <tr>
+           <th class="tableblock halign-left valign-top">
+            Health check
+           </th>
+           <th class="tableblock halign-left valign-top">
+            Meaning
+           </th>
+           <th class="tableblock halign-left valign-top">
+            Action
+           </th>
+          </tr>
+         </thead>
+         <tbody>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             <span class="monospaced">
+              AUTH_INSECURE_SERVICE_KEY_TYPE
+             </span>
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             A Ceph service key uses the old cipher.
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Run the cluster-owned migration. This check has error severity.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             <span class="monospaced">
+              AUTH_INSECURE_SERVICE_TICKETS
+             </span>
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Monitors issue service tickets with the old
+cipher.
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Run the cluster-owned migration. This check has error severity.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             <span class="monospaced">
+              AUTH_INSECURE_CLIENT_KEY_TYPE
+             </span>
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             The active key of a Ceph user uses the old
+cipher. A staged user stays listed until its rotation is confirmed.
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Rotate the keys of compatible users and confirm them, or mute the warning.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             <span class="monospaced">
+              AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE
+             </span>
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             A rotating service key uses the old
+cipher.
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Wait a few hours after migrating the cluster-owned keys. This warning
+does not prevent final cipher restriction.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             <span class="monospaced">
+              AUTH_INSECURE_KEYS_ALLOWED
+             </span>
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Monitors accept the old cipher.
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Finish the
+migration, or mute the warning while old clients remain.
+            </p>
+           </td>
+          </tr>
+          <tr>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             <span class="monospaced">
+              AUTH_INSECURE_KEYS_CREATABLE
+             </span>
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Monitors can create old-cipher keys.
+            </p>
+           </td>
+           <td class="tableblock halign-left valign-top">
+            <p class="tableblock">
+             Finish
+the migration, or mute the warning while old clients remain.
+            </p>
+           </td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="pveceph_cephx_staged_keys">
+        Staged Keys and Confirmation
+        <a class="headerlink" href="#pveceph_cephx_staged_keys" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         The helper disables automatic promotion of pending client keys so that the
+monitors keep both credentials valid. An older monitor would promote a staged
+key on its first use and end the grace period for the whole cluster. The
+helper therefore stages only when every monitor supports the feature and
+checks this again on every run.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         With
+         <span class="monospaced">
+          --apply
+         </span>
+         ,
+         <span class="monospaced">
+          --confirm-all-clients-refreshed
+         </span>
+         makes every staged key current
+and invalidates its previous key. The initial check refuses the entire batch
+if any open rotation is not ready. The helper then rechecks each key before
+retiring its old credential. If a client returns during the batch, completed
+rotations stay committed and the blocked key stays staged. To confirm ready
+users separately, use
+         <span class="monospaced">
+          --confirm-clients-refreshed &lt;USER&gt;
+         </span>
+         with
+         <span class="monospaced">
+          --apply
+         </span>
+         .
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="pveceph_cephx_external_copies">
+        Key Copies for External Clients
+        <a class="headerlink" href="#pveceph_cephx_external_copies" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         For an external client of the local cluster, copy the staged credential from
+the managed file for its Ceph user:
+        </p>
+       </div>
+       <div class="ulist">
+        <ul>
+         <li>
+          <p>
+           RBD keyring:
+           <span class="monospaced">
+            /etc/pve/priv/ceph/&lt;STORAGE_ID&gt;.keyring
+           </span>
+          </p>
+         </li>
+         <li>
+          <p>
+           CephFS bare secret:
+           <span class="monospaced">
+            /etc/pve/priv/ceph/&lt;STORAGE_ID&gt;.secret
+           </span>
+          </p>
+         </li>
+         <li>
+          <p>
+           Administrative keyring:
+           <span class="monospaced">
+            /etc/pve/priv/ceph.client.admin.keyring
+           </span>
+          </p>
+         </li>
+        </ul>
+       </div>
+       <div class="paragraph">
+        <p>
+         Use the credential for that user, not
+         <span class="monospaced">
+          client.admin
+         </span>
+         as a substitute. Transfer
+it securely and update every saved copy before refreshing the client.
+Storage backed by an external cluster is different: the helper never rotates
+that cluster’s keys. Follow its administrator’s key-rotation procedure.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         The helper lists local users not managed by Proxmox VE separately. Follow their
+client’s supported rotation procedure, or leave their keys unchanged and keep
+the old cipher enabled.
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="pveceph_cephx_rollback">
+        Roll Back a Staged Client Key
+        <a class="headerlink" href="#pveceph_cephx_rollback" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         To return a staged user to its current key:
+        </p>
+       </div>
+       <div class="olist arabic">
+        <ol class="arabic">
+         <li>
+          <p>
+           Run the helper with
+           <span class="monospaced">
+            --abort-staged-key &lt;USER&gt; --apply
+           </span>
+           . It restores the
+  current key to every managed copy while both credentials remain valid.
+          </p>
+         </li>
+         <li>
+          <p>
+           Refresh all clients back to that key, including disconnected clients and
+  external key copies. The helper retries managed CephFS mounts as during
+  forward migration.
+          </p>
+         </li>
+         <li>
+          <p>
+           Run the helper with
+           <span class="monospaced">
+            --confirm-abort-clients-refreshed &lt;USER&gt; --apply
+           </span>
+           to
+  retire the staged key. The helper refuses if monitor session collection is
+  incomplete, a visible session uses the staged key, or its key is unknown.
+          </p>
+         </li>
+        </ol>
+       </div>
+       <div class="paragraph">
+        <p>
+         Ceph 19.2.6-pve4 and 20.2.4-pve4 or newer monitors can identify each session’s
+key, allowing clients on the restored key to stay connected during rollback
+confirmation. Upgrade and restart older monitors to use this feature. Without
+key identification, every visible client of that user must disconnect before
+confirmation; upgrading is preferable for a shared user such as
+         <span class="monospaced">
+          client.admin
+         </span>
+         .
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="_emergency_cipher_override">
+        Emergency Cipher Override
+        <a class="headerlink" href="#_emergency_cipher_override" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         Monitors normally use the
+         <span class="monospaced">
+          auth_allowed_ciphers
+         </span>
+         list stored in the MonMap to
+decide which key ciphers may authenticate. The local startup option
+         <span class="monospaced">
+          mon_auth_emergency_allowed_ciphers
+         </span>
+         replaces that list for a monitor. It can
+temporarily allow the cipher of an existing administrative key after an
+incorrect restriction locked administrators out
+         <span class="footnote">
+          <br/>
+          [Ceph: Emergency
+Allowed Ciphers
+          <a href="https://docs.ceph.com/en/tentacle/rados/configuration/auth-config-ref/#emergency-allowed-ciphers">
+           https://docs.ceph.com/en/tentacle/rados/configuration/auth-config-ref/#emergency-allowed-ciphers
+          </a>
+          ]
+          <br/>
+         </span>
+         .
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         Ceph raises
+         <span class="monospaced">
+          AUTH_EMERGENCY_CIPHERS_SET
+         </span>
+         while this override is configured. The
+helper refuses the final restriction because changing the MonMap would not
+take effect. Use the override only to recover access, then repair the normal
+configuration, remove it from
+         <span class="monospaced">
+          /etc/pve/ceph.conf
+         </span>
+         , and restart every monitor
+before the final dry run.
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
+       <h6 id="_interrupted_runs_and_manual_fallback">
+        Interrupted Runs and Manual Fallback
+        <a class="headerlink" href="#_interrupted_runs_and_manual_fallback" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         After an interruption, run the helper without options to check what remains.
+Keep the journal unchanged and follow the printed next steps rather than
+starting a manual rotation.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         If the helper still cannot proceed, install the latest
+         <span class="monospaced">
+          pve-manager
+         </span>
+         and retry.
+Contact Proxmox support before editing the journal or keyrings, or before using
+the upstream Cephx key migration procedure
+         <span class="footnote">
+          <br/>
+          [Ceph documentation:
+          <a href="https://docs.ceph.com/en/tentacle/rados/configuration/auth-config-ref/#cephx-upgrade">
+           https://docs.ceph.com/en/tentacle/rados/configuration/auth-config-ref/#cephx-upgrade
+          </a>
+          ]
+          <br/>
+         </span>
+         . That
+procedure changes the Ceph authentication database, but does not account for
+these Proxmox VE details:
+        </p>
+       </div>
+       <div class="ulist">
+        <ul>
+         <li>
+          <p>
+           Ensure every managed key copy below
+           <span class="monospaced">
+            /etc/pve/priv
+           </span>
+           and
+           <span class="monospaced">
+            /var/lib/ceph
+           </span>
+           contains the key that Ceph accepts. Merge changes into
+           <span class="monospaced">
+            /etc/pve/priv/ceph.mon.keyring
+           </span>
+           ; never overwrite it.
+          </p>
+         </li>
+         <li>
+          <p>
+           Update an encrypted OSD’s lockbox key in both the authentication database and
+  its block-device LVM tag. Its temporary keyring is not the persistent copy.
+          </p>
+         </li>
+         <li>
+          <p>
+           Refresh every client before invalidating its previous Ceph user key.
+          </p>
+         </li>
+         <li>
+          <p>
+           Rotate
+           <span class="monospaced">
+            client.admin
+           </span>
+           last and prepare an independently tested recovery user
+  before changing it.
+          </p>
+         </li>
+        </ul>
+       </div>
+       <div class="paragraph">
+        <p>
+         Use manual key-rotation or cipher-restriction commands only with a complete,
+tested recovery plan that covers every item above.
+        </p>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="sect3">
      <h4 id="pveceph_shutdown">
-      8.13.4. Shutdown Proxmox VE + Ceph HCI Cluster
+      8.14.6. Shutdown Proxmox VE + Ceph HCI Cluster
       <a class="headerlink" href="#pveceph_shutdown" title="Permalink to this heading">
       </a>
      </h4>
@@ -39674,7 +41087,7 @@ to
     </div>
     <div class="sect3">
      <h4 id="pveceph_network_change">
-      8.13.5. Network Changes
+      8.14.7. Network Changes
       <a class="headerlink" href="#pveceph_network_change" title="Permalink to this heading">
       </a>
      </h4>
@@ -40835,7 +42248,7 @@ host.
    <div class="sect2">
     <h3 id="pve_ceph_mon_and_ts">
      <span>
-      8.14. Ceph Monitoring and Troubleshooting
+      8.15. Ceph Monitoring and Troubleshooting
      </span>
      <a class="headerlink" href="#pve_ceph_mon_and_ts" title="Permalink to this heading">
      </a>
@@ -40902,7 +42315,7 @@ http://www.gnu.org/software/src-highlite -->
     </div>
     <div class="sect3">
      <h4 id="pve_ceph_ts">
-      8.14.1. Troubleshooting
+      8.15.1. Troubleshooting
       <a class="headerlink" href="#pve_ceph_ts" title="Permalink to this heading">
       </a>
      </h4>
@@ -42846,32 +44259,49 @@ Note that
       </h5>
       <div class="paragraph">
        <p>
-        The option
+        The
         <strong>
-         IO Thread
+         IO thread
         </strong>
-        can only be used when using a disk with the
+        option can only be used when using a disk with one of the
+following bus/device controllers:
+       </p>
+      </div>
+      <div class="ulist">
+       <ul>
+        <li>
+         <p>
+          <strong>
+           SCSI
+          </strong>
+          , if the emulated SCSI controller type is
+          <strong>
+           VirtIO SCSI single
+          </strong>
+          , or
+         </p>
+        </li>
+        <li>
+         <p>
+          <strong>
+           VirtIO Block
+          </strong>
+         </p>
+        </li>
+       </ul>
+      </div>
+      <div class="paragraph">
+       <p>
+        With
         <strong>
-         VirtIO
+         IO thread
         </strong>
-        controller, or with the
-        <strong>
-         SCSI
-        </strong>
-        controller, when the emulated controller type is
-        <strong>
-         VirtIO SCSI single
-        </strong>
-        . With
-        <strong>
-         IO Thread
-        </strong>
-        enabled, QEMU creates one I/O thread per
-storage controller rather than handling all I/O in the main event loop or vCPU
-threads. One benefit is better work distribution and utilization of the
-underlying storage. Another benefit is reduced latency (hangs) in the guest for
-very I/O-intensive host workloads, since neither the main thread nor a vCPU
-thread can be blocked by disk I/O.
+        enabled, QEMU creates one I/O thread per storage controller
+rather than handling all I/O in the main event loop or vCPU threads. One benefit
+is better work distribution and utilization of the underlying storage. Another
+benefit is reduced latency (hangs) in the guest for very I/O-intensive host
+workloads, since neither the main thread nor a vCPU thread can be blocked by
+disk I/O.
        </p>
       </div>
      </div>
@@ -47169,12 +48599,13 @@ usually named
       </div>
       <div class="paragraph">
        <p>
-        For Windows, it can be installed from the
-        <a href="https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso">
-         Fedora
-VirtIO driver ISO
+        For Windows, see our
+        <a href="https://pve.proxmox.com/wiki/Windows_VirtIO_Drivers">
+         Windows
+VirtIO Drivers
         </a>
-        .
+        article for more information on how to acquire and install the
+drivers.
        </p>
       </div>
      </div>
@@ -50489,7 +51920,7 @@ device anymore on the host or in any other VM.
      <p>
       Note that, while PCI passthrough is available for i440fx and q35 machines, PCIe
 passthrough is only available on q35 machines. This does not mean that
-PCIe capable devices that are passed through as PCI devices will only run at
+PCIe-capable devices that are passed through as PCI devices will only run at
 PCI speeds. Passing through devices as PCIe just sets a flag for the guest to
 tell it that the device is a  PCIe device instead of a "really fast legacy PCI
 device". Some guest applications benefit from this.
@@ -50550,7 +51981,7 @@ information on specific devices, see
        <p>
         Generally, Intel systems with VT-d and AMD systems with AMD-Vi support this. On
 arm64, the equivalent is the System Memory Management Unit (SMMU), provided by
-the supported platforms. But it is not guaranteed that everything will work out
+supported platforms. It is not guaranteed that everything will work out
 of the box, due to bad hardware implementation and missing or low quality
 drivers.
        </p>
@@ -50558,7 +51989,7 @@ drivers.
       <div class="paragraph">
        <p>
         Further, server grade hardware has often better support than consumer grade
-hardware, but even then, many modern system can support this.
+hardware, but even then, many modern systems can support this.
        </p>
       </div>
       <div class="paragraph">
@@ -50707,7 +52138,7 @@ needed.
         If your hardware supports IOMMU passthrough mode, enabling this mode might
 increase performance.
 This is because VMs then bypass the (default) DMA translation normally
-performed by the hyper-visor and instead pass DMA requests directly to the
+performed by the hypervisor and instead pass DMA requests directly to the
 hardware IOMMU. To enable these options, add:
        </p>
       </div>
@@ -50730,12 +52161,15 @@ hardware IOMMU. To enable these options, add:
         Kernel Modules
        </div>
        <p>
-        You have to make sure the following modules are loaded. This can be achieved by
-adding them to ‘
-        <em>
-         /etc/modules
-        </em>
-        ’.
+        Make sure the following modules are loaded by adding them to a file under
+        <span class="monospaced">
+         '/etc/modules-load.d/'
+        </span>
+        , for example
+        <span class="monospaced">
+         '/etc/modules-load.d/vfio.conf'
+        </span>
+        :
        </p>
       </div>
       <div class="admonitionblock">
@@ -50795,7 +52229,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
           <div class="paragraph">
            <p>
             If passing through mediated devices (e.g. vGPUs), the following is not needed.
-In these cases, the device will be owned by the appropriate host-driver
+In these cases, the device will be owned by the appropriate host driver
 directly.
            </p>
           </div>
@@ -50838,7 +52272,7 @@ directly.
       </div>
       <div class="paragraph">
        <p>
-        should include the four modules from above.
+        should include the three modules from above.
        </p>
       </div>
       <div class="paragraph">
@@ -50846,7 +52280,7 @@ directly.
         Finish Configuration
        </div>
        <p>
-        Finally reboot to bring the changes into effect and check that it is indeed
+        Finally, reboot to bring the changes into effect and check that IOMMU is indeed
 enabled.
        </p>
       </div>
@@ -50968,8 +52402,8 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
           </div>
           <div class="paragraph">
            <p>
-            Some platforms handle their physical PCI(e) slots differently. So, sometimes
-it can help to put the card in a another PCI(e) slot, if you do not get the
+            Some platforms handle their physical PCI(e) slots differently. Sometimes
+it can help to put the card in another PCI(e) slot, if you do not get the
 desired
             <span class="monospaced">
              IOMMU
@@ -51038,7 +52472,11 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
           <div class="paragraph">
            <p>
             For some platforms, it may be necessary to allow unsafe interrupts.
-For this add  the following line in a file ending with ‘.conf’ file in
+To do so, add the following line to a file ending in
+            <span class="monospaced">
+             .conf
+            </span>
+            under
             <strong>
              /etc/modprobe.d/
             </strong>
@@ -51081,8 +52519,8 @@ desktop software (for example, VNC or RDP) inside the guest.
       </div>
       <div class="paragraph">
        <p>
-        If you want to use the GPU as a hardware accelerator, for example, for
-programs using OpenCL or CUDA, this is not required.
+        If you only want to use the GPU as a hardware accelerator — for example,
+with programs using OpenCL or CUDA — this isn’t necessary.
        </p>
       </div>
      </div>
@@ -51128,7 +52566,11 @@ However, if this doesn’t work, there are two things that can be done:
          </div>
          <div class="paragraph">
           <p>
-           to a .conf file in
+           to a
+           <span class="monospaced">
+            .conf
+           </span>
+           file in
            <strong>
             /etc/modprobe.d/
            </strong>
@@ -51152,8 +52594,8 @@ the vendor and device IDs obtained by:
         </li>
         <li>
          <p>
-          blacklist the driver on the host completely, ensuring that it is free to bind
-for passthrough, with
+          blacklist the driver on the host completely, ensuring it is free to bind
+for passthrough instead, by adding
          </p>
          <div class="listingblock">
           <div class="content monospaced">
@@ -51162,7 +52604,11 @@ for passthrough, with
          </div>
          <div class="paragraph">
           <p>
-           in a .conf file in
+           to a
+           <span class="monospaced">
+            .conf
+           </span>
+           file in
            <strong>
             /etc/modprobe.d/
            </strong>
@@ -51171,7 +52617,7 @@ for passthrough, with
          </div>
          <div class="paragraph">
           <p>
-           To find the drivername, execute
+           To find the driver name, execute
           </p>
          </div>
          <div class="listingblock">
@@ -51204,7 +52650,11 @@ for passthrough, with
          </div>
          <div class="paragraph">
           <p>
-           Now we can blacklist the drivers by writing them into a .conf file:
+           Now we can blacklist the drivers by writing them into a
+           <span class="monospaced">
+            .conf
+           </span>
+           file:
           </p>
          </div>
          <div class="listingblock">
@@ -51224,7 +52674,7 @@ for passthrough, with
           initramfs
          </span>
         </a>
-        again and
+        and
 reboot after that.
        </p>
       </div>
@@ -51345,7 +52795,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
           </div>
           <div class="paragraph">
            <p>
-            For mediated devices this line will differ as the device will be owned as the
+            For mediated devices this line will differ as the device will be owned by the
 host driver directly, not
             <em>
              vfio-pci
@@ -51384,7 +52834,7 @@ instead of PCI. Note that if you want to use
          OVMF
         </em>
         for GPU passthrough, the
-GPU needs to have an UEFI capable ROM, otherwise use SeaBIOS instead. To check if
+GPU needs to have a UEFI-capable ROM, otherwise use SeaBIOS instead. To check if
 the ROM is UEFI capable, see the
         <a href="https://pve.proxmox.com/wiki/PCI_Passthrough#How_to_know_if_a_graphics_card_is_UEFI_.28OVMF.29_compatible">
          PCI Passthrough Examples
@@ -51394,8 +52844,9 @@ the ROM is UEFI capable, see the
       </div>
       <div class="paragraph">
        <p>
-        Furthermore, using OVMF, disabling vga arbitration may be possible, reducing the
-amount of legacy code needed to be run during boot. To disable vga arbitration:
+        Furthermore, when using OVMF, VGA arbitration can potentially be
+disabled, which reduces the amount of legacy code that needs to run at
+boot. To disable VGA arbitration:
        </p>
       </div>
       <div class="listingblock">
@@ -51453,7 +52904,7 @@ configuration, for example by executing:
 you can pass them through all together with the shortened syntax ``00:02`
         <em>
          .
-This is equivalent with checking the ``All Functions`
+This is equivalent to checking the ``All Functions`
         </em>
         checkbox in the
 web interface.
@@ -51461,8 +52912,8 @@ web interface.
       </div>
       <div class="paragraph">
        <p>
-        There are some options to which may be necessary, depending on the device
-and guest OS:
+        There are some options which may be necessary, depending on the device and
+guest OS:
        </p>
       </div>
       <div class="ulist">
@@ -51486,7 +52937,7 @@ With this enabled the
            pcie=on|off
           </strong>
           tells Proxmox VE to use a PCIe or PCI port. Some guests/device
-combination require PCIe rather than PCI. PCIe is only available for
+combinations require PCIe rather than PCI. PCIe is only available for
           <em>
            q35
           </em>
@@ -51646,7 +53097,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
           <p>
            To use SR-IOV, platform support is especially important. It may be necessary
 to enable this feature in the BIOS/UEFI first, or to use a specific PCI(e) port
-for it to work. In doubt, consult the manual of the platform or contact its
+for it to work. If in doubt, consult the manual of the platform or contact its
 vendor.
           </p>
          </div>
@@ -51682,7 +53133,7 @@ vendor.
        irtualization) enables
 a single device to provide multiple
        <em>
-        VF
+        VFs
        </em>
        (
        <strong>
@@ -51695,16 +53146,16 @@ a single device to provide multiple
        unctions) to the
 system. Each of those
        <em>
-        VF
+        VFs
        </em>
        can be used in a different VM, with full hardware
-features and also better performance and lower latency than software
-virtualized devices.
+features and also better performance and lower latency than software-virtualized
+devices.
       </p>
      </div>
      <div class="paragraph">
       <p>
-       Currently, the most common use case for this are NICs (
+       Currently, the most common use case for this is with NICs (
        <strong>
         N
        </strong>
@@ -51717,8 +53168,8 @@ virtualized devices.
         C
        </strong>
        ard) with SR-IOV support, which can provide multiple VFs per
-physical port. This allows using features such as checksum offloading, etc. to
-be used inside a VM, reducing the (host) CPU overhead.
+physical port. This allows features such as checksum offloading to be used
+inside a VM, reducing the (host) CPU overhead.
       </p>
      </div>
      <div class="sect4">
@@ -51746,7 +53197,7 @@ Intel drivers
          </div>
          <div class="paragraph">
           <p>
-           which could be put file with
+           which can be placed in a file with a
            <em>
             .conf
            </em>
@@ -51772,8 +53223,8 @@ parameters and options.
            sysfs
           </span>
           .
-If a device and driver supports this you can change the number of VFs on
-the fly. For example, to setup 4 VFs on device 0000:01:00.0 execute:
+If a device and driver support this, you can change the number of VFs on
+the fly. For example, to set up 4 VFs on device 0000:01:00.0 execute:
          </p>
          <div class="listingblock">
           <div class="content monospaced">
@@ -51782,8 +53233,8 @@ the fly. For example, to setup 4 VFs on device 0000:01:00.0 execute:
          </div>
          <div class="paragraph">
           <p>
-           To make this change persistent you can use the ‘sysfsutils` Debian package.
-After installation configure it via
+           To make this change persistent, you can use the ‘sysfsutils` Debian package.
+After installation, configure it via
            <strong>
             /etc/sysfs.conf
            </strong>
@@ -51829,16 +53280,16 @@ outputting them with
      <div class="paragraph">
       <p>
        Mediated devices are another method to reuse features and performance from
-physical hardware for virtualized hardware. These are found most common in
+physical hardware for virtualized hardware. These are most commonly found in
 virtualized GPU setups such as Intel’s GVT-g and NVIDIA’s vGPUs used in their
 GRID technology.
       </p>
      </div>
      <div class="paragraph">
       <p>
-       With this, a physical Card is able to create virtual cards, similar to SR-IOV.
-The difference is that mediated devices do not appear as PCI(e) devices in the
-host, and are such only suited for using in virtual machines.
+       With this, a physical card is able to create virtual cards, similar to SR-IOV.
+The difference is that mediated devices do not appear as PCI(e) devices on the
+host, and are thus only suited for use in virtual machines.
       </p>
      </div>
      <div class="sect4">
@@ -51849,14 +53300,14 @@ host, and are such only suited for using in virtual machines.
       </h5>
       <div class="paragraph">
        <p>
-        In general your card’s driver must support that feature, otherwise it will
+        In general, your card’s driver must support that feature, otherwise it will
 not work. So please refer to your vendor for compatible drivers and how to
 configure them.
        </p>
       </div>
       <div class="paragraph">
        <p>
-        Intel’s drivers for GVT-g are integrated in the Kernel and should work
+        Intel’s drivers for GVT-g are integrated in the kernel and should work
 with 5th, 6th and 7th generation Intel Core Processors, as well as E3 v4, E3
 v5 and E3 v6 Xeon Processors.
        </p>
@@ -51869,11 +53320,11 @@ v5 and E3 v6 Xeon Processors.
         </em>
         (for example via
         <span class="monospaced">
-         /etc/modules
+         /etc/modules-load.d/
         </span>
         ) and to enable it on the
         <a href="#sysboot_edit_kernel_cmdline">
-         Kernel commandline
+         kernel commandline
         </a>
         and add the following parameter:
        </p>
@@ -51948,11 +53399,11 @@ supported types for the device
            available_instances
           </em>
           contains the amount of still available instances of
-this type, each
+this type; each
           <em>
            mdev
           </em>
-          use in a VM reduces this.
+          used in a VM reduces this.
          </p>
         </li>
         <li>
@@ -51968,8 +53419,8 @@ this type, each
           <em>
            create
           </em>
-          is the endpoint to create such a device, Proxmox VE does this
-automatically for you, if a
+          is the endpoint to create such a device — Proxmox VE does this
+automatically for you if a
           <em>
            hostpciX
           </em>
@@ -52010,14 +53461,14 @@ cleans it up again when the VM stops.
     </div>
     <div class="sect3">
      <h4 id="_use_in_clusters">
-      10.9.5. Use in Clusters
+      10.9.5. Usage in Clusters
       <a class="headerlink" href="#_use_in_clusters" title="Permalink to this heading">
       </a>
      </h4>
      <div class="paragraph">
       <p>
-       It is also possible to map devices on a cluster level, so that they can be
-properly used with HA and hardware changes are detected and non root users
+       It is also possible to map devices at a cluster level, so that they can be
+properly used with HA and hardware changes are detected and non-root users
 can configure them. See
        <a href="#resource_mapping">
         Resource Mapping
@@ -52059,7 +53510,7 @@ PCI(e) passthrough instructions.
       </h5>
       <div class="paragraph">
        <p>
-        Intel vIOMMU specific VM requirements:
+        Intel vIOMMU-specific VM requirements:
        </p>
       </div>
       <div class="ulist">
@@ -52070,7 +53521,7 @@ PCI(e) passthrough instructions.
           <span class="monospaced">
            intel_iommu=on
           </span>
-          in the VMs kernel parameters.
+          in the VM’s kernel parameters.
          </p>
         </li>
         <li>
@@ -52116,7 +53567,7 @@ in the configuration of the VM that should be able to pass through PCI devices.
       <div class="paragraph">
        <p>
         This vIOMMU implementation is more recent and does not have as many limitations
-as Intel vIOMMU but is currently less used in production and less documentated.
+as Intel vIOMMU but is currently less used in production and less documented.
        </p>
       </div>
       <div class="paragraph">
@@ -99702,6 +101153,23 @@ proxmox-offline-mirror-helper instead.
       </a>
      </p>
     </div>
+    <div class="paragraph" id="cli_pveceph_auth_status">
+     <p>
+      <strong>
+       pveceph auth status
+      </strong>
+      <span class="monospaced">
+       [FORMAT_OPTIONS]
+      </span>
+      <a class="headerlink" href="#cli_pveceph_auth_status" title="Permalink to this heading">
+      </a>
+     </p>
+    </div>
+    <div class="paragraph">
+     <p>
+      Show cephx key ciphers and aes256k migration prerequisites.
+     </p>
+    </div>
     <div class="paragraph" id="cli_pveceph_createmgr">
      <p>
       <strong>
@@ -100473,7 +101941,7 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
       </dt>
       <dd>
        <p>
-        Determines whether a ceph-mds daemon should poll and replay the log of an active MDS. Faster switch on MDS failure, but needs more idle resources.
+        Determines whether a ceph-mds daemon should poll and replay the log of an active MDS. Faster switch on MDS failure, but needs more idle resources. Deprecated: the setting was removed in Ceph 14.1.1.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -138676,9 +140144,9 @@ provided the MMC is eligible for relicensing.
 </div>
 <div id="footer">
  <div id="footer-text">
-  Version 9.2.4
+  Version 9.2.10
   <br/>
   Last updated
- Tue Aug  4 00:30:32 CEST 2026
+ Tue Sep  8 21:32:09 CEST 2026
  </div>
 </div>

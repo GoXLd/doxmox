@@ -1,5 +1,217 @@
 [
   {
+    "timestamp": "2026-09-09T03:07:17Z",
+    "old_hash": "affcd0dd6c7146f04e01e139088c598ee6d6369bf2fa63563ad9f2257367e585",
+    "new_hash": "dd9916fef3e619a5e6e70b9608d65e8a50667a0c4679a5b3b591432e87910eae",
+    "diff_file": "docs/changes/20260909T030717Z.diff",
+    "added_lines": 1871,
+    "removed_lines": 403,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-09-09T03:13:57Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "This release updates the Proxmox Ceph integration documentation and tools. It removes outdated key‑ring copy instructions, renumbers several sections, adds a health‑check mute feature, introduces a migration path from AES to AES‑256‑K for CephX keys, provides a helper utility for the migration, and adds a new CLI command to view key status. Operators get clearer guidance and new safety mechanisms; newcomers see a more streamlined learning path.",
+          "professional_assessment": "The documentation overhaul improves operational clarity and reduces the risk of mis‑configuration. The most critical change is the AES‑256‑K migration, which addresses CVE‑2025‑30156 and strengthens cluster security. The mute health‑check feature aids alert management but must be used carefully to avoid hiding real issues. Overall, the release balances security hardening with usability enhancements, making it a net positive for production environments.",
+          "newcomer_explainer": "If you are new to Proxmox Ceph, this update means you will no longer see the old copy‑key‑ring steps, the chapter numbers have shifted a bit, and you now have a simple way to silence health warnings temporarily. Most importantly, the system is moving to stronger encryption for CephX keys, and there is a step‑by‑step helper to guide you through that change. A new command, `pveceph auth status`, lets you check the encryption status at any time.",
+          "changes": [
+            {
+              "title": "Removal of outdated key‑ring copy example",
+              "details": "The documentation no longer includes the `mkdir /etc/pve/priv/ceph … cp …` snippet that was previously used to copy Ceph key‑rings manually.",
+              "impact": "Operators who followed the old guide may need to adjust their scripts; the new process relies on the automated migration helper.",
+              "recommended_action": "Review any custom automation that uses the removed commands and replace them with the new helper tool or standard Ceph key management commands.",
+              "severity": "low"
+            },
+            {
+              "title": "Section renumbering for CephFS and Ceph Maintenance",
+              "details": "All subsections under CephFS and Ceph Maintenance have been incremented by one level (e.g., CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).",
+              "impact": "Links or bookmarks to specific sections may break.",
+              "recommended_action": "Update internal documentation or scripts that reference the old section numbers.",
+              "severity": "low"
+            },
+            {
+              "title": "New \"Mute a Health Check\" feature",
+              "details": "Introduces `ceph health mute <CHECK> <duration>` (e.g., `2w`) and a UI workflow (Datacenter → Ceph → Mute/Unmute). Includes a `--sticky` option to keep the mute active even when new items appear.",
+              "impact": "Allows operators to silence non‑critical alerts temporarily, reducing noise in monitoring dashboards.",
+              "recommended_action": "Use the mute command or UI only for alerts that are understood and being addressed elsewhere; always document the mute duration and reason.",
+              "severity": "medium"
+            },
+            {
+              "title": "Migration of CephX keys from AES to AES‑256‑K",
+              "details": "Adds a dedicated section explaining why health checks appear after upgrading to Ceph Squid 19.2.6 / Tentacle 20.2.4 and outlines the security rationale (CVE‑2025‑30156).",
+              "impact": "Clusters using older AES ciphers are vulnerable; migration is required to maintain compliance and security.",
+              "recommended_action": "Plan and execute the key‑migration using the provided helper tool; verify that all clients support AES‑256‑K before applying.",
+              "severity": "high"
+            },
+            {
+              "title": "CephX key‑migration helper utility",
+              "details": "New documentation covers staged keys, confirmation flags, abort procedures, emergency cipher override, and recovery steps. Key flags include `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed <USER>`, `--abort‑staged‑key <USER> --apply`, and `--confirm‑abort‑clients‑refreshed <USER> --apply`.",
+              "impact": "Provides a safe, automated way to transition keys without service interruption, but misuse can lock out clients.",
+              "recommended_action": "Run the helper in a test environment first, follow the step‑by‑step checklist, and ensure you have backups of existing key files (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).",
+              "severity": "medium"
+            },
+            {
+              "title": "New CLI command `pveceph auth status`",
+              "details": "Displays current CephX key ciphers and reports any prerequisites for the AES‑256‑K migration. Supports standard format options for scripting.",
+              "impact": "Operators can quickly verify migration readiness and audit key status across the cluster.",
+              "recommended_action": "Integrate `pveceph auth status` into health‑check scripts and run it before starting the migration process.",
+              "severity": "low"
+            },
+            {
+              "title": "Emergency Cipher Override configuration",
+              "details": "Introduces the `mon_auth_emergency_allowed_ciphers` setting and its interaction with `AUTH_EMERGENCY_CIPHERS_SET` to allow temporary fallback to weaker ciphers during migration emergencies.",
+              "impact": "Provides a safety valve if a migration fails, but using weaker ciphers reduces security temporarily.",
+              "recommended_action": "Only enable the override in a controlled emergency; revert to the default cipher set as soon as the migration completes.",
+              "severity": "medium"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Этот релиз обновляет документацию и инструменты интеграции Proxmox Ceph. Он удаляет устаревшие инструкции по копированию key‑ring, перенумеровывает несколько разделов, добавляет возможность отключения health‑check, вводит путь миграции с AES на AES‑256‑K для ключей CephX, предоставляет вспомогательную утилиту для миграции и добавляет новую CLI‑команду для просмотра статуса ключа. Операторы получают более чёткие рекомендации и новые механизмы безопасности; новички видят более упрощённый путь обучения.",
+          "professional_assessment": "Полный пересмотр документации повышает операционную ясность и снижает риск неправильной конфигурации. Самым критическим изменением является миграция AES‑256‑K, которая устраняет CVE‑2025‑30156 и усиливает безопасность кластера. Функция mute health‑check помогает управлять оповещениями, но должна использоваться осторожно, чтобы не скрывать реальные проблемы. В целом выпуск сочетает укрепление безопасности с улучшениями удобства использования, что делает его положительным для производственных сред.",
+          "newcomer_explainer": "Если вы новичок в Proxmox Ceph, это обновление означает, что вы больше не увидите старые шаги copy‑key‑ring, номера глав немного изменились, и теперь у вас есть простой способ временно подавлять предупреждения о состоянии. Самое важное — система переходит на более сильное шифрование ключей CephX, и имеется пошаговый помощник, который проведёт вас через это изменение. Новая команда `pveceph auth status` позволяет в любой момент проверить статус шифрования.",
+          "changes": [
+            {
+              "title": "Удаление устаревшего примера копии key‑ring",
+              "details": "В документации больше нет фрагмента `mkdir /etc/pve/priv/ceph … cp …`, который ранее использовался для ручного копирования ключевых колец Ceph.",
+              "impact": "Операторам, которые следовали старому руководству, возможно, придётся скорректировать свои скрипты; новый процесс опирается на автоматический помощник миграции.",
+              "recommended_action": "Проверьте любую пользовательскую автоматизацию, использующую удалённые команды, и замените их новым вспомогательным инструментом или стандартными командами управления ключами Ceph.",
+              "severity": "low"
+            },
+            {
+              "title": "Перенумерация разделов для CephFS и обслуживания Ceph",
+              "details": "Все подразделы в разделе CephFS и Ceph Maintenance были повышены на один уровень (например, CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).",
+              "impact": "Links or bookmarks to specific sections may break.",
+              "recommended_action": "Обновите внутреннюю документацию или скрипты, которые ссылаются на старые номера разделов.",
+              "severity": "low"
+            },
+            {
+              "title": "Новая функция «Отключить проверку состояния»",
+              "details": "Вводит `ceph health mute <CHECK> <duration>` (например, `2w`) и UI‑процесс (Datacenter → Ceph → Mute/Unmute). Включает параметр `--sticky`, позволяющий сохранять отключение звука даже при появлении новых элементов.",
+              "impact": "Позволяет операторам временно заглушать некритические оповещения, уменьшая шум в дашбордах мониторинга.",
+              "recommended_action": "Используйте команду mute или UI только для оповещений, которые понятны и решаются в другом месте; всегда фиксируйте длительность mute и причину.",
+              "severity": "medium"
+            },
+            {
+              "title": "Миграция ключей CephX с AES на AES‑256‑K",
+              "details": "Добавлен отдельный раздел, объясняющий, почему после обновления до Ceph Squid 19.2.6 / Tentacle 20.2.4 появляются проверки состояния, и излагающий обоснование безопасности (CVE‑2025‑30156).",
+              "impact": "Кластеры, использующие устаревшие шифры AES, уязвимы; требуется миграция для обеспечения соответствия и безопасности.",
+              "recommended_action": "Спланируйте и выполните миграцию ключа с помощью предоставленного вспомогательного инструмента; убедитесь, что все клиенты поддерживают AES‑256‑K перед применением.",
+              "severity": "high"
+            },
+            {
+              "title": "Вспомогательная утилита миграции ключей CephX",
+              "details": "Новая документация охватывает staged keys, флаги подтверждения, процедуры отмены, экстренный переопределитель шифра и шаги восстановления. Флаги ключа включают `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed <USER>`, `--abort‑staged‑key <USER> --apply` и `--confirm‑abort‑clients‑refreshed <USER> --apply`.",
+              "impact": "Обеспечивает безопасный, автоматизированный способ перехода ключей без прерывания обслуживания, однако неправильное использование может заблокировать клиентов.",
+              "recommended_action": "Сначала запустите помощник в тестовой среде, следуйте пошаговому чек‑листу и убедитесь, что у вас есть резервные копии существующих ключевых файлов (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).",
+              "severity": "medium"
+            },
+            {
+              "title": "Новая команда CLI `pveceph auth status`",
+              "details": "Отображает текущие шифры ключей CephX и сообщает о любых предварительных требованиях для миграции AES‑256‑K. Поддерживает стандартные параметры формата для скриптов.",
+              "impact": "Операторы могут быстро проверить готовность к миграции и выполнить аудит статуса ключа во всём кластере.",
+              "recommended_action": "Интегрируйте `pveceph auth status` в скрипты проверки состояния и выполните его перед запуском процесса миграции.",
+              "severity": "low"
+            },
+            {
+              "title": "Конфигурация аварийного переопределения Cipher",
+              "details": "Вводит параметр `mon_auth_emergency_allowed_ciphers` и его взаимодействие с `AUTH_EMERGENCY_CIPHERS_SET`, позволяющие временно переключаться на более слабые шифры в случае чрезвычайных ситуаций миграции.",
+              "impact": "Обеспечивает предохранительный механизм в случае неудачной миграции, но использование более слабых шифров временно снижает безопасность.",
+              "recommended_action": "Включайте переопределение только в контролируемой чрезвычайной ситуации; возвращайтесь к набору шифров по умолчанию, как только миграция завершится.",
+              "severity": "medium"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Cette version met à jour la documentation et les outils d’intégration Proxmox Ceph. Elle supprime les instructions obsolètes de copie du key‑ring, renumérote plusieurs sections, ajoute une fonction de mise en sourdine du health‑check, introduit un chemin de migration d’AES vers AES‑256‑K pour les clés CephX, fournit un utilitaire d’aide à la migration, et ajoute une nouvelle commande CLI pour afficher l’état des clés. Les opérateurs bénéficient d’instructions plus claires et de nouveaux mécanismes de sécurité ; les nouveaux arrivants disposent d’un parcours d’apprentissage plus simplifié.",
+          "professional_assessment": "La refonte de la documentation améliore la clarté opérationnelle et réduit le risque de mauvaise configuration. Le changement le plus critique est la migration AES‑256‑K, qui traite la CVE‑2025‑30156 et renforce la sécurité du cluster. La fonction de mise en sourdine du health‑check facilite la gestion des alertes mais doit être utilisée avec précaution afin de ne pas masquer de vrais problèmes. Dans l’ensemble, la version équilibre le renforcement de la sécurité avec des améliorations de convivialité, ce qui en fait un avantage net pour les environnements de production.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox Ceph, cette mise à jour signifie que vous ne verrez plus les anciennes étapes copy‑key‑ring, que les numéros de chapitres ont légèrement changé, et que vous disposez désormais d’une méthode simple pour désactiver temporairement les avertissements de santé. Le plus important, c’est que le système passe à un chiffrement plus fort des clés CephX, et un assistant pas à pas vous guide à travers ce changement. Une nouvelle commande, `pveceph auth status`, vous permet de vérifier l’état du chiffrement à tout moment.",
+          "changes": [
+            {
+              "title": "Suppression de l'exemple de copie de key‑ring obsolète",
+              "details": "La documentation n’inclut plus le fragment `mkdir /etc/pve/priv/ceph … cp …` qui était auparavant utilisé pour copier manuellement les key‑rings Ceph.",
+              "impact": "Les opérateurs qui ont suivi l’ancien guide pourraient devoir ajuster leurs scripts ; le nouveau processus repose sur le migration helper automatisé.",
+              "recommended_action": "Examinez toute automatisation personnalisée qui utilise les commandes supprimées et remplacez‑les par le nouvel outil d’assistance ou les commandes standard de gestion des clés Ceph.",
+              "severity": "low"
+            },
+            {
+              "title": "Renumérotation des sections pour CephFS et la maintenance Ceph",
+              "details": "Toutes les sous‑sections sous CephFS et Ceph Maintenance ont été incrémentées d’un niveau (par ex., CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).",
+              "impact": "Links or bookmarks to specific sections may break.",
+              "recommended_action": "Mettez à jour la documentation interne ou les scripts qui font référence aux anciens numéros de section.",
+              "severity": "low"
+            },
+            {
+              "title": "Nouvelle fonctionnalité « Mute a Health Check »",
+              "details": "Introduit `ceph health mute <CHECK> <duration>` (par ex., `2w`) et un flux de travail UI (Datacenter → Ceph → Mute/Unmute). Inclut une option `--sticky` pour maintenir la mise en sourdine active même lorsque de nouveaux éléments apparaissent.",
+              "impact": "Permet aux opérateurs de mettre en sourdine les alertes non critiques temporairement, réduisant le bruit sur les tableaux de bord de surveillance.",
+              "recommended_action": "Utilisez la commande mute ou l'UI uniquement pour les alertes qui sont comprises et traitées ailleurs ; documentez toujours la durée du mute et la raison.",
+              "severity": "medium"
+            },
+            {
+              "title": "Migration des clés CephX d'AES vers AES‑256‑K",
+              "details": "Ajoute une section dédiée expliquant pourquoi les contrôles de santé apparaissent après la mise à jour vers Ceph Squid 19.2.6 / Tentacle 20.2.4 et décrit la justification de sécurité (CVE‑2025‑30156).",
+              "impact": "Les clusters utilisant d'anciens chiffrements AES sont vulnérables ; une migration est nécessaire pour garantir la conformité et la sécurité.",
+              "recommended_action": "Planifiez et exécutez la migration de clés à l’aide de l’outil d’assistance fourni ; vérifiez que tous les clients prennent en charge AES‑256‑K avant de l’appliquer.",
+              "severity": "high"
+            },
+            {
+              "title": "Outil d'aide à la migration de clé CephX",
+              "details": "La nouvelle documentation couvre les clés mises en scène, les drapeaux de confirmation, les procédures d’annulation, le contournement d’urgence du chiffrement et les étapes de récupération. Les drapeaux de clé incluent `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed <USER>`, `--abort‑staged‑key <USER> --apply`, et `--confirm‑abort‑clients‑refreshed <USER> --apply`.",
+              "impact": "Fournit un moyen sûr et automatisé de faire la transition des clés sans interruption de service, mais une mauvaise utilisation peut bloquer les clients.",
+              "recommended_action": "Exécutez d'abord l’assistant dans un environnement de test, suivez la liste de contrôle étape par étape et assurez‑vous d’avoir des sauvegardes des fichiers de clés existants (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).",
+              "severity": "medium"
+            },
+            {
+              "title": "Nouvelle commande CLI `pveceph auth status`",
+              "details": "Affiche les chiffrements de clés CephX actuels et signale les prérequis éventuels pour la migration AES‑256‑K. Prend en charge les options de format standard pour le scripting.",
+              "impact": "Les opérateurs peuvent rapidement vérifier la disponibilité de la migration et le statut des clés d’audit sur l’ensemble du cluster.",
+              "recommended_action": "Intégrez `pveceph auth status` dans les scripts de vérification de l’état de santé et exécutez‑le avant de lancer le processus de migration.",
+              "severity": "low"
+            },
+            {
+              "title": "Configuration de la dérogation d'urgence du chiffrement",
+              "details": "Introduit le paramètre `mon_auth_emergency_allowed_ciphers` et son interaction avec `AUTH_EMERGENCY_CIPHERS_SET` pour permettre un repli temporaire vers des chiffrements plus faibles lors d'urgences de migration.",
+              "impact": "Fournit une soupape de sécurité en cas d'échec d'une migration, mais l'utilisation de chiffrements plus faibles réduit temporairement la sécurité.",
+              "recommended_action": "Activez l'override uniquement en cas d'urgence contrôlée ; revenez à l'ensemble de chiffrements par défaut dès que la migration est terminée.",
+              "severity": "medium"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Removal of outdated key‑ring copy example\n   - The documentation no longer includes the `mkdir /etc/pve/priv/ceph … cp …` snippet that was previously used to copy Ceph key‑rings manually.\n   - Impact: Operators who followed the old guide may need to adjust their scripts; the new process relies on the automated migration helper.\n   - Action: Review any custom automation that uses the removed commands and replace them with the new helper tool or standard Ceph key management commands.\n   - Severity: low\n2. Section renumbering for CephFS and Ceph Maintenance\n   - All subsections under CephFS and Ceph Maintenance have been incremented by one level (e.g., CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).\n   - Impact: Links or bookmarks to specific sections may break.\n   - Action: Update internal documentation or scripts that reference the old section numbers.\n   - Severity: low\n3. New \"Mute a Health Check\" feature\n   - Introduces `ceph health mute <CHECK> <duration>` (e.g., `2w`) and a UI workflow (Datacenter → Ceph → Mute/Unmute). Includes a `--sticky` option to keep the mute active even when new items appear.\n   - Impact: Allows operators to silence non‑critical alerts temporarily, reducing noise in monitoring dashboards.\n   - Action: Use the mute command or UI only for alerts that are understood and being addressed elsewhere; always document the mute duration and reason.\n   - Severity: medium\n4. Migration of CephX keys from AES to AES‑256‑K\n   - Adds a dedicated section explaining why health checks appear after upgrading to Ceph Squid 19.2.6 / Tentacle 20.2.4 and outlines the security rationale (CVE‑2025‑30156).\n   - Impact: Clusters using older AES ciphers are vulnerable; migration is required to maintain compliance and security.\n   - Action: Plan and execute the key‑migration using the provided helper tool; verify that all clients support AES‑256‑K before applying.\n   - Severity: high\n5. CephX key‑migration helper utility\n   - New documentation covers staged keys, confirmation flags, abort procedures, emergency cipher override, and recovery steps. Key flags include `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed <USER>`, `--abort‑staged‑key <USER> --apply`, and `--confirm‑abort‑clients‑refreshed <USER> --apply`.\n   - Impact: Provides a safe, automated way to transition keys without service interruption, but misuse can lock out clients.\n   - Action: Run the helper in a test environment first, follow the step‑by‑step checklist, and ensure you have backups of existing key files (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).\n   - Severity: medium\n6. New CLI command `pveceph auth status`\n   - Displays current CephX key ciphers and reports any prerequisites for the AES‑256‑K migration. Supports standard format options for scripting.\n   - Impact: Operators can quickly verify migration readiness and audit key status across the cluster.\n   - Action: Integrate `pveceph auth status` into health‑check scripts and run it before starting the migration process.\n   - Severity: low\n7. Emergency Cipher Override configuration\n   - Introduces the `mon_auth_emergency_allowed_ciphers` setting and its interaction with `AUTH_EMERGENCY_CIPHERS_SET` to allow temporary fallback to weaker ciphers during migration emergencies.\n   - Impact: Provides a safety valve if a migration fails, but using weaker ciphers reduces security temporarily.\n   - Action: Only enable the override in a controlled emergency; revert to the default cipher set as soon as the migration completes.\n   - Severity: medium",
+        "ru": "1. Удаление устаревшего примера копии key‑ring\n   - В документации больше нет фрагмента `mkdir /etc/pve/priv/ceph … cp …`, который ранее использовался для ручного копирования ключевых колец Ceph.\n   - Impact: Операторам, которые следовали старому руководству, возможно, придётся скорректировать свои скрипты; новый процесс опирается на автоматический помощник миграции.\n   - Action: Проверьте любую пользовательскую автоматизацию, использующую удалённые команды, и замените их новым вспомогательным инструментом или стандартными командами управления ключами Ceph.\n   - Severity: low\n2. Перенумерация разделов для CephFS и обслуживания Ceph\n   - Все подразделы в разделе CephFS и Ceph Maintenance были повышены на один уровень (например, CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).\n   - Impact: Links or bookmarks to specific sections may break.\n   - Action: Обновите внутреннюю документацию или скрипты, которые ссылаются на старые номера разделов.\n   - Severity: low\n3. Новая функция «Отключить проверку состояния»\n   - Вводит `ceph health mute <CHECK> <duration>` (например, `2w`) и UI‑процесс (Datacenter → Ceph → Mute/Unmute). Включает параметр `--sticky`, позволяющий сохранять отключение звука даже при появлении новых элементов.\n   - Impact: Позволяет операторам временно заглушать некритические оповещения, уменьшая шум в дашбордах мониторинга.\n   - Action: Используйте команду mute или UI только для оповещений, которые понятны и решаются в другом месте; всегда фиксируйте длительность mute и причину.\n   - Severity: medium\n4. Миграция ключей CephX с AES на AES‑256‑K\n   - Добавлен отдельный раздел, объясняющий, почему после обновления до Ceph Squid 19.2.6 / Tentacle 20.2.4 появляются проверки состояния, и излагающий обоснование безопасности (CVE‑2025‑30156).\n   - Impact: Кластеры, использующие устаревшие шифры AES, уязвимы; требуется миграция для обеспечения соответствия и безопасности.\n   - Action: Спланируйте и выполните миграцию ключа с помощью предоставленного вспомогательного инструмента; убедитесь, что все клиенты поддерживают AES‑256‑K перед применением.\n   - Severity: high\n5. Вспомогательная утилита миграции ключей CephX\n   - Новая документация охватывает staged keys, флаги подтверждения, процедуры отмены, экстренный переопределитель шифра и шаги восстановления. Флаги ключа включают `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed <USER>`, `--abort‑staged‑key <USER> --apply` и `--confirm‑abort‑clients‑refreshed <USER> --apply`.\n   - Impact: Обеспечивает безопасный, автоматизированный способ перехода ключей без прерывания обслуживания, однако неправильное использование может заблокировать клиентов.\n   - Action: Сначала запустите помощник в тестовой среде, следуйте пошаговому чек‑листу и убедитесь, что у вас есть резервные копии существующих ключевых файлов (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).\n   - Severity: medium\n6. Новая команда CLI `pveceph auth status`\n   - Отображает текущие шифры ключей CephX и сообщает о любых предварительных требованиях для миграции AES‑256‑K. Поддерживает стандартные параметры формата для скриптов.\n   - Impact: Операторы могут быстро проверить готовность к миграции и выполнить аудит статуса ключа во всём кластере.\n   - Action: Интегрируйте `pveceph auth status` в скрипты проверки состояния и выполните его перед запуском процесса миграции.\n   - Severity: low\n7. Конфигурация аварийного переопределения Cipher\n   - Вводит параметр `mon_auth_emergency_allowed_ciphers` и его взаимодействие с `AUTH_EMERGENCY_CIPHERS_SET`, позволяющие временно переключаться на более слабые шифры в случае чрезвычайных ситуаций миграции.\n   - Impact: Обеспечивает предохранительный механизм в случае неудачной миграции, но использование более слабых шифров временно снижает безопасность.\n   - Action: Включайте переопределение только в контролируемой чрезвычайной ситуации; возвращайтесь к набору шифров по умолчанию, как только миграция завершится.\n   - Severity: medium",
+        "fr": "1. Suppression de l'exemple de copie de key‑ring obsolète\n   - La documentation n’inclut plus le fragment `mkdir /etc/pve/priv/ceph … cp …` qui était auparavant utilisé pour copier manuellement les key‑rings Ceph.\n   - Impact: Les opérateurs qui ont suivi l’ancien guide pourraient devoir ajuster leurs scripts ; le nouveau processus repose sur le migration helper automatisé.\n   - Action: Examinez toute automatisation personnalisée qui utilise les commandes supprimées et remplacez‑les par le nouvel outil d’assistance ou les commandes standard de gestion des clés Ceph.\n   - Severity: low\n2. Renumérotation des sections pour CephFS et la maintenance Ceph\n   - Toutes les sous‑sections sous CephFS et Ceph Maintenance ont été incrémentées d’un niveau (par ex., CephFS 8.12 → 8.13, Ceph Maintenance 8.13 → 8.14).\n   - Impact: Links or bookmarks to specific sections may break.\n   - Action: Mettez à jour la documentation interne ou les scripts qui font référence aux anciens numéros de section.\n   - Severity: low\n3. Nouvelle fonctionnalité « Mute a Health Check »\n   - Introduit `ceph health mute <CHECK> <duration>` (par ex., `2w`) et un flux de travail UI (Datacenter → Ceph → Mute/Unmute). Inclut une option `--sticky` pour maintenir la mise en sourdine active même lorsque de nouveaux éléments apparaissent.\n   - Impact: Permet aux opérateurs de mettre en sourdine les alertes non critiques temporairement, réduisant le bruit sur les tableaux de bord de surveillance.\n   - Action: Utilisez la commande mute ou l'UI uniquement pour les alertes qui sont comprises et traitées ailleurs ; documentez toujours la durée du mute et la raison.\n   - Severity: medium\n4. Migration des clés CephX d'AES vers AES‑256‑K\n   - Ajoute une section dédiée expliquant pourquoi les contrôles de santé apparaissent après la mise à jour vers Ceph Squid 19.2.6 / Tentacle 20.2.4 et décrit la justification de sécurité (CVE‑2025‑30156).\n   - Impact: Les clusters utilisant d'anciens chiffrements AES sont vulnérables ; une migration est nécessaire pour garantir la conformité et la sécurité.\n   - Action: Planifiez et exécutez la migration de clés à l’aide de l’outil d’assistance fourni ; vérifiez que tous les clients prennent en charge AES‑256‑K avant de l’appliquer.\n   - Severity: high\n5. Outil d'aide à la migration de clé CephX\n   - La nouvelle documentation couvre les clés mises en scène, les drapeaux de confirmation, les procédures d’annulation, le contournement d’urgence du chiffrement et les étapes de récupération. Les drapeaux de clé incluent `--apply`, `--confirm‑all‑clients‑refreshed`, `--confirm‑clients‑refreshed <USER>`, `--abort‑staged‑key <USER> --apply`, et `--confirm‑abort‑clients‑refreshed <USER> --apply`.\n   - Impact: Fournit un moyen sûr et automatisé de faire la transition des clés sans interruption de service, mais une mauvaise utilisation peut bloquer les clients.\n   - Action: Exécutez d'abord l’assistant dans un environnement de test, suivez la liste de contrôle étape par étape et assurez‑vous d’avoir des sauvegardes des fichiers de clés existants (`/etc/pve/priv/ceph/*.keyring`, `*.secret`).\n   - Severity: medium\n6. Nouvelle commande CLI `pveceph auth status`\n   - Affiche les chiffrements de clés CephX actuels et signale les prérequis éventuels pour la migration AES‑256‑K. Prend en charge les options de format standard pour le scripting.\n   - Impact: Les opérateurs peuvent rapidement vérifier la disponibilité de la migration et le statut des clés d’audit sur l’ensemble du cluster.\n   - Action: Intégrez `pveceph auth status` dans les scripts de vérification de l’état de santé et exécutez‑le avant de lancer le processus de migration.\n   - Severity: low\n7. Configuration de la dérogation d'urgence du chiffrement\n   - Introduit le paramètre `mon_auth_emergency_allowed_ciphers` et son interaction avec `AUTH_EMERGENCY_CIPHERS_SET` pour permettre un repli temporaire vers des chiffrements plus faibles lors d'urgences de migration.\n   - Impact: Fournit une soupape de sécurité en cas d'échec d'une migration, mais l'utilisation de chiffrements plus faibles réduit temporairement la sécurité.\n   - Action: Activez l'override uniquement en cas d'urgence contrôlée ; revenez à l'ensemble de chiffrements par défaut dès que la migration est terminée.\n   - Severity: medium"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 19.2.6: Removal of outdated key‑ring copy example, Section renumbering for CephFS and Ceph Maintenance, \"Mute a Health Check\" feature, Migration of CephX keys from AES to AES‑256‑K, CephX key‑migration helper utility, CLI...",
+      "version": "Proxmox VE 19.2.6",
+      "model": "fallback",
+      "generated_at": "2026-09-09T03:13:59Z"
+    }
+  },
+  {
     "timestamp": "2026-08-05T09:35:16Z",
     "old_hash": "583b7479c2cf5b9e725e4528ccd78d33884c6129f05c0f99fad641efbb0bf66a",
     "new_hash": "affcd0dd6c7146f04e01e139088c598ee6d6369bf2fa63563ad9f2257367e585",
