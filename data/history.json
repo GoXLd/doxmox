@@ -1,5 +1,196 @@
 [
   {
+    "timestamp": "2026-09-16T13:08:12Z",
+    "old_hash": "dd9916fef3e619a5e6e70b9608d65e8a50667a0c4679a5b3b591432e87910eae",
+    "new_hash": "c3724c361bf11e40c63d139a358755b6fd1d7444cfb5253b94799cea532f6f1b",
+    "diff_file": "docs/changes/20260916T130812Z.diff",
+    "added_lines": 20,
+    "removed_lines": 18,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-09-16T13:13:18Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.2.11 brings a minor version bump with clearer installer guidance, stronger warnings about ZFS on hardware RAID, and several storage‑related documentation updates, especially around Ceph client‑key rotation and CephFS ISO handling.",
+          "professional_assessment": "The release is largely documentation‑focused and does not introduce new binaries, so production impact is low. However, the added ZFS on hardware RAID warning raises a high‑severity operational risk if ignored. Operators should verify storage configurations before upgrades. The Ceph changes improve clarity for key rotation procedures, reducing the chance of mis‑steps during rolling restarts.",
+          "newcomer_explainer": "If you are new to Proxmox, this update mainly helps you set up the system more safely. It tells you how to pick the right location, choose a strong root password, and warns you not to mix ZFS with hardware RAID. It also adds a note about moving virtual‑machine ISO files off CephFS before refreshing storage.",
+          "changes": [
+            {
+              "title": "Version bump to 9.2.11",
+              "details": "Documentation now reflects the new release number 9.2.11 and an updated timestamp (Sep 15 2026 UTC).",
+              "impact": "All references to the previous version (9.2.10) are updated, ensuring consistency across guides.",
+              "recommended_action": "No action required; just note the new version when planning future upgrades.",
+              "severity": "low"
+            },
+            {
+              "title": "Ceph client‑key rotation list formatting",
+              "details": "The requirement line and the \"then complete the rolling restart\" step are now separate bullet points for clearer reading.",
+              "impact": "Improves readability, reducing the chance of skipping the rolling restart step after key rotation.",
+              "recommended_action": "Follow the two distinct steps when rotating Ceph client keys.",
+              "severity": "low"
+            },
+            {
+              "title": "New warning for CephFS‑ISO mounts",
+              "details": "If VMs have ISO images mounted from a CephFS share, they must be detached or the VMs migrated before refreshing the CephFS mount on that node.",
+              "impact": "Prevents VM access errors or data corruption during CephFS maintenance.",
+              "recommended_action": "Check all running VMs for CephFS‑based ISO mounts and either detach the ISO or move the VM to another node before performing a CephFS refresh.",
+              "severity": "medium"
+            },
+            {
+              "title": "CephX service‑key rotation command output clarified",
+              "details": "The full command block was removed; the documentation now states that the command will output the options `--apply --confirm-all-clients-refreshed --restrict-ciphers`.",
+              "impact": "Operators know exactly which flags to expect, avoiding confusion during key rotation.",
+              "recommended_action": "Run the CephX rotation command and verify that the listed options appear in the output.",
+              "severity": "low"
+            },
+            {
+              "title": "Footer version and date updated",
+              "details": "All documentation footers now show the correct version (9.2.11) and release date, matching the new release.",
+              "impact": "Ensures that readers can quickly confirm they are looking at the latest docs.",
+              "recommended_action": "No action needed; just be aware of the updated footer when referencing docs.",
+              "severity": "low"
+            },
+            {
+              "title": "Critical ZFS on hardware RAID warning emphasized",
+              "details": "A table entry now clearly states: \"ZFS on top of any hardware RAID is not supported and can result in data loss.\"",
+              "impact": "Highlights a severe risk; using ZFS over hardware RAID can cause irreversible data loss.",
+              "recommended_action": "Do not combine ZFS with hardware RAID. Use either pure ZFS disks or a supported software RAID configuration.",
+              "severity": "high"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.2.11 представляет небольшое увеличение версии, более понятные рекомендации по установщику, усиленные предупреждения о использовании ZFS на аппаратных RAID и несколько обновлений документации, связанных с хранилищем, особенно касающихся ротации клиентских ключей Ceph и работы с ISO в CephFS.",
+          "professional_assessment": "Релиз в основном ориентирован на документацию и не вводит новых бинарных файлов, поэтому влияние на продакшн минимально. Однако добавленное предупреждение о работе ZFS на аппаратном RAID повышает операционный риск высокой критичности, если его игнорировать. Операторам следует проверять конфигурацию хранилищ перед обновлением. Изменения в Ceph улучшают ясность процедур ротации ключей, снижая вероятность ошибок при поэтапных перезапусках.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, это обновление в основном помогает настроить систему более безопасно. Оно объясняет, как выбрать правильное расположение, установить надёжный пароль root, и предупреждает не смешивать ZFS с аппаратным RAID. Также добавлена рекомендация переместить ISO‑файлы виртуальных машин с CephFS перед обновлением хранилища.",
+          "changes": [
+            {
+              "title": "Обновление версии до 9.2.11",
+              "details": "Документация теперь отражает новый номер релиза 9.2.11 и обновлённую метку времени (15 сен 2026 UTC).",
+              "impact": "Все ссылки на предыдущую версию (9.2.10) обновлены, обеспечивая согласованность во всех руководствах.",
+              "recommended_action": "Действий не требуется; просто учтите новую версию при планировании будущих обновлений.",
+              "severity": "low"
+            },
+            {
+              "title": "Форматирование списка ротации клиентских ключей Ceph",
+              "details": "Строка требования и шаг «then complete the rolling restart» теперь вынесены в отдельные пункты списка для более ясного восприятия.",
+              "impact": "Повышает читаемость, уменьшая вероятность пропустить шаг rolling restart после key rotation.",
+              "recommended_action": "Следуйте двум отдельным шагам при ротации ключей клиента Ceph.",
+              "severity": "low"
+            },
+            {
+              "title": "Новое предупреждение для монтирований CephFS‑ISO",
+              "details": "Если у ВМ смонтированы ISO‑образы с общего ресурса CephFS, их необходимо отсоединить или мигрировать ВМ перед обновлением монтирования CephFS на этом узле.",
+              "impact": "Предотвращает ошибки доступа к ВМ или повреждение данных во время обслуживания CephFS.",
+              "recommended_action": "Проверьте все запущенные ВМ на наличие монтированных ISO с CephFS и либо отсоедините ISO, либо переместите ВМ на другой узел перед выполнением обновления CephFS.",
+              "severity": "medium"
+            },
+            {
+              "title": "Уточнён вывод команды ротации service‑key CephX",
+              "details": "Полный блок команды был удалён; документация теперь указывает, что команда выведет параметры `--apply --confirm-all-clients-refreshed --restrict-ciphers`.",
+              "impact": "Операторы точно знают, какие флаги ожидать, избегая путаницы при ротации ключей.",
+              "recommended_action": "Выполните команду ротации CephX и проверьте, что перечисленные параметры присутствуют в выводе.",
+              "severity": "low"
+            },
+            {
+              "title": "Версия и дата в нижнем колонтитуле обновлены",
+              "details": "Все нижние колонтитулы документации теперь отображают правильную версию (9.2.11) и дату выпуска, соответствующие новому релизу.",
+              "impact": "Позволяет читателям быстро убедиться, что они просматривают актуальную документацию.",
+              "recommended_action": "Никаких действий не требуется; просто учитывайте обновлённый нижний колонтитул при обращении к документации.",
+              "severity": "low"
+            },
+            {
+              "title": "Критическое предупреждение: ZFS на аппаратном RAID",
+              "details": "В таблице теперь ясно указано: «ZFS поверх любого аппаратного RAID не поддерживается и может привести к потере данных».",
+              "impact": "Подчеркивает серьезный риск; использование ZFS поверх аппаратного RAID может привести к необратимой потере данных.",
+              "recommended_action": "Не комбинируйте ZFS с аппаратным RAID. Используйте либо чистые диски ZFS, либо поддерживаемую конфигурацию программного RAID.",
+              "severity": "high"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.2.11 introduit une légère augmentation de version avec des consignes d’installation plus claires, des avertissements renforcés concernant ZFS sur RAID matériel, et plusieurs mises à jour de la documentation liées au stockage, notamment concernant la rotation des clés client Ceph et la gestion des ISO CephFS.",
+          "professional_assessment": "La version est principalement axée sur la documentation et n'introduit pas de nouveaux binaires, de sorte que l'impact en production est faible. Cependant, l'avertissement ajouté concernant ZFS sur RAID matériel crée un risque opérationnel de haute gravité s'il est ignoré. Les opérateurs doivent vérifier les configurations de stockage avant les mises à jour. Les modifications de Ceph améliorent la clarté des procédures de rotation des clés, réduisant ainsi le risque d'erreurs lors des redémarrages progressifs.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, cette mise à jour vous aide principalement à configurer le système de manière plus sûre. Elle vous indique comment choisir le bon emplacement, définir un mot de passe root robuste, et vous avertit de ne pas mélanger ZFS avec le RAID matériel. Elle ajoute également une note concernant le déplacement des fichiers ISO de machines virtuelles hors de CephFS avant de rafraîchir le stockage.",
+          "changes": [
+            {
+              "title": "Mise à jour de la version vers 9.2.11",
+              "details": "La documentation reflète désormais le nouveau numéro de version 9.2.11 et un horodatage mis à jour (15 septembre 2026 UTC).",
+              "impact": "Toutes les références à la version précédente (9.2.10) sont mises à jour, garantissant la cohérence entre les guides.",
+              "recommended_action": "Aucune action requise ; notez simplement la nouvelle version lors de la planification des futures mises à jour.",
+              "severity": "low"
+            },
+            {
+              "title": "Mise en forme de la liste de rotation des clés client Ceph",
+              "details": "La ligne d'exigence et l'étape « then complete the rolling restart » sont maintenant des puces séparées pour une lecture plus claire.",
+              "impact": "Améliore la lisibilité, réduisant ainsi le risque de sauter l’étape de redémarrage progressif après la rotation des clés.",
+              "recommended_action": "Suivez les deux étapes distinctes lors de la rotation des clés client Ceph.",
+              "severity": "low"
+            },
+            {
+              "title": "Nouvel avertissement pour les montages CephFS‑ISO",
+              "details": "Si des VM ont des images ISO montées depuis un partage CephFS, ces images doivent être détachées ou les VM migrées avant de rafraîchir le montage CephFS sur ce nœud.",
+              "impact": "Empêche les erreurs d'accès aux VM ou la corruption de données pendant la maintenance de CephFS.",
+              "recommended_action": "Vérifiez toutes les VMs en cours d'exécution pour les montages d'ISO basés sur CephFS et détachez l'ISO ou déplacez la VM vers un autre nœud avant d'effectuer un rafraîchissement de CephFS.",
+              "severity": "medium"
+            },
+            {
+              "title": "Sortie de la commande de rotation de la clé de service CephX clarifiée",
+              "details": "Le bloc complet de la commande a été supprimé ; la documentation indique désormais que la commande affichera les options `--apply --confirm-all-clients-refreshed --restrict-ciphers`.",
+              "impact": "Les opérateurs savent exactement quels flags attendre, évitant toute confusion lors de la rotation des clés.",
+              "recommended_action": "Exécutez la commande de rotation CephX et vérifiez que les options répertoriées apparaissent dans la sortie.",
+              "severity": "low"
+            },
+            {
+              "title": "Version du pied de page et date mises à jour",
+              "details": "Tous les pieds de page de la documentation affichent désormais la version correcte (9.2.11) et la date de publication, correspondant à la nouvelle version.",
+              "impact": "Permet aux lecteurs de vérifier rapidement qu'ils consultent la dernière documentation.",
+              "recommended_action": "Gardez les termes Proxmox précis. Conservez le sens exactement.  \nNe fournissez que le texte traduit, sans JSON, markdown ou commentaire.  \n\nAucune action requise ; il suffit d’être conscient de la mise à jour du pied de page lors de la référence aux documents.",
+              "severity": "low"
+            },
+            {
+              "title": "Avertissement critique concernant ZFS sur RAID matériel, souligné.",
+              "details": "Une entrée du tableau indique désormais clairement : « ZFS sur n’importe quel RAID matériel n’est pas pris en charge et peut entraîner une perte de données. »",
+              "impact": "Met en évidence un risque grave ; l’utilisation de ZFS sur un RAID matériel peut entraîner une perte de données irréversible.",
+              "recommended_action": "Ne combinez pas ZFS avec un RAID matériel. Utilisez soit des disques ZFS purs, soit une configuration RAID logicielle prise en charge.",
+              "severity": "high"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Version bump to 9.2.11\n   - Documentation now reflects the new release number 9.2.11 and an updated timestamp (Sep 15 2026 UTC).\n   - Impact: All references to the previous version (9.2.10) are updated, ensuring consistency across guides.\n   - Action: No action required; just note the new version when planning future upgrades.\n   - Severity: low\n2. Ceph client‑key rotation list formatting\n   - The requirement line and the \"then complete the rolling restart\" step are now separate bullet points for clearer reading.\n   - Impact: Improves readability, reducing the chance of skipping the rolling restart step after key rotation.\n   - Action: Follow the two distinct steps when rotating Ceph client keys.\n   - Severity: low\n3. New warning for CephFS‑ISO mounts\n   - If VMs have ISO images mounted from a CephFS share, they must be detached or the VMs migrated before refreshing the CephFS mount on that node.\n   - Impact: Prevents VM access errors or data corruption during CephFS maintenance.\n   - Action: Check all running VMs for CephFS‑based ISO mounts and either detach the ISO or move the VM to another node before performing a CephFS refresh.\n   - Severity: medium\n4. CephX service‑key rotation command output clarified\n   - The full command block was removed; the documentation now states that the command will output the options `--apply --confirm-all-clients-refreshed --restrict-ciphers`.\n   - Impact: Operators know exactly which flags to expect, avoiding confusion during key rotation.\n   - Action: Run the CephX rotation command and verify that the listed options appear in the output.\n   - Severity: low\n5. Footer version and date updated\n   - All documentation footers now show the correct version (9.2.11) and release date, matching the new release.\n   - Impact: Ensures that readers can quickly confirm they are looking at the latest docs.\n   - Action: No action needed; just be aware of the updated footer when referencing docs.\n   - Severity: low\n6. Critical ZFS on hardware RAID warning emphasized\n   - A table entry now clearly states: \"ZFS on top of any hardware RAID is not supported and can result in data loss.\"\n   - Impact: Highlights a severe risk; using ZFS over hardware RAID can cause irreversible data loss.\n   - Action: Do not combine ZFS with hardware RAID. Use either pure ZFS disks or a supported software RAID configuration.\n   - Severity: high",
+        "ru": "1. Обновление версии до 9.2.11\n   - Документация теперь отражает новый номер релиза 9.2.11 и обновлённую метку времени (15 сен 2026 UTC).\n   - Impact: Все ссылки на предыдущую версию (9.2.10) обновлены, обеспечивая согласованность во всех руководствах.\n   - Action: Действий не требуется; просто учтите новую версию при планировании будущих обновлений.\n   - Severity: low\n2. Форматирование списка ротации клиентских ключей Ceph\n   - Строка требования и шаг «then complete the rolling restart» теперь вынесены в отдельные пункты списка для более ясного восприятия.\n   - Impact: Повышает читаемость, уменьшая вероятность пропустить шаг rolling restart после key rotation.\n   - Action: Следуйте двум отдельным шагам при ротации ключей клиента Ceph.\n   - Severity: low\n3. Новое предупреждение для монтирований CephFS‑ISO\n   - Если у ВМ смонтированы ISO‑образы с общего ресурса CephFS, их необходимо отсоединить или мигрировать ВМ перед обновлением монтирования CephFS на этом узле.\n   - Impact: Предотвращает ошибки доступа к ВМ или повреждение данных во время обслуживания CephFS.\n   - Action: Проверьте все запущенные ВМ на наличие монтированных ISO с CephFS и либо отсоедините ISO, либо переместите ВМ на другой узел перед выполнением обновления CephFS.\n   - Severity: medium\n4. Уточнён вывод команды ротации service‑key CephX\n   - Полный блок команды был удалён; документация теперь указывает, что команда выведет параметры `--apply --confirm-all-clients-refreshed --restrict-ciphers`.\n   - Impact: Операторы точно знают, какие флаги ожидать, избегая путаницы при ротации ключей.\n   - Action: Выполните команду ротации CephX и проверьте, что перечисленные параметры присутствуют в выводе.\n   - Severity: low\n5. Версия и дата в нижнем колонтитуле обновлены\n   - Все нижние колонтитулы документации теперь отображают правильную версию (9.2.11) и дату выпуска, соответствующие новому релизу.\n   - Impact: Позволяет читателям быстро убедиться, что они просматривают актуальную документацию.\n   - Action: Никаких действий не требуется; просто учитывайте обновлённый нижний колонтитул при обращении к документации.\n   - Severity: low\n6. Критическое предупреждение: ZFS на аппаратном RAID\n   - В таблице теперь ясно указано: «ZFS поверх любого аппаратного RAID не поддерживается и может привести к потере данных».\n   - Impact: Подчеркивает серьезный риск; использование ZFS поверх аппаратного RAID может привести к необратимой потере данных.\n   - Action: Не комбинируйте ZFS с аппаратным RAID. Используйте либо чистые диски ZFS, либо поддерживаемую конфигурацию программного RAID.\n   - Severity: high",
+        "fr": "1. Mise à jour de la version vers 9.2.11\n   - La documentation reflète désormais le nouveau numéro de version 9.2.11 et un horodatage mis à jour (15 septembre 2026 UTC).\n   - Impact: Toutes les références à la version précédente (9.2.10) sont mises à jour, garantissant la cohérence entre les guides.\n   - Action: Aucune action requise ; notez simplement la nouvelle version lors de la planification des futures mises à jour.\n   - Severity: low\n2. Mise en forme de la liste de rotation des clés client Ceph\n   - La ligne d'exigence et l'étape « then complete the rolling restart » sont maintenant des puces séparées pour une lecture plus claire.\n   - Impact: Améliore la lisibilité, réduisant ainsi le risque de sauter l’étape de redémarrage progressif après la rotation des clés.\n   - Action: Suivez les deux étapes distinctes lors de la rotation des clés client Ceph.\n   - Severity: low\n3. Nouvel avertissement pour les montages CephFS‑ISO\n   - Si des VM ont des images ISO montées depuis un partage CephFS, ces images doivent être détachées ou les VM migrées avant de rafraîchir le montage CephFS sur ce nœud.\n   - Impact: Empêche les erreurs d'accès aux VM ou la corruption de données pendant la maintenance de CephFS.\n   - Action: Vérifiez toutes les VMs en cours d'exécution pour les montages d'ISO basés sur CephFS et détachez l'ISO ou déplacez la VM vers un autre nœud avant d'effectuer un rafraîchissement de CephFS.\n   - Severity: medium\n4. Sortie de la commande de rotation de la clé de service CephX clarifiée\n   - Le bloc complet de la commande a été supprimé ; la documentation indique désormais que la commande affichera les options `--apply --confirm-all-clients-refreshed --restrict-ciphers`.\n   - Impact: Les opérateurs savent exactement quels flags attendre, évitant toute confusion lors de la rotation des clés.\n   - Action: Exécutez la commande de rotation CephX et vérifiez que les options répertoriées apparaissent dans la sortie.\n   - Severity: low\n5. Version du pied de page et date mises à jour\n   - Tous les pieds de page de la documentation affichent désormais la version correcte (9.2.11) et la date de publication, correspondant à la nouvelle version.\n   - Impact: Permet aux lecteurs de vérifier rapidement qu'ils consultent la dernière documentation.\n   - Action: Gardez les termes Proxmox précis. Conservez le sens exactement.  \nNe fournissez que le texte traduit, sans JSON, markdown ou commentaire.  \n\nAucune action requise ; il suffit d’être conscient de la mise à jour du pied de page lors de la référence aux documents.\n   - Severity: low\n6. Avertissement critique concernant ZFS sur RAID matériel, souligné.\n   - Une entrée du tableau indique désormais clairement : « ZFS sur n’importe quel RAID matériel n’est pas pris en charge et peut entraîner une perte de données. »\n   - Impact: Met en évidence un risque grave ; l’utilisation de ZFS sur un RAID matériel peut entraîner une perte de données irréversible.\n   - Action: Ne combinez pas ZFS avec un RAID matériel. Utilisez soit des disques ZFS purs, soit une configuration RAID logicielle prise en charge.\n   - Severity: high"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 9.2.11: Ceph client‑key rotation list formatting, warning for CephFS‑ISO mounts, CephX service‑key rotation command output clarified, Footer version and date updated, Critical ZFS on hardware RAID warning emphasized",
+      "version": "Proxmox VE 9.2.11",
+      "model": "fallback",
+      "generated_at": "2026-09-16T13:13:30Z"
+    }
+  },
+  {
     "timestamp": "2026-09-09T03:07:17Z",
     "old_hash": "affcd0dd6c7146f04e01e139088c598ee6d6369bf2fa63563ad9f2257367e585",
     "new_hash": "dd9916fef3e619a5e6e70b9608d65e8a50667a0c4679a5b3b591432e87910eae",

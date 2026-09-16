@@ -1,0 +1,78 @@
+--- previous
++++ current
+@@ -346,10 +346,10 @@
+  </span>
+  <br/>
+  <span id="revnumber">
+-  version 9.2.10,
++  version 9.2.11,
+  </span>
+  <span id="revdate">
+-  Tue Sep  8 21:32:09 CEST 2026
++  Tue Sep 15 13:17:55 UTC 2026
+  </span>
+  <div id="toc">
+   <a href="index.html" style="font-size: 0.8em;">
+@@ -40030,8 +40030,12 @@
+           </span>
+           to 9.2.17 or newer and install the latest Ceph
+   packages on every node. Staged client-key rotation requires Ceph
+-  19.2.6-pve3, 20.2.4-pve3, or newer on every monitor. Then complete the
+-  rolling restart of all Ceph services.
++  19.2.6-pve3, 20.2.4-pve3, or newer on every monitor.
++         </p>
++        </li>
++        <li>
++         <p>
++          Then complete the rolling restart of all Ceph services.
+          </p>
+         </li>
+         <li>
+@@ -40306,6 +40310,9 @@
+            </span>
+            to
+   retry the outstanding mounts.
++  If your virtual machines have ISOs from a CephFS mount attached, you may have
++  to detach the ISOs or migrate affected virtual machines to a different node
++  to be able to refresh the CephFS mount on that node.
+           </p>
+          </li>
+          <li>
+@@ -40429,18 +40436,13 @@
+         <p>
+          After checking disconnected clients and external copies, run the exact
+ command the dry run prints. When every rotation is ready and no key needs the
+-old cipher, it is:
+-        </p>
+-       </div>
+-       <div class="listingblock">
+-        <div class="content">
+-         <!-- Generator: GNU source-highlight
+-by Lorenzo Bettini
+-http://www.lorenzobettini.it
+-http://www.gnu.org/software/src-highlite -->
+-         <pre><tt>/usr/share/pve-manager/migrations/pve-cephx-rotate-service-keys --apply <span style="color: #990000">\</span>
+-    --confirm-all-clients-refreshed --restrict-ciphers</tt></pre>
+-        </div>
++old cipher, it will print the options
++         <span class="monospaced">
++          --apply --confirm-all-clients-refreshed
++--restrict-ciphers
++         </span>
++         .
++        </p>
+        </div>
+        <div class="paragraph">
+         <p>
+@@ -140144,9 +140146,9 @@
+ </div>
+ <div id="footer">
+  <div id="footer-text">
+-  Version 9.2.10
++  Version 9.2.11
+   <br/>
+   Last updated
+- Tue Sep  8 21:32:09 CEST 2026
++ Tue Sep 15 13:17:55 UTC 2026
+  </div>
+ </div>

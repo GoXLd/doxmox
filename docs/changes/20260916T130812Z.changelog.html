@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260916T130812Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-09-16T13:08:12Z" data-iso="2026-09-16T13:08:12Z" data-tooltip="">2026-09-16 13:08:12 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260916T130812Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.11 brings a minor version bump with clearer installer guidance, stronger warnings about ZFS on hardware RAID, and several storage‑related documentation updates, especially around Ceph client‑key rotation and CephFS ISO handling.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The release is largely documentation‑focused and does not introduce new binaries, so production impact is low. However, the added ZFS on hardware RAID warning raises a high‑severity operational risk if ignored. Operators should verify storage configurations before upgrades. The Ceph changes improve clarity for key rotation procedures, reducing the chance of mis‑steps during rolling restarts.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Low</span>Version bump to 9.2.11</strong><div>Documentation now reflects the new release number 9.2.11 and an updated timestamp (Sep 15 2026 UTC).</div><div><em>Impact:</em> All references to the previous version (9.2.10) are updated, ensuring consistency across guides.</div><div><em>Action:</em> No action required; just note the new version when planning future upgrades.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Ceph client‑key rotation list formatting</strong><div>The requirement line and the &quot;then complete the rolling restart&quot; step are now separate bullet points for clearer reading.</div><div><em>Impact:</em> Improves readability, reducing the chance of skipping the rolling restart step after key rotation.</div><div><em>Action:</em> Follow the two distinct steps when rotating Ceph client keys.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>New warning for CephFS‑ISO mounts</strong><div>If VMs have ISO images mounted from a CephFS share, they must be detached or the VMs migrated before refreshing the CephFS mount on that node.</div><div><em>Impact:</em> Prevents VM access errors or data corruption during CephFS maintenance.</div><div><em>Action:</em> Check all running VMs for CephFS‑based ISO mounts and either detach the ISO or move the VM to another node before performing a CephFS refresh.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>CephX service‑key rotation command output clarified</strong><div>The full command block was removed; the documentation now states that the command will output the options `--apply --confirm-all-clients-refreshed --restrict-ciphers`.</div><div><em>Impact:</em> Operators know exactly which flags to expect, avoiding confusion during key rotation.</div><div><em>Action:</em> Run the CephX rotation command and verify that the listed options appear in the output.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Footer version and date updated</strong><div>All documentation footers now show the correct version (9.2.11) and release date, matching the new release.</div><div><em>Impact:</em> Ensures that readers can quickly confirm they are looking at the latest docs.</div><div><em>Action:</em> No action needed; just be aware of the updated footer when referencing docs.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>Critical ZFS on hardware RAID warning emphasized</strong><div>A table entry now clearly states: &quot;ZFS on top of any hardware RAID is not supported and can result in data loss.&quot;</div><div><em>Impact:</em> Highlights a severe risk; using ZFS over hardware RAID can cause irreversible data loss.</div><div><em>Action:</em> Do not combine ZFS with hardware RAID. Use either pure ZFS disks or a supported software RAID configuration.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.11 introduit une légère augmentation de version avec des consignes d’installation plus claires, des avertissements renforcés concernant ZFS sur RAID matériel, et plusieurs mises à jour de la documentation liées au stockage, notamment concernant la rotation des clés client Ceph et la gestion des ISO CephFS.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> La version est principalement axée sur la documentation et n&#x27;introduit pas de nouveaux binaires, de sorte que l&#x27;impact en production est faible. Cependant, l&#x27;avertissement ajouté concernant ZFS sur RAID matériel crée un risque opérationnel de haute gravité s&#x27;il est ignoré. Les opérateurs doivent vérifier les configurations de stockage avant les mises à jour. Les modifications de Ceph améliorent la clarté des procédures de rotation des clés, réduisant ainsi le risque d&#x27;erreurs lors des redémarrages progressifs.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Faible</span>Mise à jour de la version vers 9.2.11</strong><div>La documentation reflète désormais le nouveau numéro de version 9.2.11 et un horodatage mis à jour (15 septembre 2026 UTC).</div><div><em>Impact:</em> Toutes les références à la version précédente (9.2.10) sont mises à jour, garantissant la cohérence entre les guides.</div><div><em>Action:</em> Aucune action requise ; notez simplement la nouvelle version lors de la planification des futures mises à jour.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Mise en forme de la liste de rotation des clés client Ceph</strong><div>La ligne d&#x27;exigence et l&#x27;étape « then complete the rolling restart » sont maintenant des puces séparées pour une lecture plus claire.</div><div><em>Impact:</em> Améliore la lisibilité, réduisant ainsi le risque de sauter l’étape de redémarrage progressif après la rotation des clés.</div><div><em>Action:</em> Suivez les deux étapes distinctes lors de la rotation des clés client Ceph.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Nouvel avertissement pour les montages CephFS‑ISO</strong><div>Si des VM ont des images ISO montées depuis un partage CephFS, ces images doivent être détachées ou les VM migrées avant de rafraîchir le montage CephFS sur ce nœud.</div><div><em>Impact:</em> Empêche les erreurs d&#x27;accès aux VM ou la corruption de données pendant la maintenance de CephFS.</div><div><em>Action:</em> Vérifiez toutes les VMs en cours d&#x27;exécution pour les montages d&#x27;ISO basés sur CephFS et détachez l&#x27;ISO ou déplacez la VM vers un autre nœud avant d&#x27;effectuer un rafraîchissement de CephFS.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Sortie de la commande de rotation de la clé de service CephX clarifiée</strong><div>Le bloc complet de la commande a été supprimé ; la documentation indique désormais que la commande affichera les options `--apply --confirm-all-clients-refreshed --restrict-ciphers`.</div><div><em>Impact:</em> Les opérateurs savent exactement quels flags attendre, évitant toute confusion lors de la rotation des clés.</div><div><em>Action:</em> Exécutez la commande de rotation CephX et vérifiez que les options répertoriées apparaissent dans la sortie.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Version du pied de page et date mises à jour</strong><div>Tous les pieds de page de la documentation affichent désormais la version correcte (9.2.11) et la date de publication, correspondant à la nouvelle version.</div><div><em>Impact:</em> Permet aux lecteurs de vérifier rapidement qu&#x27;ils consultent la dernière documentation.</div><div><em>Action:</em> Gardez les termes Proxmox précis. Conservez le sens exactement.  
+Ne fournissez que le texte traduit, sans JSON, markdown ou commentaire.  
+
+Aucune action requise ; il suffit d’être conscient de la mise à jour du pied de page lors de la référence aux documents.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Avertissement critique concernant ZFS sur RAID matériel, souligné.</strong><div>Une entrée du tableau indique désormais clairement : « ZFS sur n’importe quel RAID matériel n’est pas pris en charge et peut entraîner une perte de données. »</div><div><em>Impact:</em> Met en évidence un risque grave ; l’utilisation de ZFS sur un RAID matériel peut entraîner une perte de données irréversible.</div><div><em>Action:</em> Ne combinez pas ZFS avec un RAID matériel. Utilisez soit des disques ZFS purs, soit une configuration RAID logicielle prise en charge.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.11 представляет небольшое увеличение версии, более понятные рекомендации по установщику, усиленные предупреждения о использовании ZFS на аппаратных RAID и несколько обновлений документации, связанных с хранилищем, особенно касающихся ротации клиентских ключей Ceph и работы с ISO в CephFS.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Релиз в основном ориентирован на документацию и не вводит новых бинарных файлов, поэтому влияние на продакшн минимально. Однако добавленное предупреждение о работе ZFS на аппаратном RAID повышает операционный риск высокой критичности, если его игнорировать. Операторам следует проверять конфигурацию хранилищ перед обновлением. Изменения в Ceph улучшают ясность процедур ротации ключей, снижая вероятность ошибок при поэтапных перезапусках.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Низкая</span>Обновление версии до 9.2.11</strong><div>Документация теперь отражает новый номер релиза 9.2.11 и обновлённую метку времени (15 сен 2026 UTC).</div><div><em>Impact:</em> Все ссылки на предыдущую версию (9.2.10) обновлены, обеспечивая согласованность во всех руководствах.</div><div><em>Action:</em> Действий не требуется; просто учтите новую версию при планировании будущих обновлений.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Форматирование списка ротации клиентских ключей Ceph</strong><div>Строка требования и шаг «then complete the rolling restart» теперь вынесены в отдельные пункты списка для более ясного восприятия.</div><div><em>Impact:</em> Повышает читаемость, уменьшая вероятность пропустить шаг rolling restart после key rotation.</div><div><em>Action:</em> Следуйте двум отдельным шагам при ротации ключей клиента Ceph.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Новое предупреждение для монтирований CephFS‑ISO</strong><div>Если у ВМ смонтированы ISO‑образы с общего ресурса CephFS, их необходимо отсоединить или мигрировать ВМ перед обновлением монтирования CephFS на этом узле.</div><div><em>Impact:</em> Предотвращает ошибки доступа к ВМ или повреждение данных во время обслуживания CephFS.</div><div><em>Action:</em> Проверьте все запущенные ВМ на наличие монтированных ISO с CephFS и либо отсоедините ISO, либо переместите ВМ на другой узел перед выполнением обновления CephFS.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Уточнён вывод команды ротации service‑key CephX</strong><div>Полный блок команды был удалён; документация теперь указывает, что команда выведет параметры `--apply --confirm-all-clients-refreshed --restrict-ciphers`.</div><div><em>Impact:</em> Операторы точно знают, какие флаги ожидать, избегая путаницы при ротации ключей.</div><div><em>Action:</em> Выполните команду ротации CephX и проверьте, что перечисленные параметры присутствуют в выводе.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Версия и дата в нижнем колонтитуле обновлены</strong><div>Все нижние колонтитулы документации теперь отображают правильную версию (9.2.11) и дату выпуска, соответствующие новому релизу.</div><div><em>Impact:</em> Позволяет читателям быстро убедиться, что они просматривают актуальную документацию.</div><div><em>Action:</em> Никаких действий не требуется; просто учитывайте обновлённый нижний колонтитул при обращении к документации.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Критическое предупреждение: ZFS на аппаратном RAID</strong><div>В таблице теперь ясно указано: «ZFS поверх любого аппаратного RAID не поддерживается и может привести к потере данных».</div><div><em>Impact:</em> Подчеркивает серьезный риск; использование ZFS поверх аппаратного RAID может привести к необратимой потере данных.</div><div><em>Action:</em> Не комбинируйте ZFS с аппаратным RAID. Используйте либо чистые диски ZFS, либо поддерживаемую конфигурацию программного RAID.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>
