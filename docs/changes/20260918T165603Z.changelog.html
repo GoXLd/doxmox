@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260918T165603Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-09-18T16:56:03Z" data-iso="2026-09-18T16:56:03Z" data-tooltip="">2026-09-18 16:56:03 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260918T165603Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.12 introduces a series of documentation and safety updates aimed at making installation clearer and reducing the risk of accidental data loss. The core platform remains stable, but the release refines guidance and corrects metadata timestamps.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> From an operations standpoint, the changes are primarily documentation‑driven and do not alter underlying services or APIs. The most critical impact is the reinforced warning around disk selection during manual installations, which mitigates a high‑risk operator error. Overall risk is low, but operators should review the updated install steps before proceeding with new deployments or upgrades.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Low</span>Version bump to Proxmox VE 9.2.12</strong><div>All documentation, download pages, and UI footers now display the new version number 9.2.12 instead of 9.2.11.</div><div><em>Impact:</em> Operators can verify they are using the latest release; no functional change to the platform.</div><div><em>Action:</em> Confirm the version displayed in the web UI matches 9.2.12 after upgrade.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Revision timestamps updated</strong><div>Metadata timestamps throughout the HTML docs have been changed from Tue Sep 15 2026 13:17:55 UTC to Fri Sep 18 2026 12:15:08 UTC.</div><div><em>Impact:</em> Ensures documentation reflects the correct publication date; no impact on system behavior.</div><div><em>Action:</em> No action required; this is informational.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Explicit device name placeholder in dd command</strong><div>The installation guide now uses &quot;X&quot; as a clear placeholder for the disk number in the command `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.</div><div><em>Impact:</em> Reduces confusion when copying the command, helping users target the correct block device.</div><div><em>Action:</em> Replace &quot;X&quot; with the actual disk number shown by `diskutil list` (macOS) or `lsblk` (Linux) before running the command.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>Safety note added for target device verification</strong><div>A new admonition warns: &quot;Be sure to replace /dev/XYZ with the correct device name and adapt the input filename (if) path.&quot; This emphasizes double‑checking the target before writing the image.</div><div><em>Impact:</em> Prevents accidental overwriting of the wrong drive, a high‑risk mistake that could cause data loss.</div><div><em>Action:</em> Always run `lsblk`/`diskutil list` and verify the device identifier before executing the dd command.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Clarified installation steps for macOS and Linux</strong><div>The guide now separates macOS (`/dev/rdiskX`) and Linux (`/dev/sdX`) examples and adds a tip about using `sudo` for permission elevation.</div><div><em>Impact:</em> Improves cross‑platform clarity, reducing errors for users on different operating systems.</div><div><em>Action:</em> Follow the OS‑specific command block when creating a bootable installer.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Minor UI and footer text adjustments</strong><div>Footer copyright year and page titles have been synchronized with the new version and date.</div><div><em>Impact:</em> Purely cosmetic; ensures consistency across the documentation site.</div><div><em>Action:</em> No action needed.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.12 introduit une série de mises à jour de la documentation et de la sécurité visant à rendre l&#x27;installation plus claire et à réduire le risque de perte de données accidentelle. La plateforme de base reste stable, mais cette version affine les recommandations et corrige les horodatages des métadonnées.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Du point de vue des opérations, les changements sont principalement motivés par la documentation et n&#x27;altèrent pas les services ou les API sous-jacents. L&#x27;impact le plus critique est l&#x27;avertissement renforcé concernant la sélection du disque lors des installations manuelles, ce qui atténue une erreur d&#x27;opérateur à haut risque. Le risque global est faible, mais les opérateurs doivent examiner les étapes d&#x27;installation mises à jour avant de procéder à de nouveaux déploiements ou mises à niveau.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Faible</span>Mise à jour de version vers Proxmox VE 9.2.12</strong><div>Toute la documentation, les pages de téléchargement et les pieds de page de l’interface utilisateur affichent désormais le nouveau numéro de version 9.2.12 au lieu de 9.2.11.</div><div><em>Impact:</em> Les opérateurs peuvent vérifier qu’ils utilisent la dernière release ; aucune modification fonctionnelle de la plateforme.</div><div><em>Action:</em> Confirmez que la version affichée dans l&#x27;interface Web correspond à 9.2.12 après la mise à jour.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Horodatages de révision mis à jour</strong><div>Les horodatages des métadonnées dans l’ensemble des documents HTML ont été modifiés du Tue Sep 15 2026 13:17:55 UTC au Fri Sep 18 2026 12:15:08 UTC.</div><div><em>Impact:</em> Assure que la documentation reflète la date de publication correcte ; aucun impact sur le comportement du système.</div><div><em>Action:</em> No action required; this is informational.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Espace réservé explicite pour le nom du périphérique dans la commande dd</strong><div>Le guide d&#x27;installation utilise désormais « X » comme espace réservé clair pour le numéro de disque dans la commande `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.</div><div><em>Impact:</em> Réduit la confusion lors de la copie de la commande, aidant les utilisateurs à cibler le bon périphérique de bloc.</div><div><em>Action:</em> Remplacez « X » par le numéro de disque réel affiché par `diskutil list` (macOS) ou `lsblk` (Linux) avant d’exécuter la commande.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Safety note added for target device verification</strong><div>Une nouvelle mise en garde indique : « Assurez‑vous de remplacer /dev/XYZ par le nom de périphérique correct et d’adapter le chemin du nom de fichier d’entrée (if). » Cela souligne l’importance de vérifier le ciblage avant d’écrire l’image.</div><div><em>Impact:</em> Empêche l&#x27;écrasement accidentel du mauvais disque, une erreur à haut risque pouvant entraîner une perte de données.</div><div><em>Action:</em> Exécutez toujours `lsblk`/`diskutil list` et vérifiez l’identifiant du périphérique avant d’exécuter la commande dd.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Étapes d&#x27;installation clarifiées pour macOS et Linux</strong><div>Le guide sépare désormais les exemples macOS (`/dev/rdiskX`) et Linux (`/dev/sdX`) et ajoute une astuce concernant l’utilisation de `sudo` pour l’élévation des permissions.</div><div><em>Impact:</em> Améliore la clarté multiplateforme, réduisant les erreurs pour les utilisateurs sur différents systèmes d&#x27;exploitation.</div><div><em>Action:</em> Suivez le bloc de commandes spécifique à l&#x27;OS lors de la création d&#x27;un installateur bootable.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Petites modifications de l&#x27;interface utilisateur et du texte du pied de page</strong><div>L&#x27;année du copyright du pied de page ainsi que les titres des pages ont été synchronisés avec la nouvelle version et la date.</div><div><em>Impact:</em> Purement cosmétique ; assure la cohérence sur l&#x27;ensemble du site de documentation.</div><div><em>Action:</em> Could you please provide the text you would like translated?</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.12 вводит серию обновлений документации и безопасности, направленных на упрощение установки и снижение риска случайной потери данных. Основная платформа остаётся стабильной, но выпуск уточняет рекомендации и исправляет метки времени метаданных.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> С точки зрения эксплуатации, изменения в основном связаны с документацией и не меняют базовые сервисы или API. Наиболее критическим воздействием является усиленное предупреждение о выборе диска при ручных установках, что снижает риск серьёзной ошибки оператора. Общий риск низок, однако операторам следует ознакомиться с обновлёнными шагами установки перед выполнением новых развертываний или обновлений.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Низкая</span>Обновление версии до Proxmox VE 9.2.12</strong><div>Вся документация, страницы загрузки и нижние колонтитулы UI теперь отображают новый номер версии 9.2.12 вместо 9.2.11.</div><div><em>Impact:</em> Операторы могут убедиться, что используют последний релиз; функциональных изменений в платформе нет.</div><div><em>Action:</em> Убедитесь, что версия, отображаемая в веб‑интерфейсе, соответствует 9.2.12 после обновления.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Временные метки ревизий обновлены</strong><div>Метаданные временных меток во всех HTML‑документах изменены с Tue Sep 15 2026 13:17:55 UTC на Fri Sep 18 2026 12:15:08 UTC.</div><div><em>Impact:</em> Обеспечивает, что документация отражает правильную дату публикации; не влияет на поведение системы.</div><div><em>Action:</em> Никаких действий не требуется; это информационное сообщение.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Явный заполнитель имени устройства в команде dd</strong><div>В руководстве по установке теперь используется «X» в качестве явного заполнителя для номера диска в команде `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.</div><div><em>Impact:</em> Уменьшает путаницу при копировании команды, помогая пользователям выбрать правильное блочное устройство.</div><div><em>Action:</em> Замените «X» на фактический номер диска, отображаемый командой `diskutil list` (macOS) или `lsblk` (Linux), перед выполнением команды.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Safety note added for target device verification</strong><div>Новое предупреждение гласит: «Обязательно замените /dev/XYZ на правильное имя устройства и при необходимости скорректируйте путь к входному файлу (if).» Это подчеркивает необходимость двойной проверки цели перед записью образа.</div><div><em>Impact:</em> Предотвращает случайную перезапись неправильного диска — ошибку с высоким риском, способную привести к потере данных.</div><div><em>Action:</em> Всегда запускайте `lsblk`/`diskutil list` и проверяйте идентификатор устройства перед выполнением команды dd.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Уточнены шаги установки для macOS и Linux</strong><div>В руководстве теперь разделены примеры для macOS (`/dev/rdiskX`) и Linux (`/dev/sdX`), а также добавлен совет использовать `sudo` для повышения прав.</div><div><em>Impact:</em> Улучшает кросс‑платформенную ясность, снижая количество ошибок у пользователей разных операционных систем.</div><div><em>Action:</em> Следуйте блоку команд, специфичному для ОС, при создании загрузочного установщика.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Незначительные изменения UI и текста в нижнем колонтитуле</strong><div>Год авторского права в нижнем колонтитуле и заголовки страниц синхронизированы с новой версией и датой.</div><div><em>Impact:</em> Только косметическое; обеспечивает согласованность по всему сайту документации.</div><div><em>Action:</em> No action needed.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

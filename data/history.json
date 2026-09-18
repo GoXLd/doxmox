@@ -1,5 +1,196 @@
 [
   {
+    "timestamp": "2026-09-18T16:56:03Z",
+    "old_hash": "c3724c361bf11e40c63d139a358755b6fd1d7444cfb5253b94799cea532f6f1b",
+    "new_hash": "b44948bdd699efa4b8cbd8648013779dcc613abea27f71ebfa2570b3eb6a7b63",
+    "diff_file": "docs/changes/20260918T165603Z.diff",
+    "added_lines": 4,
+    "removed_lines": 4,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-09-18T17:00:55Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.2.12 introduces a series of documentation and safety updates aimed at making installation clearer and reducing the risk of accidental data loss. The core platform remains stable, but the release refines guidance and corrects metadata timestamps.",
+          "professional_assessment": "From an operations standpoint, the changes are primarily documentation‑driven and do not alter underlying services or APIs. The most critical impact is the reinforced warning around disk selection during manual installations, which mitigates a high‑risk operator error. Overall risk is low, but operators should review the updated install steps before proceeding with new deployments or upgrades.",
+          "newcomer_explainer": "If you are new to Proxmox, this release mainly gives you clearer instructions on how to write the installer image to a USB drive and tells you exactly where to put the correct device name. It also updates the version number you will see in the web UI and on the download page. No new features are added, but the safety notes help you avoid wiping the wrong disk.",
+          "changes": [
+            {
+              "title": "Version bump to Proxmox VE 9.2.12",
+              "details": "All documentation, download pages, and UI footers now display the new version number 9.2.12 instead of 9.2.11.",
+              "impact": "Operators can verify they are using the latest release; no functional change to the platform.",
+              "recommended_action": "Confirm the version displayed in the web UI matches 9.2.12 after upgrade.",
+              "severity": "low"
+            },
+            {
+              "title": "Revision timestamps updated",
+              "details": "Metadata timestamps throughout the HTML docs have been changed from Tue Sep 15 2026 13:17:55 UTC to Fri Sep 18 2026 12:15:08 UTC.",
+              "impact": "Ensures documentation reflects the correct publication date; no impact on system behavior.",
+              "recommended_action": "No action required; this is informational.",
+              "severity": "low"
+            },
+            {
+              "title": "Explicit device name placeholder in dd command",
+              "details": "The installation guide now uses \"X\" as a clear placeholder for the disk number in the command `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.",
+              "impact": "Reduces confusion when copying the command, helping users target the correct block device.",
+              "recommended_action": "Replace \"X\" with the actual disk number shown by `diskutil list` (macOS) or `lsblk` (Linux) before running the command.",
+              "severity": "medium"
+            },
+            {
+              "title": "Safety note added for target device verification",
+              "details": "A new admonition warns: \"Be sure to replace /dev/XYZ with the correct device name and adapt the input filename (if) path.\" This emphasizes double‑checking the target before writing the image.",
+              "impact": "Prevents accidental overwriting of the wrong drive, a high‑risk mistake that could cause data loss.",
+              "recommended_action": "Always run `lsblk`/`diskutil list` and verify the device identifier before executing the dd command.",
+              "severity": "high"
+            },
+            {
+              "title": "Clarified installation steps for macOS and Linux",
+              "details": "The guide now separates macOS (`/dev/rdiskX`) and Linux (`/dev/sdX`) examples and adds a tip about using `sudo` for permission elevation.",
+              "impact": "Improves cross‑platform clarity, reducing errors for users on different operating systems.",
+              "recommended_action": "Follow the OS‑specific command block when creating a bootable installer.",
+              "severity": "medium"
+            },
+            {
+              "title": "Minor UI and footer text adjustments",
+              "details": "Footer copyright year and page titles have been synchronized with the new version and date.",
+              "impact": "Purely cosmetic; ensures consistency across the documentation site.",
+              "recommended_action": "No action needed.",
+              "severity": "low"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.2.12 вводит серию обновлений документации и безопасности, направленных на упрощение установки и снижение риска случайной потери данных. Основная платформа остаётся стабильной, но выпуск уточняет рекомендации и исправляет метки времени метаданных.",
+          "professional_assessment": "С точки зрения эксплуатации, изменения в основном связаны с документацией и не меняют базовые сервисы или API. Наиболее критическим воздействием является усиленное предупреждение о выборе диска при ручных установках, что снижает риск серьёзной ошибки оператора. Общий риск низок, однако операторам следует ознакомиться с обновлёнными шагами установки перед выполнением новых развертываний или обновлений.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, этот релиз в основном предоставляет более понятные инструкции о том, как записать образ установщика на USB‑накопитель и точно указывает, куда вставить правильное имя устройства. Он также обновляет номер версии, который вы увидите в веб‑интерфейсе и на странице загрузки. Новых функций не добавлено, но примечания по безопасности помогут вам избежать стирания неправильного диска.",
+          "changes": [
+            {
+              "title": "Обновление версии до Proxmox VE 9.2.12",
+              "details": "Вся документация, страницы загрузки и нижние колонтитулы UI теперь отображают новый номер версии 9.2.12 вместо 9.2.11.",
+              "impact": "Операторы могут убедиться, что используют последний релиз; функциональных изменений в платформе нет.",
+              "recommended_action": "Убедитесь, что версия, отображаемая в веб‑интерфейсе, соответствует 9.2.12 после обновления.",
+              "severity": "low"
+            },
+            {
+              "title": "Временные метки ревизий обновлены",
+              "details": "Метаданные временных меток во всех HTML‑документах изменены с Tue Sep 15 2026 13:17:55 UTC на Fri Sep 18 2026 12:15:08 UTC.",
+              "impact": "Обеспечивает, что документация отражает правильную дату публикации; не влияет на поведение системы.",
+              "recommended_action": "Никаких действий не требуется; это информационное сообщение.",
+              "severity": "low"
+            },
+            {
+              "title": "Явный заполнитель имени устройства в команде dd",
+              "details": "В руководстве по установке теперь используется «X» в качестве явного заполнителя для номера диска в команде `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.",
+              "impact": "Уменьшает путаницу при копировании команды, помогая пользователям выбрать правильное блочное устройство.",
+              "recommended_action": "Замените «X» на фактический номер диска, отображаемый командой `diskutil list` (macOS) или `lsblk` (Linux), перед выполнением команды.",
+              "severity": "medium"
+            },
+            {
+              "title": "Safety note added for target device verification",
+              "details": "Новое предупреждение гласит: «Обязательно замените /dev/XYZ на правильное имя устройства и при необходимости скорректируйте путь к входному файлу (if).» Это подчеркивает необходимость двойной проверки цели перед записью образа.",
+              "impact": "Предотвращает случайную перезапись неправильного диска — ошибку с высоким риском, способную привести к потере данных.",
+              "recommended_action": "Всегда запускайте `lsblk`/`diskutil list` и проверяйте идентификатор устройства перед выполнением команды dd.",
+              "severity": "high"
+            },
+            {
+              "title": "Уточнены шаги установки для macOS и Linux",
+              "details": "В руководстве теперь разделены примеры для macOS (`/dev/rdiskX`) и Linux (`/dev/sdX`), а также добавлен совет использовать `sudo` для повышения прав.",
+              "impact": "Улучшает кросс‑платформенную ясность, снижая количество ошибок у пользователей разных операционных систем.",
+              "recommended_action": "Следуйте блоку команд, специфичному для ОС, при создании загрузочного установщика.",
+              "severity": "medium"
+            },
+            {
+              "title": "Незначительные изменения UI и текста в нижнем колонтитуле",
+              "details": "Год авторского права в нижнем колонтитуле и заголовки страниц синхронизированы с новой версией и датой.",
+              "impact": "Только косметическое; обеспечивает согласованность по всему сайту документации.",
+              "recommended_action": "No action needed.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.2.12 introduit une série de mises à jour de la documentation et de la sécurité visant à rendre l'installation plus claire et à réduire le risque de perte de données accidentelle. La plateforme de base reste stable, mais cette version affine les recommandations et corrige les horodatages des métadonnées.",
+          "professional_assessment": "Du point de vue des opérations, les changements sont principalement motivés par la documentation et n'altèrent pas les services ou les API sous-jacents. L'impact le plus critique est l'avertissement renforcé concernant la sélection du disque lors des installations manuelles, ce qui atténue une erreur d'opérateur à haut risque. Le risque global est faible, mais les opérateurs doivent examiner les étapes d'installation mises à jour avant de procéder à de nouveaux déploiements ou mises à niveau.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, cette version vous fournit principalement des instructions plus claires sur la façon d’écrire l’image d’installation sur une clé USB et vous indique exactement où placer le nom de périphérique correct. Elle met également à jour le numéro de version que vous verrez dans l’interface web et sur la page de téléchargement. Aucune nouvelle fonctionnalité n’est ajoutée, mais les notes de sécurité vous aident à éviter d’effacer le mauvais disque.",
+          "changes": [
+            {
+              "title": "Mise à jour de version vers Proxmox VE 9.2.12",
+              "details": "Toute la documentation, les pages de téléchargement et les pieds de page de l’interface utilisateur affichent désormais le nouveau numéro de version 9.2.12 au lieu de 9.2.11.",
+              "impact": "Les opérateurs peuvent vérifier qu’ils utilisent la dernière release ; aucune modification fonctionnelle de la plateforme.",
+              "recommended_action": "Confirmez que la version affichée dans l'interface Web correspond à 9.2.12 après la mise à jour.",
+              "severity": "low"
+            },
+            {
+              "title": "Horodatages de révision mis à jour",
+              "details": "Les horodatages des métadonnées dans l’ensemble des documents HTML ont été modifiés du Tue Sep 15 2026 13:17:55 UTC au Fri Sep 18 2026 12:15:08 UTC.",
+              "impact": "Assure que la documentation reflète la date de publication correcte ; aucun impact sur le comportement du système.",
+              "recommended_action": "No action required; this is informational.",
+              "severity": "low"
+            },
+            {
+              "title": "Espace réservé explicite pour le nom du périphérique dans la commande dd",
+              "details": "Le guide d'installation utilise désormais « X » comme espace réservé clair pour le numéro de disque dans la commande `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.",
+              "impact": "Réduit la confusion lors de la copie de la commande, aidant les utilisateurs à cibler le bon périphérique de bloc.",
+              "recommended_action": "Remplacez « X » par le numéro de disque réel affiché par `diskutil list` (macOS) ou `lsblk` (Linux) avant d’exécuter la commande.",
+              "severity": "medium"
+            },
+            {
+              "title": "Safety note added for target device verification",
+              "details": "Une nouvelle mise en garde indique : « Assurez‑vous de remplacer /dev/XYZ par le nom de périphérique correct et d’adapter le chemin du nom de fichier d’entrée (if). » Cela souligne l’importance de vérifier le ciblage avant d’écrire l’image.",
+              "impact": "Empêche l'écrasement accidentel du mauvais disque, une erreur à haut risque pouvant entraîner une perte de données.",
+              "recommended_action": "Exécutez toujours `lsblk`/`diskutil list` et vérifiez l’identifiant du périphérique avant d’exécuter la commande dd.",
+              "severity": "high"
+            },
+            {
+              "title": "Étapes d'installation clarifiées pour macOS et Linux",
+              "details": "Le guide sépare désormais les exemples macOS (`/dev/rdiskX`) et Linux (`/dev/sdX`) et ajoute une astuce concernant l’utilisation de `sudo` pour l’élévation des permissions.",
+              "impact": "Améliore la clarté multiplateforme, réduisant les erreurs pour les utilisateurs sur différents systèmes d'exploitation.",
+              "recommended_action": "Suivez le bloc de commandes spécifique à l'OS lors de la création d'un installateur bootable.",
+              "severity": "medium"
+            },
+            {
+              "title": "Petites modifications de l'interface utilisateur et du texte du pied de page",
+              "details": "L'année du copyright du pied de page ainsi que les titres des pages ont été synchronisés avec la nouvelle version et la date.",
+              "impact": "Purement cosmétique ; assure la cohérence sur l'ensemble du site de documentation.",
+              "recommended_action": "Could you please provide the text you would like translated?",
+              "severity": "low"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Version bump to Proxmox VE 9.2.12\n   - All documentation, download pages, and UI footers now display the new version number 9.2.12 instead of 9.2.11.\n   - Impact: Operators can verify they are using the latest release; no functional change to the platform.\n   - Action: Confirm the version displayed in the web UI matches 9.2.12 after upgrade.\n   - Severity: low\n2. Revision timestamps updated\n   - Metadata timestamps throughout the HTML docs have been changed from Tue Sep 15 2026 13:17:55 UTC to Fri Sep 18 2026 12:15:08 UTC.\n   - Impact: Ensures documentation reflects the correct publication date; no impact on system behavior.\n   - Action: No action required; this is informational.\n   - Severity: low\n3. Explicit device name placeholder in dd command\n   - The installation guide now uses \"X\" as a clear placeholder for the disk number in the command `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.\n   - Impact: Reduces confusion when copying the command, helping users target the correct block device.\n   - Action: Replace \"X\" with the actual disk number shown by `diskutil list` (macOS) or `lsblk` (Linux) before running the command.\n   - Severity: medium\n4. Safety note added for target device verification\n   - A new admonition warns: \"Be sure to replace /dev/XYZ with the correct device name and adapt the input filename (if) path.\" This emphasizes double‑checking the target before writing the image.\n   - Impact: Prevents accidental overwriting of the wrong drive, a high‑risk mistake that could cause data loss.\n   - Action: Always run `lsblk`/`diskutil list` and verify the device identifier before executing the dd command.\n   - Severity: high\n5. Clarified installation steps for macOS and Linux\n   - The guide now separates macOS (`/dev/rdiskX`) and Linux (`/dev/sdX`) examples and adds a tip about using `sudo` for permission elevation.\n   - Impact: Improves cross‑platform clarity, reducing errors for users on different operating systems.\n   - Action: Follow the OS‑specific command block when creating a bootable installer.\n   - Severity: medium\n6. Minor UI and footer text adjustments\n   - Footer copyright year and page titles have been synchronized with the new version and date.\n   - Impact: Purely cosmetic; ensures consistency across the documentation site.\n   - Action: No action needed.\n   - Severity: low",
+        "ru": "1. Обновление версии до Proxmox VE 9.2.12\n   - Вся документация, страницы загрузки и нижние колонтитулы UI теперь отображают новый номер версии 9.2.12 вместо 9.2.11.\n   - Impact: Операторы могут убедиться, что используют последний релиз; функциональных изменений в платформе нет.\n   - Action: Убедитесь, что версия, отображаемая в веб‑интерфейсе, соответствует 9.2.12 после обновления.\n   - Severity: low\n2. Временные метки ревизий обновлены\n   - Метаданные временных меток во всех HTML‑документах изменены с Tue Sep 15 2026 13:17:55 UTC на Fri Sep 18 2026 12:15:08 UTC.\n   - Impact: Обеспечивает, что документация отражает правильную дату публикации; не влияет на поведение системы.\n   - Action: Никаких действий не требуется; это информационное сообщение.\n   - Severity: low\n3. Явный заполнитель имени устройства в команде dd\n   - В руководстве по установке теперь используется «X» в качестве явного заполнителя для номера диска в команде `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.\n   - Impact: Уменьшает путаницу при копировании команды, помогая пользователям выбрать правильное блочное устройство.\n   - Action: Замените «X» на фактический номер диска, отображаемый командой `diskutil list` (macOS) или `lsblk` (Linux), перед выполнением команды.\n   - Severity: medium\n4. Safety note added for target device verification\n   - Новое предупреждение гласит: «Обязательно замените /dev/XYZ на правильное имя устройства и при необходимости скорректируйте путь к входному файлу (if).» Это подчеркивает необходимость двойной проверки цели перед записью образа.\n   - Impact: Предотвращает случайную перезапись неправильного диска — ошибку с высоким риском, способную привести к потере данных.\n   - Action: Всегда запускайте `lsblk`/`diskutil list` и проверяйте идентификатор устройства перед выполнением команды dd.\n   - Severity: high\n5. Уточнены шаги установки для macOS и Linux\n   - В руководстве теперь разделены примеры для macOS (`/dev/rdiskX`) и Linux (`/dev/sdX`), а также добавлен совет использовать `sudo` для повышения прав.\n   - Impact: Улучшает кросс‑платформенную ясность, снижая количество ошибок у пользователей разных операционных систем.\n   - Action: Следуйте блоку команд, специфичному для ОС, при создании загрузочного установщика.\n   - Severity: medium\n6. Незначительные изменения UI и текста в нижнем колонтитуле\n   - Год авторского права в нижнем колонтитуле и заголовки страниц синхронизированы с новой версией и датой.\n   - Impact: Только косметическое; обеспечивает согласованность по всему сайту документации.\n   - Action: No action needed.\n   - Severity: low",
+        "fr": "1. Mise à jour de version vers Proxmox VE 9.2.12\n   - Toute la documentation, les pages de téléchargement et les pieds de page de l’interface utilisateur affichent désormais le nouveau numéro de version 9.2.12 au lieu de 9.2.11.\n   - Impact: Les opérateurs peuvent vérifier qu’ils utilisent la dernière release ; aucune modification fonctionnelle de la plateforme.\n   - Action: Confirmez que la version affichée dans l'interface Web correspond à 9.2.12 après la mise à jour.\n   - Severity: low\n2. Horodatages de révision mis à jour\n   - Les horodatages des métadonnées dans l’ensemble des documents HTML ont été modifiés du Tue Sep 15 2026 13:17:55 UTC au Fri Sep 18 2026 12:15:08 UTC.\n   - Impact: Assure que la documentation reflète la date de publication correcte ; aucun impact sur le comportement du système.\n   - Action: No action required; this is informational.\n   - Severity: low\n3. Espace réservé explicite pour le nom du périphérique dans la commande dd\n   - Le guide d'installation utilise désormais « X » comme espace réservé clair pour le numéro de disque dans la commande `dd if=proxmox-ve_*.dmg bs=1M of=/dev/rdiskX`.\n   - Impact: Réduit la confusion lors de la copie de la commande, aidant les utilisateurs à cibler le bon périphérique de bloc.\n   - Action: Remplacez « X » par le numéro de disque réel affiché par `diskutil list` (macOS) ou `lsblk` (Linux) avant d’exécuter la commande.\n   - Severity: medium\n4. Safety note added for target device verification\n   - Une nouvelle mise en garde indique : « Assurez‑vous de remplacer /dev/XYZ par le nom de périphérique correct et d’adapter le chemin du nom de fichier d’entrée (if). » Cela souligne l’importance de vérifier le ciblage avant d’écrire l’image.\n   - Impact: Empêche l'écrasement accidentel du mauvais disque, une erreur à haut risque pouvant entraîner une perte de données.\n   - Action: Exécutez toujours `lsblk`/`diskutil list` et vérifiez l’identifiant du périphérique avant d’exécuter la commande dd.\n   - Severity: high\n5. Étapes d'installation clarifiées pour macOS et Linux\n   - Le guide sépare désormais les exemples macOS (`/dev/rdiskX`) et Linux (`/dev/sdX`) et ajoute une astuce concernant l’utilisation de `sudo` pour l’élévation des permissions.\n   - Impact: Améliore la clarté multiplateforme, réduisant les erreurs pour les utilisateurs sur différents systèmes d'exploitation.\n   - Action: Suivez le bloc de commandes spécifique à l'OS lors de la création d'un installateur bootable.\n   - Severity: medium\n6. Petites modifications de l'interface utilisateur et du texte du pied de page\n   - L'année du copyright du pied de page ainsi que les titres des pages ont été synchronisés avec la nouvelle version et la date.\n   - Impact: Purement cosmétique ; assure la cohérence sur l'ensemble du site de documentation.\n   - Action: Could you please provide the text you would like translated?\n   - Severity: low"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 9.2.12: Revision timestamps updated, Explicit device name placeholder in dd command, Safety note added for target device verification, Clarified installation steps for macOS and Linux, Minor UI and footer text adjustments",
+      "version": "Proxmox VE 9.2.12",
+      "model": "fallback",
+      "generated_at": "2026-09-18T17:00:57Z"
+    }
+  },
+  {
     "timestamp": "2026-09-16T13:08:12Z",
     "old_hash": "dd9916fef3e619a5e6e70b9608d65e8a50667a0c4679a5b3b591432e87910eae",
     "new_hash": "c3724c361bf11e40c63d139a358755b6fd1d7444cfb5253b94799cea532f6f1b",
