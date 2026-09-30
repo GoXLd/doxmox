@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260930T075845Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-09-30T07:58:45Z" data-iso="2026-09-30T07:58:45Z" data-tooltip="">2026-09-30 07:58:45 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20260930T075845Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.13 brings several important enhancements: built‑in support for Software Defined Networking, tighter integration with Proxmox Backup Server, new tools for offline environments, and several Ceph‑related improvements. The release also updates the documentation version and refines command‑line help. These changes make the platform easier to secure, scale, and back up, while keeping the learning curve gentle for newcomers.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> The update is a solid incremental release. Network automation via SDN and the mature backup integration address common production pain points, raising operational efficiency. Ceph adjustments improve multi‑cluster handling and security guidance, which is critical for larger deployments. No breaking changes are introduced for existing clusters, but operators should verify the raised pve‑manager minimum version before planning Ceph migrations. Overall, the release is low‑risk and adds clear value.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-medium">Medium</span>Asynchronous storage replication and ACME certificate automation (since VE 5)</strong><div>Proxmox now supports non‑blocking storage replication and can automatically obtain and renew TLS certificates from Let’s Encrypt using the ACME protocol.</div><div><em>Impact:</em> Reduces manual steps for high‑availability storage and improves security with up‑to‑date certificates.</div><div><em>Action:</em> Enable replication on supported storage back‑ends and configure ACME in the web UI for automatic certificate handling.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>Software Defined Network (SDN) fully supported and default (v8.1+)</strong><div>The SDN stack, originally experimental in 6.2, is now a stable, default‑installed component that lets you design complex virtual networks through the web interface.</div><div><em>Impact:</em> Simplifies creation of VLANs, bridges, and firewall rules across the cluster, reducing reliance on manual Linux networking commands.</div><div><em>Action:</em> Review existing network configurations and migrate to SDN where appropriate; use the SDN wizard for new setups.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>Deep integration with Proxmox Backup Server</strong><div>Backup Server, written in Rust, provides incremental backups, deduplication, and fast restore capabilities directly from the VE UI.</div><div><em>Impact:</em> Significant storage savings and faster backup windows for VMs and containers.</div><div><em>Action:</em> Deploy a Proxmox Backup Server instance and configure backup jobs in the VE web UI.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Proxmox Offline Mirror tool (released 2022)</strong><div>The Offline Mirror allows you to download subscription repositories on a machine with internet access and then sync them to isolated Proxmox hosts.</div><div><em>Impact:</em> Enables secure, up‑to‑date package management for air‑gapped or remote sites.</div><div><em>Action:</em> Create an offline mirror on a connected system and point isolated hosts to the local repository URL.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Documentation version bump to 9.2.13 (Sep 24 2026)</strong><div>All manuals now carry the latest revision number and date, reflecting the newest feature set and bug fixes.</div><div><em>Impact:</em> Ensures operators reference the correct documentation for the installed version.</div><div><em>Action:</em> Verify that your local docs match version 9.2.13; download updated PDFs if needed.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Ceph ‘monhost’ handling improvement</strong><div>When a Ceph storage definition includes the `monhost` option, Proxmox treats the cluster as external and stores a separate key copy for that storage, even if monitors belong to the same Ceph cluster.</div><div><em>Impact:</em> Prevents accidental key sharing across unrelated Ceph clusters and improves security for multi‑cluster environments.</div><div><em>Action:</em> Review Ceph storage definitions; ensure `monhost` is set correctly for external clusters.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>CLI and migration updates for Ceph (pveceph description, version requirement, Cephx guidance)</strong><div>The `pveceph` helper now mentions &quot;inspection diagnostics&quot; in its description. Minimum required pve‑manager version for Ceph migration is raised to 9.2.19. A new &quot;Cephx Disabled&quot; section provides step‑by‑step guidance for disabling Ceph authentication when needed.</div><div><em>Impact:</em> Provides clearer command‑line help, enforces newer manager versions for safe migrations, and offers official guidance for special security configurations.</div><div><em>Action:</em> Use `pveceph --help` to see the updated description, upgrade pve‑manager to at least 9.2.19 before Ceph migrations, and follow the new Cephx Disabled guide if you must disable authentication.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.13 apporte plusieurs améliorations importantes : prise en charge native du Software Defined Networking, intégration renforcée avec Proxmox Backup Server, nouveaux outils pour les environnements hors ligne et plusieurs améliorations liées à Ceph. La version met également à jour le numéro de la documentation et affine l’aide en ligne de commande. Ces changements rendent la plateforme plus facile à sécuriser, à faire évoluer et à sauvegarder, tout en conservant une courbe d’apprentissage douce pour les nouveaux utilisateurs.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> La mise à jour est une version incrémentale solide. L&#x27;automatisation du réseau via SDN et l&#x27;intégration mature des sauvegardes répondent aux points de douleur courants en production, améliorant l&#x27;efficacité opérationnelle. Les ajustements de Ceph améliorent la gestion multi‑cluster et les recommandations de sécurité, ce qui est crucial pour les déploiements de plus grande envergure. Aucun changement incompatibles n&#x27;est introduit pour les clusters existants, mais les opérateurs doivent vérifier la version minimale de pve‑manager augmentée avant de planifier les migrations Ceph. Globalement, la version est à faible risque et apporte une valeur claire.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-medium">Moyen</span>Réplication de stockage asynchrone et automatisation des certificats ACME (depuis VE 5)</strong><div>Proxmox prend désormais en charge la réplication de stockage non bloquante et peut automatiquement obtenir et renouveler les certificats TLS de Let’s Encrypt en utilisant le protocole ACME.</div><div><em>Impact:</em> Réduit les étapes manuelles pour le stockage haute disponibilité et améliore la sécurité avec des certificats à jour.</div><div><em>Action:</em> Activez la réplication sur les back‑ends de stockage pris en charge et configurez ACME dans l&#x27;interface Web pour la gestion automatique des certificats.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Réseau défini par logiciel (SDN) entièrement pris en charge et activé par défaut (v8.1+)</strong><div>La pile SDN, initialement expérimentale dans la version 6.2, est désormais un composant stable installé par défaut qui vous permet de concevoir des réseaux virtuels complexes via l’interface web.</div><div><em>Impact:</em> Simplifie la création de VLANs, de ponts et de règles de pare-feu sur l’ensemble du cluster, réduisant la dépendance aux commandes réseau Linux manuelles.</div><div><em>Action:</em> Examinez les configurations réseau existantes et migrez vers le SDN le cas échéant ; utilisez l’assistant SDN pour les nouvelles configurations.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Intégration profonde avec Proxmox Backup Server</strong><div>Backup Server, écrit en Rust, fournit des sauvegardes incrémentielles, de la déduplication et des capacités de restauration rapide directement depuis l&#x27;UI VE.</div><div><em>Impact:</em> Économies de stockage importantes et fenêtres de sauvegarde plus rapides pour les VM et les conteneurs.</div><div><em>Action:</em> Déployez une instance de Proxmox Backup Server et configurez les tâches de sauvegarde dans l&#x27;interface web du VE.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Outil Proxmox Offline Mirror (publié en 2022)</strong><div>Le Offline Mirror vous permet de télécharger les dépôts d&#x27;abonnement sur une machine disposant d&#x27;un accès Internet, puis de les synchroniser avec des hôtes Proxmox isolés.</div><div><em>Impact:</em> Permet une gestion sécurisée et à jour des paquets pour les sites air‑gapped ou distants.</div><div><em>Action:</em> Créez un miroir hors ligne sur un système connecté et pointez les hôtes isolés vers l&#x27;URL du dépôt local.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Mise à jour de la version de la documentation vers 9.2.13 (24 septembre 2026)</strong><div>Tous les manuels affichent désormais le numéro de révision le plus récent ainsi que la date, reflétant le dernier ensemble de fonctionnalités et les correctifs de bugs.</div><div><em>Impact:</em> Garantit que les opérateurs se réfèrent à la documentation correcte pour la version installée.</div><div><em>Action:</em> Je ne peux pas vérifier la version de vos documents locaux ni télécharger de nouveaux PDF.
+
+Traduisez le texte suivant en français. Conservez les termes Proxmox avec précision. Préservez exactement le sens. Produisez uniquement le texte traduit, sans JSON, markdown ou commentaire.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Amélioration de la prise en charge du monhost Ceph</strong><div>Lorsque la définition d’un stockage Ceph inclut l’option `monhost`, Proxmox considère le cluster comme externe et stocke une copie de clé séparée pour ce stockage, même si les moniteurs appartiennent au même cluster Ceph.</div><div><em>Impact:</em> Empêche le partage accidentel de clés entre des clusters Ceph non liés et améliore la sécurité des environnements multi‑clusters.</div><div><em>Action:</em> Passez en revue les définitions de stockage Ceph ; assurez‑vous que `monhost` est correctement configuré pour les clusters externes.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Mises à jour de l&#x27;interface en ligne de commande et de la migration pour Ceph (description de pveceph, exigence de version, consignes Cephx)</strong><div>L’assistant `pveceph` mentionne désormais « inspection diagnostics » dans sa description. La version minimale requise de pve‑manager pour la migration Ceph est portée à 9.2.19. Une nouvelle section « Cephx Disabled » fournit des instructions pas à pas pour désactiver l’authentification Ceph si nécessaire.</div><div><em>Impact:</em> Fournit une aide en ligne de commande plus claire, impose des versions de gestionnaire plus récentes pour des migrations sécurisées, et propose des directives officielles pour des configurations de sécurité spéciales.</div><div><em>Action:</em> Utilisez `pveceph --help` pour voir la description mise à jour, mettez à jour pve‑manager vers au moins la version 9.2.19 avant les migrations Ceph, et suivez le nouveau guide Cephx Disabled si vous devez désactiver l’authentification.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.13 приносит несколько важных улучшений: встроенная поддержка Software Defined Networking, более тесная интеграция с Proxmox Backup Server, новые инструменты для офлайн‑окружений и несколько улучшений, связанных с Ceph. В выпуске также обновлена версия документации и уточнена справка командной строки. Эти изменения делают платформу проще в обеспечении безопасности, масштабировании и резервном копировании, при этом сохраняют плавную кривую обучения для новых пользователей.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Обновление представляет собой надёжный инкрементальный релиз. Автоматизация сети через SDN и зрелая интеграция резервного копирования решают типичные проблемы продакшн‑окружения, повышая эффективность эксплуатации. Корректировки Ceph улучшают работу с несколькими кластерами и рекомендации по безопасности, что критически важно для крупных развертываний. Для существующих кластеров не вводятся несовместимые изменения, однако операторам следует проверить повышенную минимальную версию pve‑manager перед планированием миграций Ceph. В целом релиз низкого риска и приносит явную ценность.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-medium">Средняя</span>Асинхронная репликация хранилища и автоматизация сертификатов ACME (с версии VE 5)</strong><div>Proxmox теперь поддерживает неблокирующую репликацию хранилищ и может автоматически получать и обновлять TLS‑сертификаты от Let’s Encrypt с использованием протокола ACME.</div><div><em>Impact:</em> Сокращает количество ручных действий при работе с хранилищем высокой доступности и повышает безопасность за счёт актуальных сертификатов.</div><div><em>Action:</em> Включите репликацию на поддерживаемых storage back‑ends и настройте ACME в веб‑интерфейсе для автоматической обработки сертификатов.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Software Defined Network (SDN) полностью поддерживается и включён по умолчанию (v8.1+)</strong><div>SDN‑стек, изначально экспериментальный в версии 6.2, теперь является стабильным компонентом, установленным по умолчанию, который позволяет проектировать сложные виртуальные сети через веб‑интерфейс.</div><div><em>Impact:</em> Упрощает создание VLAN‑ов, мостов и правил брандмауэра в кластере, снижая зависимость от ручных команд сетевого администрирования Linux.</div><div><em>Action:</em> Проведите обзор существующих сетевых конфигураций и при необходимости перенесите их в SDN; используйте мастер SDN для новых настроек.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Глубокая интеграция с Proxmox Backup Server</strong><div>Backup Server, написанный на Rust, предоставляет инкрементные резервные копии, дедупликацию и возможности быстрого восстановления непосредственно из VE UI.</div><div><em>Impact:</em> Значительная экономия места на диске и более короткие окна резервного копирования для ВМ и контейнеров.</div><div><em>Action:</em> Разверните экземпляр Proxmox Backup Server и настройте задания резервного копирования в VE web UI.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Proxmox Offline Mirror tool (выпущен в 2022 году)</strong><div>Offline Mirror позволяет загружать репозитории подписки на машину с доступом к интернету, а затем синхронизировать их с изолированными хостами Proxmox.</div><div><em>Impact:</em> Обеспечивает безопасное, актуальное управление пакетами для изолированных (air‑gapped) или удалённых площадок.</div><div><em>Action:</em> Создайте офлайн‑зеркало на подключённой системе и укажите изолированным хостам локальный URL репозитория.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Обновление версии документации до 9.2.13 (24 сен 2026)</strong><div>Все руководства теперь содержат последний номер ревизии и дату, отражающие новейший набор функций и исправления ошибок.</div><div><em>Impact:</em> Обеспечивает, что операторы используют правильную документацию для установленной версии.</div><div><em>Action:</em> Переведите следующий текст на русский.  
+Сохраняйте термины Proxmox точными. Сохраняйте смысл полностью.  
+Выводите только переведённый текст, без JSON, markdown или комментариев.  
+
+Я не могу проверить локальную документацию или загрузить обновлённые PDF‑файлы.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Улучшение обработки Ceph ‘monhost’</strong><div>Если в определении хранилища Ceph указана опция `monhost`, Proxmox рассматривает кластер как внешнее и сохраняет отдельную копию ключа для этого хранилища, даже если мониторы принадлежат тому же кластеру Ceph.</div><div><em>Impact:</em> Предотвращает случайное совместное использование ключей между несвязанными кластерами Ceph и повышает безопасность в мульти‑кластерных средах.</div><div><em>Action:</em> Проверьте определения хранилища Ceph; убедитесь, что параметр `monhost` установлен правильно для внешних кластеров.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Обновления CLI и миграции для Ceph (описание pveceph, требование версии, руководство по Cephx)</strong><div>В справке `pveceph` теперь в описании упоминаются «inspection diagnostics». Минимальная требуемая версия pve‑manager для миграции Ceph повышена до 9.2.19. Новый раздел «Cephx Disabled» предоставляет пошаговое руководство по отключению аутентификации Ceph при необходимости.</div><div><em>Impact:</em> Обеспечивает более понятную справку в командной строке, принудительно использует более новые версии менеджера для безопасных миграций и предоставляет официальные рекомендации по специальным настройкам безопасности.</div><div><em>Action:</em> Выполните `pveceph --help`, чтобы увидеть обновлённое описание, обновите pve‑manager как минимум до версии 9.2.19 перед миграциями Ceph и следуйте новому руководству Cephx Disabled, если необходимо отключить аутентификацию.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -346,10 +346,10 @@ ICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg==" title="Proxmox VE Administration G
  </span>
  <br/>
  <span id="revnumber">
-  version 9.2.12,
+  version 9.2.13,
  </span>
  <span id="revdate">
-  Fri Sep 18 12:15:08 UTC 2026
+  Thu Sep 24 19:51:15 CEST 2026
  </span>
  <div id="toc">
   <a href="index.html" style="font-size: 0.8em;">
@@ -32832,7 +32832,13 @@ is possible.
        <dd>
         <p>
          List of monitor daemon IPs. Optional, only needed if Ceph is not running on the
-Proxmox VE cluster.
+Proxmox VE cluster. With
+         <span class="monospaced">
+          monhost
+         </span>
+         set, Proxmox VE treats the cluster as external and
+keeps a separate key copy for this storage, even if the monitors belong to the
+Ceph cluster of this Proxmox VE cluster.
         </p>
        </dd>
        <dt class="hdlist1">
@@ -33583,7 +33589,13 @@ the node, leading to unexpected behavior.
        <dd>
         <p>
          List of monitor daemon addresses. Optional, only needed if Ceph is not running
-on the Proxmox VE cluster.
+on the Proxmox VE cluster. With
+         <span class="monospaced">
+          monhost
+         </span>
+         set, Proxmox VE treats the cluster as external
+and keeps a separate key copy for this storage, even if the monitors belong to
+the Ceph cluster of this Proxmox VE cluster.
         </p>
        </dd>
        <dt class="hdlist1">
@@ -40008,7 +40020,7 @@ work. Review each dry run before applying its plan; add
          --verbose
         </span>
         for full
-node, keyring, and device inventories.
+node, keyring, and device inventories and inspection diagnostics.
        </p>
       </div>
       <div class="paragraph">
@@ -40028,7 +40040,7 @@ without options to check the current state and follow the next steps it prints.
           <span class="monospaced">
            pve-manager
           </span>
-          to 9.2.17 or newer and install the latest Ceph
+          to 9.2.19 or newer and install the latest Ceph
   packages on every node. Staged client-key rotation requires Ceph
   19.2.6-pve3, 20.2.4-pve3, or newer on every monitor.
          </p>
@@ -40057,6 +40069,15 @@ without options to check the current state and follow the next steps it prints.
           on one node only. Do not start another migration,
   a rolling restart, or change Ceph keys with other tools while it runs. The
   helper’s lock does not block direct Ceph authentication commands.
+         </p>
+        </li>
+        <li>
+         <p>
+          If Cephx is disabled on this cluster, follow
+          <a href="#pveceph_cephx_disabled">
+           Clusters with Cephx Disabled
+          </a>
+          instead.
          </p>
         </li>
        </ul>
@@ -40114,8 +40135,9 @@ cipher stays enabled.
        <div class="paragraph">
         <p>
          After Ceph updates its health status, the two error-severity checks clear. The
-warning about rotating service keys can remain for a few hours and clears
-automatically.
+warning about rotating service keys can remain for a few hours while old
+rotating keys expire. You do not need to wait for this warning to clear before
+continuing with the migration.
         </p>
        </div>
       </div>
@@ -40329,9 +40351,10 @@ until confirmation makes the new key current and invalidates the old one.
        </div>
        <div class="paragraph">
         <p>
-         The helper reports sessions that may still hold an old key. Client names
-are hints, not a complete workload inventory; check disconnected clients
-and external key copies yourself.
+         The helper reports sessions that may still hold an old key. Client hints
+are host-wide, not session attribution or a complete workload inventory.
+Sockets without an owning process are listed separately. Check disconnected
+clients and external key copies yourself.
         </p>
        </div>
       </div>
@@ -40640,8 +40663,8 @@ cipher.
            </td>
            <td class="tableblock halign-left valign-top">
             <p class="tableblock">
-             Wait a few hours after migrating the cluster-owned keys. This warning
-does not prevent final cipher restriction.
+             Continue the migration; old rotating keys expire automatically and do
+not prevent final cipher restriction.
             </p>
            </td>
           </tr>
@@ -40690,6 +40713,108 @@ the migration, or mute the warning while old clients remain.
        </div>
       </div>
       <div class="sect5">
+       <h6 id="pveceph_cephx_disabled">
+        Clusters with Cephx Disabled
+        <a class="headerlink" href="#pveceph_cephx_disabled" title="Permalink to this heading">
+        </a>
+       </h6>
+       <div class="paragraph">
+        <p>
+         Ceph evaluates these health checks from the stored keys and cipher settings,
+also when Cephx is disabled, that is, when
+         <span class="monospaced">
+          auth_cluster_required
+         </span>
+         ,
+         <span class="monospaced">
+          auth_service_required
+         </span>
+         , and
+         <span class="monospaced">
+          auth_client_required
+         </span>
+         are set to
+         <span class="monospaced">
+          none
+         </span>
+         .
+Disabling Cephx therefore does not clear them, and changing the authentication
+method interrupts existing clients, which need a restart or remount afterwards.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         On a cluster with Cephx disabled:
+        </p>
+       </div>
+       <div class="olist arabic">
+        <ol class="arabic">
+         <li>
+          <p>
+           Run the helper without options and apply its plan. It migrates the manager,
+  metadata server, and OSD keys, restarting services one at a time when needed,
+  and switches the service tickets to the new cipher. This clears both
+  error-severity checks. If an old
+           <span class="monospaced">
+            mon.
+           </span>
+           key is stored in the authentication
+  database, the helper instead refuses and asks you to migrate that key first.
+          </p>
+         </li>
+         <li>
+          <p>
+           Optionally, migrate the bootstrap and crash keys with
+           <span class="monospaced">
+            --rotate-client-keys
+           </span>
+           .
+          </p>
+         </li>
+         <li>
+          <p>
+           Mute the remaining warnings without a duration. While Cephx is disabled, the
+  helper does not migrate the keys of other Ceph users, as their clients do not
+  authenticate with Cephx:
+          </p>
+          <div class="listingblock">
+           <div class="content">
+            <!-- Generator: GNU source-highlight
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+            <pre><tt>ceph health mute AUTH_INSECURE_CLIENT_KEY_TYPE --sticky
+ceph health mute AUTH_INSECURE_KEYS_ALLOWED --sticky
+ceph health mute AUTH_INSECURE_KEYS_CREATABLE --sticky</tt></pre>
+           </div>
+          </div>
+         </li>
+        </ol>
+       </div>
+       <div class="paragraph">
+        <p>
+         Do not restrict the allowed ciphers or forbid creating old-cipher keys by hand
+while the preferred cipher is still
+         <span class="monospaced">
+          aes
+         </span>
+         , as creating keys then fails.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         Before you enable Cephx again, unmute these checks and make sure that every
+monitor, Ceph service, and client still has a key file matching the
+authentication database. Restart the monitors first, then all other Ceph
+services, and restart or remount the clients. Then run the migration as described in
+         <a href="#pveceph_cephx_migration_helper">
+          Migration Steps
+         </a>
+         .
+        </p>
+       </div>
+      </div>
+      <div class="sect5">
        <h6 id="pveceph_cephx_staged_keys">
         Staged Keys and Confirmation
         <a class="headerlink" href="#pveceph_cephx_staged_keys" title="Permalink to this heading">
@@ -40726,6 +40851,19 @@ users separately, use
          with
          <span class="monospaced">
           --apply
+         </span>
+         .
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         Ceph 19.2.6-pve4 and 20.2.4-pve4 or newer monitors can identify each session’s
+key, allowing refreshed clients to stay connected during forward or rollback
+confirmation. Upgrade and restart older monitors to use this feature. Without
+key identification, every visible client of that user must disconnect before
+confirmation; upgrading is preferable for a shared user such as
+         <span class="monospaced">
+          client.admin
          </span>
          .
         </p>
@@ -40785,6 +40923,20 @@ that cluster’s keys. Follow its administrator’s key-rotation procedure.
        </div>
        <div class="paragraph">
         <p>
+         A storage with
+         <span class="monospaced">
+          monhost
+         </span>
+         set counts as external even if its monitors belong to
+the local cluster, so the helper does not update its key copy. If that copy
+holds the key of a Ceph user you migrate, update it with the staged key of the
+same user before confirming, or with the restored key before confirming a
+rollback. The helper refuses to retire a key it finds in a storage key copy;
+verify copies it cannot check yourself.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
          The helper lists local users not managed by Proxmox VE separately. Follow their
 client’s supported rotation procedure, or leave their keys unchanged and keep
 the old cipher enabled.
@@ -40829,23 +40981,11 @@ the old cipher enabled.
            </span>
            to
   retire the staged key. The helper refuses if monitor session collection is
-  incomplete, a visible session uses the staged key, or its key is unknown.
+  incomplete, a visible session uses the staged key, its key is unknown, or a
+  storage key copy still holds the staged key.
           </p>
          </li>
         </ol>
-       </div>
-       <div class="paragraph">
-        <p>
-         Ceph 19.2.6-pve4 and 20.2.4-pve4 or newer monitors can identify each session’s
-key, allowing clients on the restored key to stay connected during rollback
-confirmation. Upgrade and restart older monitors to use this feature. Without
-key identification, every visible client of that user must disconnect before
-confirmation; upgrading is preferable for a shared user such as
-         <span class="monospaced">
-          client.admin
-         </span>
-         .
-        </p>
        </div>
       </div>
       <div class="sect5">
@@ -40907,9 +41047,11 @@ before the final dry run.
        </h6>
        <div class="paragraph">
         <p>
-         After an interruption, run the helper without options to check what remains.
-Keep the journal unchanged and follow the printed next steps rather than
-starting a manual rotation.
+         After an interruption, run the helper without options once the affected nodes
+are reachable. Unfinished key updates can resume while their daemons are
+stopped. Keep the journal unchanged and follow the printed next steps rather
+than starting a manual rotation. Check the affected nodes and service logs
+rather than assuming a down daemon’s key needs repair.
         </p>
        </div>
        <div class="paragraph">
@@ -140146,9 +140288,9 @@ provided the MMC is eligible for relicensing.
 </div>
 <div id="footer">
  <div id="footer-text">
-  Version 9.2.12
+  Version 9.2.13
   <br/>
   Last updated
- Fri Sep 18 12:15:08 UTC 2026
+ Thu Sep 24 19:51:15 CEST 2026
  </div>
 </div>

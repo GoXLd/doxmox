@@ -1,5 +1,217 @@
 [
   {
+    "timestamp": "2026-09-30T07:58:45Z",
+    "old_hash": "b44948bdd699efa4b8cbd8648013779dcc613abea27f71ebfa2570b3eb6a7b63",
+    "new_hash": "8c42ba6f496eb729bb2a322a592f69e3fbef4cd4bbe4809a693f2462e9991f63",
+    "diff_file": "docs/changes/20260930T075845Z.diff",
+    "added_lines": 174,
+    "removed_lines": 32,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-09-30T08:04:23Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.2.13 brings several important enhancements: built‑in support for Software Defined Networking, tighter integration with Proxmox Backup Server, new tools for offline environments, and several Ceph‑related improvements. The release also updates the documentation version and refines command‑line help. These changes make the platform easier to secure, scale, and back up, while keeping the learning curve gentle for newcomers.",
+          "professional_assessment": "The update is a solid incremental release. Network automation via SDN and the mature backup integration address common production pain points, raising operational efficiency. Ceph adjustments improve multi‑cluster handling and security guidance, which is critical for larger deployments. No breaking changes are introduced for existing clusters, but operators should verify the raised pve‑manager minimum version before planning Ceph migrations. Overall, the release is low‑risk and adds clear value.",
+          "newcomer_explainer": "Proxmox VE is an open‑source platform that lets you run virtual machines and containers on a single or clustered set of servers. It combines a web UI, command‑line tools, and APIs to manage storage, networking, and backups. This release adds easier network setup (SDN), better backup options (Proxmox Backup Server), and tools for environments without internet access (Offline Mirror). It also smooths out the use of Ceph storage, a popular distributed storage system, by handling special cases automatically and giving clearer guidance on security settings.",
+          "changes": [
+            {
+              "title": "Asynchronous storage replication and ACME certificate automation (since VE 5)",
+              "details": "Proxmox now supports non‑blocking storage replication and can automatically obtain and renew TLS certificates from Let’s Encrypt using the ACME protocol.",
+              "impact": "Reduces manual steps for high‑availability storage and improves security with up‑to‑date certificates.",
+              "recommended_action": "Enable replication on supported storage back‑ends and configure ACME in the web UI for automatic certificate handling.",
+              "severity": "medium"
+            },
+            {
+              "title": "Software Defined Network (SDN) fully supported and default (v8.1+)",
+              "details": "The SDN stack, originally experimental in 6.2, is now a stable, default‑installed component that lets you design complex virtual networks through the web interface.",
+              "impact": "Simplifies creation of VLANs, bridges, and firewall rules across the cluster, reducing reliance on manual Linux networking commands.",
+              "recommended_action": "Review existing network configurations and migrate to SDN where appropriate; use the SDN wizard for new setups.",
+              "severity": "high"
+            },
+            {
+              "title": "Deep integration with Proxmox Backup Server",
+              "details": "Backup Server, written in Rust, provides incremental backups, deduplication, and fast restore capabilities directly from the VE UI.",
+              "impact": "Significant storage savings and faster backup windows for VMs and containers.",
+              "recommended_action": "Deploy a Proxmox Backup Server instance and configure backup jobs in the VE web UI.",
+              "severity": "high"
+            },
+            {
+              "title": "Proxmox Offline Mirror tool (released 2022)",
+              "details": "The Offline Mirror allows you to download subscription repositories on a machine with internet access and then sync them to isolated Proxmox hosts.",
+              "impact": "Enables secure, up‑to‑date package management for air‑gapped or remote sites.",
+              "recommended_action": "Create an offline mirror on a connected system and point isolated hosts to the local repository URL.",
+              "severity": "medium"
+            },
+            {
+              "title": "Documentation version bump to 9.2.13 (Sep 24 2026)",
+              "details": "All manuals now carry the latest revision number and date, reflecting the newest feature set and bug fixes.",
+              "impact": "Ensures operators reference the correct documentation for the installed version.",
+              "recommended_action": "Verify that your local docs match version 9.2.13; download updated PDFs if needed.",
+              "severity": "low"
+            },
+            {
+              "title": "Ceph ‘monhost’ handling improvement",
+              "details": "When a Ceph storage definition includes the `monhost` option, Proxmox treats the cluster as external and stores a separate key copy for that storage, even if monitors belong to the same Ceph cluster.",
+              "impact": "Prevents accidental key sharing across unrelated Ceph clusters and improves security for multi‑cluster environments.",
+              "recommended_action": "Review Ceph storage definitions; ensure `monhost` is set correctly for external clusters.",
+              "severity": "medium"
+            },
+            {
+              "title": "CLI and migration updates for Ceph (pveceph description, version requirement, Cephx guidance)",
+              "details": "The `pveceph` helper now mentions \"inspection diagnostics\" in its description. Minimum required pve‑manager version for Ceph migration is raised to 9.2.19. A new \"Cephx Disabled\" section provides step‑by‑step guidance for disabling Ceph authentication when needed.",
+              "impact": "Provides clearer command‑line help, enforces newer manager versions for safe migrations, and offers official guidance for special security configurations.",
+              "recommended_action": "Use `pveceph --help` to see the updated description, upgrade pve‑manager to at least 9.2.19 before Ceph migrations, and follow the new Cephx Disabled guide if you must disable authentication.",
+              "severity": "low"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.2.13 приносит несколько важных улучшений: встроенная поддержка Software Defined Networking, более тесная интеграция с Proxmox Backup Server, новые инструменты для офлайн‑окружений и несколько улучшений, связанных с Ceph. В выпуске также обновлена версия документации и уточнена справка командной строки. Эти изменения делают платформу проще в обеспечении безопасности, масштабировании и резервном копировании, при этом сохраняют плавную кривую обучения для новых пользователей.",
+          "professional_assessment": "Обновление представляет собой надёжный инкрементальный релиз. Автоматизация сети через SDN и зрелая интеграция резервного копирования решают типичные проблемы продакшн‑окружения, повышая эффективность эксплуатации. Корректировки Ceph улучшают работу с несколькими кластерами и рекомендации по безопасности, что критически важно для крупных развертываний. Для существующих кластеров не вводятся несовместимые изменения, однако операторам следует проверить повышенную минимальную версию pve‑manager перед планированием миграций Ceph. В целом релиз низкого риска и приносит явную ценность.",
+          "newcomer_explainer": "Proxmox VE — это платформа с открытым исходным кодом, позволяющая запускать виртуальные машины и контейнеры на отдельном сервере или в кластере серверов. Она объединяет веб‑интерфейс, инструменты командной строки и API для управления хранилищем, сетью и резервными копиями. В этом выпуске упрощена настройка сети (SDN), улучшены варианты резервного копирования (Proxmox Backup Server) и добавлены инструменты для сред без доступа к Интернету (Offline Mirror). Также упрощено использование хранилища Ceph, популярной распределённой системы хранения, за счёт автоматической обработки особых случаев и более чётких рекомендаций по настройкам безопасности.",
+          "changes": [
+            {
+              "title": "Асинхронная репликация хранилища и автоматизация сертификатов ACME (с версии VE 5)",
+              "details": "Proxmox теперь поддерживает неблокирующую репликацию хранилищ и может автоматически получать и обновлять TLS‑сертификаты от Let’s Encrypt с использованием протокола ACME.",
+              "impact": "Сокращает количество ручных действий при работе с хранилищем высокой доступности и повышает безопасность за счёт актуальных сертификатов.",
+              "recommended_action": "Включите репликацию на поддерживаемых storage back‑ends и настройте ACME в веб‑интерфейсе для автоматической обработки сертификатов.",
+              "severity": "medium"
+            },
+            {
+              "title": "Software Defined Network (SDN) полностью поддерживается и включён по умолчанию (v8.1+)",
+              "details": "SDN‑стек, изначально экспериментальный в версии 6.2, теперь является стабильным компонентом, установленным по умолчанию, который позволяет проектировать сложные виртуальные сети через веб‑интерфейс.",
+              "impact": "Упрощает создание VLAN‑ов, мостов и правил брандмауэра в кластере, снижая зависимость от ручных команд сетевого администрирования Linux.",
+              "recommended_action": "Проведите обзор существующих сетевых конфигураций и при необходимости перенесите их в SDN; используйте мастер SDN для новых настроек.",
+              "severity": "high"
+            },
+            {
+              "title": "Глубокая интеграция с Proxmox Backup Server",
+              "details": "Backup Server, написанный на Rust, предоставляет инкрементные резервные копии, дедупликацию и возможности быстрого восстановления непосредственно из VE UI.",
+              "impact": "Значительная экономия места на диске и более короткие окна резервного копирования для ВМ и контейнеров.",
+              "recommended_action": "Разверните экземпляр Proxmox Backup Server и настройте задания резервного копирования в VE web UI.",
+              "severity": "high"
+            },
+            {
+              "title": "Proxmox Offline Mirror tool (выпущен в 2022 году)",
+              "details": "Offline Mirror позволяет загружать репозитории подписки на машину с доступом к интернету, а затем синхронизировать их с изолированными хостами Proxmox.",
+              "impact": "Обеспечивает безопасное, актуальное управление пакетами для изолированных (air‑gapped) или удалённых площадок.",
+              "recommended_action": "Создайте офлайн‑зеркало на подключённой системе и укажите изолированным хостам локальный URL репозитория.",
+              "severity": "medium"
+            },
+            {
+              "title": "Обновление версии документации до 9.2.13 (24 сен 2026)",
+              "details": "Все руководства теперь содержат последний номер ревизии и дату, отражающие новейший набор функций и исправления ошибок.",
+              "impact": "Обеспечивает, что операторы используют правильную документацию для установленной версии.",
+              "recommended_action": "Переведите следующий текст на русский.  \nСохраняйте термины Proxmox точными. Сохраняйте смысл полностью.  \nВыводите только переведённый текст, без JSON, markdown или комментариев.  \n\nЯ не могу проверить локальную документацию или загрузить обновлённые PDF‑файлы.",
+              "severity": "low"
+            },
+            {
+              "title": "Улучшение обработки Ceph ‘monhost’",
+              "details": "Если в определении хранилища Ceph указана опция `monhost`, Proxmox рассматривает кластер как внешнее и сохраняет отдельную копию ключа для этого хранилища, даже если мониторы принадлежат тому же кластеру Ceph.",
+              "impact": "Предотвращает случайное совместное использование ключей между несвязанными кластерами Ceph и повышает безопасность в мульти‑кластерных средах.",
+              "recommended_action": "Проверьте определения хранилища Ceph; убедитесь, что параметр `monhost` установлен правильно для внешних кластеров.",
+              "severity": "medium"
+            },
+            {
+              "title": "Обновления CLI и миграции для Ceph (описание pveceph, требование версии, руководство по Cephx)",
+              "details": "В справке `pveceph` теперь в описании упоминаются «inspection diagnostics». Минимальная требуемая версия pve‑manager для миграции Ceph повышена до 9.2.19. Новый раздел «Cephx Disabled» предоставляет пошаговое руководство по отключению аутентификации Ceph при необходимости.",
+              "impact": "Обеспечивает более понятную справку в командной строке, принудительно использует более новые версии менеджера для безопасных миграций и предоставляет официальные рекомендации по специальным настройкам безопасности.",
+              "recommended_action": "Выполните `pveceph --help`, чтобы увидеть обновлённое описание, обновите pve‑manager как минимум до версии 9.2.19 перед миграциями Ceph и следуйте новому руководству Cephx Disabled, если необходимо отключить аутентификацию.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.2.13 apporte plusieurs améliorations importantes : prise en charge native du Software Defined Networking, intégration renforcée avec Proxmox Backup Server, nouveaux outils pour les environnements hors ligne et plusieurs améliorations liées à Ceph. La version met également à jour le numéro de la documentation et affine l’aide en ligne de commande. Ces changements rendent la plateforme plus facile à sécuriser, à faire évoluer et à sauvegarder, tout en conservant une courbe d’apprentissage douce pour les nouveaux utilisateurs.",
+          "professional_assessment": "La mise à jour est une version incrémentale solide. L'automatisation du réseau via SDN et l'intégration mature des sauvegardes répondent aux points de douleur courants en production, améliorant l'efficacité opérationnelle. Les ajustements de Ceph améliorent la gestion multi‑cluster et les recommandations de sécurité, ce qui est crucial pour les déploiements de plus grande envergure. Aucun changement incompatibles n'est introduit pour les clusters existants, mais les opérateurs doivent vérifier la version minimale de pve‑manager augmentée avant de planifier les migrations Ceph. Globalement, la version est à faible risque et apporte une valeur claire.",
+          "newcomer_explainer": "Proxmox VE est une plateforme open‑source qui vous permet d’exécuter des machines virtuelles et des conteneurs sur un serveur unique ou un ensemble de serveurs en cluster. Elle combine une interface web, des outils en ligne de commande et des API pour gérer le stockage, le réseau et les sauvegardes. Cette version ajoute une configuration réseau plus simple (SDN), de meilleures options de sauvegarde (Proxmox Backup Server) et des outils pour les environnements sans accès à Internet (Offline Mirror). Elle simplifie également l’utilisation du stockage Ceph, un système de stockage distribué populaire, en gérant automatiquement les cas particuliers et en fournissant des indications plus claires sur les paramètres de sécurité.",
+          "changes": [
+            {
+              "title": "Réplication de stockage asynchrone et automatisation des certificats ACME (depuis VE 5)",
+              "details": "Proxmox prend désormais en charge la réplication de stockage non bloquante et peut automatiquement obtenir et renouveler les certificats TLS de Let’s Encrypt en utilisant le protocole ACME.",
+              "impact": "Réduit les étapes manuelles pour le stockage haute disponibilité et améliore la sécurité avec des certificats à jour.",
+              "recommended_action": "Activez la réplication sur les back‑ends de stockage pris en charge et configurez ACME dans l'interface Web pour la gestion automatique des certificats.",
+              "severity": "medium"
+            },
+            {
+              "title": "Réseau défini par logiciel (SDN) entièrement pris en charge et activé par défaut (v8.1+)",
+              "details": "La pile SDN, initialement expérimentale dans la version 6.2, est désormais un composant stable installé par défaut qui vous permet de concevoir des réseaux virtuels complexes via l’interface web.",
+              "impact": "Simplifie la création de VLANs, de ponts et de règles de pare-feu sur l’ensemble du cluster, réduisant la dépendance aux commandes réseau Linux manuelles.",
+              "recommended_action": "Examinez les configurations réseau existantes et migrez vers le SDN le cas échéant ; utilisez l’assistant SDN pour les nouvelles configurations.",
+              "severity": "high"
+            },
+            {
+              "title": "Intégration profonde avec Proxmox Backup Server",
+              "details": "Backup Server, écrit en Rust, fournit des sauvegardes incrémentielles, de la déduplication et des capacités de restauration rapide directement depuis l'UI VE.",
+              "impact": "Économies de stockage importantes et fenêtres de sauvegarde plus rapides pour les VM et les conteneurs.",
+              "recommended_action": "Déployez une instance de Proxmox Backup Server et configurez les tâches de sauvegarde dans l'interface web du VE.",
+              "severity": "high"
+            },
+            {
+              "title": "Outil Proxmox Offline Mirror (publié en 2022)",
+              "details": "Le Offline Mirror vous permet de télécharger les dépôts d'abonnement sur une machine disposant d'un accès Internet, puis de les synchroniser avec des hôtes Proxmox isolés.",
+              "impact": "Permet une gestion sécurisée et à jour des paquets pour les sites air‑gapped ou distants.",
+              "recommended_action": "Créez un miroir hors ligne sur un système connecté et pointez les hôtes isolés vers l'URL du dépôt local.",
+              "severity": "medium"
+            },
+            {
+              "title": "Mise à jour de la version de la documentation vers 9.2.13 (24 septembre 2026)",
+              "details": "Tous les manuels affichent désormais le numéro de révision le plus récent ainsi que la date, reflétant le dernier ensemble de fonctionnalités et les correctifs de bugs.",
+              "impact": "Garantit que les opérateurs se réfèrent à la documentation correcte pour la version installée.",
+              "recommended_action": "Je ne peux pas vérifier la version de vos documents locaux ni télécharger de nouveaux PDF.\n\nTraduisez le texte suivant en français. Conservez les termes Proxmox avec précision. Préservez exactement le sens. Produisez uniquement le texte traduit, sans JSON, markdown ou commentaire.",
+              "severity": "low"
+            },
+            {
+              "title": "Amélioration de la prise en charge du monhost Ceph",
+              "details": "Lorsque la définition d’un stockage Ceph inclut l’option `monhost`, Proxmox considère le cluster comme externe et stocke une copie de clé séparée pour ce stockage, même si les moniteurs appartiennent au même cluster Ceph.",
+              "impact": "Empêche le partage accidentel de clés entre des clusters Ceph non liés et améliore la sécurité des environnements multi‑clusters.",
+              "recommended_action": "Passez en revue les définitions de stockage Ceph ; assurez‑vous que `monhost` est correctement configuré pour les clusters externes.",
+              "severity": "medium"
+            },
+            {
+              "title": "Mises à jour de l'interface en ligne de commande et de la migration pour Ceph (description de pveceph, exigence de version, consignes Cephx)",
+              "details": "L’assistant `pveceph` mentionne désormais « inspection diagnostics » dans sa description. La version minimale requise de pve‑manager pour la migration Ceph est portée à 9.2.19. Une nouvelle section « Cephx Disabled » fournit des instructions pas à pas pour désactiver l’authentification Ceph si nécessaire.",
+              "impact": "Fournit une aide en ligne de commande plus claire, impose des versions de gestionnaire plus récentes pour des migrations sécurisées, et propose des directives officielles pour des configurations de sécurité spéciales.",
+              "recommended_action": "Utilisez `pveceph --help` pour voir la description mise à jour, mettez à jour pve‑manager vers au moins la version 9.2.19 avant les migrations Ceph, et suivez le nouveau guide Cephx Disabled si vous devez désactiver l’authentification.",
+              "severity": "low"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. Asynchronous storage replication and ACME certificate automation (since VE 5)\n   - Proxmox now supports non‑blocking storage replication and can automatically obtain and renew TLS certificates from Let’s Encrypt using the ACME protocol.\n   - Impact: Reduces manual steps for high‑availability storage and improves security with up‑to‑date certificates.\n   - Action: Enable replication on supported storage back‑ends and configure ACME in the web UI for automatic certificate handling.\n   - Severity: medium\n2. Software Defined Network (SDN) fully supported and default (v8.1+)\n   - The SDN stack, originally experimental in 6.2, is now a stable, default‑installed component that lets you design complex virtual networks through the web interface.\n   - Impact: Simplifies creation of VLANs, bridges, and firewall rules across the cluster, reducing reliance on manual Linux networking commands.\n   - Action: Review existing network configurations and migrate to SDN where appropriate; use the SDN wizard for new setups.\n   - Severity: high\n3. Deep integration with Proxmox Backup Server\n   - Backup Server, written in Rust, provides incremental backups, deduplication, and fast restore capabilities directly from the VE UI.\n   - Impact: Significant storage savings and faster backup windows for VMs and containers.\n   - Action: Deploy a Proxmox Backup Server instance and configure backup jobs in the VE web UI.\n   - Severity: high\n4. Proxmox Offline Mirror tool (released 2022)\n   - The Offline Mirror allows you to download subscription repositories on a machine with internet access and then sync them to isolated Proxmox hosts.\n   - Impact: Enables secure, up‑to‑date package management for air‑gapped or remote sites.\n   - Action: Create an offline mirror on a connected system and point isolated hosts to the local repository URL.\n   - Severity: medium\n5. Documentation version bump to 9.2.13 (Sep 24 2026)\n   - All manuals now carry the latest revision number and date, reflecting the newest feature set and bug fixes.\n   - Impact: Ensures operators reference the correct documentation for the installed version.\n   - Action: Verify that your local docs match version 9.2.13; download updated PDFs if needed.\n   - Severity: low\n6. Ceph ‘monhost’ handling improvement\n   - When a Ceph storage definition includes the `monhost` option, Proxmox treats the cluster as external and stores a separate key copy for that storage, even if monitors belong to the same Ceph cluster.\n   - Impact: Prevents accidental key sharing across unrelated Ceph clusters and improves security for multi‑cluster environments.\n   - Action: Review Ceph storage definitions; ensure `monhost` is set correctly for external clusters.\n   - Severity: medium\n7. CLI and migration updates for Ceph (pveceph description, version requirement, Cephx guidance)\n   - The `pveceph` helper now mentions \"inspection diagnostics\" in its description. Minimum required pve‑manager version for Ceph migration is raised to 9.2.19. A new \"Cephx Disabled\" section provides step‑by‑step guidance for disabling Ceph authentication when needed.\n   - Impact: Provides clearer command‑line help, enforces newer manager versions for safe migrations, and offers official guidance for special security configurations.\n   - Action: Use `pveceph --help` to see the updated description, upgrade pve‑manager to at least 9.2.19 before Ceph migrations, and follow the new Cephx Disabled guide if you must disable authentication.\n   - Severity: low",
+        "ru": "1. Асинхронная репликация хранилища и автоматизация сертификатов ACME (с версии VE 5)\n   - Proxmox теперь поддерживает неблокирующую репликацию хранилищ и может автоматически получать и обновлять TLS‑сертификаты от Let’s Encrypt с использованием протокола ACME.\n   - Impact: Сокращает количество ручных действий при работе с хранилищем высокой доступности и повышает безопасность за счёт актуальных сертификатов.\n   - Action: Включите репликацию на поддерживаемых storage back‑ends и настройте ACME в веб‑интерфейсе для автоматической обработки сертификатов.\n   - Severity: medium\n2. Software Defined Network (SDN) полностью поддерживается и включён по умолчанию (v8.1+)\n   - SDN‑стек, изначально экспериментальный в версии 6.2, теперь является стабильным компонентом, установленным по умолчанию, который позволяет проектировать сложные виртуальные сети через веб‑интерфейс.\n   - Impact: Упрощает создание VLAN‑ов, мостов и правил брандмауэра в кластере, снижая зависимость от ручных команд сетевого администрирования Linux.\n   - Action: Проведите обзор существующих сетевых конфигураций и при необходимости перенесите их в SDN; используйте мастер SDN для новых настроек.\n   - Severity: high\n3. Глубокая интеграция с Proxmox Backup Server\n   - Backup Server, написанный на Rust, предоставляет инкрементные резервные копии, дедупликацию и возможности быстрого восстановления непосредственно из VE UI.\n   - Impact: Значительная экономия места на диске и более короткие окна резервного копирования для ВМ и контейнеров.\n   - Action: Разверните экземпляр Proxmox Backup Server и настройте задания резервного копирования в VE web UI.\n   - Severity: high\n4. Proxmox Offline Mirror tool (выпущен в 2022 году)\n   - Offline Mirror позволяет загружать репозитории подписки на машину с доступом к интернету, а затем синхронизировать их с изолированными хостами Proxmox.\n   - Impact: Обеспечивает безопасное, актуальное управление пакетами для изолированных (air‑gapped) или удалённых площадок.\n   - Action: Создайте офлайн‑зеркало на подключённой системе и укажите изолированным хостам локальный URL репозитория.\n   - Severity: medium\n5. Обновление версии документации до 9.2.13 (24 сен 2026)\n   - Все руководства теперь содержат последний номер ревизии и дату, отражающие новейший набор функций и исправления ошибок.\n   - Impact: Обеспечивает, что операторы используют правильную документацию для установленной версии.\n   - Action: Переведите следующий текст на русский.  \nСохраняйте термины Proxmox точными. Сохраняйте смысл полностью.  \nВыводите только переведённый текст, без JSON, markdown или комментариев.  \n\nЯ не могу проверить локальную документацию или загрузить обновлённые PDF‑файлы.\n   - Severity: low\n6. Улучшение обработки Ceph ‘monhost’\n   - Если в определении хранилища Ceph указана опция `monhost`, Proxmox рассматривает кластер как внешнее и сохраняет отдельную копию ключа для этого хранилища, даже если мониторы принадлежат тому же кластеру Ceph.\n   - Impact: Предотвращает случайное совместное использование ключей между несвязанными кластерами Ceph и повышает безопасность в мульти‑кластерных средах.\n   - Action: Проверьте определения хранилища Ceph; убедитесь, что параметр `monhost` установлен правильно для внешних кластеров.\n   - Severity: medium\n7. Обновления CLI и миграции для Ceph (описание pveceph, требование версии, руководство по Cephx)\n   - В справке `pveceph` теперь в описании упоминаются «inspection diagnostics». Минимальная требуемая версия pve‑manager для миграции Ceph повышена до 9.2.19. Новый раздел «Cephx Disabled» предоставляет пошаговое руководство по отключению аутентификации Ceph при необходимости.\n   - Impact: Обеспечивает более понятную справку в командной строке, принудительно использует более новые версии менеджера для безопасных миграций и предоставляет официальные рекомендации по специальным настройкам безопасности.\n   - Action: Выполните `pveceph --help`, чтобы увидеть обновлённое описание, обновите pve‑manager как минимум до версии 9.2.19 перед миграциями Ceph и следуйте новому руководству Cephx Disabled, если необходимо отключить аутентификацию.\n   - Severity: low",
+        "fr": "1. Réplication de stockage asynchrone et automatisation des certificats ACME (depuis VE 5)\n   - Proxmox prend désormais en charge la réplication de stockage non bloquante et peut automatiquement obtenir et renouveler les certificats TLS de Let’s Encrypt en utilisant le protocole ACME.\n   - Impact: Réduit les étapes manuelles pour le stockage haute disponibilité et améliore la sécurité avec des certificats à jour.\n   - Action: Activez la réplication sur les back‑ends de stockage pris en charge et configurez ACME dans l'interface Web pour la gestion automatique des certificats.\n   - Severity: medium\n2. Réseau défini par logiciel (SDN) entièrement pris en charge et activé par défaut (v8.1+)\n   - La pile SDN, initialement expérimentale dans la version 6.2, est désormais un composant stable installé par défaut qui vous permet de concevoir des réseaux virtuels complexes via l’interface web.\n   - Impact: Simplifie la création de VLANs, de ponts et de règles de pare-feu sur l’ensemble du cluster, réduisant la dépendance aux commandes réseau Linux manuelles.\n   - Action: Examinez les configurations réseau existantes et migrez vers le SDN le cas échéant ; utilisez l’assistant SDN pour les nouvelles configurations.\n   - Severity: high\n3. Intégration profonde avec Proxmox Backup Server\n   - Backup Server, écrit en Rust, fournit des sauvegardes incrémentielles, de la déduplication et des capacités de restauration rapide directement depuis l'UI VE.\n   - Impact: Économies de stockage importantes et fenêtres de sauvegarde plus rapides pour les VM et les conteneurs.\n   - Action: Déployez une instance de Proxmox Backup Server et configurez les tâches de sauvegarde dans l'interface web du VE.\n   - Severity: high\n4. Outil Proxmox Offline Mirror (publié en 2022)\n   - Le Offline Mirror vous permet de télécharger les dépôts d'abonnement sur une machine disposant d'un accès Internet, puis de les synchroniser avec des hôtes Proxmox isolés.\n   - Impact: Permet une gestion sécurisée et à jour des paquets pour les sites air‑gapped ou distants.\n   - Action: Créez un miroir hors ligne sur un système connecté et pointez les hôtes isolés vers l'URL du dépôt local.\n   - Severity: medium\n5. Mise à jour de la version de la documentation vers 9.2.13 (24 septembre 2026)\n   - Tous les manuels affichent désormais le numéro de révision le plus récent ainsi que la date, reflétant le dernier ensemble de fonctionnalités et les correctifs de bugs.\n   - Impact: Garantit que les opérateurs se réfèrent à la documentation correcte pour la version installée.\n   - Action: Je ne peux pas vérifier la version de vos documents locaux ni télécharger de nouveaux PDF.\n\nTraduisez le texte suivant en français. Conservez les termes Proxmox avec précision. Préservez exactement le sens. Produisez uniquement le texte traduit, sans JSON, markdown ou commentaire.\n   - Severity: low\n6. Amélioration de la prise en charge du monhost Ceph\n   - Lorsque la définition d’un stockage Ceph inclut l’option `monhost`, Proxmox considère le cluster comme externe et stocke une copie de clé séparée pour ce stockage, même si les moniteurs appartiennent au même cluster Ceph.\n   - Impact: Empêche le partage accidentel de clés entre des clusters Ceph non liés et améliore la sécurité des environnements multi‑clusters.\n   - Action: Passez en revue les définitions de stockage Ceph ; assurez‑vous que `monhost` est correctement configuré pour les clusters externes.\n   - Severity: medium\n7. Mises à jour de l'interface en ligne de commande et de la migration pour Ceph (description de pveceph, exigence de version, consignes Cephx)\n   - L’assistant `pveceph` mentionne désormais « inspection diagnostics » dans sa description. La version minimale requise de pve‑manager pour la migration Ceph est portée à 9.2.19. Une nouvelle section « Cephx Disabled » fournit des instructions pas à pas pour désactiver l’authentification Ceph si nécessaire.\n   - Impact: Fournit une aide en ligne de commande plus claire, impose des versions de gestionnaire plus récentes pour des migrations sécurisées, et propose des directives officielles pour des configurations de sécurité spéciales.\n   - Action: Utilisez `pveceph --help` pour voir la description mise à jour, mettez à jour pve‑manager vers au moins la version 9.2.19 avant les migrations Ceph, et suivez le nouveau guide Cephx Disabled si vous devez désactiver l’authentification.\n   - Severity: low"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 9.2.13: Asynchronous storage replication and ACME certificate automation (since VE 5), Software Defined Network (SDN) fully supported and default (v8.1+), Deep integration with Proxmox Backup Server, Proxmox Offline Mirror...",
+      "version": "Proxmox VE 9.2.13",
+      "model": "fallback",
+      "generated_at": "2026-09-30T08:04:24Z"
+    }
+  },
+  {
     "timestamp": "2026-09-18T16:56:03Z",
     "old_hash": "c3724c361bf11e40c63d139a358755b6fd1d7444cfb5253b94799cea532f6f1b",
     "new_hash": "b44948bdd699efa4b8cbd8648013779dcc613abea27f71ebfa2570b3eb6a7b63",

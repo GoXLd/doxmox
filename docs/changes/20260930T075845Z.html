@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20260930T075845Z.diff - Diff Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --meta: #4f46e5;
+      --hunk: #b45309;
+      --add-bg: rgba(22, 163, 74, 0.13);
+      --add: #166534;
+      --del-bg: rgba(220, 38, 38, 0.12);
+      --del: #991b1b;
+      --accent: #0b5cab;
+      --control-bg: #ffffff;
+      --control-line: #c7d2e0;
+      --control-text: #0f172a;
+      --telegram: #229ed9;
+      --telegram-hover: #1d8fc4;
+      --telegram-text: #ffffff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --meta: #a5b4fc;
+      --hunk: #f59e0b;
+      --add-bg: rgba(16, 185, 129, 0.18);
+      --add: #6ee7b7;
+      --del-bg: rgba(248, 113, 113, 0.2);
+      --del: #fca5a5;
+      --accent: #93c5fd;
+      --control-bg: #111827;
+      --control-line: #334155;
+      --control-text: #dbe7ff;
+      --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme]) {
+        --bg: #0b1020;
+        --card: #0f172a;
+        --line: #1e293b;
+        --text: #dbe7ff;
+        --muted: #9fb3d1;
+        --meta: #a5b4fc;
+        --hunk: #f59e0b;
+        --add-bg: rgba(16, 185, 129, 0.18);
+        --add: #6ee7b7;
+        --del-bg: rgba(248, 113, 113, 0.2);
+        --del: #fca5a5;
+        --accent: #93c5fd;
+        --control-bg: #111827;
+        --control-line: #334155;
+        --control-text: #dbe7ff;
+        --shadow: 0 10px 30px rgba(2, 6, 23, 0.45);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Menlo, Consolas, "Liberation Mono", monospace;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 36px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .control select {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 8px;
+      font-size: 13px;
+    }
+    .control-btn {
+      border: 1px solid var(--control-line);
+      border-radius: 8px;
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .control-btn:hover {
+      border-color: var(--accent);
+    }
+    .head {
+      margin-bottom: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    a {
+      color: var(--accent);
+    }
+    .nav {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .diff {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      overflow: auto;
+      line-height: 1.45;
+      font-size: 13px;
+    }
+    .line {
+      display: block;
+      white-space: pre;
+    }
+    .line.meta { color: var(--meta); }
+    .line.hunk { color: var(--hunk); }
+    .line.add {
+      color: var(--add);
+      background: var(--add-bg);
+    }
+    .line.del {
+      color: var(--del);
+      background: var(--del-bg);
+    }
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+    .hint-tooltip {
+      position: relative;
+    }
+    .hint-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 10px);
+      max-width: min(420px, 75vw);
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      color: #f8fafc;
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.3);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip::before {
+      content: "";
+      position: absolute;
+      left: 14px;
+      bottom: calc(100% + 4px);
+      border-width: 6px;
+      border-style: solid;
+      border-color: rgba(15, 23, 42, 0.96) transparent transparent transparent;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      transition-delay: 250ms;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .hint-tooltip:hover::after,
+    .hint-tooltip:hover::before,
+    .hint-tooltip:focus-visible::after,
+    .hint-tooltip:focus-visible::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label class="control">
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label class="control">
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="head">
+      <h1>20260930T075845Z.diff</h1>
+      <p><span data-i18n="generated">Generated:</span> <time id="generated-at" datetime="2026-09-30T07:59:14Z" data-iso="2026-09-30T07:59:14Z">2026-09-30 07:59:14 UTC</time></p>
+      <p class="nav">
+        <a href="../index.html" data-i18n="back_to_menu">Back to main menu</a>
+        <a href="20260930T075845Z.changelog.html" target="_blank" rel="noopener noreferrer" data-i18n="open_changelog">Open changelog</a>
+      </p>
+    </div>
+    <pre class="diff"><span class="line meta">--- previous</span>
+<span class="line meta">+++ current</span>
+<span class="line hunk">@@ -346,10 +346,10 @@</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;br/&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revnumber&quot;&gt;</span>
+<span class="line del">-  version 9.2.12,</span>
+<span class="line add">+  version 9.2.13,</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;span id=&quot;revdate&quot;&gt;</span>
+<span class="line del">-  Fri Sep 18 12:15:08 UTC 2026</span>
+<span class="line add">+  Thu Sep 24 19:51:15 CEST 2026</span>
+<span class="line ctx">  &lt;/span&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;toc&quot;&gt;</span>
+<span class="line ctx">   &lt;a href=&quot;index.html&quot; style=&quot;font-size: 0.8em;&quot;&gt;</span>
+<span class="line hunk">@@ -32832,7 +32832,13 @@</span>
+<span class="line ctx">        &lt;dd&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          List of monitor daemon IPs. Optional, only needed if Ceph is not running on the</span>
+<span class="line del">-Proxmox VE cluster.</span>
+<span class="line add">+Proxmox VE cluster. With</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          monhost</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         set, Proxmox VE treats the cluster as external and</span>
+<span class="line add">+keeps a separate key copy for this storage, even if the monitors belong to the</span>
+<span class="line add">+Ceph cluster of this Proxmox VE cluster.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/dd&gt;</span>
+<span class="line ctx">        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -33583,7 +33589,13 @@</span>
+<span class="line ctx">        &lt;dd&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          List of monitor daemon addresses. Optional, only needed if Ceph is not running</span>
+<span class="line del">-on the Proxmox VE cluster.</span>
+<span class="line add">+on the Proxmox VE cluster. With</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          monhost</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         set, Proxmox VE treats the cluster as external</span>
+<span class="line add">+and keeps a separate key copy for this storage, even if the monitors belong to</span>
+<span class="line add">+the Ceph cluster of this Proxmox VE cluster.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/dd&gt;</span>
+<span class="line ctx">        &lt;dt class=&quot;hdlist1&quot;&gt;</span>
+<span class="line hunk">@@ -40008,7 +40020,7 @@</span>
+<span class="line ctx">          --verbose</span>
+<span class="line ctx">         &lt;/span&gt;</span>
+<span class="line ctx">         for full</span>
+<span class="line del">-node, keyring, and device inventories.</span>
+<span class="line add">+node, keyring, and device inventories and inspection diagnostics.</span>
+<span class="line ctx">        &lt;/p&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -40028,7 +40040,7 @@</span>
+<span class="line ctx">           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">            pve-manager</span>
+<span class="line ctx">           &lt;/span&gt;</span>
+<span class="line del">-          to 9.2.17 or newer and install the latest Ceph</span>
+<span class="line add">+          to 9.2.19 or newer and install the latest Ceph</span>
+<span class="line ctx">   packages on every node. Staged client-key rotation requires Ceph</span>
+<span class="line ctx">   19.2.6-pve3, 20.2.4-pve3, or newer on every monitor.</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line hunk">@@ -40059,6 +40071,15 @@</span>
+<span class="line ctx">   helper’s lock does not block direct Ceph authentication commands.</span>
+<span class="line ctx">          &lt;/p&gt;</span>
+<span class="line ctx">         &lt;/li&gt;</span>
+<span class="line add">+        &lt;li&gt;</span>
+<span class="line add">+         &lt;p&gt;</span>
+<span class="line add">+          If Cephx is disabled on this cluster, follow</span>
+<span class="line add">+          &lt;a href=&quot;#pveceph_cephx_disabled&quot;&gt;</span>
+<span class="line add">+           Clusters with Cephx Disabled</span>
+<span class="line add">+          &lt;/a&gt;</span>
+<span class="line add">+          instead.</span>
+<span class="line add">+         &lt;/p&gt;</span>
+<span class="line add">+        &lt;/li&gt;</span>
+<span class="line ctx">        &lt;/ul&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line hunk">@@ -40114,8 +40135,9 @@</span>
+<span class="line ctx">        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line ctx">          After Ceph updates its health status, the two error-severity checks clear. The</span>
+<span class="line del">-warning about rotating service keys can remain for a few hours and clears</span>
+<span class="line del">-automatically.</span>
+<span class="line add">+warning about rotating service keys can remain for a few hours while old</span>
+<span class="line add">+rotating keys expire. You do not need to wait for this warning to clear before</span>
+<span class="line add">+continuing with the migration.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line hunk">@@ -40329,9 +40351,10 @@</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         The helper reports sessions that may still hold an old key. Client names</span>
+<span class="line del">-are hints, not a complete workload inventory; check disconnected clients</span>
+<span class="line del">-and external key copies yourself.</span>
+<span class="line add">+         The helper reports sessions that may still hold an old key. Client hints</span>
+<span class="line add">+are host-wide, not session attribution or a complete workload inventory.</span>
+<span class="line add">+Sockets without an owning process are listed separately. Check disconnected</span>
+<span class="line add">+clients and external key copies yourself.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line hunk">@@ -40640,8 +40663,8 @@</span>
+<span class="line ctx">            &lt;/td&gt;</span>
+<span class="line ctx">            &lt;td class=&quot;tableblock halign-left valign-top&quot;&gt;</span>
+<span class="line ctx">             &lt;p class=&quot;tableblock&quot;&gt;</span>
+<span class="line del">-             Wait a few hours after migrating the cluster-owned keys. This warning</span>
+<span class="line del">-does not prevent final cipher restriction.</span>
+<span class="line add">+             Continue the migration; old rotating keys expire automatically and do</span>
+<span class="line add">+not prevent final cipher restriction.</span>
+<span class="line ctx">             &lt;/p&gt;</span>
+<span class="line ctx">            &lt;/td&gt;</span>
+<span class="line ctx">           &lt;/tr&gt;</span>
+<span class="line hunk">@@ -40690,6 +40713,108 @@</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line add">+       &lt;h6 id=&quot;pveceph_cephx_disabled&quot;&gt;</span>
+<span class="line add">+        Clusters with Cephx Disabled</span>
+<span class="line add">+        &lt;a class=&quot;headerlink&quot; href=&quot;#pveceph_cephx_disabled&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line add">+        &lt;/a&gt;</span>
+<span class="line add">+       &lt;/h6&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Ceph evaluates these health checks from the stored keys and cipher settings,</span>
+<span class="line add">+also when Cephx is disabled, that is, when</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          auth_cluster_required</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         ,</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          auth_service_required</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         , and</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          auth_client_required</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         are set to</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          none</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         .</span>
+<span class="line add">+Disabling Cephx therefore does not clear them, and changing the authentication</span>
+<span class="line add">+method interrupts existing clients, which need a restart or remount afterwards.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         On a cluster with Cephx disabled:</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;olist arabic&quot;&gt;</span>
+<span class="line add">+        &lt;ol class=&quot;arabic&quot;&gt;</span>
+<span class="line add">+         &lt;li&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Run the helper without options and apply its plan. It migrates the manager,</span>
+<span class="line add">+  metadata server, and OSD keys, restarting services one at a time when needed,</span>
+<span class="line add">+  and switches the service tickets to the new cipher. This clears both</span>
+<span class="line add">+  error-severity checks. If an old</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            mon.</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           key is stored in the authentication</span>
+<span class="line add">+  database, the helper instead refuses and asks you to migrate that key first.</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/li&gt;</span>
+<span class="line add">+         &lt;li&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Optionally, migrate the bootstrap and crash keys with</span>
+<span class="line add">+           &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+            --rotate-client-keys</span>
+<span class="line add">+           &lt;/span&gt;</span>
+<span class="line add">+           .</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+         &lt;/li&gt;</span>
+<span class="line add">+         &lt;li&gt;</span>
+<span class="line add">+          &lt;p&gt;</span>
+<span class="line add">+           Mute the remaining warnings without a duration. While Cephx is disabled, the</span>
+<span class="line add">+  helper does not migrate the keys of other Ceph users, as their clients do not</span>
+<span class="line add">+  authenticate with Cephx:</span>
+<span class="line add">+          &lt;/p&gt;</span>
+<span class="line add">+          &lt;div class=&quot;listingblock&quot;&gt;</span>
+<span class="line add">+           &lt;div class=&quot;content&quot;&gt;</span>
+<span class="line add">+            &lt;!-- Generator: GNU source-highlight</span>
+<span class="line add">+by Lorenzo Bettini</span>
+<span class="line add">+http://www.lorenzobettini.it</span>
+<span class="line add">+http://www.gnu.org/software/src-highlite --&gt;</span>
+<span class="line add">+            &lt;pre&gt;&lt;tt&gt;ceph health mute AUTH_INSECURE_CLIENT_KEY_TYPE --sticky</span>
+<span class="line add">+ceph health mute AUTH_INSECURE_KEYS_ALLOWED --sticky</span>
+<span class="line add">+ceph health mute AUTH_INSECURE_KEYS_CREATABLE --sticky&lt;/tt&gt;&lt;/pre&gt;</span>
+<span class="line add">+           &lt;/div&gt;</span>
+<span class="line add">+          &lt;/div&gt;</span>
+<span class="line add">+         &lt;/li&gt;</span>
+<span class="line add">+        &lt;/ol&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Do not restrict the allowed ciphers or forbid creating old-cipher keys by hand</span>
+<span class="line add">+while the preferred cipher is still</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          aes</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         , as creating keys then fails.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Before you enable Cephx again, unmute these checks and make sure that every</span>
+<span class="line add">+monitor, Ceph service, and client still has a key file matching the</span>
+<span class="line add">+authentication database. Restart the monitors first, then all other Ceph</span>
+<span class="line add">+services, and restart or remount the clients. Then run the migration as described in</span>
+<span class="line add">+         &lt;a href=&quot;#pveceph_cephx_migration_helper&quot;&gt;</span>
+<span class="line add">+          Migration Steps</span>
+<span class="line add">+         &lt;/a&gt;</span>
+<span class="line add">+         .</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+      &lt;/div&gt;</span>
+<span class="line add">+      &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line ctx">        &lt;h6 id=&quot;pveceph_cephx_staged_keys&quot;&gt;</span>
+<span class="line ctx">         Staged Keys and Confirmation</span>
+<span class="line ctx">         &lt;a class=&quot;headerlink&quot; href=&quot;#pveceph_cephx_staged_keys&quot; title=&quot;Permalink to this heading&quot;&gt;</span>
+<span class="line hunk">@@ -40726,6 +40851,19 @@</span>
+<span class="line ctx">          with</span>
+<span class="line ctx">          &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line ctx">           --apply</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         .</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line add">+         Ceph 19.2.6-pve4 and 20.2.4-pve4 or newer monitors can identify each session’s</span>
+<span class="line add">+key, allowing refreshed clients to stay connected during forward or rollback</span>
+<span class="line add">+confirmation. Upgrade and restart older monitors to use this feature. Without</span>
+<span class="line add">+key identification, every visible client of that user must disconnect before</span>
+<span class="line add">+confirmation; upgrading is preferable for a shared user such as</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          client.admin</span>
+<span class="line ctx">          &lt;/span&gt;</span>
+<span class="line ctx">          .</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line hunk">@@ -40785,6 +40923,20 @@</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line add">+         A storage with</span>
+<span class="line add">+         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line add">+          monhost</span>
+<span class="line add">+         &lt;/span&gt;</span>
+<span class="line add">+         set counts as external even if its monitors belong to</span>
+<span class="line add">+the local cluster, so the helper does not update its key copy. If that copy</span>
+<span class="line add">+holds the key of a Ceph user you migrate, update it with the staged key of the</span>
+<span class="line add">+same user before confirming, or with the restored key before confirming a</span>
+<span class="line add">+rollback. The helper refuses to retire a key it finds in a storage key copy;</span>
+<span class="line add">+verify copies it cannot check yourself.</span>
+<span class="line add">+        &lt;/p&gt;</span>
+<span class="line add">+       &lt;/div&gt;</span>
+<span class="line add">+       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line add">+        &lt;p&gt;</span>
+<span class="line ctx">          The helper lists local users not managed by Proxmox VE separately. Follow their</span>
+<span class="line ctx"> client’s supported rotation procedure, or leave their keys unchanged and keep</span>
+<span class="line ctx"> the old cipher enabled.</span>
+<span class="line hunk">@@ -40829,23 +40981,11 @@</span>
+<span class="line ctx">            &lt;/span&gt;</span>
+<span class="line ctx">            to</span>
+<span class="line ctx">   retire the staged key. The helper refuses if monitor session collection is</span>
+<span class="line del">-  incomplete, a visible session uses the staged key, or its key is unknown.</span>
+<span class="line add">+  incomplete, a visible session uses the staged key, its key is unknown, or a</span>
+<span class="line add">+  storage key copy still holds the staged key.</span>
+<span class="line ctx">           &lt;/p&gt;</span>
+<span class="line ctx">          &lt;/li&gt;</span>
+<span class="line ctx">         &lt;/ol&gt;</span>
+<span class="line del">-       &lt;/div&gt;</span>
+<span class="line del">-       &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line del">-        &lt;p&gt;</span>
+<span class="line del">-         Ceph 19.2.6-pve4 and 20.2.4-pve4 or newer monitors can identify each session’s</span>
+<span class="line del">-key, allowing clients on the restored key to stay connected during rollback</span>
+<span class="line del">-confirmation. Upgrade and restart older monitors to use this feature. Without</span>
+<span class="line del">-key identification, every visible client of that user must disconnect before</span>
+<span class="line del">-confirmation; upgrading is preferable for a shared user such as</span>
+<span class="line del">-         &lt;span class=&quot;monospaced&quot;&gt;</span>
+<span class="line del">-          client.admin</span>
+<span class="line del">-         &lt;/span&gt;</span>
+<span class="line del">-         .</span>
+<span class="line del">-        &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">       &lt;/div&gt;</span>
+<span class="line ctx">       &lt;div class=&quot;sect5&quot;&gt;</span>
+<span class="line hunk">@@ -40907,9 +41047,11 @@</span>
+<span class="line ctx">        &lt;/h6&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line ctx">         &lt;p&gt;</span>
+<span class="line del">-         After an interruption, run the helper without options to check what remains.</span>
+<span class="line del">-Keep the journal unchanged and follow the printed next steps rather than</span>
+<span class="line del">-starting a manual rotation.</span>
+<span class="line add">+         After an interruption, run the helper without options once the affected nodes</span>
+<span class="line add">+are reachable. Unfinished key updates can resume while their daemons are</span>
+<span class="line add">+stopped. Keep the journal unchanged and follow the printed next steps rather</span>
+<span class="line add">+than starting a manual rotation. Check the affected nodes and service logs</span>
+<span class="line add">+rather than assuming a down daemon’s key needs repair.</span>
+<span class="line ctx">         &lt;/p&gt;</span>
+<span class="line ctx">        &lt;/div&gt;</span>
+<span class="line ctx">        &lt;div class=&quot;paragraph&quot;&gt;</span>
+<span class="line hunk">@@ -140146,9 +140288,9 @@</span>
+<span class="line ctx"> &lt;/div&gt;</span>
+<span class="line ctx"> &lt;div id=&quot;footer&quot;&gt;</span>
+<span class="line ctx">  &lt;div id=&quot;footer-text&quot;&gt;</span>
+<span class="line del">-  Version 9.2.12</span>
+<span class="line add">+  Version 9.2.13</span>
+<span class="line ctx">   &lt;br/&gt;</span>
+<span class="line ctx">   Last updated</span>
+<span class="line del">- Fri Sep 18 12:15:08 UTC 2026</span>
+<span class="line add">+ Thu Sep 24 19:51:15 CEST 2026</span>
+<span class="line ctx">  &lt;/div&gt;</span>
+<span class="line ctx"> &lt;/div&gt;</span></pre>
+    <footer class="footer">
+      <span data-i18n="footer_by">Author</span>
+      <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a>
+      · <a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a>
+      · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          theme_light: "Light",
+          theme_dark: "Dark",
+          generated: "Generated:",
+          back_to_menu: "Back to main menu",
+          open_changelog: "Open changelog",
+          footer_by: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms.",
+          empty_diff: "(empty diff)",
+          language_en: "English",
+          language_fr: "French",
+          language_ru: "Russian"
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          theme_light: "Clair",
+          theme_dark: "Sombre",
+          generated: "Généré :",
+          back_to_menu: "Retour au menu principal",
+          open_changelog: "Ouvrir le changelog",
+          footer_by: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions.",
+          empty_diff: "(diff vide)",
+          language_en: "Anglais",
+          language_fr: "Français",
+          language_ru: "Russe"
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          theme_light: "Светлая",
+          theme_dark: "Тёмная",
+          generated: "Сгенерировано:",
+          back_to_menu: "Назад в главное меню",
+          open_changelog: "Открыть changelog",
+          footer_by: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями.",
+          empty_diff: "(пустой diff)",
+          language_en: "Английский",
+          language_fr: "Французский",
+          language_ru: "Русский"
+        }
+      };
+
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") {
+          return saved;
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        const langOptions = {
+          en: "language_en",
+          fr: "language_fr",
+          ru: "language_ru"
+        };
+        for (const option of langSelect.options) {
+          option.textContent = t(lang, langOptions[option.value]);
+        }
+        themeSelect.options[0].textContent = t(lang, "theme_light");
+        themeSelect.options[1].textContent = t(lang, "theme_dark");
+      }
+
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+
+      function formatTimezoneHint(date) {
+        const zone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
+        const offsetMinutes = -date.getTimezoneOffset();
+        const sign = offsetMinutes >= 0 ? "+" : "-";
+        const absMinutes = Math.abs(offsetMinutes);
+        const hh = String(Math.floor(absMinutes / 60)).padStart(2, "0");
+        const mm = String(absMinutes % 60).padStart(2, "0");
+        return `${zone} (UTC${sign}${hh}:${mm})`;
+      }
+
+      function applyGeneratedTime() {
+        const generatedNode = document.getElementById("generated-at");
+        if (!(generatedNode instanceof HTMLElement)) return;
+        const iso = generatedNode.getAttribute("data-iso") || generatedNode.getAttribute("datetime") || "";
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) return;
+        const local = formatLocalDateTime(iso);
+        if (local) generatedNode.textContent = local;
+        generatedNode.dataset.tooltip = formatTimezoneHint(date);
+      }
+
+      function applyEventTimes() {
+        document.querySelectorAll(".event-time").forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          const iso = node.getAttribute("data-iso") || node.getAttribute("datetime") || "";
+          const date = new Date(iso);
+          if (Number.isNaN(date.getTime())) return;
+          const local = formatLocalDateTime(iso);
+          if (local) node.textContent = local;
+          node.dataset.tooltip = formatTimezoneHint(date);
+        });
+      }
+
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyGeneratedTime();
+
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>
