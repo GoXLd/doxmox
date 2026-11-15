@@ -346,10 +346,10 @@ ICAgPC9nPgogICAgPC9nPgogIDwvZz4KPC9zdmc+Cg==" title="Proxmox VE Administration G
  </span>
  <br/>
  <span id="revnumber">
-  version 9.2.13,
+  version 9.2.14,
  </span>
  <span id="revdate">
-  Thu Sep 24 19:51:15 CEST 2026
+  Fri Nov  6 21:22:22 CET 2026
  </span>
  <div id="toc">
   <a href="index.html" style="font-size: 0.8em;">
@@ -3882,6 +3882,21 @@ installation.
      </p>
     </div>
     <div class="paragraph">
+     <p>
+      The
+      <span class="monospaced">
+       Advanced Options
+      </span>
+      button lets you pin the names of the network interfaces,
+set up a bond for the management network, and tag the management network with a
+VLAN, see
+      <a href="#advanced_network_options">
+       Advanced Network Configuration Options
+      </a>
+      .
+     </p>
+    </div>
+    <div class="paragraph">
      <a class="image" href="images/screenshot/pve-install-summary.png">
       <img alt="screenshot/pve-install-summary.png" src="images/screenshot/pve-install-summary.png" style="padding: 0 10px 0 0;float:left;" width="250"/>
      </a>
@@ -4552,8 +4567,8 @@ swap-partition).
          <span class="monospaced">
           hdsize
          </span>
-         is only honored for bootable disks, that is only the
-first disk or mirror for RAID0, RAID1 or RAID10, and all disks in RAID-Z[123].
+         applies to every disk of the pool, as the installer
+sets up all of them as bootable disks.
         </p>
        </dd>
       </dl>
@@ -4630,8 +4645,288 @@ swap partition).
      </div>
     </div>
     <div class="sect3">
+     <h4 id="advanced_network_options">
+      2.3.5. Advanced Network Configuration Options
+      <a class="headerlink" href="#advanced_network_options" title="Permalink to this heading">
+      </a>
+     </h4>
+     <div class="paragraph">
+      <p>
+       The
+       <span class="monospaced">
+        Advanced Options
+       </span>
+       dialog of the network configuration step provides the
+following settings for the management network.
+      </p>
+     </div>
+     <div class="dlist">
+      <dl>
+       <dt class="hdlist1">
+        <span class="monospaced">
+         Interface Name Pinning
+        </span>
+       </dt>
+       <dd>
+        <p>
+         Assigns fixed names to the network interfaces, based on their MAC addresses, so
+that the names do not change after kernel or firmware updates, or hardware
+changes that keep the MAC addresses. By default, the interfaces are named
+         <span class="monospaced">
+          nic0
+         </span>
+         ,
+         <span class="monospaced">
+          nic1
+         </span>
+         , and so on, but you can enter other names. To pin the names after
+the installation, for example for a replacement interface with a different MAC
+address, see
+         <a href="#network_override_device_names">
+          Overriding Network Device Names
+         </a>
+         .
+        </p>
+       </dd>
+       <dt class="hdlist1">
+        <span class="monospaced">
+         Management Bond
+        </span>
+       </dt>
+       <dd>
+        <p>
+         Combines two or more of the
+         <span class="monospaced">
+          Bond Interfaces
+         </span>
+         into the bond
+         <span class="monospaced">
+          bond0
+         </span>
+         , which then
+connects the bridge
+         <span class="monospaced">
+          vmbr0
+         </span>
+         to the network instead of a single interface. This
+keeps the host reachable if one of the interfaces or its link fails. The
+         <span class="monospaced">
+          Bond Mode
+         </span>
+         defaults to
+         <em>
+          active-backup
+         </em>
+         , which works without any configuration
+on the switch, while the
+         <em>
+          802.3ad
+         </em>
+         mode requires switch ports configured for
+LACP. The
+         <span class="monospaced">
+          Hash Policy
+         </span>
+         applies to the
+         <em>
+          802.3ad
+         </em>
+         and
+         <em>
+          balance-xor
+         </em>
+         modes, and
+the optional
+         <span class="monospaced">
+          Primary Interface
+         </span>
+         to the
+         <em>
+          active-backup
+         </em>
+         mode, where it is
+preferred as the active interface. See
+         <a href="#sysadmin_network_bond">
+          Linux Bond
+         </a>
+         for a description of the modes.
+        </p>
+        <div class="admonitionblock">
+         <table>
+          <tr>
+           <td class="icon">
+            <img alt="Note" src="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
+m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
+CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
+BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
+Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
+vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
+oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
+/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
+Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
+bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
+0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
+rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
+X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
+NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
+cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
+KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
+S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
+UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
+XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
+4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
+nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
+iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
+/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
+qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
+uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
+bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
+NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
+PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
+0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
+1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
+i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
+UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
+4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
+Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
+NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
+ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
+AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
+IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
+W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
+o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
+GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
+lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
+zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
+PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
+           </td>
+           <td class="content">
+            The
+            <em>
+             balance-alb
+            </em>
+            and
+            <em>
+             balance-tlb
+            </em>
+            modes are not suitable if guests use
+the bridge on top of the bond, as they overwrite the source MAC address of
+frames sent over an interface other than the active one.
+           </td>
+          </tr>
+         </table>
+        </div>
+       </dd>
+       <dt class="hdlist1">
+        <span class="monospaced">
+         Management VLAN
+        </span>
+       </dt>
+       <dd>
+        <p>
+         Tags the management network with the given
+         <span class="monospaced">
+          VLAN Tag
+         </span>
+         , for networks that are
+only reachable tagged. The bridge
+         <span class="monospaced">
+          vmbr0
+         </span>
+         then becomes VLAN-aware and the host
+address is configured on the interface
+         <span class="monospaced">
+          vlan&lt;tag&gt;
+         </span>
+         on top of it, so that guests
+can still use other VLANs on the bridge. Valid tags are 2 to 4094, as the
+VLAN-aware bridge sends VLAN 1 untagged. Leave the VLAN setup disabled for an
+untagged management network.
+        </p>
+        <div class="admonitionblock">
+         <table>
+          <tr>
+           <td class="icon">
+            <img alt="Tip" src="data:image/png;base64,
+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"/>
+           </td>
+           <td class="content">
+            The installer proposes the network settings it obtained via DHCP on the
+untagged network. If the management network is only reachable tagged, boot the
+installer with the
+            <span class="monospaced">
+             proxmox-vlan=&lt;tag&gt;
+            </span>
+            kernel parameter, so that it obtains
+them on that VLAN and preselects its tag. See
+            <a href="#nomodeset_kernel_param">
+             adding the
+             <span class="monospaced">
+              nomodeset
+             </span>
+             kernel parameter
+            </a>
+            for how to
+add a kernel parameter.
+           </td>
+          </tr>
+         </table>
+        </div>
+       </dd>
+      </dl>
+     </div>
+    </div>
+    <div class="sect3">
      <h4 id="_zfs_performance_tips">
-      2.3.5. ZFS Performance Tips
+      2.3.6. ZFS Performance Tips
       <a class="headerlink" href="#_zfs_performance_tips" title="Permalink to this heading">
       </a>
      </h4>
@@ -4657,7 +4952,7 @@ following command:
     </div>
     <div class="sect3">
      <h4 id="nomodeset_kernel_param">
-      2.3.6. Adding the
+      2.3.7. Adding the
       <span class="monospaced">
        nomodeset
       </span>
@@ -8525,8 +8820,8 @@ bridges to separate network domains. Each host can have up to 4094 bridges.
         vmbr0
        </span>
        , which
-is connected to the first Ethernet card. The corresponding
-configuration in
+is connected to the management interface selected during the installation. The
+corresponding configuration in
        <span class="monospaced">
         /etc/network/interfaces
        </span>
@@ -8548,6 +8843,22 @@ iface vmbr0 inet static
         bridge-stp off
         bridge-fd 0</pre>
       </div>
+     </div>
+     <div class="paragraph">
+      <p>
+       If you set up a bond during the installation, the bridge is connected to the
+bond
+       <span class="monospaced">
+        bond0
+       </span>
+       instead. With a VLAN tag for the management network, the bridge is
+VLAN-aware and the host address is configured on a VLAN interface on top of it.
+See
+       <a href="#advanced_network_options">
+        Advanced Network Configuration Options
+       </a>
+       .
+      </p>
      </div>
      <div class="paragraph">
       <p>
@@ -9240,7 +9551,145 @@ outside. The benefit is that you can use more than one VLAN on a
 single virtual NIC.
          </p>
         </li>
+        <li>
+         <p>
+          <strong>
+           SDN configured VLAN:
+          </strong>
+          It is also possible to
+          <a href="#pvesdn_config_vnet">
+           configure VLANs in SDN
+          </a>
+          by
+creating a VLAN zone on the bridge and then creating VNets for every VLAN tag.
+In this case, it is also recommended to use a VLAN-aware bridge.
+         </p>
+        </li>
        </ul>
+      </div>
+      <div class="paragraph" id="vlan_example_vlan_through_sdn">
+       <div class="title">
+        Example: SDN VLAN Zones with VLAN-aware bridges
+       </div>
+       <p>
+        This is the preferred solution if users have a small number of VLANs inside
+their cluster. On every node, users should configure a VLAN-aware bridge with
+the respective carrier for their VLANs:
+        <a class="headerlink" href="#vlan_example_vlan_through_sdn" title="Permalink to this heading">
+        </a>
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>auto vmbr0
+iface vmbr0 inet manual
+        bridge-ports nic0
+        bridge-stp off
+        bridge-fd 0
+        bridge-vlan-aware yes
+        bridge-vids 2-4094</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        Then create an SDN zone on top of that bridge:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>vlan: vlanz
+        bridge vmbr0
+        ipam pve</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        Then, for each VLAN they want to use, create a VNet:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>vnet: vnet1234
+        zone vlanz
+        tag 1234</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        After applying the SDN configuration, users can then select vnet1234 in the
+network device configuration of their guests. This method does not allow to
+configure an IP for the host directly on a VNet - but it can be done manually
+by adding an entry for the VNet to /etc/network/interfaces:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>auto vnet1234
+iface vnet1234 inet static
+        address 192.0.2.1/24</pre>
+       </div>
+      </div>
+      <div class="admonitionblock">
+       <table>
+        <tr>
+         <td class="icon">
+          <img alt="Note" src="data:image/png;base64,
+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"/>
+         </td>
+         <td class="content">
+          On a VLAN-aware bridge, a VNet uses
+          <span class="monospaced">
+           vmbr0.&lt;tag&gt;
+          </span>
+          as its bridge port. Do
+not configure a host address on that interface for a tag that has a VNet,
+configure it on the VNet instead.
+         </td>
+        </tr>
+       </table>
       </div>
      </div>
      <div class="sect4">
@@ -9254,7 +9703,13 @@ single virtual NIC.
         To allow host communication with an isolated network. It is possible
 to apply VLAN tags to any network device (NIC, Bond, Bridge). In
 general, you should configure the VLAN on the interface with the least
-abstraction layers between itself and the physical NIC.
+abstraction layers between itself and the physical NIC. But it would still
+be best to configure the VLAN on a bridge instead of a bond or the NIC
+directly to avoid some of the issues mentioned
+        <a href="#vlan_common_issues">
+         here
+        </a>
+        .
        </p>
       </div>
       <div class="paragraph">
@@ -9263,48 +9718,15 @@ abstraction layers between itself and the physical NIC.
 the host management address on a separate VLAN.
        </p>
       </div>
-      <div class="listingblock">
+      <div class="listingblock" id="vlan_example_management_ip_and_vlan_aware_bridge">
        <div class="title">
-        Example: Use VLAN 5 for the Proxmox VE management IP with traditional Linux bridge
+        Example: Use VLAN 5 for the Proxmox VE management IP with VLAN-aware Linux bridge
        </div>
        <div class="content monospaced">
         <pre>auto lo
 iface lo inet loopback
 
 iface eno1 inet manual
-
-iface eno1.5 inet manual
-
-auto vmbr0v5
-iface vmbr0v5 inet static
-        address  10.10.10.2/24
-        gateway  10.10.10.1
-        bridge-ports eno1.5
-        bridge-stp off
-        bridge-fd 0
-
-auto vmbr0
-iface vmbr0 inet manual
-        bridge-ports eno1
-        bridge-stp off
-        bridge-fd 0</pre>
-       </div>
-      </div>
-      <div class="listingblock">
-       <div class="title">
-        Example: Use VLAN 5 for the Proxmox VE management IP with VLAN aware Linux bridge
-       </div>
-       <div class="content monospaced">
-        <pre>auto lo
-iface lo inet loopback
-
-iface eno1 inet manual
-
-
-auto vmbr0.5
-iface vmbr0.5 inet static
-        address  10.10.10.2/24
-        gateway  10.10.10.1
 
 auto vmbr0
 iface vmbr0 inet manual
@@ -9312,7 +9734,25 @@ iface vmbr0 inet manual
         bridge-stp off
         bridge-fd 0
         bridge-vlan-aware yes
-        bridge-vids 2-4094</pre>
+        bridge-vids 2-4094
+
+auto vmbr0.5
+iface vmbr0.5 inet static
+        address  10.10.10.2/24
+        gateway  10.10.10.1</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        Guests can then reference the VLAN tag directly in their network
+configuration. Compared to an SDN-configured solution, this has the
+disadvantage that specific VLANs cannot be named, but the advantage that
+each VLAN does not have to be configured individually.
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>net0: bridge=vmbr0,tag=5,...</pre>
        </div>
       </div>
       <div class="paragraph">
@@ -9321,9 +9761,9 @@ iface vmbr0 inet manual
 make this network fail-safe.
        </p>
       </div>
-      <div class="listingblock">
+      <div class="listingblock" id="vlan_example_bond_with_management_ip_and_vlan_aware_bridge">
        <div class="title">
-        Example: Use VLAN 5 with bond0 for the Proxmox VE management IP with traditional Linux bridge
+        Example: Use VLAN 5 with bond0 for the Proxmox VE management IP with VLAN-aware Linux bridge
        </div>
        <div class="content monospaced">
         <pre>auto lo
@@ -9340,22 +9780,171 @@ iface bond0 inet manual
       bond-mode 802.3ad
       bond-xmit-hash-policy layer2+3
 
-iface bond0.5 inet manual
-
-auto vmbr0v5
-iface vmbr0v5 inet static
-        address  10.10.10.2/24
-        gateway  10.10.10.1
-        bridge-ports bond0.5
-        bridge-stp off
-        bridge-fd 0
-
 auto vmbr0
 iface vmbr0 inet manual
         bridge-ports bond0
+        bridge-vlan-aware yes
+        bridge-vids 2-4094
         bridge-stp off
-        bridge-fd 0</pre>
+        bridge-fd 0
+
+auto vmbr0.5
+iface vmbr0.5 inet static
+        address 10.10.10.2/24
+        gateway 10.10.10.1</pre>
        </div>
+      </div>
+     </div>
+     <div class="sect4">
+      <h5 id="vlan_common_issues">
+       Common Issues
+       <a class="headerlink" href="#vlan_common_issues" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="paragraph">
+       <div class="title">
+        Issue: Host not reachable on VLAN interface after guest start
+       </div>
+       <p>
+        A management IP can be configured in a VLAN interface whose underlying
+interface is a bridge port, for example on nic0.5 or bond0.5. If the bridge
+the underlying interface is on is not VLAN-aware, the IP stops working as
+soon as a guest on that bridge and VLAN is started. Stopping the guest will
+not rectify this problem, the host has to be rebooted. To fix this, the VLAN
+interface must be removed, and the management IP configured on the bridge
+VLAN interface, as well as making the bridge VLAN-aware.
+        <a href="#vlan_example_management_ip_and_vlan_aware_bridge">
+         This example
+        </a>
+        shows how to
+do this.
+       </p>
+      </div>
+      <div class="paragraph">
+       <div class="title">
+        Issue: ifupdown2 fails after configuring gateway on NIC
+       </div>
+       <p>
+        When configuring a default gateway on the VLAN interface, where the underlying
+interface is part of a VLAN-aware bridge, ifupdown2 will not be able to
+configure the default gateway and fail with a similar error:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>error: nic0.1337: cmd '/bin/ip route replace default via 192.0.2.1 proto kernel
+dev nic0.1337 onlink' failed: returned 2 (Error: Nexthop device is not up.)</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        To avoid this issue, configure the address and default gateway on a VLAN
+interface of the bridge, for example
+        <span class="monospaced">
+         vmbr0.5
+        </span>
+        , as shown in
+        <a href="#vlan_example_management_ip_and_vlan_aware_bridge">
+         this example
+        </a>
+        .
+       </p>
+      </div>
+      <div class="paragraph">
+       <div class="title">
+        Issue: Limited number of tags when VLAN offloading to NIC
+       </div>
+       <p>
+        Certain NICs only support VLAN filter offloading for a reduced number of tags.
+In these cases it’s best to either reduce the tag range on the VLAN-aware
+bridge or disable offloading altogether. To determine if offloading is enabled,
+use
+        <span class="monospaced">
+         ethtool
+        </span>
+        , replacing
+        <span class="monospaced">
+         nic0
+        </span>
+        with the name of your interface:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>ethtool -k nic0 | grep rx-vlan-filter</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        If the output contains "[fixed]", the value cannot be changed. Otherwise, use a
+        <span class="monospaced">
+         post-up
+        </span>
+        command to disable offloading, so that the setting persists across
+reboots:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>iface nic0 inet manual
+        post-up ethtool -K nic0 rx-vlan-filter off</pre>
+       </div>
+      </div>
+     </div>
+     <div class="sect4">
+      <h5 id="_troubleshooting">
+       Troubleshooting
+       <a class="headerlink" href="#_troubleshooting" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="paragraph">
+       <p>
+        There are some helpful commands that can be utilized when debugging such issues:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>$ bridge -compressvlans vlan show</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        This prints a list of bridges and their ports, as well as the VLANs that are
+currently configured for them:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>port              vlan-id
+nic0              1 PVID Egress Untagged
+                  2-4094
+vmbr0             1 PVID Egress Untagged
+veth100i0         1234 PVID Egress Untagged</pre>
+       </div>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>$ bridge fdb show</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        This prints a list of the current forwarding database entries of all bridges.
+The bridge decides how to forward a given packet based on this table. An entry
+of the fdb generally looks like this:
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="content monospaced">
+        <pre>aa:aa:aa:d8:36:7c dev nic0 vlan 49 master vmbr0 permanent</pre>
+       </div>
+      </div>
+      <div class="paragraph">
+       <p>
+        This means that packets arriving on vmbr0, that have VLAN Tag 49 set and
+destination MAC address aa:aa:aa:d8:36:7c will not be forwarded, but be
+terminated locally.
+       </p>
       </div>
      </div>
     </div>
@@ -12099,6 +12688,27 @@ and the two
        </div>
        <div class="content monospaced">
         <pre># zpool add &lt;pool&gt; log &lt;log-device&gt;</pre>
+       </div>
+      </div>
+     </div>
+     <div class="sect4">
+      <h5 id="sysadmin_zfs_add_hot_spare">
+       Adding a hot spare drive to an existing pool
+       <a class="headerlink" href="#sysadmin_zfs_add_hot_spare" title="Permalink to this heading">
+       </a>
+      </h5>
+      <div class="paragraph">
+       <p>
+        ZFS supports hot spare drives which allow the system to automatically replace
+a failed disk with the spare without manual intervention.
+       </p>
+      </div>
+      <div class="listingblock">
+       <div class="title">
+        Add a hot spare to an existing pool
+       </div>
+       <div class="content monospaced">
+        <pre># zpool add &lt;pool&gt; spare &lt;spare-device&gt;</pre>
        </div>
       </div>
      </div>
@@ -25565,9 +26175,9 @@ the change to take effect.
      </div>
     </div>
     <div class="sect3">
-     <h4 id="_troubleshooting">
+     <h4 id="_troubleshooting_2">
       5.12.3. Troubleshooting
-      <a class="headerlink" href="#_troubleshooting" title="Permalink to this heading">
+      <a class="headerlink" href="#_troubleshooting_2" title="Permalink to this heading">
       </a>
      </h4>
      <div class="sect4">
@@ -30995,6 +31605,24 @@ master keys for storage in a safe, physical location.
         </td>
        </tr>
       </table>
+     </div>
+     <div class="paragraph">
+      <p>
+       For disaster recovery at another site, for example from a copy of the backups
+that a sync job made to a second Proxmox Backup Server at that site, the
+restoring cluster needs the key as well. Add the datastore of the copy as
+storage there with the same key, for example with
+       <span class="monospaced">
+        pvesm add pbs &lt;storage-id&gt;
+... --encryption-key &lt;key-file&gt;
+       </span>
+       , or add the key to an existing storage with
+       <span class="monospaced">
+        pvesm set &lt;storage-id&gt; --encryption-key &lt;key-file&gt;
+       </span>
+       . Keep the key outside the
+site it protects: removing a storage also deletes its key file.
+      </p>
      </div>
      <div class="paragraph">
       <p>
@@ -40301,10 +40929,18 @@ keys with other tools. Its
 until confirmation makes the new key current and invalidates the old one.
         </p>
        </div>
-       <div class="ulist" id="pveceph_cephx_refresh_clients">
+       <div class="paragraph" id="pveceph_cephx_refresh_clients">
         <div class="title">
          Refresh Clients
         </div>
+        <p>
+         Refresh the clients after applying the plan, as they can only load a new key
+once it is staged:
+         <a class="headerlink" href="#pveceph_cephx_refresh_clients" title="Permalink to this heading">
+         </a>
+        </p>
+       </div>
+       <div class="ulist">
         <ul>
          <li>
           <p>
@@ -40351,10 +40987,14 @@ until confirmation makes the new key current and invalidates the old one.
        </div>
        <div class="paragraph">
         <p>
-         The helper reports sessions that may still hold an old key. Client hints
-are host-wide, not session attribution or a complete workload inventory.
-Sockets without an owning process are listed separately. Check disconnected
-clients and external key copies yourself.
+         Then run the helper without options. It lists the sessions that may still hold
+an old key. Where it finds the kernel client of a session, it names the RBD
+mapping, with the container or virtual machine configured to use it, if any, or
+the CephFS client, with the CephFS mounts of the cluster found on that node.
+Other client hints, such as the virtual machines connected from a node, are
+host-wide, not session attribution or a complete workload inventory. Refresh the
+affected clients and run the helper again until it prints a confirmation
+command. Check disconnected clients and external key copies yourself.
         </p>
        </div>
       </div>
@@ -40740,6 +41380,27 @@ also when Cephx is disabled, that is, when
          .
 Disabling Cephx therefore does not clear them, and changing the authentication
 method interrupts existing clients, which need a restart or remount afterwards.
+        </p>
+       </div>
+       <div class="paragraph">
+        <p>
+         Only run a cluster without Cephx if its public network, not only its cluster
+network, is reachable solely by hosts you trust with full administrative access
+to Ceph. In particular, keep untrusted guests off that network. Without Cephx,
+Ceph grants every connection full access, whatever Ceph user it claims, and
+does not sign or encrypt messages. The Ceph project recommends against disabling
+Cephx
+         <span class="footnote">
+          <br/>
+          [Ceph: Disabling Cephx
+          <a href="https://docs.ceph.com/en/tentacle/rados/configuration/auth-config-ref/#disabling-cephx">
+           https://docs.ceph.com/en/tentacle/rados/configuration/auth-config-ref/#disabling-cephx
+          </a>
+          ]
+          <br/>
+         </span>
+         .
+Disabling it does not repair a failed key migration.
         </p>
        </div>
        <div class="paragraph">
@@ -49055,9 +49716,9 @@ configuration in the guest is the preferred option.
       </div>
      </div>
      <div class="sect4">
-      <h5 id="_troubleshooting_2">
+      <h5 id="_troubleshooting_3">
        Troubleshooting
-       <a class="headerlink" href="#_troubleshooting_2" title="Permalink to this heading">
+       <a class="headerlink" href="#_troubleshooting_3" title="Permalink to this heading">
        </a>
       </h5>
       <div class="paragraph">
@@ -49383,9 +50044,9 @@ circumstances.
       </div>
      </div>
      <div class="sect4">
-      <h5 id="_troubleshooting_3">
+      <h5 id="_troubleshooting_4">
        Troubleshooting
-       <a class="headerlink" href="#_troubleshooting_3" title="Permalink to this heading">
+       <a class="headerlink" href="#_troubleshooting_4" title="Permalink to this heading">
        </a>
       </h5>
       <div class="paragraph">
@@ -55543,7 +56204,7 @@ by the guest firmware (BIOS/UEFI). If you require multiple disks for booting
            </span>
            =
            <span class="monospaced">
-            &lt;486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | ClearwaterForest | ClearwaterForest-v2 | ClearwaterForest-v3 | Conroe | Cooperlake | Cooperlake-v2 | DiamondRapids | EPYC | EPYC-Genoa | EPYC-Genoa-v2 | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Milan-v3 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-Rome-v5 | EPYC-Turin | EPYC-v3 | EPYC-v4 | EPYC-v5 | GraniteRapids | GraniteRapids-v2 | GraniteRapids-v3 | GraniteRapids-v4 | GraniteRapids-v5 | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | Icelake-Server-v7 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | SapphireRapids-v3 | SapphireRapids-v4 | SapphireRapids-v5 | SapphireRapids-v6 | SierraForest | SierraForest-v2 | SierraForest-v3 | SierraForest-v4 | SierraForest-v5 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Westmere | Westmere-IBRS | a64fx | athlon | core2duo | coreduo | cortex-a35 | cortex-a53 | cortex-a55 | cortex-a57 | cortex-a710 | cortex-a72 | cortex-a76 | cortex-a78ae | host | kvm32 | kvm64 | max | neoverse-n1 | neoverse-n2 | neoverse-v1 | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64&gt;
+            &lt;486 | Broadwell | Broadwell-IBRS | Broadwell-noTSX | Broadwell-noTSX-IBRS | Cascadelake-Server | Cascadelake-Server-noTSX | Cascadelake-Server-v2 | Cascadelake-Server-v4 | Cascadelake-Server-v5 | Cascadelake-Server-v6 | Cascadelake-Server-v7 | ClearwaterForest | ClearwaterForest-v2 | ClearwaterForest-v3 | ClearwaterForest-v4 | Conroe | Cooperlake | Cooperlake-v2 | DiamondRapids | DiamondRapids-v2 | EPYC | EPYC-Genoa | EPYC-Genoa-v2 | EPYC-Genoa-v3 | EPYC-IBPB | EPYC-Milan | EPYC-Milan-v2 | EPYC-Milan-v3 | EPYC-Milan-v4 | EPYC-Rome | EPYC-Rome-v2 | EPYC-Rome-v3 | EPYC-Rome-v4 | EPYC-Rome-v5 | EPYC-Turin | EPYC-Turin-v2 | EPYC-v3 | EPYC-v4 | EPYC-v5 | GraniteRapids | GraniteRapids-v2 | GraniteRapids-v3 | GraniteRapids-v4 | GraniteRapids-v5 | GraniteRapids-v6 | GraniteRapids-v7 | Haswell | Haswell-IBRS | Haswell-noTSX | Haswell-noTSX-IBRS | Icelake-Client | Icelake-Client-noTSX | Icelake-Server | Icelake-Server-noTSX | Icelake-Server-v3 | Icelake-Server-v4 | Icelake-Server-v5 | Icelake-Server-v6 | Icelake-Server-v7 | Icelake-Server-v8 | Icelake-Server-v9 | IvyBridge | IvyBridge-IBRS | KnightsMill | Nehalem | Nehalem-IBRS | Opteron_G1 | Opteron_G2 | Opteron_G3 | Opteron_G4 | Opteron_G5 | Penryn | SandyBridge | SandyBridge-IBRS | SapphireRapids | SapphireRapids-v2 | SapphireRapids-v3 | SapphireRapids-v4 | SapphireRapids-v5 | SapphireRapids-v6 | SapphireRapids-v7 | SapphireRapids-v8 | SierraForest | SierraForest-v2 | SierraForest-v3 | SierraForest-v4 | SierraForest-v5 | SierraForest-v6 | Skylake-Client | Skylake-Client-IBRS | Skylake-Client-noTSX-IBRS | Skylake-Client-v4 | Skylake-Server | Skylake-Server-IBRS | Skylake-Server-noTSX-IBRS | Skylake-Server-v4 | Skylake-Server-v5 | Skylake-Server-v6 | Westmere | Westmere-IBRS | a64fx | athlon | core2duo | coreduo | cortex-a35 | cortex-a53 | cortex-a55 | cortex-a57 | cortex-a710 | cortex-a72 | cortex-a76 | cortex-a78ae | host | kvm32 | kvm64 | max | neoverse-n1 | neoverse-n2 | neoverse-v1 | pentium | pentium2 | pentium3 | phenom | qemu32 | qemu64&gt;
            </span>
            (
            <em>
@@ -58006,8 +58667,36 @@ are used:
           </dt>
           <dd>
            <p>
-            NUMA allocation policy.
+            NUMA allocation policy. Possible values are:
            </p>
+           <div class="ulist">
+            <ul>
+             <li>
+              <p>
+               preferred: prefer the given host node list for allocation
+              </p>
+             </li>
+             <li>
+              <p>
+               bind: restrict memory allocation to the given host node list
+              </p>
+             </li>
+             <li>
+              <p>
+               interleave: interleave memory allocations across the given host node list
+              </p>
+              <div class="paragraph">
+               <p>
+                The models are explained in more details in the kernel’s documentation
+                <a href="https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html#components-of-memory-policies">
+                 https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html#components-of-memory-policies
+                </a>
+                .
+               </p>
+              </div>
+             </li>
+            </ul>
+           </div>
           </dd>
          </dl>
         </div>
@@ -67113,7 +67802,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         </span>
         :
         <span class="monospaced">
-         (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
+         (?^:[^\x00-\x08\x0a-\x1F\x7F]+\z)
         </span>
         (
         <em>
@@ -67135,7 +67824,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         </span>
         :
         <span class="monospaced">
-         (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
+         (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*\z)
         </span>
        </dt>
        <dd>
@@ -67255,7 +67944,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
           </dt>
           <dd>
            <p>
-            Allow unprivileged containers to use mknod() to add certain device nodes. This requires a kernel with seccomp trap to user space support (5.3 or newer). This is experimental.
+            Allow unprivileged containers to use mknod() to add certain device nodes. This requires a kernel with seccomp trap to user space support (5.3 or newer).
            </p>
           </dd>
           <dt class="hdlist1">
@@ -69343,7 +70032,8 @@ the network segments.  This allows connectivity of VMs between different nodes.
           each
          </strong>
          node that
-  allows node-to-node connection.
+  allows node-to-node connection. It is recommended to make a Linux bridge
+  VLAN-aware.
         </p>
        </dd>
       </dl>
@@ -70138,12 +70828,12 @@ The EVPN controller plugin configures the Free Range Routing (frr) router.
      <div class="dlist">
       <dl>
        <dt class="hdlist1">
-        ASN #
+        ASN
        </dt>
        <dd>
         <p>
-         A unique BGP ASN number. It’s highly recommended to use a private ASN
-  number (64512 – 65534, 4200000000 – 4294967294), as otherwise you could end up
+         A unique BGP ASN. It’s highly recommended to use a private ASN
+  (64512 – 65534, 4200000000 – 4294967294), as otherwise you could end up
   breaking global routing by mistake. Every EVPN controller configured on a node
   must have the same ASN configured.
         </p>
@@ -70272,7 +70962,7 @@ controller is used - otherwise the ASN from the BGP controller.
          no-prepend
 replace-as
         </span>
-        option in the FRR configuration for handling multiple ASN numbers in
+        option in the FRR configuration for handling multiple ASNs in
 the configuration. This is the case when the BGP and EVPN controller have
 different ASNs configured and auto mode is disabled.
        </p>
@@ -70405,12 +71095,12 @@ controller.
         </p>
        </dd>
        <dt class="hdlist1">
-        ASN #
+        ASN
        </dt>
        <dd>
         <p>
-         A unique BGP ASN number. It’s highly recommended to use a private ASN
-  number in the range (64512 - 65534) or (4200000000 - 4294967294), as otherwise
+         A unique BGP ASN. It’s highly recommended to use a private ASN
+  in the range (64512 - 65534) or (4200000000 - 4294967294), as otherwise
   you could break global routing by mistake.
         </p>
        </dd>
@@ -72868,8 +73558,8 @@ currently in the cluster will be shown.
         </dt>
         <dd>
          <p>
-          BGP Autonomous System Number for this node. It is recommended to use
-private ASN numbers (64512-65534 for 16-bit, 4200000000-4294967294 for 32-bit).
+          BGP Autonomous System Number for this node. It is recommended to use a
+private ASN (64512-65534 for 16-bit, 4200000000-4294967294 for 32-bit).
          </p>
         </dd>
         <dt class="hdlist1">
@@ -74720,14 +75410,14 @@ addresses 192.168.0.1, 192.168.0.2 and 192.168.0.3.
      </div>
      <div class="paragraph">
       <p>
-       Create an EVPN controller, using a private ASN number and the above node
+       Create an EVPN controller, using a private ASN and the above node
 addresses as peers.
       </p>
      </div>
      <div class="listingblock">
       <div class="content monospaced">
        <pre>ID: myevpnctl
-ASN#: 65000
+ASN: 65000
 Peers: 192.168.0.1,192.168.0.2,192.168.0.3</pre>
       </div>
      </div>
@@ -79536,13 +80226,96 @@ these users to log in via their system username and password.
         <span class="monospaced">
          /etc/pve/priv/shadow.cfg
         </span>
-        . Passwords are hashed using the SHA-256 hashing
-algorithm. This is the most convenient realm for small-scale (or even
-mid-scale) installations, where users do not need access to anything outside of
-Proxmox VE. In this case, users are fully managed by Proxmox VE and are able to change
-their own passwords via the GUI.
+        . Passwords are hashed and salted using the yescrypt
+algorithm
+        <span class="footnote">
+         <br/>
+         [yescrypt
+         <a href="https://www.openwall.com/yescrypt/">
+          https://www.openwall.com/yescrypt/
+         </a>
+         ]
+         <br/>
+        </span>
+        . It provides
+strong protections against offline password cracking attempts. This realm is the
+most convenient realm for small-scale (or even mid-scale) installations, where
+users do not need access to anything outside of Proxmox VE. In this case, users are
+fully managed by Proxmox VE and are able to change their own passwords via the GUI.
        </p>
       </dd>
+     </dl>
+    </div>
+    <div class="admonitionblock">
+     <table>
+      <tr>
+       <td class="icon">
+        <img alt="Note" src="data:image/png;base64,
+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"/>
+       </td>
+       <td class="content">
+        Passwords created with older versions of Proxmox VE used a hashing scheme based
+on SHA-256 that is now considered insecure. If the file
+        <span class="monospaced">
+         /etc/pve/priv/shadow.cfg
+        </span>
+        shows a password hash starting with
+        <span class="monospaced">
+         $5$
+        </span>
+        for an
+account, that account still uses such a password. The hash is updated when a new
+password is set, and on the next login of that user as long as the cluster is
+quorate.
+       </td>
+      </tr>
+     </table>
+    </div>
+    <div class="dlist">
+     <dl>
       <dt class="hdlist1">
        LDAP
       </dt>
@@ -93791,295 +94564,191 @@ access the following properties:
       <img alt="screenshot/gui-datacenter-notification-matcher.png" src="images/screenshot/gui-datacenter-notification-matcher.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
      </a>
      <p>
-      Notification matchers route notifications to notification targets based on their
-matching rules. These rules can match certain properties of a notification, such
-as the timestamp (
-      <span class="monospaced">
-       match-calendar
-      </span>
-      ), the severity of the notification
-(
-      <span class="monospaced">
-       match-severity
-      </span>
-      ) or metadata fields (
-      <span class="monospaced">
-       match-field
-      </span>
-      ).
-If a notification is matched by a matcher, all targets configured for the
-matcher will receive the notification.
+      Notification matchers route notifications to notification targets based on
+their matching rules. These rules can match certain properties of a
+notification, such as the timestamp, the severity of the notification or
+metadata fields, as well as arbitrary combinations of these. If a notification
+is matched by a matcher, all targets configured for the matcher will receive
+the notification.
      </p>
     </div>
     <div class="paragraph">
      <p>
-      An arbitrary number of matchers can be created, each with with their own
-matching rules and targets to notify.
-Every target is notified at most once for every notification, even if the target
-is used in multiple matchers.
+      An arbitrary number of matchers can be created, each with their own match
+rules and targets to notify. Every target is notified at most once for every
+notification, even if the target is used in multiple matchers.
      </p>
-    </div>
-    <div class="paragraph">
-     <p>
-      A matcher without any matching rules is always true; the configured targets will
-always be notified.
-     </p>
-    </div>
-    <div class="listingblock">
-     <div class="content monospaced">
-      <pre>matcher: always-matches
-        target admin
-        comment This matcher always matches</pre>
-     </div>
     </div>
     <div class="sect3">
-     <h4 id="_matcher_options">
-      17.3.1. Matcher Options
-      <a class="headerlink" href="#_matcher_options" title="Permalink to this heading">
+     <h4 id="_match_rules">
+      17.3.1. Match Rules
+      <a class="headerlink" href="#_match_rules" title="Permalink to this heading">
       </a>
      </h4>
+     <div class="paragraph">
+      <p>
+       Notification matchers can be configured in the Proxmox VE Web UI under Datacenter →
+Notifications. Matchers can be created, modified and deleted from this view.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       When editing a matcher, match rules can be edited under the
+       <em>
+        Match Rules
+       </em>
+       tab.
+Rules are represented as a tree. Each tree node can either match on properties
+of a notification (fields, severity or timestamp) or combine the results of
+child nodes (e.g.
+       <em>
+        All sub-rules match
+       </em>
+       ). Combinator nodes can be nested, which
+makes it possible to compose arbitrarily complex matching behavior.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       The following node types are available:
+      </p>
+     </div>
      <div class="ulist">
       <ul>
        <li>
         <p>
-         <span class="monospaced">
-          target
-         </span>
-         : Determine which target should be notified if the matcher matches.
-  can be used multiple times to notify multiple targets.
+         <strong>
+          Always match
+         </strong>
+         : Match any notification.
         </p>
        </li>
        <li>
         <p>
-         <span class="monospaced">
-          invert-match
-         </span>
-         : Inverts the result of the whole matcher
+         <strong>
+          All sub-rules match
+         </strong>
+         : All direct children of this node must match.
         </p>
        </li>
        <li>
         <p>
-         <span class="monospaced">
-          mode
-         </span>
-         : Determines how the individual match rules are evaluated to compute
-  the result for the whole matcher.
-  If set to
-         <span class="monospaced">
-          all
-         </span>
-         , all matching rules must match.
-  If set to
-         <span class="monospaced">
-          any
-         </span>
-         , at least one rule must match.
-  Defaults to
-         <span class="monospaced">
-          all
-         </span>
+         <strong>
+          At least one sub-rule matches
+         </strong>
+         : At least one direct child of this node must
+  match.
+        </p>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Exactly one sub-rule matches
+         </strong>
+         : Exactly one direct child of this node must
+  match.
+        </p>
+       </li>
+       <li>
+        <p>
+         <strong>
+          Match Field
+         </strong>
+         : Match a metadata field of a notification. This node can either
+  match if the field value matches one of the values provided, or,
+  alternatively, if it matches a regular expression. Available fields
+  are listed in
+         <a href="#notification_events">
+          Notification Events
+         </a>
          .
         </p>
        </li>
        <li>
         <p>
-         <span class="monospaced">
-          match-calendar
-         </span>
-         : Match the notification’s timestamp against a schedule.
+         <strong>
+          Match Calendar
+         </strong>
+         : Check if the timestamp of a notification is within a
+  configured time range, based on a selection of weekdays and one contiguous
+  time range within each day (e.g. Monday to Friday, 09:00 to 17:00). If
+  multiple time ranges within a day must be matched, use an
+         <strong>
+          At least one
+  sub-rule matches
+         </strong>
+         node with one
+         <strong>
+          Match Calendar
+         </strong>
+         child per time range.
         </p>
        </li>
        <li>
         <p>
+         <strong>
+          Match Severity
+         </strong>
+         : Match the severity of a notification. The following
+  severity levels are available:
          <span class="monospaced">
-          match-field
+          info
          </span>
-         : Match the notification’s metadata fields.
-        </p>
-       </li>
-       <li>
-        <p>
+         ,
          <span class="monospaced">
-          match-severity
+          notice
          </span>
-         : Match the notification’s severity.
-        </p>
-       </li>
-       <li>
-        <p>
+         ,
          <span class="monospaced">
-          comment
+          warning
          </span>
-         : Comment for this matcher.
-        </p>
-       </li>
-      </ul>
-     </div>
-    </div>
-    <div class="sect3">
-     <h4 id="notification_matchers_calendar">
-      17.3.2. Calendar Matching Rules
-      <a class="headerlink" href="#notification_matchers_calendar" title="Permalink to this heading">
-      </a>
-     </h4>
-     <div class="paragraph">
-      <p>
-       A calendar matcher matches the time when a notification is sent against a
-configurable schedule.
-      </p>
-     </div>
-     <div class="ulist">
-      <ul>
-       <li>
-        <p>
+         ,
          <span class="monospaced">
-          match-calendar 8-12
-         </span>
-        </p>
-       </li>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-calendar 8:00-15:30
-         </span>
-        </p>
-       </li>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-calendar mon..fri 9:00-17:00
-         </span>
-        </p>
-       </li>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-calendar sun,tue..wed,fri 9-17
-         </span>
-        </p>
-       </li>
-      </ul>
-     </div>
-    </div>
-    <div class="sect3">
-     <h4 id="notification_matchers_field">
-      17.3.3. Field Matching Rules
-      <a class="headerlink" href="#notification_matchers_field" title="Permalink to this heading">
-      </a>
-     </h4>
-     <div class="paragraph">
-      <p>
-       Notifications have a selection of metadata fields that can be matched.  When
-using
-       <span class="monospaced">
-        exact
-       </span>
-       as a matching mode, a
-       <span class="monospaced">
-        ,
-       </span>
-       can be used as a separator.  The
-matching rule then matches if the metadata field has
-       <strong>
-        any
-       </strong>
-       of the specified
-values.
-      </p>
-     </div>
-     <div class="ulist">
-      <ul>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-field exact:type=vzdump
-         </span>
-         Only match notifications about backups.
-        </p>
-       </li>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-field exact:type=replication,fencing
-         </span>
-         Match
-         <span class="monospaced">
-          replication
+          error
          </span>
          and
          <span class="monospaced">
-          fencing
+          unknown
          </span>
-         notifications.
-        </p>
-       </li>
-       <li>
-        <p>
+         . Each
+         <strong>
+          Match Severity
+         </strong>
+         node can specify multiple severity levels
+  it matches on, for instance
          <span class="monospaced">
-          match-field regex:hostname=^.+\.example\.com$
+          info
          </span>
-         Match the hostname of
-the node.
+         and
+         <span class="monospaced">
+          notice
+         </span>
+         .
         </p>
        </li>
       </ul>
      </div>
      <div class="paragraph">
       <p>
-       If a matched metadata field does not exist, the notification will not be
-matched.
-For instance, a
-       <span class="monospaced">
-        match-field regex:hostname=.*
-       </span>
-       directive will only match
-notifications that have an arbitrary
-       <span class="monospaced">
-        hostname
-       </span>
-       metadata field, but will
-not match if the field does not exist.
-      </p>
-     </div>
-    </div>
-    <div class="sect3">
-     <h4 id="notification_matchers_severity">
-      17.3.4. Severity Matching Rules
-      <a class="headerlink" href="#notification_matchers_severity" title="Permalink to this heading">
-      </a>
-     </h4>
-     <div class="paragraph">
-      <p>
-       A notification has a associated severity that can be matched.
-      </p>
-     </div>
-     <div class="ulist">
-      <ul>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-severity error
-         </span>
-         : Only match errors
-        </p>
-       </li>
-       <li>
-        <p>
-         <span class="monospaced">
-          match-severity warning,error
-         </span>
-         : Match warnings and error
-        </p>
-       </li>
-      </ul>
-     </div>
-     <div class="paragraph">
-      <p>
-       The following severities are in use:
+       Each node in the tree can be inverted by checking
+       <strong>
+        Invert Rule
+       </strong>
+       . For instance,
+for a
+       <strong>
+        Match Severity
+       </strong>
+       node matching on
        <span class="monospaced">
         info
        </span>
-       ,
+       , checking
+       <strong>
+        Invert Rule
+       </strong>
+       lets the
+node match on
        <span class="monospaced">
         notice
        </span>
@@ -94091,46 +94760,732 @@ not match if the field does not exist.
        <span class="monospaced">
         error
        </span>
-       ,
+       and
        <span class="monospaced">
         unknown
        </span>
        .
       </p>
      </div>
+     <div class="paragraph">
+      <p>
+       Under the
+       <em>
+        Targets to Notify
+       </em>
+       tab, one or more notification targets can be
+selected. All selected targets are notified if a notification is matched.
+      </p>
+     </div>
     </div>
     <div class="sect3">
-     <h4 id="_examples_12">
-      17.3.5. Examples
-      <a class="headerlink" href="#_examples_12" title="Permalink to this heading">
+     <h4 id="_matcher_configuration_options">
+      17.3.2. Matcher Configuration Options
+      <a class="headerlink" href="#_matcher_configuration_options" title="Permalink to this heading">
       </a>
      </h4>
-     <div class="listingblock">
-      <div class="content monospaced">
-       <pre>matcher: workday
-        match-calendar mon..fri 9-17
-        target admin
-        comment Notify admins during working hours
-
-matcher: night-and-weekend
-        match-calendar mon..fri 9-17
-        invert-match true
-        target on-call-admins
-        comment Separate target for non-working hours</pre>
-      </div>
+     <div class="paragraph">
+      <p>
+       This section gives an overview of the options used by matchers in the
+configuration file and in the API.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       The following options are used in configuration entries for matchers:
+      </p>
+     </div>
+     <div class="ulist">
+      <ul>
+       <li>
+        <p>
+         <span class="monospaced">
+          target
+         </span>
+         : Determine which target should be notified if the matcher matches.
+  Can be used multiple times to notify multiple targets.
+        </p>
+       </li>
+       <li>
+        <p>
+         <span class="monospaced">
+          disable
+         </span>
+         : Don’t evaluate this matcher.
+        </p>
+       </li>
+       <li>
+        <p>
+         <span class="monospaced">
+          comment
+         </span>
+         : Comment for this matcher.
+        </p>
+       </li>
+       <li>
+        <p>
+         The matching behavior is defined either by the
+         <span class="monospaced">
+          expression
+         </span>
+         option or by the
+  deprecated options below; the two cannot be combined.
+        </p>
+        <div class="ulist">
+         <ul>
+          <li>
+           <p>
+            Expression-based matchers (preferred):
+           </p>
+           <div class="ulist">
+            <ul>
+             <li>
+              <p>
+               <span class="monospaced">
+                expression
+               </span>
+               : Ruleset for this matcher as a single JSON-serialized object
+    (
+               <a href="#notification_match_expression_reference">
+                Match Expression Reference
+               </a>
+               ).
+              </p>
+             </li>
+            </ul>
+           </div>
+          </li>
+          <li>
+           <p>
+            Deprecated matcher options:
+           </p>
+           <div class="ulist">
+            <ul>
+             <li>
+              <p>
+               <span class="monospaced">
+                invert-match
+               </span>
+               : Inverts the result of the whole matcher.
+              </p>
+             </li>
+             <li>
+              <p>
+               <span class="monospaced">
+                mode
+               </span>
+               : Determines how the individual match rules are evaluated to compute
+    the result for the whole matcher. If set to
+               <span class="monospaced">
+                all
+               </span>
+               , all matching rules must
+    match. If set to
+               <span class="monospaced">
+                any
+               </span>
+               , at least one rule must match. Defaults to
+               <span class="monospaced">
+                all
+               </span>
+               .
+              </p>
+             </li>
+             <li>
+              <p>
+               <span class="monospaced">
+                match-calendar
+               </span>
+               : Match the notification’s timestamp against a schedule.
+    Days can be specified as an inclusive range (e.g.
+               <span class="monospaced">
+                mon..wed
+               </span>
+               ) or enumerated
+    (e.g.
+               <span class="monospaced">
+                mon,wed,sat
+               </span>
+               ). If no days are specified, the time range applies to
+    every day of the week (e.g.
+               <span class="monospaced">
+                08:00-12:00
+               </span>
+               ).
+               <br/>
+               Examples:
+               <br/>
+               <span class="monospaced">
+                match-calendar mon..wed 9-12
+               </span>
+               <br/>
+               <span class="monospaced">
+                match-calendar mon,wed,sat 08:15-12:35
+               </span>
+               <br/>
+               <span class="monospaced">
+                match-calendar 04:15-16:35
+               </span>
+              </p>
+             </li>
+             <li>
+              <p>
+               <span class="monospaced">
+                match-field
+               </span>
+               : Match a notification’s metadata field, either against a list
+    of matched values, or as a regular expression. If the field does not exist,
+    the notification will not be matched.
+               <br/>
+               Examples:
+               <br/>
+               <span class="monospaced">
+                match-field exact:type=vzdump
+               </span>
+               <br/>
+               <span class="monospaced">
+                match-field exact:type=replication,fencing
+               </span>
+               <br/>
+               <span class="monospaced">
+                match-field regex:hostname=^pve[0-9]+$
+               </span>
+              </p>
+             </li>
+             <li>
+              <p>
+               <span class="monospaced">
+                match-severity
+               </span>
+               : Match the notification’s severity.
+               <br/>
+               Examples:
+               <br/>
+               <span class="monospaced">
+                match-severity error
+               </span>
+               <br/>
+               <span class="monospaced">
+                match-severity warning,error,unknown
+               </span>
+              </p>
+             </li>
+            </ul>
+           </div>
+          </li>
+         </ul>
+        </div>
+       </li>
+      </ul>
+     </div>
+     <div class="paragraph">
+      <p>
+       A matcher without any matching rules always matches; the configured targets will
+always be notified.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       Starting with Proxmox VE 9.3, match rules created and edited via the UI are stored
+as a single option
+       <span class="monospaced">
+        expression
+       </span>
+       in the respective matcher configuration entry.
+The previously used options (
+       <span class="monospaced">
+        match-field
+       </span>
+       ,
+       <span class="monospaced">
+        match-calendar
+       </span>
+       ,
+       <span class="monospaced">
+        match-severity
+       </span>
+       ,
+       <span class="monospaced">
+        mode
+       </span>
+       and
+       <span class="monospaced">
+        invert-match
+       </span>
+       ) will continue to be supported at least until the
+next major release.
+      </p>
+     </div>
+     <div class="admonitionblock">
+      <table>
+       <tr>
+        <td class="icon">
+         <img alt="Note" src="data:image/png;base64,
+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"/>
+        </td>
+        <td class="content">
+         Any existing matcher will be migrated to use the newer
+         <span class="monospaced">
+          expression
+         </span>
+         option
+  when edited through the UI.
+        </td>
+       </tr>
+      </table>
+     </div>
+    </div>
+    <div class="sect3">
+     <h4 id="notification_match_expression_reference">
+      17.3.3. Match Expression Reference
+      <a class="headerlink" href="#notification_match_expression_reference" title="Permalink to this heading">
+      </a>
+     </h4>
+     <div class="paragraph">
+      <p>
+       This section describes the representation used to encode rules in the
+       <span class="monospaced">
+        expression
+       </span>
+       parameter.
+      </p>
+     </div>
+     <div class="paragraph">
+      <p>
+       The
+       <span class="monospaced">
+        expression
+       </span>
+       option contains a JSON-formatted tree structure of rules, with
+leaf nodes matching on the properties of a notification (
+       <span class="monospaced">
+        field
+       </span>
+       ,
+       <span class="monospaced">
+        severity
+       </span>
+       ,
+       <span class="monospaced">
+        calendar
+       </span>
+       ) or representing constants (
+       <span class="monospaced">
+        constant
+       </span>
+       ). Intermediate nodes and the
+root node encode the relationship between them (
+       <span class="monospaced">
+        all-of
+       </span>
+       ,
+       <span class="monospaced">
+        any-of
+       </span>
+       ,
+       <span class="monospaced">
+        one-of
+       </span>
+       ,
+       <span class="monospaced">
+        not
+       </span>
+       ).
+      </p>
+     </div>
+     <div style="overflow-x:auto">
+      <table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+       <col style="width:12%;"/>
+       <col style="width:25%;"/>
+       <col style="width:12%;"/>
+       <col style="width:50%;"/>
+       <thead>
+        <tr>
+         <th class="tableblock halign-left valign-top">
+          Node Type
+         </th>
+         <th class="tableblock halign-left valign-top">
+          Description
+         </th>
+         <th class="tableblock halign-left valign-top">
+          Leaf Node
+         </th>
+         <th class="tableblock halign-left valign-top">
+          Example
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            all-of
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Match if all child nodes match
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           No
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"all-of": [&lt;expr&gt;]}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            any-of
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Match if any child node matches
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           No
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"any-of": [&lt;expr&gt;]}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            one-of
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Match if exactly one child node matches
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           No
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"one-of": [&lt;expr&gt;]}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            not
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Invert the result of a single child node
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           No
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"not": &lt;expr&gt;}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            constant
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Always or never matches, depending on the boolean value
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Yes
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"constant": true|false}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            match
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Match on a property of a notification
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Yes
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"match": &lt;match-expr&gt;}
+           </span>
+          </p>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </div>
+     <div class="paragraph">
+      <p>
+       <span class="monospaced">
+        match
+       </span>
+       leaf nodes can have the following variants (
+       <span class="monospaced">
+        &lt;match-expr&gt;
+       </span>
+       ):
+      </p>
+     </div>
+     <div style="overflow-x:auto">
+      <table class="tableblock frame-all grid-all" style="
+width:100%;
+">
+       <col style="width:12%;"/>
+       <col style="width:37%;"/>
+       <col style="width:50%;"/>
+       <thead>
+        <tr>
+         <th class="tableblock halign-left valign-top">
+          Match Type
+         </th>
+         <th class="tableblock halign-left valign-top">
+          Description
+         </th>
+         <th class="tableblock halign-left valign-top">
+          Example
+         </th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            calendar
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Check if the notification’s timestamp is within a configured time range
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"type": "calendar", "schedule": "mon..fri 9-17"}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            field
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Check a notification’s fields against a regex or a list of permitted values
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"type": "field", "field": "job-id", "values": ["a", "b"]}
+           </span>
+           or
+           <span class="monospaced">
+            {"type": "field", "field": "hostname", "regex": "^pve[0-9]+$"}
+           </span>
+          </p>
+         </td>
+        </tr>
+        <tr>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            severity
+           </span>
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           Check a notification’s severity against a list of permitted values
+          </p>
+         </td>
+         <td class="tableblock halign-left valign-top">
+          <p class="tableblock">
+           <span class="monospaced">
+            {"type": "severity", "severities": ["info", "notice"]}
+           </span>
+          </p>
+         </td>
+        </tr>
+       </tbody>
+      </table>
+     </div>
+     <div class="paragraph">
+      <p>
+       A pretty-printed, full example of a non-trivial expression is shown below. It
+encodes an expression matching on backup jobs (
+       <span class="monospaced">
+        vzdump
+       </span>
+       ), but only within a
+given time range (
+       <span class="monospaced">
+        mon..fri 09:00-17:00
+       </span>
+       ) or if it has a severity of
+       <span class="monospaced">
+        warning
+       </span>
+       or
+       <span class="monospaced">
+        error
+       </span>
+       . In the API and configuration file, the JSON is expected to be
+stored as a single line, as the value of the
+       <span class="monospaced">
+        expression
+       </span>
+       option; the line
+breaks and indentation are only for demonstration purposes.
+      </p>
      </div>
      <div class="listingblock">
       <div class="content monospaced">
-       <pre>matcher: backup-failures
-        match-field exact:type=vzdump
-        match-severity error
-        target backup-admins
-        comment Send notifications about backup failures to one group of admins
-
-matcher: cluster-failures
-        match-field exact:type=replication,fencing
-        target cluster-admins
-        comment Send cluster-related notifications to other group of admins</pre>
+       <pre>{
+  "all-of": [
+    {
+      "any-of": [
+        {
+          "match": {
+            "type": "calendar",
+            "schedule": "mon..fri 09:00-17:00"
+          }
+        },
+        {
+          "match": {
+            "type": "severity",
+            "severities": [
+              "warning",
+              "error"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "match": {
+        "type": "field",
+        "field": "type",
+        "values": [
+          "vzdump"
+        ]
+      }
+    }
+  ]
+}</pre>
       </div>
      </div>
     </div>
@@ -96214,9 +97569,9 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
      </table>
     </div>
     <div class="sect3">
-     <h4 id="_examples_13">
+     <h4 id="_examples_12">
       19.3.1. EXAMPLES
-      <a class="headerlink" href="#_examples_13" title="Permalink to this heading">
+      <a class="headerlink" href="#_examples_12" title="Permalink to this heading">
       </a>
      </h4>
      <div class="paragraph">
@@ -98296,6 +99651,19 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dd>
       <dt class="hdlist1">
        <span class="monospaced">
+        --on-volume-remove
+       </span>
+       <span class="monospaced">
+        [discard=&lt;1|0&gt;]
+       </span>
+      </dt>
+      <dd>
+       <p>
+        Optional actions when removing LVs.
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
         --options
        </span>
        <span class="monospaced">
@@ -98461,12 +99829,12 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --saferemove_throughput
        </span>
        <span class="monospaced">
-        &lt;string&gt;
+        -?\d+[kmgKMG]?
        </span>
       </dt>
       <dd>
        <p>
-        Wipe throughput (cstream -t parameter value).
+        Wipe throughput in bytes per second (optional suffix: k, m, or g).
        </p>
       </dd>
       <dt class="hdlist1">
@@ -100585,6 +101953,19 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
       </dd>
       <dt class="hdlist1">
        <span class="monospaced">
+        --on-volume-remove
+       </span>
+       <span class="monospaced">
+        [discard=&lt;1|0&gt;]
+       </span>
+      </dt>
+      <dd>
+       <p>
+        Optional actions when removing LVs.
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
         --options
        </span>
        <span class="monospaced">
@@ -100724,12 +102105,12 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --saferemove_throughput
        </span>
        <span class="monospaced">
-        &lt;string&gt;
+        -?\d+[kmgKMG]?
        </span>
       </dt>
       <dd>
        <p>
-        Wipe throughput (cstream -t parameter value).
+        Wipe throughput in bytes per second (optional suffix: k, m, or g).
        </p>
       </dd>
       <dt class="hdlist1">
@@ -101311,7 +102692,8 @@ proxmox-offline-mirror-helper instead.
     </div>
     <div class="paragraph">
      <p>
-      Show cephx key ciphers and aes256k migration prerequisites.
+      Show current and pending cephx key ciphers and aes256k migration
+prerequisites.
      </p>
     </div>
     <div class="paragraph" id="cli_pveceph_createmgr">
@@ -101915,7 +103297,7 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
        </p>
        <div class="paragraph">
         <p>
-         Depreacted. This setting was deprecated in recent Ceph versions.
+         Deprecated. This setting has been ignored since Ceph Nautilus.
         </p>
        </div>
       </dd>
@@ -102012,7 +103394,7 @@ vr6+wTfK/4tEfzeeMmUKkydPzhg8jJAAREgEg0H6+vrQNC2pFL8ZUVWVrKws8vPzycnJQVXVjH/s
         --version
        </span>
        <span class="monospaced">
-        &lt;squid | tentacle&gt;
+        &lt;squid | tentacle | umbrella&gt;
        </span>
        (
        <em>
@@ -103764,7 +105146,7 @@ new account information triggers a refresh.
       </dt>
       <dd>
        <p>
-        Force renewal even if expiry is more than 30 days away.
+        Force renewal even if the certificate is not yet due for renewal.
        </p>
       </dd>
      </dl>
@@ -108523,7 +109905,7 @@ Microsoft. Must be called while the VM is shut down.
        </span>
        :
        <span class="monospaced">
-        &lt;fsfreeze-freeze | fsfreeze-status | fsfreeze-thaw | fstrim | get-fsinfo | get-host-name | get-memory-block-info | get-memory-blocks | get-osinfo | get-time | get-timezone | get-users | get-vcpus | info | network-get-interfaces | ping | shutdown | suspend-disk | suspend-hybrid | suspend-ram&gt;
+        &lt;fsfreeze-freeze | fsfreeze-status | fsfreeze-thaw | fstrim | get-cpustats | get-disks | get-diskstats | get-fsinfo | get-host-name | get-load | get-memory-block-info | get-memory-blocks | get-osinfo | get-time | get-timezone | get-users | get-vcpus | info | network-get-interfaces | ping | shutdown | suspend-disk | suspend-hybrid | suspend-ram&gt;
        </span>
       </dt>
       <dd>
@@ -114901,7 +116283,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --entrypoint
        </span>
        <span class="monospaced">
-        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+\z)
        </span>
        (
        <em>
@@ -114922,7 +116304,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --env
        </span>
        <span class="monospaced">
-        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*\z)
        </span>
       </dt>
       <dd>
@@ -117341,7 +118723,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --entrypoint
        </span>
        <span class="monospaced">
-        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+\z)
        </span>
        (
        <em>
@@ -117362,7 +118744,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --env
        </span>
        <span class="monospaced">
-        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*\z)
        </span>
       </dt>
       <dd>
@@ -118327,7 +119709,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --entrypoint
        </span>
        <span class="monospaced">
-        (?^:[^\x00-\x08\x0a-\x1F\x7F]+)
+        (?^:[^\x00-\x08\x0a-\x1F\x7F]+\z)
        </span>
        (
        <em>
@@ -118348,7 +119730,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
         --env
        </span>
        <span class="monospaced">
-        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*)
+        (?^:(?:\w+=[^\x00-\x08\x0a-\x1F\x7F]*)(?:\0\w+=[^\x00-\x08\x0a-\x1F\x7F]*)*\z)
        </span>
       </dt>
       <dd>
@@ -119710,6 +121092,21 @@ container.
       Return the version of the cluster join API available on this node.
      </p>
     </div>
+    <div class="paragraph" id="cli_pvecm_ca_rotate">
+     <p>
+      <strong>
+       pvecm ca rotate
+      </strong>
+      <a class="headerlink" href="#cli_pvecm_ca_rotate" title="Permalink to this heading">
+      </a>
+     </p>
+    </div>
+    <div class="paragraph">
+     <p>
+      Replace the cluster CA with a new key and certificate, for example after
+the key got exposed, and issue new node certificates on all online nodes.
+     </p>
+    </div>
     <div class="paragraph" id="cli_pvecm_create">
      <p>
       <strong>
@@ -120378,6 +121775,27 @@ address as link0.
          systemd
         </span>
         calendar events.
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
+        --skip-freeze-fs
+       </span>
+       <span class="monospaced">
+        &lt;boolean&gt;
+       </span>
+       (
+       <em>
+        default =
+       </em>
+       <span class="monospaced">
+        0
+       </span>
+       )
+      </dt>
+      <dd>
+       <p>
+        Whether to skip freezing and thawing the guest’s filesystems for consistency during replication.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -121199,6 +122617,27 @@ It will accept the job state as ja JSON obj.
          systemd
         </span>
         calendar events.
+       </p>
+      </dd>
+      <dt class="hdlist1">
+       <span class="monospaced">
+        --skip-freeze-fs
+       </span>
+       <span class="monospaced">
+        &lt;boolean&gt;
+       </span>
+       (
+       <em>
+        default =
+       </em>
+       <span class="monospaced">
+        0
+       </span>
+       )
+      </dt>
+      <dd>
+       <p>
+        Whether to skip freezing and thawing the guest’s filesystems for consistency during replication.
        </p>
       </dd>
       <dt class="hdlist1">
@@ -124859,7 +126298,7 @@ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
        </span>
        :
        <span class="monospaced">
-        (?^:^(?^:[^\s:/]+)\@(?^:[A-Za-z][A-Za-z0-9\.\-_]+)(?:!(?^:[A-Za-z][A-Za-z0-9\.\-_]+))?$)
+        (?^:^(?^:[^\s:/]+)\@(?^:[A-Za-z][A-Za-z0-9\.\-_]+)(?:!(?^:[A-Za-z][A-Za-z0-9\.\-_]+))?\z)
        </span>
       </dt>
       <dd>
@@ -140288,9 +141727,9 @@ provided the MMC is eligible for relicensing.
 </div>
 <div id="footer">
  <div id="footer-text">
-  Version 9.2.13
+  Version 9.2.14
   <br/>
   Last updated
- Thu Sep 24 19:51:15 CEST 2026
+ Fri Nov  6 21:22:22 CET 2026
  </div>
 </div>
