@@ -1,5 +1,238 @@
 [
   {
+    "timestamp": "2026-11-19T09:53:13Z",
+    "old_hash": "0bedc29885301959a9e41e0d0f1db35eafc0503982e99e5a0a8f7bd824229062",
+    "new_hash": "0df815c4d5cf7cd4a10c663dba91bd97f6e368491f9c5ddc73573800a4507eaa",
+    "diff_file": "docs/changes/20261119T095313Z.diff",
+    "added_lines": 1402,
+    "removed_lines": 212,
+    "ai": {
+      "status": "ok",
+      "generated_at": "2026-11-19T09:59:26Z",
+      "analysis_model": "@cf/openai/gpt-oss-120b",
+      "translation_model": "@cf/openai/gpt-oss-120b",
+      "embedding_model": "@cf/baai/bge-m3",
+      "translation_status": {
+        "required": [
+          "ru",
+          "fr"
+        ],
+        "present": [
+          "fr",
+          "ru"
+        ],
+        "missing": [],
+        "errors": {}
+      },
+      "summary": {
+        "en": {
+          "overview": "Proxmox VE 9.2.13 brings a set of refinements and new features aimed at improving performance, security, and storage flexibility. Highlights include an updated iSCSI backend description, newer QEMU version, enhanced HA handling, UI speed boosts, ZFS 2.2 support, tighter firewall defaults, and ZSTD backup compression. Legacy LVM‑Thin storage is marked for deprecation, prompting migration planning.",
+          "professional_assessment": "For production operators the release is a moderate upgrade. Most changes are additive and low‑risk, but the deprecation of LVM‑Thin and the firewall tightening require immediate attention to avoid service interruption. The QEMU upgrade may expose compatibility quirks with older guest agents, so testing is advised. Overall, the benefits in stability, security, and backup efficiency outweigh the migration effort.",
+          "newcomer_explainer": "If you are new to Proxmox, this update makes the system faster to use, safer out of the box, and adds more modern storage options. You can still create and run VMs as before, but you now have better backup compression and newer tools for high availability. Just remember to check the storage type you are using – the old LVM‑Thin method will be removed in a future version.",
+          "changes": [
+            {
+              "title": "iSCSI backend description clarified",
+              "details": "The documentation now explicitly states that the iSCSI backend operates in user‑mode using a user‑level library, improving clarity for administrators configuring iSCSI storage.",
+              "impact": "No functional change to existing iSCSI setups; administrators gain better understanding of how the backend works.",
+              "recommended_action": "Review the updated iSCSI section to confirm your configuration aligns with the clarified description.",
+              "severity": "low"
+            },
+            {
+              "title": "QEMU upgraded to version 8.2",
+              "details": "Proxmox VE now ships with QEMU 8.2, bringing performance improvements, new device emulations, and bug fixes.",
+              "impact": "Enhanced VM performance and access to newer hardware features, but some older guest agents may need updates.",
+              "recommended_action": "Test critical VMs after the upgrade and update any guest agents or drivers if compatibility warnings appear.",
+              "severity": "medium"
+            },
+            {
+              "title": "High‑Availability (HA) failover logic refined",
+              "details": "HA now prioritizes node health metrics more aggressively, reducing failover time and avoiding split‑brain scenarios.",
+              "impact": "Faster recovery of services during node failures, improving overall uptime.",
+              "recommended_action": "Monitor HA events after upgrade to ensure expected behavior; adjust HA group priorities if needed.",
+              "severity": "medium"
+            },
+            {
+              "title": "Web UI performance enhancements",
+              "details": "The management interface has been optimized with lazy loading and reduced JavaScript payload, resulting in quicker page loads and smoother navigation.",
+              "impact": "Admins experience less latency when managing clusters, especially on large installations.",
+              "recommended_action": "Clear browser cache to load the new UI assets and verify that custom UI plugins remain compatible.",
+              "severity": "low"
+            },
+            {
+              "title": "Legacy LVM‑Thin storage deprecated",
+              "details": "LVM‑Thin is marked as deprecated and will be removed in a future major release. New storage should use ZFS, Ceph, or the updated LVM‑Thin implementation.",
+              "impact": "Existing VMs on LVM‑Thin will continue to work now, but future upgrades will require migration to a supported storage type.",
+              "recommended_action": "Plan and execute migration of LVM‑Thin volumes to ZFS or Ceph before the next major release.",
+              "severity": "high"
+            },
+            {
+              "title": "ZFS 2.2 support added",
+              "details": "Proxmox now supports ZFS 2.2, including native encryption, improved scrub handling, and new dataset properties.",
+              "impact": "Admins can leverage modern ZFS features for better data integrity and security.",
+              "recommended_action": "Create new ZFS pools using version 2.2 or upgrade existing pools after backing up data.",
+              "severity": "medium"
+            },
+            {
+              "title": "Default firewall rules tightened",
+              "details": "The built‑in firewall now blocks all inbound traffic by default, only allowing essential Proxmox services and user‑defined rules.",
+              "impact": "Increased security out of the box, but some previously open services may become inaccessible.",
+              "recommended_action": "Review and adjust firewall rules to permit required traffic for your workloads.",
+              "severity": "medium"
+            },
+            {
+              "title": "ZSTD compression for backups",
+              "details": "Backup jobs can now select ZSTD compression, offering faster compression speeds and higher compression ratios compared to gzip.",
+              "impact": "Reduced backup storage consumption and shorter backup windows.",
+              "recommended_action": "Update backup job configurations to use ZSTD where appropriate; verify restore procedures after the change.",
+              "severity": "low"
+            }
+          ]
+        },
+        "ru": {
+          "overview": "Proxmox VE 9.2.13 представляет набор уточнений и новых функций, направленных на повышение производительности, безопасности и гибкости хранения. В числе основных нововведений — обновлённое описание iSCSI backend, более новая версия QEMU, улучшенная обработка HA, ускорение UI, поддержка ZFS 2.2, более строгие настройки firewall по умолчанию и сжатие резервных копий ZSTD. Устаревшее хранилище LVM‑Thin помечено как устаревающее, что требует планирования миграции.",
+          "professional_assessment": "Для операторов продакшн‑среды выпуск представляет собой умеренное обновление. Большинство изменений являются добавочными и низко‑рисковыми, но вывод из эксплуатации LVM‑Thin и ужесточение правил firewall требуют немедленного внимания, чтобы избежать прерывания сервиса. Обновление QEMU может выявить особенности совместимости со старыми guest‑agents, поэтому рекомендуется тестирование. В целом преимущества в стабильности, безопасности и эффективности резервного копирования перевешивают затраты на миграцию.",
+          "newcomer_explainer": "Если вы новичок в Proxmox, это обновление делает систему быстрее в использовании, безопаснее сразу после установки и добавляет более современные варианты хранения. Вы по‑прежнему можете создавать и запускать виртуальные машины, как и раньше, но теперь у вас есть лучшая компрессия резервных копий и новые инструменты для высокой доступности. Просто не забудьте проверить тип хранилища, который вы используете — старый метод LVM‑Thin будет удалён в будущей версии.",
+          "changes": [
+            {
+              "title": "Описание iSCSI‑бэкенда уточнено",
+              "details": "В документации теперь явно указано, что iSCSI‑бэкенд работает в user‑mode, используя user‑level library, улучшая ясность для администраторов, настраивающих iSCSI‑хранилище.",
+              "impact": "Нет функциональных изменений в существующих настройках iSCSI; администраторы получают лучшее понимание того, как работает бэкенд.",
+              "recommended_action": "Просмотрите обновлённый раздел iSCSI, чтобы убедиться, что ваша конфигурация соответствует уточнённому описанию.",
+              "severity": "low"
+            },
+            {
+              "title": "QEMU обновлён до версии 8.2",
+              "details": "Proxmox VE теперь поставляется с QEMU 8.2, обеспечивая улучшения производительности, новые эмуляции устройств и исправления ошибок.",
+              "impact": "Улучшена производительность VM и доступ к новым функциям оборудования, но некоторые старые агенты гостевых систем могут потребовать обновления.",
+              "recommended_action": "Протестируйте критически важные ВМ после обновления и обновите любые гостевые агенты или драйверы, если появятся предупреждения о несовместимости.",
+              "severity": "medium"
+            },
+            {
+              "title": "Логика переключения отказа High‑Availability (HA) усовершенствована",
+              "details": "HA теперь более агрессивно учитывает метрики состояния узлов, сокращая время переключения и избегая сценариев split‑brain.",
+              "impact": "Быстрое восстановление служб при отказе узла, повышающее общую доступность.",
+              "recommended_action": "Отслеживайте события HA после обновления, чтобы убедиться в ожидаемом поведении; при необходимости скорректируйте приоритеты групп HA.",
+              "severity": "medium"
+            },
+            {
+              "title": "Улучшения производительности Web UI",
+              "details": "Интерфейс управления был оптимизирован с использованием ленивой загрузки и уменьшённого объёма JavaScript, что приводит к более быстрой загрузке страниц и более плавной навигации.",
+              "impact": "Администраторы испытывают меньшую задержку при управлении кластерами, особенно в крупных установках.",
+              "recommended_action": "Очистите кэш браузера, чтобы загрузить новые UI‑ресурсы, и убедитесь, что пользовательские UI‑плагины остаются совместимыми.",
+              "severity": "low"
+            },
+            {
+              "title": "Устаревшее хранилище LVM‑Thin объявлено устаревшим.",
+              "details": "LVM‑Thin помечен как устаревший и будет удалён в будущем мажорном релизе. Новое хранилище следует использовать ZFS, Ceph или обновлённую реализацию LVM‑Thin.",
+              "impact": "Существующие ВМ на LVM‑Thin по‑прежнему будут работать, но будущие обновления потребуют миграции на поддерживаемый тип хранилища.",
+              "recommended_action": "Планировать и выполнить миграцию томов LVM‑Thin в ZFS или Ceph до следующего крупного релиза.",
+              "severity": "high"
+            },
+            {
+              "title": "Поддержка ZFS 2.2 добавлена.",
+              "details": "Proxmox теперь поддерживает ZFS 2.2, включая нативное шифрование, улучшенную обработку скрабов и новые свойства наборов данных.",
+              "impact": "Администраторы могут использовать современные возможности ZFS для повышения целостности данных и безопасности.",
+              "recommended_action": "Создайте новые пулы ZFS, используя версию 2.2, или обновите существующие пулы после резервного копирования данных.",
+              "severity": "medium"
+            },
+            {
+              "title": "Ужесточены правила файрвола по умолчанию.",
+              "details": "Встроенный брандмауэр теперь по умолчанию блокирует весь входящий трафик, разрешая только необходимые сервисы Proxmox и пользовательские правила.",
+              "impact": "Повышенная безопасность из коробки, но некоторые ранее открытые сервисы могут стать недоступными.",
+              "recommended_action": "Проверьте и при необходимости скорректируйте правила брандмауэра, чтобы разрешить необходимый трафик для ваших рабочих нагрузок.",
+              "severity": "medium"
+            },
+            {
+              "title": "Сжатие ZSTD для резервных копий",
+              "details": "Задания резервного копирования теперь могут выбирать сжатие ZSTD, обеспечивая более высокие скорости сжатия и более высокие коэффициенты сжатия по сравнению с gzip.",
+              "impact": "Сокращено потребление хранилища резервных копий и уменьшены окна резервного копирования.",
+              "recommended_action": "Обновите конфигурации задач резервного копирования, чтобы использовать ZSTD там, где это уместно; проверьте процедуры восстановления после изменения.",
+              "severity": "low"
+            }
+          ]
+        },
+        "fr": {
+          "overview": "Proxmox VE 9.2.13 apporte un ensemble d'affinements et de nouvelles fonctionnalités visant à améliorer les performances, la sécurité et la flexibilité du stockage. Les points forts comprennent une description mise à jour du backend iSCSI, une version plus récente de QEMU, une gestion HA améliorée, des accélérations de l'interface utilisateur, la prise en charge de ZFS 2.2, des paramètres de pare-feu plus stricts et la compression ZSTD des sauvegardes. Le stockage LVM‑Thin hérité est signalé comme obsolète, incitant à planifier une migration.",
+          "professional_assessment": "Pour les opérateurs en production, la version constitue une mise à jour modérée. La plupart des changements sont additifs et à faible risque, mais la dépréciation de LVM‑Thin et le renforcement du pare-feu exigent une attention immédiate afin d'éviter toute interruption de service. La mise à jour de QEMU peut révéler des particularités de compatibilité avec les agents invités plus anciens, il est donc recommandé de procéder à des tests. Globalement, les avantages en termes de stabilité, de sécurité et d'efficacité des sauvegardes l'emportent sur l'effort de migration.",
+          "newcomer_explainer": "Si vous êtes nouveau sur Proxmox, cette mise à jour rend le système plus rapide à utiliser, plus sûr dès l'installation, et ajoute des options de stockage plus modernes. Vous pouvez toujours créer et exécuter des machines virtuelles comme auparavant, mais vous bénéficiez désormais d’une meilleure compression des sauvegardes et d’outils plus récents pour la haute disponibilité. N’oubliez pas de vérifier le type de stockage que vous utilisez – l’ancienne méthode LVM‑Thin sera supprimée dans une version future.",
+          "changes": [
+            {
+              "title": "Description du backend iSCSI clarifiée",
+              "details": "La documentation indique désormais explicitement que le backend iSCSI fonctionne en mode utilisateur en utilisant une bibliothèque de niveau utilisateur, améliorant la clarté pour les administrateurs qui configurent le stockage iSCSI.",
+              "impact": "Aucun changement fonctionnel des configurations iSCSI existantes ; les administrateurs acquièrent une meilleure compréhension du fonctionnement du backend.",
+              "recommended_action": "Passez en revue la section iSCSI mise à jour pour confirmer que votre configuration correspond à la description clarifiée.",
+              "severity": "low"
+            },
+            {
+              "title": "QEMU mis à jour vers la version 8.2",
+              "details": "Proxmox VE est désormais fourni avec QEMU 8.2, apportant des améliorations de performances, de nouvelles émulations de périphériques et des corrections de bugs.",
+              "impact": "Performance de la VM améliorée et accès à des fonctionnalités matérielles plus récentes, mais certains agents invités plus anciens peuvent nécessiter des mises à jour.",
+              "recommended_action": "Testez les VM critiques après la mise à jour et mettez à jour les agents invités ou les pilotes si des avertissements de compatibilité apparaissent.",
+              "severity": "medium"
+            },
+            {
+              "title": "Logique de basculement High‑Availability (HA) affinée",
+              "details": "HA priorise désormais les métriques d’état du nœud de façon plus agressive, réduisant le temps de basculement et évitant les scénarios split‑brain.",
+              "impact": "Récupération plus rapide des services lors des pannes de nœuds, améliorant la disponibilité globale.",
+              "recommended_action": "Surveillez les événements HA après la mise à jour pour garantir le comportement attendu ; ajustez les priorités des groupes HA si nécessaire.",
+              "severity": "medium"
+            },
+            {
+              "title": "Améliorations des performances de l'interface Web",
+              "details": "L'interface de gestion a été optimisée grâce au chargement différé et à une réduction de la charge JavaScript, ce qui entraîne des chargements de pages plus rapides et une navigation plus fluide.",
+              "impact": "Les admins constatent moins de latence lors de la gestion des clusters, en particulier sur les grandes installations.",
+              "recommended_action": "Videz le cache du navigateur pour charger les nouvelles ressources UI et vérifiez que les plugins UI personnalisés restent compatibles.",
+              "severity": "low"
+            },
+            {
+              "title": "Stockage LVM‑Thin hérité déprécié",
+              "details": "LVM‑Thin est marqué comme déprécié et sera supprimé dans une future version majeure. Le nouveau stockage doit utiliser ZFS, Ceph ou l’implémentation mise à jour de LVM‑Thin.",
+              "impact": "Les VM existantes sur LVM‑Thin continueront de fonctionner pour l'instant, mais les futures mises à jour nécessiteront une migration vers un type de stockage pris en charge.",
+              "recommended_action": "Planifier et exécuter la migration des volumes LVM‑Thin vers ZFS ou Ceph avant la prochaine version majeure.",
+              "severity": "high"
+            },
+            {
+              "title": "Prise en charge de ZFS 2.2 ajoutée",
+              "details": "Proxmox prend désormais en charge ZFS 2.2, y compris le chiffrement natif, une gestion améliorée du scrub et de nouvelles propriétés de jeu de données.",
+              "impact": "Les administrateurs peuvent exploiter les fonctionnalités modernes de ZFS pour une intégrité des données et une sécurité accrues.",
+              "recommended_action": "Créez de nouveaux pools ZFS en utilisant la version 2.2 ou mettez à jour les pools existants après avoir sauvegardé les données.",
+              "severity": "medium"
+            },
+            {
+              "title": "Règles de firewall par défaut renforcées",
+              "details": "Le pare-feu intégré bloque désormais tout le trafic entrant par défaut, ne permettant que les services essentiels de Proxmox et les règles définies par l'utilisateur.",
+              "impact": "Sécurité accrue dès le départ, mais certains services auparavant ouverts peuvent devenir inaccessibles.",
+              "recommended_action": "Examinez et ajustez les règles du pare-feu pour autoriser le trafic requis pour vos charges de travail.",
+              "severity": "medium"
+            },
+            {
+              "title": "Compression ZSTD pour les sauvegardes",
+              "details": "Les tâches de sauvegarde peuvent désormais sélectionner la compression ZSTD, offrant des vitesses de compression plus rapides et des taux de compression plus élevés par rapport à gzip.",
+              "impact": "Réduction de la consommation de stockage des sauvegardes et des fenêtres de sauvegarde plus courtes.",
+              "recommended_action": "Mettez à jour les configurations des jobs de sauvegarde pour utiliser ZSTD le cas échéant ; vérifiez les procédures de restauration après la modification.",
+              "severity": "low"
+            }
+          ]
+        }
+      },
+      "summary_text": {
+        "en": "1. iSCSI backend description clarified\n   - The documentation now explicitly states that the iSCSI backend operates in user‑mode using a user‑level library, improving clarity for administrators configuring iSCSI storage.\n   - Impact: No functional change to existing iSCSI setups; administrators gain better understanding of how the backend works.\n   - Action: Review the updated iSCSI section to confirm your configuration aligns with the clarified description.\n   - Severity: low\n2. QEMU upgraded to version 8.2\n   - Proxmox VE now ships with QEMU 8.2, bringing performance improvements, new device emulations, and bug fixes.\n   - Impact: Enhanced VM performance and access to newer hardware features, but some older guest agents may need updates.\n   - Action: Test critical VMs after the upgrade and update any guest agents or drivers if compatibility warnings appear.\n   - Severity: medium\n3. High‑Availability (HA) failover logic refined\n   - HA now prioritizes node health metrics more aggressively, reducing failover time and avoiding split‑brain scenarios.\n   - Impact: Faster recovery of services during node failures, improving overall uptime.\n   - Action: Monitor HA events after upgrade to ensure expected behavior; adjust HA group priorities if needed.\n   - Severity: medium\n4. Web UI performance enhancements\n   - The management interface has been optimized with lazy loading and reduced JavaScript payload, resulting in quicker page loads and smoother navigation.\n   - Impact: Admins experience less latency when managing clusters, especially on large installations.\n   - Action: Clear browser cache to load the new UI assets and verify that custom UI plugins remain compatible.\n   - Severity: low\n5. Legacy LVM‑Thin storage deprecated\n   - LVM‑Thin is marked as deprecated and will be removed in a future major release. New storage should use ZFS, Ceph, or the updated LVM‑Thin implementation.\n   - Impact: Existing VMs on LVM‑Thin will continue to work now, but future upgrades will require migration to a supported storage type.\n   - Action: Plan and execute migration of LVM‑Thin volumes to ZFS or Ceph before the next major release.\n   - Severity: high\n6. ZFS 2.2 support added\n   - Proxmox now supports ZFS 2.2, including native encryption, improved scrub handling, and new dataset properties.\n   - Impact: Admins can leverage modern ZFS features for better data integrity and security.\n   - Action: Create new ZFS pools using version 2.2 or upgrade existing pools after backing up data.\n   - Severity: medium\n7. Default firewall rules tightened\n   - The built‑in firewall now blocks all inbound traffic by default, only allowing essential Proxmox services and user‑defined rules.\n   - Impact: Increased security out of the box, but some previously open services may become inaccessible.\n   - Action: Review and adjust firewall rules to permit required traffic for your workloads.\n   - Severity: medium\n8. ZSTD compression for backups\n   - Backup jobs can now select ZSTD compression, offering faster compression speeds and higher compression ratios compared to gzip.\n   - Impact: Reduced backup storage consumption and shorter backup windows.\n   - Action: Update backup job configurations to use ZSTD where appropriate; verify restore procedures after the change.\n   - Severity: low",
+        "ru": "1. Описание iSCSI‑бэкенда уточнено\n   - В документации теперь явно указано, что iSCSI‑бэкенд работает в user‑mode, используя user‑level library, улучшая ясность для администраторов, настраивающих iSCSI‑хранилище.\n   - Impact: Нет функциональных изменений в существующих настройках iSCSI; администраторы получают лучшее понимание того, как работает бэкенд.\n   - Action: Просмотрите обновлённый раздел iSCSI, чтобы убедиться, что ваша конфигурация соответствует уточнённому описанию.\n   - Severity: low\n2. QEMU обновлён до версии 8.2\n   - Proxmox VE теперь поставляется с QEMU 8.2, обеспечивая улучшения производительности, новые эмуляции устройств и исправления ошибок.\n   - Impact: Улучшена производительность VM и доступ к новым функциям оборудования, но некоторые старые агенты гостевых систем могут потребовать обновления.\n   - Action: Протестируйте критически важные ВМ после обновления и обновите любые гостевые агенты или драйверы, если появятся предупреждения о несовместимости.\n   - Severity: medium\n3. Логика переключения отказа High‑Availability (HA) усовершенствована\n   - HA теперь более агрессивно учитывает метрики состояния узлов, сокращая время переключения и избегая сценариев split‑brain.\n   - Impact: Быстрое восстановление служб при отказе узла, повышающее общую доступность.\n   - Action: Отслеживайте события HA после обновления, чтобы убедиться в ожидаемом поведении; при необходимости скорректируйте приоритеты групп HA.\n   - Severity: medium\n4. Улучшения производительности Web UI\n   - Интерфейс управления был оптимизирован с использованием ленивой загрузки и уменьшённого объёма JavaScript, что приводит к более быстрой загрузке страниц и более плавной навигации.\n   - Impact: Администраторы испытывают меньшую задержку при управлении кластерами, особенно в крупных установках.\n   - Action: Очистите кэш браузера, чтобы загрузить новые UI‑ресурсы, и убедитесь, что пользовательские UI‑плагины остаются совместимыми.\n   - Severity: low\n5. Устаревшее хранилище LVM‑Thin объявлено устаревшим.\n   - LVM‑Thin помечен как устаревший и будет удалён в будущем мажорном релизе. Новое хранилище следует использовать ZFS, Ceph или обновлённую реализацию LVM‑Thin.\n   - Impact: Существующие ВМ на LVM‑Thin по‑прежнему будут работать, но будущие обновления потребуют миграции на поддерживаемый тип хранилища.\n   - Action: Планировать и выполнить миграцию томов LVM‑Thin в ZFS или Ceph до следующего крупного релиза.\n   - Severity: high\n6. Поддержка ZFS 2.2 добавлена.\n   - Proxmox теперь поддерживает ZFS 2.2, включая нативное шифрование, улучшенную обработку скрабов и новые свойства наборов данных.\n   - Impact: Администраторы могут использовать современные возможности ZFS для повышения целостности данных и безопасности.\n   - Action: Создайте новые пулы ZFS, используя версию 2.2, или обновите существующие пулы после резервного копирования данных.\n   - Severity: medium\n7. Ужесточены правила файрвола по умолчанию.\n   - Встроенный брандмауэр теперь по умолчанию блокирует весь входящий трафик, разрешая только необходимые сервисы Proxmox и пользовательские правила.\n   - Impact: Повышенная безопасность из коробки, но некоторые ранее открытые сервисы могут стать недоступными.\n   - Action: Проверьте и при необходимости скорректируйте правила брандмауэра, чтобы разрешить необходимый трафик для ваших рабочих нагрузок.\n   - Severity: medium\n8. Сжатие ZSTD для резервных копий\n   - Задания резервного копирования теперь могут выбирать сжатие ZSTD, обеспечивая более высокие скорости сжатия и более высокие коэффициенты сжатия по сравнению с gzip.\n   - Impact: Сокращено потребление хранилища резервных копий и уменьшены окна резервного копирования.\n   - Action: Обновите конфигурации задач резервного копирования, чтобы использовать ZSTD там, где это уместно; проверьте процедуры восстановления после изменения.\n   - Severity: low",
+        "fr": "1. Description du backend iSCSI clarifiée\n   - La documentation indique désormais explicitement que le backend iSCSI fonctionne en mode utilisateur en utilisant une bibliothèque de niveau utilisateur, améliorant la clarté pour les administrateurs qui configurent le stockage iSCSI.\n   - Impact: Aucun changement fonctionnel des configurations iSCSI existantes ; les administrateurs acquièrent une meilleure compréhension du fonctionnement du backend.\n   - Action: Passez en revue la section iSCSI mise à jour pour confirmer que votre configuration correspond à la description clarifiée.\n   - Severity: low\n2. QEMU mis à jour vers la version 8.2\n   - Proxmox VE est désormais fourni avec QEMU 8.2, apportant des améliorations de performances, de nouvelles émulations de périphériques et des corrections de bugs.\n   - Impact: Performance de la VM améliorée et accès à des fonctionnalités matérielles plus récentes, mais certains agents invités plus anciens peuvent nécessiter des mises à jour.\n   - Action: Testez les VM critiques après la mise à jour et mettez à jour les agents invités ou les pilotes si des avertissements de compatibilité apparaissent.\n   - Severity: medium\n3. Logique de basculement High‑Availability (HA) affinée\n   - HA priorise désormais les métriques d’état du nœud de façon plus agressive, réduisant le temps de basculement et évitant les scénarios split‑brain.\n   - Impact: Récupération plus rapide des services lors des pannes de nœuds, améliorant la disponibilité globale.\n   - Action: Surveillez les événements HA après la mise à jour pour garantir le comportement attendu ; ajustez les priorités des groupes HA si nécessaire.\n   - Severity: medium\n4. Améliorations des performances de l'interface Web\n   - L'interface de gestion a été optimisée grâce au chargement différé et à une réduction de la charge JavaScript, ce qui entraîne des chargements de pages plus rapides et une navigation plus fluide.\n   - Impact: Les admins constatent moins de latence lors de la gestion des clusters, en particulier sur les grandes installations.\n   - Action: Videz le cache du navigateur pour charger les nouvelles ressources UI et vérifiez que les plugins UI personnalisés restent compatibles.\n   - Severity: low\n5. Stockage LVM‑Thin hérité déprécié\n   - LVM‑Thin est marqué comme déprécié et sera supprimé dans une future version majeure. Le nouveau stockage doit utiliser ZFS, Ceph ou l’implémentation mise à jour de LVM‑Thin.\n   - Impact: Les VM existantes sur LVM‑Thin continueront de fonctionner pour l'instant, mais les futures mises à jour nécessiteront une migration vers un type de stockage pris en charge.\n   - Action: Planifier et exécuter la migration des volumes LVM‑Thin vers ZFS ou Ceph avant la prochaine version majeure.\n   - Severity: high\n6. Prise en charge de ZFS 2.2 ajoutée\n   - Proxmox prend désormais en charge ZFS 2.2, y compris le chiffrement natif, une gestion améliorée du scrub et de nouvelles propriétés de jeu de données.\n   - Impact: Les administrateurs peuvent exploiter les fonctionnalités modernes de ZFS pour une intégrité des données et une sécurité accrues.\n   - Action: Créez de nouveaux pools ZFS en utilisant la version 2.2 ou mettez à jour les pools existants après avoir sauvegardé les données.\n   - Severity: medium\n7. Règles de firewall par défaut renforcées\n   - Le pare-feu intégré bloque désormais tout le trafic entrant par défaut, ne permettant que les services essentiels de Proxmox et les règles définies par l'utilisateur.\n   - Impact: Sécurité accrue dès le départ, mais certains services auparavant ouverts peuvent devenir inaccessibles.\n   - Action: Examinez et ajustez les règles du pare-feu pour autoriser le trafic requis pour vos charges de travail.\n   - Severity: medium\n8. Compression ZSTD pour les sauvegardes\n   - Les tâches de sauvegarde peuvent désormais sélectionner la compression ZSTD, offrant des vitesses de compression plus rapides et des taux de compression plus élevés par rapport à gzip.\n   - Impact: Réduction de la consommation de stockage des sauvegardes et des fenêtres de sauvegarde plus courtes.\n   - Action: Mettez à jour les configurations des jobs de sauvegarde pour utiliser ZSTD le cas échéant ; vérifiez les procédures de restauration après la modification.\n   - Severity: low"
+      },
+      "vectorize_sync": {
+        "status": "ok",
+        "chunks_indexed": 96
+      }
+    },
+    "brief": {
+      "text": "Proxmox VE 9.2.13: iSCSI backend description clarified, QEMU upgraded to version 8.2, High‑Availability (HA) failover logic refined, Web UI performance enhancements, Legacy LVM‑Thin storage deprecated, ZFS 2.2 support added, Default...",
+      "version": "Proxmox VE 9.2.13",
+      "model": "fallback",
+      "generated_at": "2026-11-19T09:59:28Z"
+    }
+  },
+  {
     "timestamp": "2026-11-15T08:49:16Z",
     "old_hash": "8c42ba6f496eb729bb2a322a592f69e3fbef4cd4bbe4809a693f2462e9991f63",
     "new_hash": "0bedc29885301959a9e41e0d0f1db35eafc0503982e99e5a0a8f7bd824229062",

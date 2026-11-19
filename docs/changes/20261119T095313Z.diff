@@ -1,0 +1,2608 @@
+--- previous
++++ current
+@@ -346,10 +346,10 @@
+  </span>
+  <br/>
+  <span id="revnumber">
+-  version 9.2.14,
++  version 9.2.15,
+  </span>
+  <span id="revdate">
+-  Fri Nov  6 21:22:22 CET 2026
++  Wed Nov 18 14:41:06 CET 2026
+  </span>
+  <div id="toc">
+   <a href="index.html" style="font-size: 0.8em;">
+@@ -4679,9 +4679,21 @@
+          <span class="monospaced">
+           nic1
+          </span>
+-         , and so on, but you can enter other names. To pin the names after
+-the installation, for example for a replacement interface with a different MAC
+-address, see
++         , and so on, but you can enter other names. Names of the form
++         <span class="monospaced">
++          bond&lt;N&gt;
++         </span>
++         ,
++         <span class="monospaced">
++          vlan&lt;N&gt;
++         </span>
++         and
++         <span class="monospaced">
++          vmbr&lt;N&gt;
++         </span>
++         are reserved for bonds, VLANs and bridges. To
++pin the names after the installation, for example for a replacement interface
++with a different MAC address, see
+          <a href="#network_override_device_names">
+           Overriding Network Device Names
+          </a>
+@@ -4745,11 +4757,17 @@
+           active-backup
+          </em>
+          mode, where it is
+-preferred as the active interface. See
++preferred as the active interface. Enter the primary interface by its name as
++listed under
++         <span class="monospaced">
++          Bond Interfaces
++         </span>
++         . See
+          <a href="#sysadmin_network_bond">
+           Linux Bond
+          </a>
+-         for a description of the modes.
++         for a
++description of the modes.
+         </p>
+         <div class="admonitionblock">
+          <table>
+@@ -14093,7 +14111,9 @@
+      </div>
+      <div class="paragraph">
+       <p>
+-       You can enable compression with:
++       When creating a pool on Proxmox VE using the Web UI or the ISO installer,
++compression is enabled by default. To enable it manually or to change the
++compression algorithm, you can use the following:
+       </p>
+      </div>
+      <div class="listingblock">
+@@ -20530,7 +20550,8 @@
+          <strong>
+           System:
+          </strong>
+-         configure network, DNS and time settings, and access the syslog.
++         configure network, DNS and time settings, and access the syslog and
++  the API access log.
+         </p>
+        </li>
+        <li>
+@@ -26428,6 +26449,55 @@
+       .
+      </p>
+     </div>
++    <div class="paragraph">
++     <p>
++      By default, the lowest free VMID in the range is suggested, so the VMIDs of
++destroyed guests get reused. This can be undesirable, for example, if external
++backup or monitoring systems identify guests by their VMID. With the
++      <span class="monospaced">
++       unique
++      </span>
++      option set, only VMIDs that have never been in use are suggested. For this,
++Proxmox VE records the VMID of every guest on creation and destruction in
++      <span class="monospaced">
++       /etc/pve/virtual-guest/used-guest-ids
++      </span>
++      , independent of whether
++      <span class="monospaced">
++       unique
++      </span>
++      is
++set. VMIDs of guests that were removed before Proxmox VE started recording them are
++not known and may still be suggested.
++     </p>
++    </div>
++    <div class="paragraph">
++     <p>
++      The range and the
++      <span class="monospaced">
++       unique
++      </span>
++      option only affect which VMID is suggested. Any
++other free VMID can still be chosen manually. With the
++      <span class="monospaced">
++       enforce
++      </span>
++      option set,
++they become a hard limit instead. New guests can then only use VMIDs from the
++range and, if
++      <span class="monospaced">
++       unique
++      </span>
++      is set as well, only VMIDs that have never been in use.
++Operations on existing guests, like destroying them or restoring a backup over
++them, are not restricted.
++     </p>
++    </div>
++    <div class="listingblock">
++     <div class="content monospaced">
++      <pre>next-id: lower=10000,upper=20000,unique=1,enforce=1</pre>
++     </div>
++    </div>
+     <div class="admonitionblock">
+      <table>
+       <tr>
+@@ -26479,8 +26549,29 @@
+ PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
+        </td>
+        <td class="content">
+-        The range is only used for the next-id API call, so it isn’t a hard
+-limit.
++        Consecutive VMIDs are stored as a single range, so the list of used VMIDs
++usually stays small. It only grows large if many VMIDs with gaps between them
++are used. If the list reaches 512 KiB, a warning is logged whenever it is
++updated. The list shrinks again as gaps get filled, since the ranges on both
++sides of a gap are merged into a single entry once all VMIDs in it have been
++used. With
++        <span class="monospaced">
++         unique
++        </span>
++        set, auto-selection suggests the lowest VMID that has never
++been used and thereby fills the gaps from the bottom up. To stay within the file
++size limit of the cluster file system, the smallest gaps between recorded VMIDs
++are marked as used once the list would exceed 768 KiB. As a result, they are no
++longer suggested with
++        <span class="monospaced">
++         unique
++        </span>
++        set and cannot be used for new guests anymore
++with
++        <span class="monospaced">
++         enforce
++        </span>
++        set as well.
+        </td>
+       </tr>
+      </table>
+@@ -27549,6 +27640,20 @@
+          <td class="tableblock halign-left valign-top">
+           <p class="tableblock monospaced">
+            <span class="monospaced">
++            virtual-guest/used-guest-ids
++           </span>
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Guest IDs that have been in use, for optionally avoiding their reuse
++          </p>
++         </td>
++        </tr>
++        <tr>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock monospaced">
++           <span class="monospaced">
+             vzdump.cron
+            </span>
+           </p>
+@@ -29087,7 +29192,15 @@
+           </dt>
+           <dd>
+            <p>
+-            QEMU/KVM VM images.
++            QEMU/KVM VM images. This allows all volume types of VMs, that is
++            <span class="monospaced">
++             vm-vol
++            </span>
++            and
++            <span class="monospaced">
++             vm-state
++            </span>
++            .
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -29095,7 +29208,48 @@
+           </dt>
+           <dd>
+            <p>
+-            Allow to store container data.
++            Allow to store container data. This allows all volume types of containers, which
++currently is only
++            <span class="monospaced">
++             ct-vol
++            </span>
++            .
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           vm-vol
++          </dt>
++          <dd>
++           <p>
++            The disks of VMs, including EFI disks, TPM states and cloud-init drives. Use
++this instead of
++            <span class="monospaced">
++             images
++            </span>
++            for a storage that should not hold the saved states of
++VMs.
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           vm-state
++          </dt>
++          <dd>
++           <p>
++            The saved states of VMs, as created by a snapshot that includes the RAM and by
++hibernation. Use this instead of
++            <span class="monospaced">
++             images
++            </span>
++            for a storage that should only hold
++these.
++           </p>
++          </dd>
++          <dt class="hdlist1">
++           ct-vol
++          </dt>
++          <dd>
++           <p>
++            The volumes of containers.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -29143,6 +29297,35 @@
+            </p>
+           </dd>
+          </dl>
++        </div>
++        <div class="paragraph">
++         <p>
++          See
++          <a href="#storage_volume_types">
++           Volume Types of Guests
++          </a>
++          for how
++          <span class="monospaced">
++           images
++          </span>
++          and
++          <span class="monospaced">
++           rootdir
++          </span>
++          relate to
++          <span class="monospaced">
++           vm-vol
++          </span>
++          ,
++          <span class="monospaced">
++           vm-state
++          </span>
++          and
++          <span class="monospaced">
++           ct-vol
++          </span>
++          .
++         </p>
+         </div>
+        </dd>
+        <dt class="hdlist1">
+@@ -29308,6 +29491,305 @@
+       </table>
+      </div>
+     </div>
++    <div class="sect3">
++     <h4 id="storage_volume_types">
++      7.2.3. Volume Types of Guests
++      <a class="headerlink" href="#storage_volume_types" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       The content types
++       <span class="monospaced">
++        images
++       </span>
++       and
++       <span class="monospaced">
++        rootdir
++       </span>
++       allow all volumes of VMs or of
++containers on a storage. To allow only some of them, set the specific volume
++types as content types instead.
++      </p>
++     </div>
++     <div style="overflow-x:auto">
++      <table class="tableblock frame-all grid-all" style="
++width:100%;
++">
++       <caption class="title">
++        Table 3. Content types for the volumes of guests
++       </caption>
++       <col style="width:20%;"/>
++       <col style="width:20%;"/>
++       <col style="width:60%;"/>
++       <thead>
++        <tr>
++         <th class="tableblock halign-left valign-top">
++          Content type
++         </th>
++         <th class="tableblock halign-left valign-top">
++          Web interface
++         </th>
++         <th class="tableblock halign-left valign-top">
++          Allows
++         </th>
++        </tr>
++       </thead>
++       <tbody>
++        <tr>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock monospaced">
++           images
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Disk image
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           All volumes of VMs:
++           <span class="monospaced">
++            vm-vol
++           </span>
++           and
++           <span class="monospaced">
++            vm-state
++           </span>
++          </p>
++         </td>
++        </tr>
++        <tr>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock monospaced">
++           vm-vol
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           VM Disk
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Disks of VMs, including EFI disks, TPM states and
++cloud-init drives
++          </p>
++         </td>
++        </tr>
++        <tr>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock monospaced">
++           vm-state
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           VM State
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Saved states of VMs, from snapshots that include
++the RAM and from hibernation
++          </p>
++         </td>
++        </tr>
++        <tr>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock monospaced">
++           rootdir
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Container
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           All volumes of containers, which currently is only
++           <span class="monospaced">
++            ct-vol
++           </span>
++          </p>
++         </td>
++        </tr>
++        <tr>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock monospaced">
++           ct-vol
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Container Volume
++          </p>
++         </td>
++         <td class="tableblock halign-left valign-top">
++          <p class="tableblock">
++           Root disks and mount points of containers
++          </p>
++         </td>
++        </tr>
++       </tbody>
++      </table>
++     </div>
++     <div class="paragraph">
++      <p>
++       Existing storages do not need to be changed. Use the volume types if a storage
++should hold only some of the volumes of guests. For example, to keep the saved
++states of VMs off a storage that is used for VM disks and containers:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content monospaced">
++       <pre># pvesm set &lt;STORAGE_ID&gt; --content vm-vol,rootdir</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       Or to add a directory storage that only holds the saved states of VMs:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content monospaced">
++       <pre># pvesm add dir vmstate --path /mnt/vmstate --content vm-state</pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       In the web interface, tick
++       <em>
++        Advanced
++       </em>
++       in the dialog for adding or editing a
++storage. The
++       <em>
++        Content
++       </em>
++       selector then also lists the volume types. Select
++       <em>
++        VM Disk
++       </em>
++       or
++       <em>
++        VM State
++       </em>
++       instead of
++       <em>
++        Disk image
++       </em>
++       , or
++       <em>
++        Container Volume
++       </em>
++       instead
++of
++       <em>
++        Container
++       </em>
++       . A volume type has no effect next to the content type that
++already allows it, for example
++       <span class="monospaced">
++        vm-vol
++       </span>
++       next to
++       <span class="monospaced">
++        images
++       </span>
++       , and is dropped from
++the configuration.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       Where the state of a VM is saved if the storages of its disks do not allow
++       <span class="monospaced">
++        vm-state
++       </span>
++       is described for the
++       <a href="#qm_vmstatestorage">
++        <span class="monospaced">
++         vmstatestorage
++        </span>
++       </a>
++       option.
++      </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAJhUlEQVRoge2ZWWycVxXHf+fce7/v
++m/GaGCde4pI0aQlJC0kRtE1L00JbLIjY4QkeUB9YHhAIJFCExAsKUkE8IAFFPIDUIqhBRSDRBUqC
++CimFFBCBpCWx02IaZ3G2SdyxPZ7vHh6+mcnSZnFjKIge6Wj8zYzvPf9z/me5d8TM+F8WfbkNuFx5
++BcDLLf/fAEZGRmx4eNh6enqsp6fHhoeHbWRk5D9aFeSlVqHNmzfb6H33sHnT7ZQmD5GfOMax6Sm+
++Pl5h1Yc+xpYtW2SBbX1ReUkRGBkZsdH77mHLW95EOv4Ms3ueJh6YYPHUFF9aljJ63z3cf//9/5FI
++vKQIDA8P293L2yhVjjH7t51ocDiviFecF46n7XzBreChhx4qNhH5t0XjJUVgx44ddGUZ9b/vIpQD
++oRQIWSDJAiFL6B9axo4dO4gxAmANWVDLG+Ln82URMRGhVCqRHxonlAPqFXWKC4r6IhI6OMjMzBN4
++/4LlTUQQEZxzZ32QJAlpmrb+p16vU6vVOHXq1AWjN18AnDj0F971vrs4OnmYJVkoDA4FCPUO172I
++Cgnt7SV++4vvsGhRJx3tJbIsRVVpsUnOBBABBVFEClKYwbKr7sTM7EIUnBcA7z21k7t49x1X8JXv
++bOWra7rw5QRtcN8PLCfvvZJvb9vJycpJpg4/hp/N0I4SMQs4Jw0A5zBXHGiCaIZIKABgpGlKjPEF
++0TpT5pUDRXiVt99+Le03r+WzuytM1gO6pB/3+o0cbxvk8yOPMjW6i2iR2lxOjJDHSDMFogmGwzQ7
++rRJAUpAENAGXIZq2AFzQpvkACCEQcahP+cRH3sKHn9zHXU+MM7rtGeD33NDXzaZynZU9gcezpUw9
++X6OzIyOakkfF4QEpPG6nDRNNEA2FSgKimETSNCXPc0II57VpXhEolUqoOrxPSLOMT330Dv5SqfKD
++NR388Y2L+caQsjITNv3pMBs3rOT56ZyZGaM+J0QUxDc0INrWUgggoRGBAOIRAt77hY1AmqaoeJxP
++cN645jVDbNn8Hj73o8fZ/af9mEE9j9y2YRXt5YzZWmRmzjj1/BwhTXAKzitOHEbeWlc0AVwDnCv8
++KoZzjotV33lTSL1HNKAuEtKM1169jM98/E6mTk3x4Nbd7Bk7TEdHRvAeVY+hmDqmZwx1kIkiqrhz
++S2zL+AbNMC6l/80LgHMOEY9oQvBCks5RKpXo7JhFxbhz42pet2aQet1YtLiDJAkIDq8BHwJmwlwO
++UaD0ojsrNKuUReIZyb9gABCHcwWFgg+0lTPyvIRToVzKWLpkMfV6REQplYvmZCj1uuBUSdJwTg8A
++XBdoCZMOsBkQBeGi/J83gBgjmABC8AlJGsjzFLMyaXDM1etEA0VR50iCx6mSZhkiijpPjEpQD+SF
++4WdJrTAewdCFB1CtVlFVVATnhMQnWJqC5aTBk+c5IIgWRoTgSZJAmiZAo1s7hwsppglI+fTiljeY
++nyHkLQotKIAYI4igzpFHISQOiwEnKTEG8hhRVZw6YjRQLfJGHcF7jleqTBw8znXr12MABnv37efY
++iSnesG4tiUsRUQwD7JIAzKsPqCqiRbVwweM04XdPjhJN+dvTBxgbn6G9q59yZx9/3HWEb33vN+zc
++/RzOJ+w/eJLtO8Z5ZNtT7PvHIUQTvvv9X/Lc/mN0d3by3fseRLQwvWh0Fy+h8wbQ2VFG1KM+xfuA
++qufo8So/fejPPD/rqJys8pvf7eLAoeNMHqnw2U9+kH3jVQ5MClMzKUla5obr13HliiEMmDx6gltv
++uY7Vr1nBQF8PJopQ9AFTt/AROFfMjCW9XTy19xB33Hodb924jr1j+/nDk3/nzTdei4jw3nfeyCOP
++bufa1y5jzeoVrcHM8HR3dfHlr/2Q+x94jFtuuh44/9B2PplXDryYLF3STXd3e+t5UXcHY89OsOH6
++NS2Qed7wpM1Rm50G4MGHH2P961Zy3bqreXrPP5mrzwLt5y6/cACq1eoLCKm+TN/SAebmfn8aUG83
++PYs7+cnPH+eqKwd5as8/edc7bi02847pmVkATk1VWbF8AOcca1Yv59DkqcYK0tCL02deACqVCldc
++0YdIwLmEPM9RV6NnUZlPf3wT6oqJcePN6wHhzTeu4/CRCrfctJ4sSxBRli7pYfHEMUSU97/7Th75
++1RP8eec+Yp5zzTVXM9DfDyogBvHS6HTJACYmJnjVoq5GFw0454gCEOnoaMfiNGZFFRFxJGkbywZ6
++i1NWoy9kWYmbb1gHKCHApuGbisVFGyoYUswa5OR5ftF56JIBjI6OMtDfWwAQ35jnc8AVpRXBohVq
++UowECKqK4RBxoE0W6gvGCcEjaOEAwEQWdpgbGxujt7erOLO2mk3R8i0Wz9EiuUGz+qlKEQEUaJbI
++4lTHmTVePKgWzpDGJGpc8CDTlEsuo88++wxXDA0UIUbAOP23KGZKjI48KnkuhcbiPbPCOBoeBikO
++Lk2VxjqNRilaAEqSZGEAbN261bZt+zW33XY7IAXXm6Ou0YhIMamaaUOl5WRrzg00viuKWWxpQUOH
++NAZFQRpD48Xlkig0MTHBB95zG+VSylz1KCbWyDOh2XyK+56IqjWMKigkUnzWnPPFFFRRLZ29SQRU
++ELOGY4pZ6LKOlM07mZ07d/KOtw1TcB4sGkTDiDQ9K1IkrKeYmQC08d7pZLSiRBpE5s7aS0XAHFEK
++AGY51Wr18g80Zmb33nsvX/z8XdSmj2AWOXhwkrxe46+79jB55Dh/3T2GxUhHextdXW2sXN7PNWtW
++IQKDA71FFBoAjIgQkVg/a5+oHrU5zIznDhxk964xKpXKggAoTlWW8+OfPorlOQ//cjsDy1bS2dFO
++W+diVly1iL6+Pqanpzl5qsL4pPHwN3/G1InDlMsZ7Z1tDA30cfWqIa5dexV9fb2YnT7UTxw4xsHJ
++o4yOjfOP8QOMjx/k4OQx7r777lY0zycXvJ02M4sxMjg4SL1eR0TYsGEDw8PD9PX10d7ejogUN3a1
++GqpKCIE8z5mdnUVVqVarbN++nba2Nvbu3csDDzyAqrJ8+atb+zjn6e/vZ/Xq1axatYq1a9fS29tL
++lmUMDQ1RKpXOm9EXvV6v1+tWr9eZnp5mZmaGWq1GjLHF62aiNZ+bnPfe45xrvTZzxMyYmZk56+LX
++zKjX661DvHOOJElIkoRSqYT3/vLvRlW15eHCa4VxzdvmpjZDfubzuXeb3vuzqCEixBhbo0NTkyS5
++PAr9L8j/96+U/w3yCoCXW14B8HLLvwDd67nwZIEPdgAAAABJRU5ErkJggg=="/>
++        </td>
++        <td class="content">
++         A volume type can only be added to a storage if all nodes of the cluster
++are online and run
++         <span class="monospaced">
++          pve-manager
++         </span>
++         in version 9.2.29 or newer. Older versions
++cannot read a content list with these types and use the default content types
++of the storage type instead.
++        </td>
++       </tr>
++      </table>
++     </div>
++     <div class="paragraph">
++      <p>
++       Changing the content types of a storage does not move or remove the volumes
++that are already on it. A VM cannot be started while one of its disks is on a
++storage that does not allow VM disks, so move such disks to another storage
++first.
++      </p>
++     </div>
++    </div>
+    </div>
+    <div class="sect2">
+     <h3 id="_volumes">
+@@ -29865,7 +30347,7 @@
+ width:100%;
+ ">
+       <caption class="title">
+-       Table 3. Directory layout
++       Table 4. Directory layout
+       </caption>
+       <col style="width:50%;"/>
+       <col style="width:50%;"/>
+@@ -30228,7 +30710,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 4. Storage features for backend
++        Table 5. Storage features for backend
+         <span class="monospaced">
+          dir
+         </span>
+@@ -30610,7 +31092,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 5. Storage features for backend
++        Table 6. Storage features for backend
+         <span class="monospaced">
+          nfs
+         </span>
+@@ -30974,7 +31456,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 6. Storage features for backend
++        Table 7. Storage features for backend
+         <span class="monospaced">
+          cifs
+         </span>
+@@ -31333,7 +31815,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 7. Storage features for backend
++        Table 8. Storage features for backend
+         <span class="monospaced">
+          pbs
+         </span>
+@@ -31918,7 +32400,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 8. Storage features for backend
++        Table 9. Storage features for backend
+         <span class="monospaced">
+          zfs
+         </span>
+@@ -32164,15 +32646,65 @@
+         </p>
+         <div class="paragraph">
+          <p>
+-          Storage devices that support the "write zeroes" operation will use
++          Storage devices that support the "write zeroes" operation use it to zero blocks.
++Otherwise, zeroes are written manually. The volume is processed range by range,
++according to
+           <span class="monospaced">
+-           blkdiscard
++           saferemove-stepsize
+           </span>
+-          to zero blocks. Otherwise, a fallback to
++          .
++         </p>
++        </div>
++       </dd>
++       <dt class="hdlist1">
++        <span class="monospaced">
++         on-volume-remove
++        </span>
++       </dt>
++       <dd>
++        <p>
++         Configure additional actions to run before an LV is removed.
++The LV is first renamed to
++         <span class="monospaced">
++          del-*
++         </span>
++         ; if cleanup fails, it is kept and
++renamed to
++         <span class="monospaced">
++          failed-&lt;N&gt;-del-*
++         </span>
++         , so it can be inspected, cleaned up
++manually, or removed explicitly.
++        </p>
++        <div class="paragraph">
++         <p>
++          Set
+           <span class="monospaced">
+-           cstream
++           discard=1
+           </span>
+-          is performed.
++          to issue discard (TRIM) requests for the LV’s blocks before the
++LV is removed, so thin-provisioned backing storage, such as a SAN LUN, can
++reclaim space the LV occupied. This is called "Discard Removed Volumes"
++in the web UI. Configuring the discard option fails if any backing device in
++the LV’s volume group is detected as not supporting it.
++         </p>
++        </div>
++        <div class="paragraph">
++         <p>
++          If
++          <span class="monospaced">
++           saferemove
++          </span>
++          and
++          <span class="monospaced">
++           discard
++          </span>
++          are both enabled, the LV is processed range by
++range. Ranges are zeroed until reaching a boundary aligned with both the
++zeroing step size and the discard granularity. The accumulated range is then
++discarded before processing continues. This prevents complete discard chunks
++from being skipped and avoids allocating the whole LV with zeroes on
++thin-provisioned backing storage before the space can be reclaimed again.
+          </p>
+         </div>
+        </dd>
+@@ -32183,13 +32715,8 @@
+        </dt>
+        <dd>
+         <p>
+-         Wipe step size in MiB (
+-         <span class="monospaced">
+-          blkdiscard -p
+-         </span>
+-         parameter value), capped to the maximum
+-step size supported by the underlying storage. Up to 32 MiB (maximum) by
+-default.
++         Wipe step size in MiB, capped to the maximum step size supported by the
++underlying storage. Up to 32 MiB (maximum) by default.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+@@ -32199,11 +32726,9 @@
+        </dt>
+        <dd>
+         <p>
+-         Wipe throughput (
+-         <span class="monospaced">
+-          cstream -t
+-         </span>
+-         parameter value), up to 10 MiB/s by default.
++         Limits wipe throughput. If the backing storage supports the "write zeroes"
++operation, throughput is unlimited by default. Otherwise, manually written
++zeroes are limited to 10 MiB/s by default.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+@@ -32402,6 +32927,78 @@
+       <table>
+        <tr>
+         <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         If you extend a shared volume group onto another device on one node, the
++other nodes may only see the added physical volume after LVM has scanned their
++devices again, for example with
++         <span class="monospaced">
++          pvscan --cache
++         </span>
++         . This command also resets the
++autoactivation records of LVM, which can let LVM activate logical volumes on its
++own later. Proxmox VE disables autoactivation for the logical volumes it creates.
++Before you run the command, make sure that autoactivation is also disabled for
++all other logical volumes of the volume group, for example with
++         <span class="monospaced">
++          lvchange --setautoactivation n &lt;vg&gt;/&lt;lv&gt;
++         </span>
++         . Proxmox VE runs the same rescan on its
++own when it does not find the volume group of a storage at all, so keep
++autoactivation disabled for all logical volumes of a shared volume group.
++        </td>
++       </tr>
++      </table>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
+          <img alt="Tip" src="data:image/png;base64,
+ iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAKZUlEQVRoge2aa3BU5RmAn3Pbs7fs
+ JmwCRGITk0hVLFAtNWoq6pAiU0cKaYfa6ShT+YN4YbQw9F/8QX+UMv6gM3Q6oxMV6TgIbe10Gq2g
+@@ -32464,7 +33061,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 9. Storage features for backend
++        Table 10. Storage features for backend
+         <span class="monospaced">
+          lvm
+         </span>
+@@ -32725,7 +33322,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 10. Storage features for backend
++        Table 11. Storage features for backend
+         <span class="monospaced">
+          lvmthin
+         </span>
+@@ -32928,63 +33525,66 @@
+       <table>
+        <tr>
+         <td class="icon">
+-         <img alt="Tip" src="data:image/png;base64,
+-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"/>
++         <img alt="Note" src="data:image/png;base64,
++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"/>
+         </td>
+         <td class="content">
+-         If you want to use LVM on top of iSCSI, it make sense to set
++         To use LVM on top of iSCSI, set
+          <span class="monospaced">
+           content none
+          </span>
+-         . That way it is not possible to create VMs using iSCSI
+-LUNs directly.
++         , in the web interface by
++clearing
++         <strong>
++          Use LUNs directly
++         </strong>
++         . That way it is not possible to create VMs using
++iSCSI LUNs directly. As a guest may use a LUN without data that could be
++detected, Proxmox VE refuses to create a volume group on a LUN of a target that a
++storage offers as disk images.
+         </td>
+        </tr>
+       </table>
+@@ -33025,7 +33625,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 11. Storage features for backend
++        Table 12. Storage features for backend
+         <span class="monospaced">
+          iscsi
+         </span>
+@@ -33122,8 +33722,8 @@
+     </div>
+     <div class="paragraph">
+      <p>
+-      This backend provides basically the same functionality as the Open-iSCSI backed,
+-but uses a user-level library to implement it. You need to install the
++      This backend provides basically the same functionality as the Open-iSCSI
++backend, but uses a user-level library to implement it. You need to install the
+       <span class="monospaced">
+        libiscsi-bin
+       </span>
+@@ -33147,7 +33747,7 @@
+      <div class="paragraph">
+       <p>
+        The user mode iSCSI backend uses the same configuration options as the
+-Open-iSCSI backed.
++Open-iSCSI backend.
+       </p>
+      </div>
+      <div class="listingblock">
+@@ -33233,7 +33833,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 12. Storage features for backend
++        Table 13. Storage features for backend
+         <span class="monospaced">
+          iscsidirect
+         </span>
+@@ -33927,7 +34527,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 13. Storage features for backend
++        Table 14. Storage features for backend
+         <span class="monospaced">
+          rbd
+         </span>
+@@ -34536,7 +35136,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 14. Storage features for backend
++        Table 15. Storage features for backend
+         <span class="monospaced">
+          cephfs
+         </span>
+@@ -35089,7 +35689,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 15. Storage features for backend
++        Table 16. Storage features for backend
+         <span class="monospaced">
+          iscsi
+         </span>
+@@ -39444,14 +40044,28 @@
+ /F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
+        </td>
+        <td class="content">
+-        When using the PG autoscaler, all pools in the cluster are required to
+-use CRUSH rules of the same kind, either all specifying a device class,
+-or none. Otherwise the autoscaler will skip the affected
+-pools and their
++        The PG autoscaler skips pools whose CRUSH rules use different roots
++that share OSDs, and does not adjust their
+         <span class="monospaced">
+          pg_num
+         </span>
+-        will not be adjusted.
++        . A rule with a device class
++uses the root of that class, such as
++        <span class="monospaced">
++         default~nvme
++        </span>
++        in the example above, which
++shares its OSDs with the
++        <span class="monospaced">
++         default
++        </span>
++        root. This typically affects setups where
++some pools use a rule with a device class while others, often including the
++        <span class="monospaced">
++         .mgr
++        </span>
++        pool, use a rule without one. To avoid this, use rules with a device
++class either for all pools or for none.
+        </td>
+       </tr>
+      </table>
+@@ -41596,11 +42210,144 @@
+ verify copies it cannot check yourself.
+         </p>
+        </div>
++      </div>
++      <div class="sect5">
++       <h6 id="pveceph_cephx_other_users">
++        Ceph Users Not Managed by Proxmox VE
++        <a class="headerlink" href="#pveceph_cephx_other_users" title="Permalink to this heading">
++        </a>
++       </h6>
+        <div class="paragraph">
+         <p>
+-         The helper lists local users not managed by Proxmox VE separately. Follow their
+-client’s supported rotation procedure, or leave their keys unchanged and keep
+-the old cipher enabled.
++         The helper lists local users not managed by Proxmox VE separately, as keys that
++need manual migration. Follow their client’s supported rotation procedure, or
++leave their keys unchanged and keep the old cipher enabled.
++        </p>
++       </div>
++       <div class="paragraph">
++        <p>
++         If every client of such a user supports
++         <span class="monospaced">
++          aes256k
++         </span>
++         , move the clients to a new
++user with an
++         <span class="monospaced">
++          aes256k
++         </span>
++         key. Both users work side by side, so each client can
++switch when convenient, for example one node of a Kubernetes cluster using
++Ceph CSI at a time. For a user
++         <span class="monospaced">
++          client.app
++         </span>
++         with RBD access to the pool
++         <span class="monospaced">
++          vm-pool
++         </span>
++         :
++        </p>
++       </div>
++       <div class="olist arabic">
++        <ol class="arabic">
++         <li>
++          <p>
++           Show the capabilities of the current user:
++          </p>
++          <div class="listingblock">
++           <div class="content">
++            <!-- Generator: GNU source-highlight
++by Lorenzo Bettini
++http://www.lorenzobettini.it
++http://www.gnu.org/software/src-highlite -->
++            <pre><tt>ceph auth get client<span style="color: #990000">.</span>app</tt></pre>
++           </div>
++          </div>
++         </li>
++         <li>
++          <p>
++           Create the new user with the same capabilities and an
++           <span class="monospaced">
++            aes256k
++           </span>
++           key:
++          </p>
++          <div class="listingblock">
++           <div class="content">
++            <!-- Generator: GNU source-highlight
++by Lorenzo Bettini
++http://www.lorenzobettini.it
++http://www.gnu.org/software/src-highlite -->
++            <pre><tt>ceph auth get-or-create client<span style="color: #990000">.</span>app2 mon <span style="color: #FF0000">'profile rbd'</span> <span style="color: #990000">\</span>
++    osd <span style="color: #FF0000">'profile rbd pool=vm-pool'</span> --key-type<span style="color: #990000">=</span>aes256k</tt></pre>
++           </div>
++          </div>
++         </li>
++         <li>
++          <p>
++           Transfer the printed keyring securely and configure every client to use the
++  new user.
++          </p>
++         </li>
++         <li>
++          <p>
++           Once a dry run of the helper with
++           <span class="monospaced">
++            --restrict-ciphers
++           </span>
++           lists no client
++  connected as
++           <span class="monospaced">
++            client.app
++           </span>
++           any more, delete that user:
++          </p>
++          <div class="listingblock">
++           <div class="content">
++            <!-- Generator: GNU source-highlight
++by Lorenzo Bettini
++http://www.lorenzobettini.it
++http://www.gnu.org/software/src-highlite -->
++            <pre><tt>ceph auth del client<span style="color: #990000">.</span>app</tt></pre>
++           </div>
++          </div>
++         </li>
++        </ol>
++       </div>
++       <div class="paragraph">
++        <p>
++         Alternatively, you can rotate the key in place with
++         <span class="monospaced">
++          ceph auth rotate --key-type=aes256k &lt;USER&gt;
++         </span>
++         <span class="footnote">
++          <br/>
++          [Ceph key rotation
++          <a href="https://docs.ceph.com/en/latest/rados/configuration/auth-config-ref/#upgrading-and-rotating-cephx-keys">
++           https://docs.ceph.com/en/latest/rados/configuration/auth-config-ref/#upgrading-and-rotating-cephx-keys
++          </a>
++          ]
++          <br/>
++         </span>
++         .
++This replaces the key at once, without the grace period of a staged key.
++Transfer the printed keyring securely, update every saved copy and refresh the
++clients.
++        </p>
++       </div>
++       <div class="paragraph">
++        <p>
++         If an earlier helper run with
++         <span class="monospaced">
++          --apply
++         </span>
++         recorded the previous key, the helper
++then asks you to confirm the refresh with
++         <span class="monospaced">
++          --confirm-clients-refreshed &lt;USER&gt; --apply
++         </span>
++         . The first confirmation may only
++record which clients are connected. In that case, repeat the command.
+         </p>
+        </div>
+       </div>
+@@ -43562,7 +44309,7 @@
+ width:100%;
+ ">
+       <caption class="title">
+-       Table 16. Storage Types
++       Table 17. Storage Types
+       </caption>
+       <col style="width:25%;"/>
+       <col style="width:25%;"/>
+@@ -45727,6 +46474,81 @@
+          </td>
+          <td class="content">
+           Live migrations between Intel and AMD host CPUs have no guarantee to work.
++         </td>
++        </tr>
++       </table>
++      </div>
++      <div class="admonitionblock">
++       <table>
++        <tr>
++         <td class="icon">
++          <img alt="Warning" src="data:image/png;base64,
++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
++/F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
++         </td>
++         <td class="content">
++          The
++          <em>
++           host
++          </em>
++          CPU type can potentially enable new CPU features for the
++guest when the guest is restarted after a system upgrade. This can result in
++unexpected consequences.
+          </td>
+         </tr>
+        </table>
+@@ -54508,6 +55330,25 @@
+        </p>
+       </li>
+      </ol>
++    </div>
++    <div class="paragraph">
++     <p>
++      A storage of a VM disk is skipped if it allows the disks of VMs, but not their
++saved states, see the
++      <span class="monospaced">
++       content
++      </span>
++      property in the
++      <a href="#chapter_storage">
++       storage chapter
++      </a>
++      . Saving the state fails if such a storage
++is given as target or set as
++      <span class="monospaced">
++       vmstatestorage
++      </span>
++      .
++     </p>
+     </div>
+    </div>
+    <div class="sect2">
+@@ -57084,7 +57925,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum r/w speed in bytes per second.
++            Maximum r/w speed in bytes per second. Deprecated: Use
++            <em>
++             mbps
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -57112,7 +57957,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum read speed in bytes per second.
++            Maximum read speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_rd
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -57140,7 +57989,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum write speed in bytes per second.
++            Maximum write speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_wr
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -57697,7 +58550,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [type=]&lt;tdx-type&gt; ,attestation=&lt;1|0&gt; [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
++         [type=]&lt;tdx-type&gt; [,attestation=&lt;1|0&gt;] [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -58156,7 +59009,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         &lt;backup | clone | create | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
++         &lt;backup | clone | create | import | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
+         </span>
+        </dt>
+        <dd>
+@@ -59226,7 +60079,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum r/w speed in bytes per second.
++            Maximum r/w speed in bytes per second. Deprecated: Use
++            <em>
++             mbps
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -59254,7 +60111,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum read speed in bytes per second.
++            Maximum read speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_rd
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -59282,7 +60143,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum write speed in bytes per second.
++            Maximum write speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_wr
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -59873,7 +60738,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum r/w speed in bytes per second.
++            Maximum r/w speed in bytes per second. Deprecated: Use
++            <em>
++             mbps
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -59901,7 +60770,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum read speed in bytes per second.
++            Maximum read speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_rd
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -59929,7 +60802,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum write speed in bytes per second.
++            Maximum write speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_wr
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -61651,7 +62528,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum r/w speed in bytes per second.
++            Maximum r/w speed in bytes per second. Deprecated: Use
++            <em>
++             mbps
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -61679,7 +62560,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum read speed in bytes per second.
++            Maximum read speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_rd
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -61707,7 +62592,11 @@
+           </dt>
+           <dd>
+            <p>
+-            Maximum write speed in bytes per second.
++            Maximum write speed in bytes per second. Deprecated: Use
++            <em>
++             mbps_wr
++            </em>
++            instead.
+            </p>
+           </dd>
+           <dt class="hdlist1">
+@@ -62403,7 +63292,7 @@
+         </span>
+         :
+         <span class="monospaced">
+-         [[model=]&lt;i6300esb|ib700&gt;] [,action=&lt;enum&gt;]
++         [[model=]&lt;i6300esb&gt;] [,action=&lt;enum&gt;]
+         </span>
+        </dt>
+        <dd>
+@@ -62432,7 +63321,7 @@
+            </span>
+            =
+            <span class="monospaced">
+-            &lt;i6300esb | ib700&gt;
++            &lt;i6300esb&gt;
+            </span>
+            (
+            <em>
+@@ -64879,17 +65768,17 @@
+        <img alt="screenshot/gui-create-ct-network.png" src="images/screenshot/gui-create-ct-network.png" style="padding: 0 0 0 10px;float:right;" width="250"/>
+       </a>
+       <p>
+-       You can configure up to 10 network interfaces for a single container.
++       You can configure up to 32 network interfaces for a single container.
+ The corresponding options are called
+        <span class="monospaced">
+         net0
+        </span>
+        to
+        <span class="monospaced">
+-        net9
++        net31
+        </span>
+        , and they can contain the
+-following setting:
++following settings:
+       </p>
+      </div>
+      <div class="dlist">
+@@ -68480,7 +69369,7 @@
+        </dt>
+        <dd>
+         <p>
+-         Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
++         Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
+         </p>
+        </dd>
+        <dt class="hdlist1">
+@@ -80157,6 +81046,259 @@
+ refer to your API client’s documentation.
+      </p>
+     </div>
++    <div class="sect3">
++     <h4 id="pveum_token_policy">
++      14.3.1. Token Policy
++      <a class="headerlink" href="#pveum_token_policy" title="Permalink to this heading">
++      </a>
++     </h4>
++     <div class="paragraph">
++      <p>
++       The optional
++       <span class="monospaced">
++        token-policy
++       </span>
++       datacenter option sets cluster-wide rules for
++creating and updating API tokens, as compliance standards like PCI DSS,
++SOC 2, or ISO 27001 often require, most notably a limited credential
++lifetime. The policy can require an expiration date for new tokens, limit
++how far in the future the expiration date can be set, forbid extending the
++expiration date of existing tokens, and require privilege separation.
++      </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Warning" src="data:image/png;base64,
++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
++/F/lgJiyQFHragAAAABJRU5ErkJggg=="/>
++        </td>
++        <td class="content">
++         The policy is enforced by the nodes that handle a token request,
++so in a cluster, only configure it once all nodes run a version supporting
++it. Nodes running an older version ignore the policy, and changing
++datacenter options on such a node removes it from the configuration.
++        </td>
++       </tr>
++      </table>
++     </div>
++     <div class="paragraph">
++      <p>
++       Changing the policy requires
++       <span class="monospaced">
++        Sys.Modify
++       </span>
++       on
++       <span class="monospaced">
++        /
++       </span>
++       , like any other datacenter
++option. Configure it in the web interface under
++       <strong>
++        Datacenter → Options →
++API Token Policy
++       </strong>
++       , or on the command line:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content">
++       <!-- Generator: GNU source-highlight
++by Lorenzo Bettini
++http://www.lorenzobettini.it
++http://www.gnu.org/software/src-highlite -->
++       <pre><tt>pvesh <span style="font-weight: bold"><span style="color: #0000FF">set</span></span> /cluster/options --token-policy max-lifetime<span style="color: #990000">=</span><span style="color: #993399">7776000</span></tt></pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       <span class="monospaced">
++        max-lifetime
++       </span>
++       is set in seconds (7776000 above is 90 days), while the web
++interface takes days. It counts from when the expiration date is set, that
++is on token creation or when an update changes it, and implies
++       <span class="monospaced">
++        require-expiry
++       </span>
++       , as a token without an expiration date would exceed any
++maximum lifetime.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       The policy only applies when a token is created or updated, and only to
++values that actually change. Existing tokens stay valid even if they do not
++conform to a policy configured later, and unrelated updates of such tokens
++keep working. A new expiration date must be within the limit. With
++       <span class="monospaced">
++        disallow-expiry-extension
++       </span>
++       , the expiration date of an existing token can
++only be shortened, or set if it has none. Tokens can always be deleted and
++recreated.
++      </p>
++     </div>
++     <div class="paragraph">
++      <p>
++       With
++       <span class="monospaced">
++        allow-extension-on-regenerate
++       </span>
++       , an existing token can still be
++extended within the limit when its secret is regenerated in the same
++request. The old secret stops working, like it would when recreating the
++token, so tools can rotate their tokens in place without setting up the
++permissions again. In the web interface, enable
++       <strong>
++        Regenerate Secret
++       </strong>
++       in the
++token edit dialog and set the new expiration date. On the command line, pass
++the new expiration date in Unix epoch seconds:
++      </p>
++     </div>
++     <div class="listingblock">
++      <div class="content">
++       <!-- Generator: GNU source-highlight
++by Lorenzo Bettini
++http://www.lorenzobettini.it
++http://www.gnu.org/software/src-highlite -->
++       <pre><tt>pveum user token modify <span style="color: #990000">&lt;</span>userid<span style="color: #990000">&gt;</span> <span style="color: #990000">&lt;</span>tokenid<span style="color: #990000">&gt;</span> --expire <span style="color: #990000">&lt;</span>timestamp<span style="color: #990000">&gt;</span> --regenerate <span style="color: #993399">1</span></tt></pre>
++      </div>
++     </div>
++     <div class="paragraph">
++      <p>
++       Like on creation, the new secret is only displayed once, so update the tool
++to use it right away.
++      </p>
++     </div>
++     <div class="admonitionblock">
++      <table>
++       <tr>
++        <td class="icon">
++         <img alt="Note" src="data:image/png;base64,
++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"/>
++        </td>
++        <td class="content">
++         The policy also applies to tokens that other tools create through the
++API, for example when adding the cluster as a remote to Proxmox Datacenter
++Manager. For tools that do not set an expiration date, set
++         <span class="monospaced">
++          default-to-max-lifetime
++         </span>
++         together with
++         <span class="monospaced">
++          max-lifetime
++         </span>
++         , so that their tokens
++get the maximum lifetime instead of being rejected. If a tool still cannot
++create a compliant token, for example because it disables privilege
++separation, create one manually and use that in the tool instead.
++        </td>
++       </tr>
++      </table>
++     </div>
++    </div>
+    </div>
+    <div class="sect2">
+     <h3 id="pveum_resource_pools">
+@@ -84877,7 +86019,7 @@
+ width:60%;
+ ">
+      <caption class="title">
+-      Table 17. Availability - Downtime per Year
++      Table 18. Availability - Downtime per Year
+      </caption>
+      <col style="width:50%;"/>
+      <col style="width:50%;"/>
+@@ -87117,7 +88259,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 18. Available HA Rule Types
++        Table 19. Available HA Rule Types
+        </caption>
+        <col style="width:25%;"/>
+        <col style="width:75%;"/>
+@@ -92478,7 +93620,7 @@
+        </span>
+        :
+        <span class="monospaced">
+-        &lt;auto | legacy-sendmail | notification-system&gt;
++        &lt;auto | legacy-sendmail | none | notification-system&gt;
+        </span>
+        (
+        <em>
+@@ -92507,7 +93649,11 @@
+         <em>
+          auto
+         </em>
+-        (default setting), an email will be sent if mailto is set, and the notification system will be used if not.
++        (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to
++        <em>
++         none
++        </em>
++        , no notification will be sent.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -92743,7 +93889,7 @@
+          </dt>
+          <dd>
+           <p>
+-           Keep backups for the last &lt;N&gt; different days. If there is morethan one backup for a single day, only the latest one is kept.
++           Keep backups for the last &lt;N&gt; different days. If there is more than one backup for a single day, only the latest one is kept.
+           </p>
+          </dd>
+          <dt class="hdlist1">
+@@ -92757,7 +93903,7 @@
+          </dt>
+          <dd>
+           <p>
+-           Keep backups for the last &lt;N&gt; different hours. If there is morethan one backup for a single hour, only the latest one is kept.
++           Keep backups for the last &lt;N&gt; different hours. If there is more than one backup for a single hour, only the latest one is kept.
+           </p>
+          </dd>
+          <dt class="hdlist1">
+@@ -92785,7 +93931,7 @@
+          </dt>
+          <dd>
+           <p>
+-           Keep backups for the last &lt;N&gt; different months. If there is morethan one backup for a single month, only the latest one is kept.
++           Keep backups for the last &lt;N&gt; different months. If there is more than one backup for a single month, only the latest one is kept.
+           </p>
+          </dd>
+          <dt class="hdlist1">
+@@ -92799,7 +93945,7 @@
+          </dt>
+          <dd>
+           <p>
+-           Keep backups for the last &lt;N&gt; different weeks. If there is morethan one backup for a single week, only the latest one is kept.
++           Keep backups for the last &lt;N&gt; different weeks. If there is more than one backup for a single week, only the latest one is kept.
+           </p>
+          </dd>
+          <dt class="hdlist1">
+@@ -92813,7 +93959,7 @@
+          </dt>
+          <dd>
+           <p>
+-           Keep backups for the last &lt;N&gt; different years. If there is morethan one backup for a single year, only the latest one is kept.
++           Keep backups for the last &lt;N&gt; different years. If there is more than one backup for a single year, only the latest one is kept.
+           </p>
+          </dd>
+         </dl>
+@@ -99094,7 +100240,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Base volume. This volume is automatically activated.
++        Volume ID of the base volume (automatically activated).
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99107,7 +100253,7 @@
+       </dt>
+       <dd>
+        <p>
+-        ZFS block size
++        ZFS block size.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99133,7 +100279,7 @@
+       </dt>
+       <dd>
+        <p>
+-        host group for comstar views
++        Host group for COMSTAR views.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99146,7 +100292,7 @@
+       </dt>
+       <dd>
+        <p>
+-        target group for comstar views
++        Target group for COMSTAR views.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99220,7 +100366,19 @@
+            <em>
+             images
+            </em>
+-           for VMs.
++           for VMs. A storage can instead be restricted to some of their volume types:
++           <em>
++            vm-vol
++           </em>
++           for the disks of VMs,
++           <em>
++            vm-state
++           </em>
++           for the saved states of VMs, and
++           <em>
++            ct-vol
++           </em>
++           for the volumes of Containers.
+           </td>
+          </tr>
+         </table>
+@@ -99278,7 +100436,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Populate the directory with the default structure.
++        Populate the base directory with the default structure.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99291,7 +100449,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Data Pool (for erasure coding only)
++        Data pool name for erasure-coded images.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99330,7 +100488,7 @@
+       </dt>
+       <dd>
+        <p>
+-        CIFS domain.
++        The name of the user domain (workgroup) to use.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99360,7 +100518,7 @@
+       </dt>
+       <dd>
+        <p>
+-        NFS export path.
++        Path exported by the NFS server (e.g., /srv/nfs).
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99399,7 +100557,7 @@
+       </dt>
+       <dd>
+        <p>
+-        The Ceph filesystem name.
++        The name or identifier of the filesystem.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99412,7 +100570,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Mount CephFS through FUSE.
++        Mount the filesystem through FUSE.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99446,7 +100604,7 @@
+       </dt>
+       <dd>
+        <p>
+-        iscsi provider
++        The iSCSI target implementation used on the remote machine.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99493,7 +100651,7 @@
+       </dt>
+       <dd>
+        <p>
+-        target portal group for Linux LIO targets
++        Target portal group for Linux LIO targets.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99586,7 +100744,7 @@
+       </dt>
+       <dd>
+        <p>
+-        mount point
++        Path to the directory where the storage is mounted.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99599,7 +100757,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Namespace.
++        The namespace used for grouping, isolation, or partitioning purposes.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99646,7 +100804,7 @@
+       </dt>
+       <dd>
+        <p>
+-        disable write caching on the target
++        Disable write caching on the iSCSI target.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99672,15 +100830,19 @@
+       </dt>
+       <dd>
+        <p>
+-        NFS/CIFS mount options (see
++        Comma-separated list of mount options. See
+         <em>
+          man nfs
+         </em>
+-        or
++        ,
+         <em>
+          man mount.cifs
+         </em>
+-        )
++        , or
++        <em>
++         man mount.ceph
++        </em>
++        for more information.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99693,7 +100855,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Password for accessing the share/datastore.
++        The password used for authentication.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99706,7 +100868,7 @@
+       </dt>
+       <dd>
+        <p>
+-        File system path.
++        Path of the storage in the local file system, for example its base directory or mount point.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99719,7 +100881,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Pool.
++        Name of the pool that stores images.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99749,7 +100911,7 @@
+       </dt>
+       <dd>
+        <p>
+-        iSCSI portal (IP or DNS name with optional port).
++        iSCSI portal (IP or hostname, optionally with port).
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99847,7 +101009,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Server IP or DNS name.
++        IP address or hostname of the server.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99860,7 +101022,7 @@
+       </dt>
+       <dd>
+        <p>
+-        CIFS share.
++        The name of the share to use.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -99957,7 +101119,7 @@
+       </dt>
+       <dd>
+        <p>
+-        use sparse volumes
++        Use sparse (thin-provisioned) volumes.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100000,7 +101162,7 @@
+       </dt>
+       <dd>
+        <p>
+-        iSCSI target.
++        iSCSI target name (an iSCSI Qualified Name - IQN).
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100013,7 +101175,7 @@
+       </dt>
+       <dd>
+        <p>
+-        LVM thin pool LV name.
++        Name of the LVM thin pool logical volume.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100026,7 +101188,11 @@
+       </dt>
+       <dd>
+        <p>
+-        RBD Id.
++        The username for authentication. For RBD and CephFS, the Ceph client ID without the
++        <em>
++         client.
++        </em>
++        prefix.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100039,7 +101205,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Volume group name.
++        LVM volume group name.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100925,7 +102091,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Keep backups for the last &lt;N&gt; different days. If there is morethan one backup for a single day, only the latest one is kept.
++        Keep backups for the last &lt;N&gt; different days. If there is more than one backup for a single day, only the latest one is kept.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100938,7 +102104,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Keep backups for the last &lt;N&gt; different hours. If there is morethan one backup for a single hour, only the latest one is kept.
++        Keep backups for the last &lt;N&gt; different hours. If there is more than one backup for a single hour, only the latest one is kept.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100964,7 +102130,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Keep backups for the last &lt;N&gt; different months. If there is morethan one backup for a single month, only the latest one is kept.
++        Keep backups for the last &lt;N&gt; different months. If there is more than one backup for a single month, only the latest one is kept.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100977,7 +102143,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Keep backups for the last &lt;N&gt; different weeks. If there is morethan one backup for a single week, only the latest one is kept.
++        Keep backups for the last &lt;N&gt; different weeks. If there is more than one backup for a single week, only the latest one is kept.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -100990,7 +102156,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Keep backups for the last &lt;N&gt; different years. If there is morethan one backup for a single year, only the latest one is kept.
++        Keep backups for the last &lt;N&gt; different years. If there is more than one backup for a single year, only the latest one is kept.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101422,7 +102588,7 @@
+       </dt>
+       <dd>
+        <p>
+-        ZFS block size
++        ZFS block size.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101448,7 +102614,7 @@
+       </dt>
+       <dd>
+        <p>
+-        host group for comstar views
++        Host group for COMSTAR views.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101461,7 +102627,7 @@
+       </dt>
+       <dd>
+        <p>
+-        target group for comstar views
++        Target group for COMSTAR views.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101535,7 +102701,19 @@
+            <em>
+             images
+            </em>
+-           for VMs.
++           for VMs. A storage can instead be restricted to some of their volume types:
++           <em>
++            vm-vol
++           </em>
++           for the disks of VMs,
++           <em>
++            vm-state
++           </em>
++           for the saved states of VMs, and
++           <em>
++            ct-vol
++           </em>
++           for the volumes of Containers.
+           </td>
+          </tr>
+         </table>
+@@ -101593,7 +102771,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Populate the directory with the default structure.
++        Populate the base directory with the default structure.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101606,7 +102784,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Data Pool (for erasure coding only)
++        Data pool name for erasure-coded images.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101658,7 +102836,7 @@
+       </dt>
+       <dd>
+        <p>
+-        CIFS domain.
++        The name of the user domain (workgroup) to use.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101714,7 +102892,7 @@
+       </dt>
+       <dd>
+        <p>
+-        The Ceph filesystem name.
++        The name or identifier of the filesystem.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101727,7 +102905,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Mount CephFS through FUSE.
++        Mount the filesystem through FUSE.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101795,7 +102973,7 @@
+       </dt>
+       <dd>
+        <p>
+-        target portal group for Linux LIO targets
++        Target portal group for Linux LIO targets.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101888,7 +103066,7 @@
+       </dt>
+       <dd>
+        <p>
+-        mount point
++        Path to the directory where the storage is mounted.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101901,7 +103079,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Namespace.
++        The namespace used for grouping, isolation, or partitioning purposes.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101948,7 +103126,7 @@
+       </dt>
+       <dd>
+        <p>
+-        disable write caching on the target
++        Disable write caching on the iSCSI target.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101974,15 +103152,19 @@
+       </dt>
+       <dd>
+        <p>
+-        NFS/CIFS mount options (see
++        Comma-separated list of mount options. See
+         <em>
+          man nfs
+         </em>
+-        or
++        ,
+         <em>
+          man mount.cifs
+         </em>
+-        )
++        , or
++        <em>
++         man mount.ceph
++        </em>
++        for more information.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -101995,7 +103177,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Password for accessing the share/datastore.
++        The password used for authentication.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -102008,7 +103190,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Pool.
++        Name of the pool that stores images.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -102123,7 +103305,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Server IP or DNS name.
++        IP address or hostname of the server.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -102220,7 +103402,7 @@
+       </dt>
+       <dd>
+        <p>
+-        use sparse volumes
++        Use sparse (thin-provisioned) volumes.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -102263,7 +103445,11 @@
+       </dt>
+       <dd>
+        <p>
+-        RBD Id.
++        The username for authentication. For RBD and CephFS, the Ceph client ID without the
++        <em>
++         client.
++        </em>
++        prefix.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -105220,7 +106406,7 @@
+         --api
+        </span>
+        <span class="monospaced">
+-        &lt;1984hosting | acmedns | acmeproxy | active24 | ad | ali | alviy | anx | artfiles | arvan | aurora | autodns | aws | azion | azure | beget | bookmyname | bunny | cf | clouddns | cloudns | cn | conoha | constellix | cpanel | curanet | cyon | da | ddnss | desec | df | dgon | dnsexit | dnshome | dnsimple | dnsservices | doapi | domeneshop | dp | dpi | dreamhost | duckdns | durabledns | dyn | dynu | dynv6 | easydns | edgecenter | edgedns | euserv | exoscale | fornex | freedns | freemyip | gandi_livedns | gcloud | gcore | gd | geoscaling | googledomains | he | he_ddns | hetzner | hetznercloud | hexonet | hostingde | huaweicloud | infoblox | infomaniak | internetbs | inwx | ionos | ionos_cloud | ipv64 | ispconfig | jd | joker | kappernet | kas | kinghost | knot | la | leaseweb | lexicon | limacity | linode | linode_v4 | loopia | lua | maradns | me | miab | mijnhost | misaka | myapi | mydevil | mydnsjp | mythic_beasts | namecheap | namecom | namesilo | nanelo | nederhost | neodigit | netcup | netlify | nic | njalla | nm | nsd | nsone | nsupdate | nw | oci | omglol | one | online | openprovider | openprovider_rest | openstack | opnsense | ovh | pdns | pleskxml | pointhq | porkbun | rackcorp | rackspace | rage4 | rcode0 | regru | scaleway | schlundtech | selectel | selfhost | servercow | simply | spaceship | technitium | tele3 | tencent | timeweb | transip | udr | ultra | unoeuro | variomedia | veesp | vercel | vscale | vultr | websupport | west_cn | world4you | yandex360 | yc | zilore | zone | zoneedit | zonomi&gt;
++        &lt;1984hosting | acmedns | acmeproxy | active24 | ad | ali | alviy | anx | artfiles | arubabusiness | arvan | aurora | autodns | aws | azion | azure | baidu | beget | bh | bhosted | bookmyname | bunny | calrissia | cdmon | cf | clouddns | cloudns | cn | comlaude | conoha | constellix | cpanel | cpanel_uapi | creoline | curanet | cyon | czechia | da | ddnss | desec | df | dgon | dnsexit | dnshome | dnsimple | dnsmint | dnsservices | doapi | domeneshop | dp | dpi | dreamhost | duckdns | durabledns | dyn | dynu | dynv6 | easydns | edgecenter | edgedns | efficientip | eurodns | euserv | exoscale | firestorm | fornex | freedns | freemyip | gandi_livedns | gcloud | gcore | gd | geoscaling | glesys | gname | googledomains | he | he_ddns | hestiacp | hetznercloud | hexonet | hostingde | hostinger | hostup | huaweicloud | hw | infoblox | infoblox_uddi | infomaniak | internetbs | inwx | ionos | ionos_cloud | ipprojects | ipv64 | ispconfig | jd | joker | kappernet | kas | kinghost | knot | la | laodc | leaseweb | level27 | lexicon | limacity | linode_v4 | loopia | lua | maradns | me | mgwm | miab | mijnhost | misaka | muumuu | myapi | mydevil | mydnsjp | myloc | mythic_beasts | namecheap | namecom | namesilo | nanelo | nederhost | neodigit | netcup | netlify | nexdns | nic | njalla | nm | nsd | nsone | nsupdate | nw | oci | omglol | one | online | openprovider | openprovider_rest | openstack | opnsense | opteamax | optidata | opusdns | ovh | pdns | pleskxml | pointhq | porkbun | poweradmin | qc | rackcorp | rackspace | rage4 | rcode0 | regru | rltx | scaleway | schlundtech | selectel | selfhost | servercow | simply | sitehost | sotoon | spaceship | subreg | technitium | tele3 | tencent | timeweb | transip | udr | ultra | unoeuro | variomedia | veesp | vercel | virakcloud | volcengine | vscale | vultr | websupport | wedos | west_cn | world4you | yandex360 | yc | zilore | zone | zoneedit | zonomi&gt;
+        </span>
+       </dt>
+       <dd>
+@@ -105441,7 +106627,7 @@
+         --api
+        </span>
+        <span class="monospaced">
+-        &lt;1984hosting | acmedns | acmeproxy | active24 | ad | ali | alviy | anx | artfiles | arvan | aurora | autodns | aws | azion | azure | beget | bookmyname | bunny | cf | clouddns | cloudns | cn | conoha | constellix | cpanel | curanet | cyon | da | ddnss | desec | df | dgon | dnsexit | dnshome | dnsimple | dnsservices | doapi | domeneshop | dp | dpi | dreamhost | duckdns | durabledns | dyn | dynu | dynv6 | easydns | edgecenter | edgedns | euserv | exoscale | fornex | freedns | freemyip | gandi_livedns | gcloud | gcore | gd | geoscaling | googledomains | he | he_ddns | hetzner | hetznercloud | hexonet | hostingde | huaweicloud | infoblox | infomaniak | internetbs | inwx | ionos | ionos_cloud | ipv64 | ispconfig | jd | joker | kappernet | kas | kinghost | knot | la | leaseweb | lexicon | limacity | linode | linode_v4 | loopia | lua | maradns | me | miab | mijnhost | misaka | myapi | mydevil | mydnsjp | mythic_beasts | namecheap | namecom | namesilo | nanelo | nederhost | neodigit | netcup | netlify | nic | njalla | nm | nsd | nsone | nsupdate | nw | oci | omglol | one | online | openprovider | openprovider_rest | openstack | opnsense | ovh | pdns | pleskxml | pointhq | porkbun | rackcorp | rackspace | rage4 | rcode0 | regru | scaleway | schlundtech | selectel | selfhost | servercow | simply | spaceship | technitium | tele3 | tencent | timeweb | transip | udr | ultra | unoeuro | variomedia | veesp | vercel | vscale | vultr | websupport | west_cn | world4you | yandex360 | yc | zilore | zone | zoneedit | zonomi&gt;
++        &lt;1984hosting | acmedns | acmeproxy | active24 | ad | ali | alviy | anx | artfiles | arubabusiness | arvan | aurora | autodns | aws | azion | azure | baidu | beget | bh | bhosted | bookmyname | bunny | calrissia | cdmon | cf | clouddns | cloudns | cn | comlaude | conoha | constellix | cpanel | cpanel_uapi | creoline | curanet | cyon | czechia | da | ddnss | desec | df | dgon | dnsexit | dnshome | dnsimple | dnsmint | dnsservices | doapi | domeneshop | dp | dpi | dreamhost | duckdns | durabledns | dyn | dynu | dynv6 | easydns | edgecenter | edgedns | efficientip | eurodns | euserv | exoscale | firestorm | fornex | freedns | freemyip | gandi_livedns | gcloud | gcore | gd | geoscaling | glesys | gname | googledomains | he | he_ddns | hestiacp | hetznercloud | hexonet | hostingde | hostinger | hostup | huaweicloud | hw | infoblox | infoblox_uddi | infomaniak | internetbs | inwx | ionos | ionos_cloud | ipprojects | ipv64 | ispconfig | jd | joker | kappernet | kas | kinghost | knot | la | laodc | leaseweb | level27 | lexicon | limacity | linode_v4 | loopia | lua | maradns | me | mgwm | miab | mijnhost | misaka | muumuu | myapi | mydevil | mydnsjp | myloc | mythic_beasts | namecheap | namecom | namesilo | nanelo | nederhost | neodigit | netcup | netlify | nexdns | nic | njalla | nm | nsd | nsone | nsupdate | nw | oci | omglol | one | online | openprovider | openprovider_rest | openstack | opnsense | opteamax | optidata | opusdns | ovh | pdns | pleskxml | pointhq | porkbun | poweradmin | qc | rackcorp | rackspace | rage4 | rcode0 | regru | rltx | scaleway | schlundtech | selectel | selfhost | servercow | simply | sitehost | sotoon | spaceship | subreg | technitium | tele3 | tencent | timeweb | transip | udr | ultra | unoeuro | variomedia | veesp | vercel | virakcloud | volcengine | vscale | vultr | websupport | wedos | west_cn | world4you | yandex360 | yc | zilore | zone | zoneedit | zonomi&gt;
+        </span>
+       </dt>
+       <dd>
+@@ -108185,7 +109371,7 @@
+         --intel-tdx
+        </span>
+        <span class="monospaced">
+-        [type=]&lt;tdx-type&gt; ,attestation=&lt;1|0&gt; [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
++        [type=]&lt;tdx-type&gt; [,attestation=&lt;1|0&gt;] [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -108336,7 +109522,7 @@
+         --lock
+        </span>
+        <span class="monospaced">
+-        &lt;backup | clone | create | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
++        &lt;backup | clone | create | import | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
+        </span>
+       </dt>
+       <dd>
+@@ -109183,7 +110369,7 @@
+         --watchdog
+        </span>
+        <span class="monospaced">
+-        [[model=]&lt;i6300esb|ib700&gt;] [,action=&lt;enum&gt;]
++        [[model=]&lt;i6300esb&gt;] [,action=&lt;enum&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -110862,7 +112048,7 @@
+         --intel-tdx
+        </span>
+        <span class="monospaced">
+-        [type=]&lt;tdx-type&gt; ,attestation=&lt;1|0&gt; [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
++        [type=]&lt;tdx-type&gt; [,attestation=&lt;1|0&gt;] [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -111021,7 +112207,7 @@
+         --lock
+        </span>
+        <span class="monospaced">
+-        &lt;backup | clone | create | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
++        &lt;backup | clone | create | import | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
+        </span>
+       </dt>
+       <dd>
+@@ -111762,7 +112948,7 @@
+         --watchdog
+        </span>
+        <span class="monospaced">
+-        [[model=]&lt;i6300esb|ib700&gt;] [,action=&lt;enum&gt;]
++        [[model=]&lt;i6300esb&gt;] [,action=&lt;enum&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -113480,7 +114666,7 @@
+         --intel-tdx
+        </span>
+        <span class="monospaced">
+-        [type=]&lt;tdx-type&gt; ,attestation=&lt;1|0&gt; [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
++        [type=]&lt;tdx-type&gt; [,attestation=&lt;1|0&gt;] [,vsock-cid=&lt;integer&gt;] [,vsock-port=&lt;integer&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -113618,7 +114804,7 @@
+         --lock
+        </span>
+        <span class="monospaced">
+-        &lt;backup | clone | create | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
++        &lt;backup | clone | create | import | migrate | rollback | snapshot | snapshot-delete | suspended | suspending&gt;
+        </span>
+       </dt>
+       <dd>
+@@ -114372,7 +115558,7 @@
+         --watchdog
+        </span>
+        <span class="monospaced">
+-        [[model=]&lt;i6300esb|ib700&gt;] [,action=&lt;enum&gt;]
++        [[model=]&lt;i6300esb&gt;] [,action=&lt;enum&gt;]
+        </span>
+       </dt>
+       <dd>
+@@ -116455,7 +117641,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
++        Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -118895,7 +120081,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
++        Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -119834,7 +121020,7 @@
+       </dt>
+       <dd>
+        <p>
+-        Sets DNS server IP address for a container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
++        Comma-separated list of IP addresses. Sets the addresses of the DNS servers of the container. Create will automatically use the setting from the host if you neither set searchdomain nor nameserver.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -127369,7 +128555,7 @@
+         --notification-mode
+        </span>
+        <span class="monospaced">
+-        &lt;auto | legacy-sendmail | notification-system&gt;
++        &lt;auto | legacy-sendmail | none | notification-system&gt;
+        </span>
+        (
+        <em>
+@@ -127398,7 +128584,11 @@
+         <em>
+          auto
+         </em>
+-        (default setting), an email will be sent if mailto is set, and the notification system will be used if not.
++        (default setting), an email will be sent if mailto is set, and the notification system will be used if not. If set to
++        <em>
++         none
++        </em>
++        , no notification will be sent.
+        </p>
+       </dd>
+       <dt class="hdlist1">
+@@ -133216,7 +134406,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 19. Special Values
++        Table 20. Special Values
+        </caption>
+        <col style="width:50%;"/>
+        <col style="width:50%;"/>
+@@ -133375,7 +134565,7 @@
+ width:100%;
+ ">
+        <caption class="title">
+-        Table 20. Schedule Examples
++        Table 21. Schedule Examples
+        </caption>
+        <col style="width:33%;"/>
+        <col style="width:33%;"/>
+@@ -141727,9 +142917,9 @@
+ </div>
+ <div id="footer">
+  <div id="footer-text">
+-  Version 9.2.14
++  Version 9.2.15
+   <br/>
+   Last updated
+- Fri Nov  6 21:22:22 CET 2026
++ Wed Nov 18 14:41:06 CET 2026
+  </div>
+ </div>

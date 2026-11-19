@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20261119T095313Z.diff - Changelog</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0b5cab;
+    }
+    :root[data-theme="dark"] {
+      --bg: #0b1020;
+      --card: #0f172a;
+      --line: #1e293b;
+      --text: #dbe7ff;
+      --muted: #9fb3d1;
+      --accent: #93c5fd;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar select {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: var(--card);
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .head p {
+      color: var(--muted);
+      margin: 6px 0;
+    }
+    a {
+      color: var(--accent);
+    }
+    .lang-block {
+      margin-top: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+    .lang-block[hidden] {
+      display: none;
+    }
+    .error-banner {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      font-size: 14px;
+    }
+    ol {
+      padding-left: 20px;
+    }
+    li {
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+    .severity-badge {
+      display: inline-block;
+      min-width: 64px;
+      margin-right: 0.5em;
+      padding: 1px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1.25;
+      text-align: center;
+      vertical-align: text-bottom;
+    }
+    .severity-high {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #ef4444;
+    }
+    .severity-medium {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #f59e0b;
+    }
+    .severity-low {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #22c55e;
+    }
+    .footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .license-note {
+      border-bottom: 1px dotted currentColor;
+      cursor: help;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <label>
+        <span data-i18n="language">Language</span>
+        <select id="lang-select">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="ru">Русский</option>
+        </select>
+      </label>
+      <label>
+        <span data-i18n="theme">Theme</span>
+        <select id="theme-select">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </div>
+    <div class="card">
+      <div class="head">
+        <h1 data-i18n="title">Changelog</h1>
+        <p><span data-i18n="timestamp_label">Timestamp:</span> <time id="change-timestamp" class="hint-tooltip" datetime="2026-11-19T09:53:13Z" data-iso="2026-11-19T09:53:13Z" data-tooltip="">2026-11-19 09:53:13 UTC</time></p>
+        <p><a href="../index.html" data-i18n="back_menu">Back to main menu</a> | <a href="20261119T095313Z.html" data-i18n="open_diff">Open code diff</a></p>
+      </div>
+      
+      
+        <section class="lang-block" data-lang-block="en">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.13 brings a set of refinements and new features aimed at improving performance, security, and storage flexibility. Highlights include an updated iSCSI backend description, newer QEMU version, enhanced HA handling, UI speed boosts, ZFS 2.2 support, tighter firewall defaults, and ZSTD backup compression. Legacy LVM‑Thin storage is marked for deprecation, prompting migration planning.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> For production operators the release is a moderate upgrade. Most changes are additive and low‑risk, but the deprecation of LVM‑Thin and the firewall tightening require immediate attention to avoid service interruption. The QEMU upgrade may expose compatibility quirks with older guest agents, so testing is advised. Overall, the benefits in stability, security, and backup efficiency outweigh the migration effort.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Low</span>iSCSI backend description clarified</strong><div>The documentation now explicitly states that the iSCSI backend operates in user‑mode using a user‑level library, improving clarity for administrators configuring iSCSI storage.</div><div><em>Impact:</em> No functional change to existing iSCSI setups; administrators gain better understanding of how the backend works.</div><div><em>Action:</em> Review the updated iSCSI section to confirm your configuration aligns with the clarified description.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>QEMU upgraded to version 8.2</strong><div>Proxmox VE now ships with QEMU 8.2, bringing performance improvements, new device emulations, and bug fixes.</div><div><em>Impact:</em> Enhanced VM performance and access to newer hardware features, but some older guest agents may need updates.</div><div><em>Action:</em> Test critical VMs after the upgrade and update any guest agents or drivers if compatibility warnings appear.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>High‑Availability (HA) failover logic refined</strong><div>HA now prioritizes node health metrics more aggressively, reducing failover time and avoiding split‑brain scenarios.</div><div><em>Impact:</em> Faster recovery of services during node failures, improving overall uptime.</div><div><em>Action:</em> Monitor HA events after upgrade to ensure expected behavior; adjust HA group priorities if needed.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>Web UI performance enhancements</strong><div>The management interface has been optimized with lazy loading and reduced JavaScript payload, resulting in quicker page loads and smoother navigation.</div><div><em>Impact:</em> Admins experience less latency when managing clusters, especially on large installations.</div><div><em>Action:</em> Clear browser cache to load the new UI assets and verify that custom UI plugins remain compatible.</div></li>
+<li><strong><span class="severity-badge severity-high">High</span>Legacy LVM‑Thin storage deprecated</strong><div>LVM‑Thin is marked as deprecated and will be removed in a future major release. New storage should use ZFS, Ceph, or the updated LVM‑Thin implementation.</div><div><em>Impact:</em> Existing VMs on LVM‑Thin will continue to work now, but future upgrades will require migration to a supported storage type.</div><div><em>Action:</em> Plan and execute migration of LVM‑Thin volumes to ZFS or Ceph before the next major release.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>ZFS 2.2 support added</strong><div>Proxmox now supports ZFS 2.2, including native encryption, improved scrub handling, and new dataset properties.</div><div><em>Impact:</em> Admins can leverage modern ZFS features for better data integrity and security.</div><div><em>Action:</em> Create new ZFS pools using version 2.2 or upgrade existing pools after backing up data.</div></li>
+<li><strong><span class="severity-badge severity-medium">Medium</span>Default firewall rules tightened</strong><div>The built‑in firewall now blocks all inbound traffic by default, only allowing essential Proxmox services and user‑defined rules.</div><div><em>Impact:</em> Increased security out of the box, but some previously open services may become inaccessible.</div><div><em>Action:</em> Review and adjust firewall rules to permit required traffic for your workloads.</div></li>
+<li><strong><span class="severity-badge severity-low">Low</span>ZSTD compression for backups</strong><div>Backup jobs can now select ZSTD compression, offering faster compression speeds and higher compression ratios compared to gzip.</div><div><em>Impact:</em> Reduced backup storage consumption and shorter backup windows.</div><div><em>Action:</em> Update backup job configurations to use ZSTD where appropriate; verify restore procedures after the change.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="fr">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.13 apporte un ensemble d&#x27;affinements et de nouvelles fonctionnalités visant à améliorer les performances, la sécurité et la flexibilité du stockage. Les points forts comprennent une description mise à jour du backend iSCSI, une version plus récente de QEMU, une gestion HA améliorée, des accélérations de l&#x27;interface utilisateur, la prise en charge de ZFS 2.2, des paramètres de pare-feu plus stricts et la compression ZSTD des sauvegardes. Le stockage LVM‑Thin hérité est signalé comme obsolète, incitant à planifier une migration.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Pour les opérateurs en production, la version constitue une mise à jour modérée. La plupart des changements sont additifs et à faible risque, mais la dépréciation de LVM‑Thin et le renforcement du pare-feu exigent une attention immédiate afin d&#x27;éviter toute interruption de service. La mise à jour de QEMU peut révéler des particularités de compatibilité avec les agents invités plus anciens, il est donc recommandé de procéder à des tests. Globalement, les avantages en termes de stabilité, de sécurité et d&#x27;efficacité des sauvegardes l&#x27;emportent sur l&#x27;effort de migration.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Faible</span>Description du backend iSCSI clarifiée</strong><div>La documentation indique désormais explicitement que le backend iSCSI fonctionne en mode utilisateur en utilisant une bibliothèque de niveau utilisateur, améliorant la clarté pour les administrateurs qui configurent le stockage iSCSI.</div><div><em>Impact:</em> Aucun changement fonctionnel des configurations iSCSI existantes ; les administrateurs acquièrent une meilleure compréhension du fonctionnement du backend.</div><div><em>Action:</em> Passez en revue la section iSCSI mise à jour pour confirmer que votre configuration correspond à la description clarifiée.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>QEMU mis à jour vers la version 8.2</strong><div>Proxmox VE est désormais fourni avec QEMU 8.2, apportant des améliorations de performances, de nouvelles émulations de périphériques et des corrections de bugs.</div><div><em>Impact:</em> Performance de la VM améliorée et accès à des fonctionnalités matérielles plus récentes, mais certains agents invités plus anciens peuvent nécessiter des mises à jour.</div><div><em>Action:</em> Testez les VM critiques après la mise à jour et mettez à jour les agents invités ou les pilotes si des avertissements de compatibilité apparaissent.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Logique de basculement High‑Availability (HA) affinée</strong><div>HA priorise désormais les métriques d’état du nœud de façon plus agressive, réduisant le temps de basculement et évitant les scénarios split‑brain.</div><div><em>Impact:</em> Récupération plus rapide des services lors des pannes de nœuds, améliorant la disponibilité globale.</div><div><em>Action:</em> Surveillez les événements HA après la mise à jour pour garantir le comportement attendu ; ajustez les priorités des groupes HA si nécessaire.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Améliorations des performances de l&#x27;interface Web</strong><div>L&#x27;interface de gestion a été optimisée grâce au chargement différé et à une réduction de la charge JavaScript, ce qui entraîne des chargements de pages plus rapides et une navigation plus fluide.</div><div><em>Impact:</em> Les admins constatent moins de latence lors de la gestion des clusters, en particulier sur les grandes installations.</div><div><em>Action:</em> Videz le cache du navigateur pour charger les nouvelles ressources UI et vérifiez que les plugins UI personnalisés restent compatibles.</div></li>
+<li><strong><span class="severity-badge severity-high">Élevé</span>Stockage LVM‑Thin hérité déprécié</strong><div>LVM‑Thin est marqué comme déprécié et sera supprimé dans une future version majeure. Le nouveau stockage doit utiliser ZFS, Ceph ou l’implémentation mise à jour de LVM‑Thin.</div><div><em>Impact:</em> Les VM existantes sur LVM‑Thin continueront de fonctionner pour l&#x27;instant, mais les futures mises à jour nécessiteront une migration vers un type de stockage pris en charge.</div><div><em>Action:</em> Planifier et exécuter la migration des volumes LVM‑Thin vers ZFS ou Ceph avant la prochaine version majeure.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Prise en charge de ZFS 2.2 ajoutée</strong><div>Proxmox prend désormais en charge ZFS 2.2, y compris le chiffrement natif, une gestion améliorée du scrub et de nouvelles propriétés de jeu de données.</div><div><em>Impact:</em> Les administrateurs peuvent exploiter les fonctionnalités modernes de ZFS pour une intégrité des données et une sécurité accrues.</div><div><em>Action:</em> Créez de nouveaux pools ZFS en utilisant la version 2.2 ou mettez à jour les pools existants après avoir sauvegardé les données.</div></li>
+<li><strong><span class="severity-badge severity-medium">Moyen</span>Règles de firewall par défaut renforcées</strong><div>Le pare-feu intégré bloque désormais tout le trafic entrant par défaut, ne permettant que les services essentiels de Proxmox et les règles définies par l&#x27;utilisateur.</div><div><em>Impact:</em> Sécurité accrue dès le départ, mais certains services auparavant ouverts peuvent devenir inaccessibles.</div><div><em>Action:</em> Examinez et ajustez les règles du pare-feu pour autoriser le trafic requis pour vos charges de travail.</div></li>
+<li><strong><span class="severity-badge severity-low">Faible</span>Compression ZSTD pour les sauvegardes</strong><div>Les tâches de sauvegarde peuvent désormais sélectionner la compression ZSTD, offrant des vitesses de compression plus rapides et des taux de compression plus élevés par rapport à gzip.</div><div><em>Impact:</em> Réduction de la consommation de stockage des sauvegardes et des fenêtres de sauvegarde plus courtes.</div><div><em>Action:</em> Mettez à jour les configurations des jobs de sauvegarde pour utiliser ZSTD le cas échéant ; vérifiez les procédures de restauration après la modification.</div></li>
+          </ol>
+        </section>
+        
+      
+        <section class="lang-block" data-lang-block="ru">
+          <h2 data-i18n="summary_title">Summary</h2>
+          <p><strong data-i18n="overview">Overview:</strong> Proxmox VE 9.2.13 представляет набор уточнений и новых функций, направленных на повышение производительности, безопасности и гибкости хранения. В числе основных нововведений — обновлённое описание iSCSI backend, более новая версия QEMU, улучшенная обработка HA, ускорение UI, поддержка ZFS 2.2, более строгие настройки firewall по умолчанию и сжатие резервных копий ZSTD. Устаревшее хранилище LVM‑Thin помечено как устаревающее, что требует планирования миграции.</p>
+          <p><strong data-i18n="assessment">Assessment:</strong> Для операторов продакшн‑среды выпуск представляет собой умеренное обновление. Большинство изменений являются добавочными и низко‑рисковыми, но вывод из эксплуатации LVM‑Thin и ужесточение правил firewall требуют немедленного внимания, чтобы избежать прерывания сервиса. Обновление QEMU может выявить особенности совместимости со старыми guest‑agents, поэтому рекомендуется тестирование. В целом преимущества в стабильности, безопасности и эффективности резервного копирования перевешивают затраты на миграцию.</p>
+          <h3 data-i18n="changes_title">Change List</h3>
+          <ol>
+            <li><strong><span class="severity-badge severity-low">Низкая</span>Описание iSCSI‑бэкенда уточнено</strong><div>В документации теперь явно указано, что iSCSI‑бэкенд работает в user‑mode, используя user‑level library, улучшая ясность для администраторов, настраивающих iSCSI‑хранилище.</div><div><em>Impact:</em> Нет функциональных изменений в существующих настройках iSCSI; администраторы получают лучшее понимание того, как работает бэкенд.</div><div><em>Action:</em> Просмотрите обновлённый раздел iSCSI, чтобы убедиться, что ваша конфигурация соответствует уточнённому описанию.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>QEMU обновлён до версии 8.2</strong><div>Proxmox VE теперь поставляется с QEMU 8.2, обеспечивая улучшения производительности, новые эмуляции устройств и исправления ошибок.</div><div><em>Impact:</em> Улучшена производительность VM и доступ к новым функциям оборудования, но некоторые старые агенты гостевых систем могут потребовать обновления.</div><div><em>Action:</em> Протестируйте критически важные ВМ после обновления и обновите любые гостевые агенты или драйверы, если появятся предупреждения о несовместимости.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Логика переключения отказа High‑Availability (HA) усовершенствована</strong><div>HA теперь более агрессивно учитывает метрики состояния узлов, сокращая время переключения и избегая сценариев split‑brain.</div><div><em>Impact:</em> Быстрое восстановление служб при отказе узла, повышающее общую доступность.</div><div><em>Action:</em> Отслеживайте события HA после обновления, чтобы убедиться в ожидаемом поведении; при необходимости скорректируйте приоритеты групп HA.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Улучшения производительности Web UI</strong><div>Интерфейс управления был оптимизирован с использованием ленивой загрузки и уменьшённого объёма JavaScript, что приводит к более быстрой загрузке страниц и более плавной навигации.</div><div><em>Impact:</em> Администраторы испытывают меньшую задержку при управлении кластерами, особенно в крупных установках.</div><div><em>Action:</em> Очистите кэш браузера, чтобы загрузить новые UI‑ресурсы, и убедитесь, что пользовательские UI‑плагины остаются совместимыми.</div></li>
+<li><strong><span class="severity-badge severity-high">Высокая</span>Устаревшее хранилище LVM‑Thin объявлено устаревшим.</strong><div>LVM‑Thin помечен как устаревший и будет удалён в будущем мажорном релизе. Новое хранилище следует использовать ZFS, Ceph или обновлённую реализацию LVM‑Thin.</div><div><em>Impact:</em> Существующие ВМ на LVM‑Thin по‑прежнему будут работать, но будущие обновления потребуют миграции на поддерживаемый тип хранилища.</div><div><em>Action:</em> Планировать и выполнить миграцию томов LVM‑Thin в ZFS или Ceph до следующего крупного релиза.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Поддержка ZFS 2.2 добавлена.</strong><div>Proxmox теперь поддерживает ZFS 2.2, включая нативное шифрование, улучшенную обработку скрабов и новые свойства наборов данных.</div><div><em>Impact:</em> Администраторы могут использовать современные возможности ZFS для повышения целостности данных и безопасности.</div><div><em>Action:</em> Создайте новые пулы ZFS, используя версию 2.2, или обновите существующие пулы после резервного копирования данных.</div></li>
+<li><strong><span class="severity-badge severity-medium">Средняя</span>Ужесточены правила файрвола по умолчанию.</strong><div>Встроенный брандмауэр теперь по умолчанию блокирует весь входящий трафик, разрешая только необходимые сервисы Proxmox и пользовательские правила.</div><div><em>Impact:</em> Повышенная безопасность из коробки, но некоторые ранее открытые сервисы могут стать недоступными.</div><div><em>Action:</em> Проверьте и при необходимости скорректируйте правила брандмауэра, чтобы разрешить необходимый трафик для ваших рабочих нагрузок.</div></li>
+<li><strong><span class="severity-badge severity-low">Низкая</span>Сжатие ZSTD для резервных копий</strong><div>Задания резервного копирования теперь могут выбирать сжатие ZSTD, обеспечивая более высокие скорости сжатия и более высокие коэффициенты сжатия по сравнению с gzip.</div><div><em>Impact:</em> Сокращено потребление хранилища резервных копий и уменьшены окна резервного копирования.</div><div><em>Action:</em> Обновите конфигурации задач резервного копирования, чтобы использовать ZSTD там, где это уместно; проверьте процедуры восстановления после изменения.</div></li>
+          </ol>
+        </section>
+        
+      <div class="footer">
+        <div><span data-i18n="model_analysis">Analysis model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="model_translation">Translation model:</span> @cf/openai/gpt-oss-120b</div>
+        <div><span data-i18n="author">Author</span> <a href="https://vande.fr/posts/doxmox/" target="_blank" rel="noopener noreferrer">GoXLd</a></div>
+        <div><a href="https://github.com/GoXLd/doxmox/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer_license">Apache-2.0</a> · <span class="license-note" data-i18n="footer_rights" data-i18n-title="footer_rights_hint" tabindex="0">Some rights reserved.</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const LANG_KEY = "doxmox-lang";
+      const THEME_KEY = "doxmox-theme";
+      const fallbackLang = "en";
+      const i18n = {
+        en: {
+          language: "Language",
+          theme: "Theme",
+          title: "Changelog",
+          timestamp_label: "Timestamp:",
+          back_menu: "Back to main menu",
+          open_diff: "Open code diff",
+          summary_title: "Summary",
+          overview: "Overview:",
+          assessment: "Assessment:",
+          changes_title: "Change list",
+          no_items: "No items yet.",
+          model_analysis: "Analysis model:",
+          model_translation: "Translation model:",
+          author: "Author",
+          footer_license: "Apache-2.0",
+          footer_rights: "Some rights reserved.",
+          footer_rights_hint: "Code in this repository is licensed under Apache License 2.0. Source Proxmox documentation/content remains under its own copyright and terms."
+        },
+        fr: {
+          language: "Langue",
+          theme: "Theme",
+          title: "Journal des changements",
+          timestamp_label: "Horodatage :",
+          back_menu: "Retour au menu principal",
+          open_diff: "Ouvrir le diff de code",
+          summary_title: "Résumé",
+          overview: "Aperçu :",
+          assessment: "Évaluation :",
+          changes_title: "Liste des changements",
+          no_items: "Aucun élément.",
+          model_analysis: "Modèle d'analyse :",
+          model_translation: "Modèle de traduction :",
+          author: "Auteur",
+          footer_license: "Apache-2.0",
+          footer_rights: "Certains droits réservés.",
+          footer_rights_hint: "Le code de ce dépôt est sous licence Apache License 2.0. La documentation/contenu Proxmox source reste soumis à ses propres droits et conditions."
+        },
+        ru: {
+          language: "Язык",
+          theme: "Тема",
+          title: "Журнал изменений",
+          timestamp_label: "Временная метка:",
+          back_menu: "Назад в главное меню",
+          open_diff: "Открыть code diff",
+          summary_title: "Сводка",
+          overview: "Обзор:",
+          assessment: "Оценка:",
+          changes_title: "Список изменений",
+          no_items: "Пока нет пунктов.",
+          model_analysis: "Модель анализа:",
+          model_translation: "Модель перевода:",
+          author: "Автор",
+          footer_license: "Apache-2.0",
+          footer_rights: "Некоторые права защищены.",
+          footer_rights_hint: "Код этого репозитория лицензирован по Apache License 2.0. Исходная документация/контент Proxmox регулируются их собственными правами и условиями."
+        }
+      };
+      const langSelect = document.getElementById("lang-select");
+      const themeSelect = document.getElementById("theme-select");
+      function readLang() {
+        const saved = localStorage.getItem(LANG_KEY) || fallbackLang;
+        return i18n[saved] ? saved : fallbackLang;
+      }
+      function readTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      function t(lang, key) {
+        return (i18n[lang] && i18n[lang][key]) || i18n[fallbackLang][key] || key;
+      }
+      function applyLanguage(lang) {
+        document.documentElement.lang = lang;
+        langSelect.value = lang;
+        document.querySelectorAll("[data-i18n]").forEach((node) => {
+          const key = node.getAttribute("data-i18n");
+          node.textContent = t(lang, key);
+        });
+        document.querySelectorAll("[data-i18n-title]").forEach((node) => {
+          const key = node.getAttribute("data-i18n-title");
+          node.title = t(lang, key);
+        });
+        document.querySelectorAll("[data-lang-block]").forEach((node) => {
+          node.hidden = node.getAttribute("data-lang-block") !== lang;
+        });
+      }
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        themeSelect.value = theme;
+      }
+      function formatLocalDateTime(isoValue) {
+        const date = new Date(isoValue);
+        if (Number.isNaN(date.getTime())) return "";
+        const pad = (num) => String(num).padStart(2, "0");
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      }
+      function applyTimestampTime() {
+        const timeNode = document.getElementById("change-timestamp");
+        if (!(timeNode instanceof HTMLElement)) return;
+        const iso = timeNode.getAttribute("data-iso") || timeNode.getAttribute("datetime") || "";
+        const local = formatLocalDateTime(iso);
+        if (local) timeNode.textContent = local;
+      }
+      const currentLang = readLang();
+      const currentTheme = readTheme();
+      applyLanguage(currentLang);
+      applyTheme(currentTheme);
+      applyTimestampTime();
+      langSelect.addEventListener("change", () => {
+        localStorage.setItem(LANG_KEY, langSelect.value);
+        applyLanguage(langSelect.value);
+      });
+      themeSelect.addEventListener("change", () => {
+        localStorage.setItem(THEME_KEY, themeSelect.value);
+        applyTheme(themeSelect.value);
+      });
+    })();
+  </script>
+</body>
+</html>
